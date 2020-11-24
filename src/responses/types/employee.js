@@ -1,6 +1,8 @@
 module.exports = {
   pickerBoyDetailsFetchedSuccessfully: 'PickerBoy Details Fetched Successfully',
   pickerBoyDetailsNotFound: 'PickerBoy Details Not Found !',
+  pickerBoyIdInvalidEitherDeletedOrDeactivated: 'Picker Boy Id is Invalid or is either deleted !',
+  invalidPickerBoy: 'The Picker Boy id is Invalid !',
 
   zohoServerError: 'Zoho Server Error, Data Not Found!.',
   userDetailsFetched: 'User Details Fetched Successfully from Zoho !.',

@@ -34,11 +34,11 @@ module.exports = async (req, res, next) => {
         next();
       } else {
         error('INVALID pickerBoy!');
-        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.salesmanIdInvalidEitherDeletedOrDeactivated);
+        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.pickerBoyIdInvalidEitherDeletedOrDeactivated);
       }
     } else {
       error('The pickerBoy ID is Invalid !');
-      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidSalesmanId);
+      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidPickerBoy);
     }
 
     // catch any runtime error 
