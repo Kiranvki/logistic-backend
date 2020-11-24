@@ -11,7 +11,7 @@ const {
   isUserCheckedIn, // is user checked in 
   isValidPickerBoyId, // check whether the salesman id is valid or not
   isAlreadyCheckedIn, // check whether the user already check In
-  getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
+  // getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
   // generateMonthDaysAndOtherMetaData, // generate month days and other meta data 
 } = require('../../../../hooks/app')
 
@@ -36,7 +36,7 @@ function userRoutes() {
     closed.route('/user/attendance/check-out').get(
       verifyAppToken, // verify app token
       isValidPickerBoyId, // validate salesman Id
-      isUserCheckedIn, // check whether the user is already checked in 
+      //  isUserCheckedIn, // check whether the user is already checked in 
       ctrl.checkOutUser, // controller function
     )
     /*
