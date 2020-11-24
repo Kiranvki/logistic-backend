@@ -3,12 +3,13 @@ const ctrl = require('./picker_boy.controller');
 
 // custom joi validation
 const {
+  joiPickerBoyGetDetails, // get the saleman details 
   joiIdInParams, // check joi id in params
   joiSalesmanList, // get salesman list
   joiSalesmanPatch, // patch salesman
   joiSalesmanReport, // get salesman Report
   joiSalesmanCreate, // create a new salesman
-  joiSalesmanGetDetails, // get the saleman details 
+
   joiSalesmanChangeStatus, // salesman status change
   joiSalesmanReportDetails, // salesman report details 
   joiSalesmanListForFilter,  // joi salesman filter list 
@@ -20,7 +21,7 @@ const {
 // hooks 
 //const {
 // isValidAgencyId, // is valid agency id or not 
-// isValidSalesman, // get the salesman details 
+
 // getDetailsFromZoho, // get details from zoho
 // checkWhetherTheAsmIsMapped, // check whether the asm is mapped is valid or not 
 // getValidAndActiveSalesmanId, // get valid and active salesman id 
@@ -35,13 +36,13 @@ const {
 
 // app hooks 
 const {
-  getAdoptionMetricDetailsForInternal, // get adoption details 
+  // getAdoptionMetricDetailsForInternal, // get adoption details 
+  isValidPickerBoy, // get the PickerBoy details 
 } = require('../../../../hooks/app');
 
-// auth 
 const {
-  verifyUserToken
-} = require('../../../../hooks/Auth');
+  verifyAppToken
+} = require('../../../../hooks/app/Auth');
 
 // exporting the user routes 
 function userRoutes() {
@@ -49,6 +50,15 @@ function userRoutes() {
   return (open, closed) => {
     // closed
     // post 
+
+    // get pickerboy details
+    closed.route('/picker-boy/:pickerBoyId').get(
+      [joiPickerBoyGetDetails], // joi validation
+      verifyAppToken, // verify user token
+      isValidPickerBoy, // check is valid asm id 
+      ctrl.getPickerBoyDetails // get controller 
+    );
+
     /*
     closed.route('/salesman').post(
       [joiSalesmanCreate], // joi validation
@@ -68,13 +78,7 @@ function userRoutes() {
       ctrl.getList // controller function
     );
 
-    // get salesman details 
-    closed.route('/salesman/:salesmanId').get(
-      [joiSalesmanGetDetails], // joi validation
-      verifyUserToken, // verify user token
-      isValidSalesman, // check is valid asm id 
-      ctrl.getSalesmanDetails // get controller 
-    );
+  
 
     // activate or deactivate status change
     closed.route('/salesman/:salesmanId/status/:type').patch(

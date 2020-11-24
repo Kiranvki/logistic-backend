@@ -112,8 +112,8 @@ const schemas = {
   }),
 
   // joi saleman details 
-  joiSalesmanGetDetails: Joi.object().keys({
-    salesmanId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Salesman Id').required().options({
+  joiPickerBoyGetDetails: Joi.object().keys({
+    pickerBoyId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('PickerBoy Id').required().options({
       language: {
         string: {
           regex: {
@@ -376,10 +376,10 @@ module.exports = {
     });
   },
 
-  // joi salesman details
-  joiSalesmanGetDetails: (req, res, next) => {
+  // joi PickerBoy details
+  joiPickerBoyGetDetails: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiSalesmanGetDetails;
+    let schema = schemas.joiPickerBoyGetDetails;
     let option = options.basic;
 
     // validating the schema 

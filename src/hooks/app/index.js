@@ -8,4 +8,7 @@ module.exports = {
   generateTokenForAppUsers: require('./generateTokenForAppUsers'),
   isAlreadyCheckedIn: require('./isAlreadyCheckedIn'),
   isUserCheckedIn: require('./isUserCheckedIn'),
+  generateMonthDaysAndOtherMetaData: require('./generateMonthDaysAndOtherMetaData'),
+  getAllAppUserWhoAreNotCheckedOut: require('./getAllAppUserWhoAreNotCheckedOut'),
+  isValidPickerBoy: require('./isValidPickerBoy')
 }

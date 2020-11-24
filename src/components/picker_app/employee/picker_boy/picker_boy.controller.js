@@ -654,93 +654,21 @@ class PickerBoyController extends BaseController {
     }
   }
 
-  // get salesman details 
-  getSalesmanDetails = async (req, res) => {
+  // get pickerBoyData details
+  getPickerBoyDetails = async (req, res) => {
     try {
-      info('Salesman GET DETAILS !');
+      info('pickerBoy GET DETAILS !');
 
-      // get salesman details 
-      let salesmanData = await Model.aggregate([{
+      // get pickerBoy details
+      let pickerBoyData = await Model.aggregate([{
         $match: {
-          _id: mongoose.Types.ObjectId(req.params.salesmanId)
-        }
-      }, {
-        $lookup: {
-          from: 'asmsalesmanmappings',
-          let: {
-            'id': '$_id'
-          },
-          // localField: '_id',
-          // foreignField: 'salesmanId',
-          pipeline: [
-            {
-              $match: {
-                'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$salesmanId', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                'status': 1,
-                'isDeleted': 1,
-                'asmId': 1,
-                'salesmanId': 1,
-              }
-            }
-          ],
-          as: 'asmMapping'
-        }
-      }, {
-        $unwind: {
-          path: '$asmMapping',
-          preserveNullAndEmptyArrays: true
-        }
-      }, {
-        $lookup: {
-          from: 'areasalesmanagers',
-          // localField: 'asmMapping.asmId',
-          // foreignField: '_id',
-          let: {
-            'id': '$asmMapping.asmId'
-          },
-          pipeline: [
-            {
-              $match: {
-                'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$_id', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                'status': 1,
-                'isDeleted': 1,
-                'employeeId': 1,
-                'email': 1,
-                'gender': 1,
-                'designation': 1,
-                'firstName': 1,
-                'lastName': 1,
-                'contactMobile': 1,
-                'photo': 1,
-              }
-            }
-          ],
-          as: 'asmMapping.asmId'
-        }
-      }, {
-        $unwind: {
-          path: '$asmMapping.asmId',
-          preserveNullAndEmptyArrays: true
+          _id: mongoose.Types.ObjectId(req.params.pickerBoyId)
         }
       }]).allowDiskUse(true);
 
       // check if inserted 
-      if (salesmanData && salesmanData.length) return this.success(req, res, this.status.HTTP_OK, salesmanData[salesmanData.length - 1], this.messageTypes.salesmanDetailsFetchedSuccessfully);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesmanDetailsNotFound);
+      if (pickerBoyData && pickerBoyData.length) return this.success(req, res, this.status.HTTP_OK, pickerBoyData[pickerBoyData.length - 1], this.messageTypes.pickerBoyDetailsFetchedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerBoyDetailsNotFound);
 
       // catch any runtime error 
     } catch (err) {

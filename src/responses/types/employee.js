@@ -1,4 +1,7 @@
 module.exports = {
+  pickerBoyDetailsFetchedSuccessfully: 'PickerBoy Details Fetched Successfully',
+  pickerBoyDetailsNotFound: 'PickerBoy Details Not Found !',
+
   zohoServerError: 'Zoho Server Error, Data Not Found!.',
   userDetailsFetched: 'User Details Fetched Successfully from Zoho !.',
   asmCreated: 'Area Sales Manager Created Successfully !',

@@ -22,7 +22,7 @@ module.exports = async (req, res, next) => {
       endDateOfTheMonth = moment(startDateOfTheMonth).endOf("month").toDate(); // get the end date of the month 
 
     // injecting into the request body 
-    req.body.salesmanId = req.user._id; // salesman id 
+    req.body.pickerBoyId = req.user._id; // pickerboy id 
     req.body.startDateOfTheMonth = startDateOfTheMonth; // start day of the month 
     req.body.endDateOfTheMonth = endDateOfTheMonth; // end day of the month 
 
