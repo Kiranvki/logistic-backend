@@ -1,6 +1,9 @@
 module.exports = {
   attendanceMarkedSuccessfully: 'User Checked In !',
   attendanceNotMarkedSuccessfully: 'Attendance Not Marked Successfully, Please try again after sometime !',
+  invalidPickerBoyId: 'Invalid PickerBoy Id !',
+  pickerBoyNotCheckedIn: 'User Still Not Checked In !',
+
   salesmanNotCheckedIn: 'User Still Not Checked In !',
   invalidSalesmanId: 'Invalid Salesman Id !',
   userCheckedOut: 'User Checked Out Successfully !',

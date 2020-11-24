@@ -36,7 +36,7 @@ function userRoutes() {
     closed.route('/user/attendance/check-out').get(
       verifyAppToken, // verify app token
       isValidPickerBoyId, // validate salesman Id
-      //  isUserCheckedIn, // check whether the user is already checked in 
+      isUserCheckedIn, // check whether the user is already checked in 
       ctrl.checkOutUser, // controller function
     )
     /*

@@ -7,4 +7,5 @@ module.exports = {
   checkOtpIsValidOrNot: require('./checkOtpIsValidOrNot'),
   generateTokenForAppUsers: require('./generateTokenForAppUsers'),
   isAlreadyCheckedIn: require('./isAlreadyCheckedIn'),
+  isUserCheckedIn: require('./isUserCheckedIn'),
 }
