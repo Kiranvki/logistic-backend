@@ -1,0 +1,25 @@
+doctype html
+header.text-center(style='height: 25px;padding: 0.8em;background-color: #34495E;margin-bottom: 1em;text-align: center;')
+  .logo(style='max-width: 33.33%;')
+    img(src='https://waycoolstorage.blob.core.windows.net/receivable/waycoolLogo.png', style='left: 12px;\
+    position: absolute;top: 13px;transform: rotate(12deg);width: 3%;float: left;')
+    p(style='color: white;font-family: Palatino;font-size: 1.2em; margin-top: 4px;')
+      | Waycool Foods &amp; Products
+      | Private Limited
+.body(style='padding: 1em;margin-right: auto;margin-left: auto;max-width: 800px;color: #2C3E50;')
+  h1(style='font-family: Palatino;font-size: 1.5em;text-align: center;')
+    | OTP (One Time Passcode) 
+    br
+    |  VERIFICATION
+  p(style='color: #34495E;') Below is your one time passcode.
+  h2(style='color: #34495E;text-align: center;margin: 25px 50px;letter-spacing: 16px;font-family: serif;border: 1px solid grey;')
+    | #{otp}
+  p(style='color: #19242e;') *this OTP is valid till #{expiry} min of generation.
+  br
+  p
+    | Please reach out at prasun.jaiswal@waycool.in or aakaankshaa.r@waycool.in in case of any difficulties while
+    | logging in.
+  div(style='align-content: left')
+    | Warm Regards, 
+    br
+    p(style='font-family: Palatino;font-size: 1.5em;')  Waycool Foods &amp; Products Private Limited

@@ -1,0 +1,41 @@
+doctype html
+head
+  title optacredit
+  meta(charset='utf-8')
+  meta(name='viewport' content='width=device-width, initial-scale=1')
+  link(rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css')
+
+.container
+  table.table(style='width: 20%')
+    thead
+      tr
+        td(style='border:0; font-size: 12px')
+          b Name
+        td(style='border:0;font-size: 12px') #{name}
+      tr
+        td(style='border:0;font-size: 12px')
+          b PhoneNumber
+        td(style='border:0;font-size: 12px') #{phonenumber} 
+        tr
+        td(style='border:0;font-size: 12px')
+          b Email
+        td(style='border:0;font-size: 12px') #{email} 
+        
+      tr
+        td(style='border:0;font-size: 12px')
+          b ApplicationId
+        td(style='border:0;font-size: 12px') #{applicationId}
+  table.table(style="width:60%")
+    thead
+      tr
+        th(style= 'font-size: 14px;max-width:100px') Paid On
+        th(style= 'font-size: 14px;max-width:100px') Payment Type
+        th(style= 'font-size: 14px;max-width:100px') Transferred Amount
+        th(style= 'font-size: 14px;max-width:100px') Reference No
+    tbody
+     each p in paymentHistory
+      tr
+       td(style= 'font-size: 12px;max-width:100px')= p.paymentDate
+        td(style= 'font-size: 12px;max-width:100px')= p.remarks
+        td(style= 'font-size: 12px;max-width:100px')= p.amountPaid
+        td(style= 'font-size: 12px;max-width:100px')=   p.transactionId
