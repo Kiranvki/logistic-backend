@@ -1,5 +1,6 @@
 module.exports = {
   // On boarding hooks 
+  setupDataForGoFrugalApi: require('./setupDataForGoFrugalApi'),// setup the api for gofrugal  
   isValidPickerBoyId: require('./app/isValidPickerBoyId'),  //check whether the picker id is correct or not
   generateOtp: require('./app/generateOtp'), // generate the OTP
   hashPassword: require('./hashPassword'), // hash password 
