@@ -27,6 +27,10 @@ const onBoardApiRouter = express.Router(); // Protected routes
 const employeeOpenRouter = express.Router(); // Open routes
 const employeeApiRouter = express.Router(); // Protected routes
 
+// sales order
+const salesOrderOpenRouter = express.Router(); // Open routes
+const salesOrderApiRouter = express.Router(); // Protected routes
+
 /* Fetch router files and apply them to our routers */
 glob('./src/components/picker_app/onBoard/*', null, (err, items) => {
   items.forEach(component => {
@@ -47,6 +51,16 @@ glob('./src/components/picker_app/employee/*', null, (err, items) => {
   });
 });
 
+/* Fetch router files and apply them to our routers */
+glob('./src/components/sales_order/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      salesOrderOpenRouter,
+      salesOrderApiRouter,
+    );
+  });
+});
+
 
 // Admin Panel Routes
 app.use('/v1/picker', onBoardOpenRouter);
@@ -55,6 +69,10 @@ app.use('/api/v1/picker', onBoardApiRouter);
 // Employee Routes
 app.use('/v1/employee', employeeOpenRouter);
 app.use('/api/v1/employee', employeeApiRouter);
+
+// SalesOrder Routes
+app.use('/v1/salesorder', salesOrderOpenRouter);
+app.use('/api/v1/salesorder', salesOrderApiRouter);
 
 // handle 404
 app.use(function (req, res, next) {

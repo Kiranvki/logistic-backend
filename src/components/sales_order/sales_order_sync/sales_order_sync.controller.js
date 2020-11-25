@@ -217,9 +217,9 @@ class areaSalesManagerController extends BaseController {
   }
 
   // sync with  tally 
-  markANewCustomerListSync = async (city) => {
+  markANewSalesOrderListSync = async (city) => {
     try {
-      info(`marking a new customer sync for city ${city} !`);
+      info(`marking a new SalesOrder sync for city ${city} !`);
 
       // marking customer list sync 
       await Model.findOneAndUpdate({
@@ -227,7 +227,7 @@ class areaSalesManagerController extends BaseController {
       }, {
         '$set': {
           'isSyncing': true,
-          'customerListSyncStarted': new Date()
+          'saledOrderListSyncStarted': new Date()
         }
       }, {
         'upsert': true
@@ -248,12 +248,12 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  // mark customer list sync complete
-  markCustomerSyncSuccess = async (city) => {
+  // mark sales order list sync complete
+  markSalesOrderSyncSuccess = async (city) => {
     try {
-      info(`marking customer list sync for city ${city} completed !`);
+      info(`marking sales order list sync for city ${city} completed !`);
 
-      // marking customer list sync 
+      // marking sales order list sync
       await Model.findOneAndUpdate({
         'cityId': city
       }, {
@@ -261,7 +261,7 @@ class areaSalesManagerController extends BaseController {
           'isSyncing': false
         },
         '$push': {
-          'lastCustomerListSync': new Date()
+          'lastSalesOrderListSync': new Date()
         }
       }, {
         'upsert': true

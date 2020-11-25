@@ -34,7 +34,7 @@ module.exports = async (req, res, next) => {
       next();
     } else {
       error('Go Frugal Server Config Not Available !'); // route doesnt exist 
-      return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, MessageTypes.customers.goFrugalConfigNotFound);
+      return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, MessageTypes.salesOrder.goFrugalConfigNotFound);
     }
 
     // catch any runtime error 

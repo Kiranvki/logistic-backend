@@ -1,4 +1,3 @@
 module.exports = {
-  getCustomerList: require('./getCustomerList'), // get the customer list 
-  getThePriceLevel: require('./getThePriceLevel'), // get the price level
+  getSalesOrderList: require('./getSalesOrderList'), // get the customer list 
 }

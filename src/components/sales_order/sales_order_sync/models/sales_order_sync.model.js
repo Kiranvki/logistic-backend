@@ -15,13 +15,13 @@ const customersSync = new Schema({
     type: 'Boolean',
     default: false
   },
-  'customerListSyncStarted': {
+  'saledOrderListSyncStarted': {
     type: 'Date'
   },
   'customerAccountsSyncStarted': {
     type: 'Date'
   },
-  'lastCustomerListSync': [{
+  'lastSalesOrderListSync': [{
     type: 'Date'
   }],
   'lastCustomerAccountsSync': [{

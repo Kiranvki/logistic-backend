@@ -5,4 +5,5 @@ module.exports = {
   employee: require('./employee'), // employee  
   appUserOnBoard: require('./appUserOnBoard'), // app user onboard
   appUserAttendance: require('./appUserAttendance'), // app user attendance
+  salesOrder: require('./salesOrder') // sales order
 };

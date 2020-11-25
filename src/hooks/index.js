@@ -1,5 +1,6 @@
 module.exports = {
   // On boarding hooks 
+  getTheDetailsFromGoFrugal: require('./getTheDetailsFromGoFrugal'), // // get the details from go frugal 
   setupDataForGoFrugalApi: require('./setupDataForGoFrugalApi'),// setup the api for gofrugal  
   isValidPickerBoyId: require('./app/isValidPickerBoyId'),  //check whether the picker id is correct or not
   generateOtp: require('./app/generateOtp'), // generate the OTP

@@ -3,7 +3,10 @@ const Schema = mongoose.Schema;
 
 // schema
 const salesOrder = new Schema({
-
+  'cityId': {
+    type: 'String',
+    enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
+  },
   'orderPK': {
     type: 'Number'
   },
@@ -201,6 +204,17 @@ const salesOrder = new Schema({
   },
   'otherChargesTaxInclusive': {
     type: 'String'
+  },
+  'location': {
+    type: {
+      type: String, // Don't do `{ location: { type: String } }`
+      enum: ['Point'], // 'location.type' must be 'Point'
+      required: true
+    },
+    coordinates: {
+      type: [Number],
+      required: true
+    },
   },
   'orderItems': [
     {

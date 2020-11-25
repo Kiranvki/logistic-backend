@@ -1,5 +1,5 @@
 // controllers 
-// const CustomerSyncCtrl = require('../customers_sync/customers_sync.controller');
+const SalesOrderSyncCtrl = require('../sales_order_sync/sales_order_sync.controller');
 // const CustomerPaymentCtrl = require('../customers_payment_mapping/customers_payment_mapping.controller');
 // const CustomerInvoiceCtrl = require('../customers_invoice_mapping/customers_invoice_mapping.controller');
 // const CustomerDebitNoteCtrl = require('../customers_debit_mapping/customers_debit_mapping.controller');
@@ -37,7 +37,7 @@ class areaSalesManagerController extends BaseController {
   // constructor 
   constructor() {
     super();
-    this.messageTypes = this.messageTypes.customers;
+    this.messageTypes = this.messageTypes.salesOrder;
   }
 
   // internal function 
@@ -88,48 +88,31 @@ class areaSalesManagerController extends BaseController {
   // create a new entry
   syncWithGoFrugal = async (req, res) => {
     try {
-      info('Creating Customer Data !');
+      info('Creating Sales Order  Data !');
       let city = req.params.city || req.body.city; // city 
       let errors = [];
-
+      let salesOrderList = req.body.salesOrderList;
       // inserting data into the db 
-      for (let i = 0; i < req.body.customerList.length; i++) {
-        // updating 
-        await Model.findOneAndUpdate({
-          goFrugalId: req.body.customerList[i].goFrugalId,
-          cityId: city
-        }, {
-          ...req.body.customerList[i],
-          dbStatus: 1,
-          isDeleted: 0
-        }, {
-          upsert: true,
-          lean: true,
-          new: true,
-          setDefaultsOnInsert: true
-        }).catch((err) => {
-          error(`ERROR OCCURED FOR CITY - ${city}, GOFRUGAL ID - ${req.body.customerList[i].goFrugalId}, ERROR - ${err}`);
+
+      await Model.create(salesOrderList)
+        .catch((err) => {
+          error(`ERROR OCCURED FOR CITY - ${city},  ERROR - ${err}`);
           errors.push({
             city: city,
-            customerId: req.body.customerList[i].goFrugalId,
             error: err
           })
         });
-      }
+
 
       // go frugal sync
-      req.cronLogger.info(`CUSTOMER GO FRUGAL SYNC | ${new Date()} | CITY - ${city} | TOTAL COUNT - ${req.body.customerList.length} | ERROR - ${errors.length} | ${JSON.stringify(errors)} !`);
+      req.cronLogger.info(`SALES ORDER GO FRUGAL SYNC | ${new Date()} | CITY - ${city} | TOTAL COUNT - ${req.body.salesOrderList.length} | ERROR - ${errors.length} | ${JSON.stringify(errors)} !`);
 
-      info('Hitting Tally Customer Accounts Data Sync');
 
-      // hit the customer accounts sync 
-      // await hitTallyCustomerAccountsSync(city); // Commented for receivables api sync
-
-      // mark customer sync completed 
-      await CustomerSyncCtrl.markCustomerSyncSuccess(city);
+      // mark sales order sync completed 
+      await SalesOrderSyncCtrl.markSalesOrderSyncSuccess(city);
 
       // success 
-      return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.customerInsertInitiated);
+      return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.salesOrderInsertInitiated);
 
       // catch any runtime error 
     } catch (err) {

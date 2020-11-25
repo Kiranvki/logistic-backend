@@ -10,7 +10,7 @@ const {
 // exporting the hooks 
 module.exports = async (url, authToken, city, page) => {
   try {
-    info(`Getting Customer base from GoFrugal ${city} for page ${page}!`);
+    info(`Getting Sales Order  from GoFrugal ${city} for page ${page}!`);
 
     // check whether the document type already exist or not 
     return request.get(url + '?page=' + page)
@@ -24,10 +24,10 @@ module.exports = async (url, authToken, city, page) => {
       .retry(1)
       .then((res) => {
         // checking whether the user is authentic
-        if (res.status === 200 && res.body && res.body.eCustomers && Array.isArray(res.body.eCustomers)) {
+        if (res.status === 200 && res.body && res.body.salesOrders && Array.isArray(res.body.salesOrders)) {
           return {
             success: true,
-            data: res.body.eCustomers,
+            data: res.body.salesOrders,
             currentPage: res.body.current_page,
             totalPages: res.body.total_pages
           };
