@@ -38,11 +38,11 @@ const {
 const {
   // getAdoptionMetricDetailsForInternal, // get adoption details 
   isValidPickerBoy, // get the PickerBoy details 
-} = require('../../../../hooks/app');
+} = require('../../../hooks/app');
 
 const {
   verifyAppToken
-} = require('../../../../hooks/app/Auth');
+} = require('../../../hooks/app/Auth');
 
 // exporting the user routes 
 function userRoutes() {

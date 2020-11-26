@@ -1,17 +1,17 @@
 // controllers
-const BasicCtrl = require('../../../basic_config/basic_config.controller');
+const BasicCtrl = require('../../basic_config/basic_config.controller');
 // const AsmSalesmanMappingCtrl = require('../asm_salesman_mapping/asm_salesman_mapping.controller');
 // const DraftBeatPlanSalesmanCtrl = require('../../beat_plan/draft_salesman_mapping/draft_salesman_mapping.controller');
 // const PublishedBeatPlanCtrl = require('../../beat_plan/published/published.controller');
 // const DraftBeatPlanCtrl = require('../../beat_plan/draft/draft.controller');
-const BaseController = require('../../../baseController');
+const BaseController = require('../../baseController');
 const mongoose = require('mongoose');
 const Model = require('./models/picker_boy.model');
 const { parse } = require('json2csv');
 const {
   error,
   info
-} = require('../../../../utils').logging;
+} = require('../../../utils').logging;
 const _ = require('lodash');
 const moment = require('moment');
 // const {
