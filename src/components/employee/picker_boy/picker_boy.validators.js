@@ -4,7 +4,7 @@ const BaseJoi = require('joi');
 const Extension = require('joi-date-extensions');
 const Joi = BaseJoi.extend(Extension);
 // handling the joi response 
-const Response = require('../../../../responses/response');
+const Response = require('../../../responses/response');
 
 // add joi schema 
 const schemas = {
@@ -14,7 +14,7 @@ const schemas = {
   }),
 
   // create a new salesman
-  joiSalesmanCreate: Joi.object().keys({
+  joiPickerBoyCreate: Joi.object().keys({
     empId: Joi.string().trim().label('emp id').optional().allow('').max(12),
     isWaycoolEmp: Joi.boolean().label('Is Waycool Employee').required(),
     agencyId: Joi.string().trim().label('Agency Id').when('isWaycoolEmp', {
@@ -30,6 +30,7 @@ const schemas = {
         }
       })
     }),
+    city: Joi.string().trim().lowercase().label('city').required().valid(['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']),
     profilePic: Joi.string().trim().label('Profile Pic').optional().allow('').regex(/^[a-fA-F0-9]{24}$/).options({
       language: {
         string: {
@@ -284,9 +285,9 @@ module.exports = {
   },
 
   // create a new salesman
-  joiSalesmanCreate: (req, res, next) => {
+  joiPickerBoyCreate: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiSalesmanCreate;
+    let schema = schemas.joiPickerBoyCreate;
     let option = options.basic;
 
     // replacing space with - 

@@ -42,7 +42,7 @@ glob('./src/components/picker_app/onBoard/*', null, (err, items) => {
 });
 
 /* Fetch router files and apply them to our routers */
-glob('./src/components/picker_app/employee/*', null, (err, items) => {
+glob('./src/components/employee/*', null, (err, items) => {
   items.forEach(component => {
     if (require(component).routes) require(component).routes(
       employeeOpenRouter,

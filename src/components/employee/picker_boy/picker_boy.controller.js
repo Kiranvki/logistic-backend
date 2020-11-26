@@ -108,10 +108,10 @@ class PickerBoyController extends BaseController {
     }
   }
 
-  // create a new salesman
+  // create a new picker Boy
   post = async (req, res) => {
     try {
-      info('Create a new Salesman !');
+      info('Create a new Picker Boy !');
 
       // get the firstname
       req.body.firstName = req.body.isWaycoolEmp == false ? req.body.firstName.replace(
@@ -153,7 +153,7 @@ class PickerBoyController extends BaseController {
         'createdById': req.user._id,
         'createdBy': req.user.email || 'admin',
         'warehouseId': mongoose.Types.ObjectId(req.user.warehouseId) || null,
-        'cityId': req.user.region[0] || 'chennai',
+        'cityId': req.body.cityId,
       }
 
       // checking if profile pic is present 
@@ -184,65 +184,9 @@ class PickerBoyController extends BaseController {
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
         info('Salesman Successfully Created !');
-
-        // creating a asm salesman mapping object
-        req.body.asmSalesmanMappingObject = {
-          ...req.body.asmSalesmanMappingObject,
-          salesmanId: isInserted._id
-        }
-
-        // create asm salesman mapping
-        await AsmSalesmanMappingCtrl.create(req.body.asmSalesmanMappingObject, req.user);
-
-        // check if the salesman is not of Waycool 
-        if (!dataToInsert.isWaycoolEmp) {
-          // is not waycool employee 
-          let dataToSend = {
-            'address': dataToInsert.cityId || 'N/A',
-            'firstName': dataToInsert.firstName || '',
-            'emailID': dataToInsert.email || '',
-            'password': 'password',
-            'approvalStatus': 'A',
-            'recordId': (isInserted._id).toString(),
-            'department': 'Sales',
-            'ownerName': `${dataToInsert.firstName} ${dataToInsert.lastName} `,
-            'dateOfJoining': moment().format('YYYY-MM-DD'),
-            'reportingTo': dataToInsert.reportingTo ? dataToInsert.reportingTo.name : '',
-            'employeeStatus': 'Active',
-            'workphone': dataToInsert.contactMobile,
-            'title': 'Salesman',
-            'grade': 'X1',
-            'Work Location': dataToInsert.cityId,
-            'ownerID': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
-            'Work Location': dataToInsert.cityId,
-            'experience': '',
-            'designation': 'Salesman',
-            'employeeID': dataToInsert.employeeId,
-            'mobilePhone': dataToInsert.contactMobile,
-            'location': dataToInsert.cityId || 'N/A',
-            'fcmToken': '',
-            'deviceType': '',
-            'agecyId': dataToInsert.agencyId,
-            'agecyName': req.body.agencyName || 'N/A',
-            'employerId': dataToInsert.agencyId,
-            'isWaycoolEmp': dataToInsert.isWaycoolEmp
-          };
-
-          // updating rec server with new agency employee
-          let isUpdatedInRecServer = await postSalesmanOther(dataToSend);
-
-          // if rec server responded with success
-          if (isUpdatedInRecServer.success) {
-            await Model.findByIdAndUpdate(isInserted._id, {
-              recServerEmpId: mongoose.Types.ObjectId(isUpdatedInRecServer.data._id)
-            })
-          }
-        }
-
         // returning success
         return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesmanCreated)
       } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesmanNotCreated);
-
 
       // catch any runtime error 
     } catch (err) {

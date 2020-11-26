@@ -9,6 +9,13 @@ const pickerBoy = new Schema({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
   },
+  agencyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'agencies',
+    autopopulate: {
+      select: 'nameToDisplay'
+    }
+  },
   employeeId: {
     type: String
   },
@@ -72,17 +79,7 @@ const pickerBoy = new Schema({
   dateOfJoining: {
     type: Date
   },
-  reportingTo: {
-    id: {
-      type: String
-    },
-    name: {
-      type: String
-    },
-    emailId: {
-      type: String
-    }
-  },
+
   profilePic: {
     type: mongoose.Schema.Types.ObjectId,
     default: null
@@ -97,8 +94,16 @@ const pickerBoy = new Schema({
     type: 'String',
     enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
   },
-  agencyId: {
-    type: mongoose.Schema.Types.ObjectId,
+  reportingTo: {
+    id: {
+      type: String
+    },
+    name: {
+      type: String
+    },
+    emailId: {
+      type: String
+    }
   },
   status: {
     type: Number,
@@ -118,7 +123,7 @@ pickerBoy.plugin(autopopulate);
 // creating indexes
 pickerBoy.index({
   'cityId': 1,
-  'agencyId': 1
+
 });
 
 // exporting the entire module
