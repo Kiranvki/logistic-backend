@@ -195,37 +195,27 @@ class PickerBoyController extends BaseController {
     }
   }
 
-  // get the salesman list
+  // get the picker list
   getList = async (req, res) => {
     try {
-      info('Get Salesman List !');
+      info('Get picker boy List !');
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
         searchKey = req.query.search || '',
         sortBy = req.query.sortBy || 'createdAt',
-        type = req.query.type == 'mapped' ? true : false,
-        sortingArray = {},
-        asmMappingCond = {
-          'status': 1,
-          'isDeleted': 0,
-        };
+        // type = req.query.type == 'mapped' ? true : false,
+        sortingArray = {};
+      // asmMappingCond = {
+      //   'status': 1,
+      //   'isDeleted': 0,
+      // };
 
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
 
-      // project data 
-      let dataToProject = {
-        firstName: 1,
-        lastName: 1,
-        employeeId: 1,
-        status: 1,
-      }
-
       // city filter for allocated city 
       let searchObject = {
         'isDeleted': 0,
-        'cityId': req.user.region[0] || 'chennai',
-        'warehouseId': mongoose.Types.ObjectId(req.user.warehouseId) || null,
       };
 
       // if status is active 
@@ -233,15 +223,11 @@ class PickerBoyController extends BaseController {
         searchObject = {
           'isDeleted': 0,
           'status': 1,
-          'cityId': req.user.region[0] || 'chennai',
-          'warehouseId': mongoose.Types.ObjectId(req.user.warehouseId) || null,
         };
       else if (req.query.status && req.query.status == 'inactive')
         searchObject = {
           'isDeleted': 0,
           'status': 0,
-          'cityId': req.user.region[0] || 'chennai',
-          'warehouseId': mongoose.Types.ObjectId(req.user.warehouseId) || null,
         };
 
       // creating a match object
@@ -261,219 +247,19 @@ class PickerBoyController extends BaseController {
           }]
         };
 
-      // get the total customer
-      let totalSalesman = await Model.aggregate([{
+
+      // get the total picker boy
+      let totalPickerBoy = await Model.countDocuments({
+        ...searchObject
+      });
+
+      // get the picker boy list
+      let pickerBoyList = await Model.aggregate([{
         $match: {
           ...searchObject
         }
-      }, {
-        $lookup: {
-          from: 'asmsalesmanmappings',
-          let: {
-            'id': '$_id'
-          },
-          pipeline: [
-            {
-              $match: {
-                'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$salesmanId', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                'status': 1,
-                'isDeleted': 1,
-                'asmId': 1,
-                'salesmanId': 1,
-              }
-            }, {
-              $lookup: {
-                from: 'areasalesmanagers',
-                let: {
-                  'id': '$asmId'
-                },
-                pipeline: [
-                  {
-                    $match: {
-                      'status': 1,
-                      'isDeleted': 0,
-                      '$expr': {
-                        '$eq': ['$_id', '$$id']
-                      }
-                    }
-                  }, {
-                    $project: {
-                      'status': 1,
-                      'isDeleted': 1,
-                      'employeeId': 1,
-                      'email': 1,
-                      'gender': 1,
-                      'designation': 1,
-                      'firstName': 1,
-                      'lastName': 1,
-                      'contactMobile': 1,
-                      'photo': 1,
-                    }
-                  }
-                ],
-                as: 'asmId'
-              }
-            }, {
-              $unwind: {
-                path: '$asmId',
-                preserveNullAndEmptyArrays: true
-              }
-            }],
-          as: 'asmMapping'
-        }
-      }, {
-        $unwind: {
-          path: '$asmMapping',
-          preserveNullAndEmptyArrays: true
-        }
-      }, {
-        $match: {
-          'asmMapping.asmId': {
-            $exists: type
-          }
-        }
-      }, {
-        $count: 'sum'
-      }]).allowDiskUse(true);
-
-      // calculating the total number of applications for the given scenario
-      if (totalSalesman[0] !== undefined)
-        totalSalesman = totalSalesman[0].sum;
-      else
-        totalSalesman = 0;
-
-      // get the asms list 
-      let salesmanList = await Model.aggregate([{
-        $match: {
-          ...searchObject
-        }
-      }, {
-        $lookup: {
-          from: 'asmsalesmanmappings',
-          let: {
-            'id': '$_id'
-          },
-          // localField: '_id',
-          // foreignField: 'salesmanId',
-          pipeline: [
-            {
-              $match: {
-                // ...asmMappingCond,
-                'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$salesmanId', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                'status': 1,
-                'isDeleted': 1,
-                'asmId': 1,
-                'salesmanId': 1,
-              }
-            }, {
-              $lookup: {
-                from: 'areasalesmanagers',
-                // localField: 'asmMapping.asmId',
-                // foreignField: '_id',
-                let: {
-                  'id': '$asmId'
-                },
-                pipeline: [
-                  {
-                    $match: {
-                      'status': 1,
-                      'isDeleted': 0,
-                      '$expr': {
-                        '$eq': ['$_id', '$$id']
-                      }
-                    }
-                  }, {
-                    $project: {
-                      'status': 1,
-                      'isDeleted': 1,
-                      'employeeId': 1,
-                      'email': 1,
-                      'gender': 1,
-                      'designation': 1,
-                      'firstName': 1,
-                      'lastName': 1,
-                      'contactMobile': 1,
-                      'photo': 1,
-                    }
-                  }
-                ],
-                as: 'asmId'
-              }
-            }, {
-              $unwind: {
-                path: '$asmId',
-                preserveNullAndEmptyArrays: true
-              }
-            }],
-          as: 'asmMapping'
-        }
-      }, {
-        $unwind: {
-          path: '$asmMapping',
-          preserveNullAndEmptyArrays: true
-        }
-      }
-        // , {
-        //   $lookup: {
-        //     from: 'areasalesmanagers',
-        //     // localField: 'asmMapping.asmId',
-        //     // foreignField: '_id',
-        //     let: {
-        //       'id': '$asmMapping.asmId'
-        //     },
-        //     pipeline: [
-        //       {
-        //         $match: {
-        //           'status': 1,
-        //           'isDeleted': 0,
-        //           '$expr': {
-        //             '$eq': ['$_id', '$$id']
-        //           }
-        //         }
-        //       }, {
-        //         $project: {
-        //           'status': 1,
-        //           'isDeleted': 1,
-        //           'employeeId': 1,
-        //           'email': 1,
-        //           'gender': 1,
-        //           'designation': 1,
-        //           'firstName': 1,
-        //           'lastName': 1,
-        //           'contactMobile': 1,
-        //           'photo': 1,
-        //         }
-        //       }
-        //     ],
-        //     as: 'asmMapping.asmId'
-        //   }
-        // }, {
-        //   $unwind: {
-        //     path: '$asmMapping.asmId',
-        //     preserveNullAndEmptyArrays: true
-        //   }
-        // }
-        , {
-        $match: {
-          'asmMapping.asmId': {
-            $exists: type
-          }
-        }
-      }, {
+      },
+      {
         $sort: sortingArray
       }, {
         $skip: skip
@@ -481,21 +267,17 @@ class PickerBoyController extends BaseController {
         $limit: pageSize
       }]).allowDiskUse(true);
 
-      // iterating the salesman list 
-      for (let i = 0; i < salesmanList.length; i++) {
-        let customersData = await DraftBeatPlanCtrl.getCustomersForSalesman(salesmanList[i]._id);
-        salesmanList[i].numOfCustomersForTheDay = customersData.success ? customersData.data : 'N/A';
-      }
+
 
       // success 
       return this.success(req, res, this.status.HTTP_OK, {
-        results: salesmanList,
+        results: pickerBoyList,
         pageMeta: {
           skip: parseInt(skip),
           pageSize: pageSize,
-          total: totalSalesman
+          total: totalPickerBoy
         }
-      }, this.messageTypes.salesmanListFetchedSuccessfully);
+      }, this.messageTypes.pickerBoyListFetchedSuccessfully);
 
       // catch any runtime error 
     } catch (err) {

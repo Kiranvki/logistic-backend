@@ -80,11 +80,10 @@ const schemas = {
     gender: Joi.string().trim().lowercase().valid(['male', 'female', 'transgender']).optional().allow('')
   }),
 
-  // get salesman list
-  joiSalesmanList: Joi.object().keys({
+  // get picker boy list
+  joiPickerBoyList: Joi.object().keys({
     page: Joi.number().integer().min(1).label('Page').required(),
     search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
-    type: Joi.string().trim().valid(['mapped', 'unmapped']).optional().default('mapped'),
     status: Joi.string().trim().lowercase().valid(['active', 'inactive']).optional().allow(''),
   }),
 
@@ -314,10 +313,10 @@ module.exports = {
     });
   },
 
-  // get salesman list 
-  joiSalesmanList: (req, res, next) => {
+  // get picker boy list
+  joiPickerBoyList: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiSalesmanList;
+    let schema = schemas.joiPickerBoyList;
     let option = options.basic;
 
     // validating the schema 

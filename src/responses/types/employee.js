@@ -3,6 +3,7 @@ module.exports = {
   pickerBoyDetailsNotFound: 'PickerBoy Details Not Found !',
   pickerBoyIdInvalidEitherDeletedOrDeactivated: 'Picker Boy Id is Invalid or is either deleted !',
   invalidPickerBoy: 'The Picker Boy id is Invalid !',
+  pickerBoyListFetchedSuccessfully: 'Picker Boy List Fetched Successfully !',
 
   zohoServerError: 'Zoho Server Error, Data Not Found!.',
   userDetailsFetched: 'User Details Fetched Successfully from Zoho !.',
