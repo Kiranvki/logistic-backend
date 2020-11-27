@@ -1,5 +1,5 @@
 // user controller 
-const ctrl = require('./sales_order.controller');
+const ctrl = require('./sales_order_packing.controller');
 
 // library
 const multer = require('multer');
@@ -14,7 +14,7 @@ const {
   joiCustomersList, // get the list of customers in db
   joiGetCustomerOther, // get customer other details 
   joiInvoicePaymentRefresh, // joi invoice payment sync 
-} = require('./sales_order.validators');
+} = require('./sales_order_packing.validators');
 
 // hooks 
 const {
@@ -42,11 +42,10 @@ function userRoutes() {
   return (open, closed) => {
 
     // sync with goFrugal  
-    open.route('/goFrugal/sync/city/:city').get(
-      [joiGoFrugalSync], // joi validation
-      setupDataForGoFrugalApi, // setup data for gofrugal
-      getTheDetailsFromGoFrugal, // get the data from go frugal 
-      ctrl.syncWithGoFrugal // get controller 
+    open.route('/sales-order/').get(
+      //  [joiGoFrugalSync], // joi validation
+      verifyUserToken,
+      ctrl.getSalesOrder // get controller 
     );
 
     /*

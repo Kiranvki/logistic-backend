@@ -40,6 +40,44 @@ class areaSalesManagerController extends BaseController {
     this.messageTypes = this.messageTypes.salesOrder;
   }
 
+
+  // Internal Function get sales order details 
+  getSalesOrderDetails = (locationId, cityId) => {
+    try {
+      info('Get Sales Order details !');
+
+      // get details 
+      return Model.find({
+
+        locationId: pareseInt(locationId),
+        cityId: cityId
+
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in Sales Order DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      //  this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
   // internal function 
   isEmpIdUnique = async (empId) => {
     try {
@@ -379,42 +417,7 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  // Internal Function get customer details 
-  getDetails = (customerId) => {
-    try {
-      info('Get Customer details !');
 
-      // get details 
-      return Model.findOne({
-        _id: mongoose.Types.ObjectId(customerId),
-        dbStatus: 1,
-        isDeleted: 0
-      }).lean().then((res) => {
-        if (res && !_.isEmpty(res)) {
-          return {
-            success: true,
-            data: res
-          }
-        } else {
-          error('Error Searching Data in Customer DB!');
-          return {
-            success: false
-          }
-        }
-      }).catch(err => {
-        error(err);
-        return {
-          success: false,
-          error: err
-        }
-      });
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
 
   // get customer details 
   getCustomerDetails = async (req, res) => {

@@ -1,5 +1,5 @@
 // controllers 
-const SalesOrderSyncCtrl = require('../sales_order_sync/sales_order_sync.controller');
+const SalesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
 // const CustomerPaymentCtrl = require('../customers_payment_mapping/customers_payment_mapping.controller');
 // const CustomerInvoiceCtrl = require('../customers_invoice_mapping/customers_invoice_mapping.controller');
 // const CustomerDebitNoteCtrl = require('../customers_debit_mapping/customers_debit_mapping.controller');
@@ -9,7 +9,7 @@ const SalesOrderSyncCtrl = require('../sales_order_sync/sales_order_sync.control
 
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
-const Model = require('./models/sales_order.model');
+const Model = require('./models/sales_order_packing.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const {
@@ -40,35 +40,7 @@ class areaSalesManagerController extends BaseController {
     this.messageTypes = this.messageTypes.salesOrder;
   }
 
-  // internal function 
-  isEmpIdUnique = async (empId) => {
-    try {
-      info('Checking whether the Employee Id is unique or not!');
 
-      // creating the data inside the database 
-      return Model
-        .findOne({
-          'employeeId': empId,
-          'isDeleted': 0
-        })
-        .lean()
-        .then((res) => {
-          if (res && !_.isEmpty(res))
-            return {
-              success: false,
-            };
-          else return {
-            success: true
-          }
-        });
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
-      }
-    }
-  }
 
   // get user details 
   get = async (req, res) => {
@@ -86,33 +58,22 @@ class areaSalesManagerController extends BaseController {
   }
 
   // create a new entry
-  syncWithGoFrugal = async (req, res) => {
+  getSalesOrder = async (req, res) => {
     try {
-      info('Creating Sales Order  Data !');
-      let city = req.params.city || req.body.city; // city 
-      let errors = [];
-      let salesOrderList = req.body.salesOrderList;
+      info('Getting  Sales Order  Data !');
+      let locationId = req.user.locationId || 0; // locationId 
+      let cityId = req.user.cityId || 'N/A'; // cityId 
+
       // inserting data into the db 
+      let salesOrderData = await SalesOrderCtrl.getSalesOrderDetails(locationId, cityId);
+      // success
+      if (salesOrderData.success) {
 
-      await Model.create(salesOrderList)
-        .catch((err) => {
-          error(`ERROR OCCURED FOR CITY - ${city},  ERROR - ${err}`);
-          errors.push({
-            city: city,
-            error: err
-          })
-        });
-
-
-      // go frugal sync
-      req.cronLogger.info(`SALES ORDER GO FRUGAL SYNC | ${new Date()} | CITY - ${city} | TOTAL COUNT - ${req.body.salesOrderList.length} | ERROR - ${errors.length} | ${JSON.stringify(errors)} !`);
-
-
-      // mark sales order sync completed 
-      await SalesOrderSyncCtrl.markSalesOrderSyncSuccess(city);
-
-      // success 
-      return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.salesOrderInsertInitiated);
+        return this.success(req, res, this.status.HTTP_OK, {
+          ...salesOrderData.data
+        }, this.messageTypes.userDetailsFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
 
       // catch any runtime error 
     } catch (err) {

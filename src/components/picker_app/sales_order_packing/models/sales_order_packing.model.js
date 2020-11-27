@@ -2,7 +2,15 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // schema
-const salesOrder = new Schema({
+const salesOrderPacking = new Schema({
+  'pickerBoyId': {
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'pickerBoy',
+    autopopulate: {
+      select: ['fullName', 'employeeId']
+    }
+  },
   'cityId': {
     type: 'String',
     enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
@@ -276,10 +284,10 @@ const salesOrder = new Schema({
   timestamps: true
 });
 
-salesOrder.index({
+salesOrderPacking.index({
   'onlineReferenceNo': 1,
   'createdAt': 1
 });
 
 // exporting the entire module
-module.exports = mongoose.model('salesOrder', salesOrder);
+module.exports = mongoose.model('salesOrderPacking', salesOrderPacking);
