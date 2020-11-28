@@ -409,14 +409,14 @@ class userController extends BaseController {
   }
 
   // get the attendance detail for the day 
-  getAttendanceDetailsForADay = async (salesmanId, startDate, endDate) => {
+  getAttendanceDetailsForADay = async (pickerBoyId, startDate, endDate) => {
     try {
       info('Get Details !');
 
-      // get the attendance of the salesman 
+      // get the attendance of the picker boy
       return Model.aggregate([{
         $match: {
-          'userId': mongoose.Types.ObjectId(salesmanId),
+          'userId': mongoose.Types.ObjectId(pickerBoyId),
           'dateOfAttendance': {
             $gte: startDate,
             $lte: endDate

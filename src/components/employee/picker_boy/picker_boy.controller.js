@@ -868,143 +868,22 @@ class PickerBoyController extends BaseController {
   }
 
   // Internal Function get full details 
-  getSalesmanFullDetails = async (salesmanId) => {
+  getPickerBoyFullDetails = async (pickerBoyId) => {
     try {
-      info('Salesman GET DETAILS !');
+      info('PickerBoy GET DETAILS !');
 
-      // get salesman details 
-      let salesmanData = await Model.aggregate([{
+      // get picker boy details
+      let pickerBoyData = await Model.aggregate([{
         $match: {
-          _id: mongoose.Types.ObjectId(salesmanId)
-        }
-      }, {
-        $lookup: {
-          from: 'asmsalesmanmappings',
-          let: {
-            'id': '$_id'
-          },
-          // localField: '_id',
-          // foreignField: 'salesmanId',
-          pipeline: [
-            {
-              $match: {
-                'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$salesmanId', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                'status': 1,
-                'isDeleted': 1,
-                'asmId': 1,
-                'salesmanId': 1,
-              }
-            }
-          ],
-          as: 'asmMapping'
-        }
-      }, {
-        $unwind: {
-          path: '$asmMapping',
-          preserveNullAndEmptyArrays: true
-        }
-      }, {
-        $lookup: {
-          from: 'areasalesmanagers',
-          // localField: 'asmMapping.asmId',
-          // foreignField: '_id',
-          let: {
-            'id': '$asmMapping.asmId'
-          },
-          pipeline: [
-            {
-              $match: {
-                'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$_id', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                'status': 1,
-                'isDeleted': 1,
-                'employeeId': 1,
-                'email': 1,
-                'gender': 1,
-                'designation': 1,
-                'firstName': 1,
-                'lastName': 1,
-                'contactMobile': 1,
-                'photo': 1,
-              }
-            }
-          ],
-          as: 'asmMapping.asmId'
-        }
-      }, {
-        $unwind: {
-          path: '$asmMapping.asmId',
-          preserveNullAndEmptyArrays: true
-        }
-      }, {
-        $lookup: {
-          from: 'warehouses',
-          let: {
-            'id': '$warehouseId'
-          },
-          pipeline: [
-            {
-              $match: {
-                'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$_id', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                'nameToDisplay': 1,
-                'location': 1,
-                'locationId': { $ifNull: ["$locationId", "1"] },
-              }
-            }
-          ],
-          as: 'warehouse'
-        }
-      },
-      // , {
-      //   $unwind: {
-      //     path: '$warehouse',
-      //     preserveNullAndEmptyArrays: true
-      //   }
-      // }
-      {
-        "$addFields": {
-          "warehouse": {
-            $ifNull: [{ $arrayElemAt: ['$warehouse', -1] }, {
-              "_id": null,
-              "nameToDisplay": null,
-              "location": {
-                "type": "Point",
-                "coordinates": [
-                  null,
-                  null
-                ]
-              },
-              "locationId": "1"
-            }]
-          }
+          _id: mongoose.Types.ObjectId(pickerBoyId)
         }
       }
       ]).allowDiskUse(true);
 
       // check if inserted 
-      if (salesmanData && salesmanData.length) return {
+      if (pickerBoyData && pickerBoyData.length) return {
         success: true,
-        data: salesmanData[salesmanData.length - 1]
+        data: pickerBoyData[pickerBoyData.length - 1]
       };
       else return { success: false };
 

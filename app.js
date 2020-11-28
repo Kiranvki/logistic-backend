@@ -31,6 +31,10 @@ const employeeApiRouter = express.Router(); // Protected routes
 const salesOrderOpenRouter = express.Router(); // Open routes
 const salesOrderApiRouter = express.Router(); // Protected routes
 
+// app picker boy details 
+const appPickerBoyOpenRouter = express.Router(); // Open routes
+const appPickerBoyApiRouter = express.Router(); // Protected routes
+
 /* Fetch router files and apply them to our routers */
 glob('./src/components/picker_app/onBoard/*', null, (err, items) => {
   items.forEach(component => {
@@ -38,6 +42,17 @@ glob('./src/components/picker_app/onBoard/*', null, (err, items) => {
       onBoardOpenRouter,
       onBoardApiRouter,
     );
+  });
+});
+
+/* Fetch router files and apply them to our routers */
+glob('./src/components/picker_app/*', null, (err, items) => {
+  items.forEach(component => {
+    if (component != './src/components/picker_app/onBoard')
+      if (require(component).routes) require(component).routes(
+        appPickerBoyOpenRouter,
+        appPickerBoyApiRouter,
+      );
   });
 });
 
@@ -73,6 +88,10 @@ app.use('/api/v1/employee', employeeApiRouter);
 // SalesOrder Routes
 app.use('/v1/salesorder', salesOrderOpenRouter);
 app.use('/api/v1/salesorder', salesOrderApiRouter);
+
+// app 
+app.use('/app/v1/picker-app', appPickerBoyOpenRouter);
+app.use('/app/api/v1/picker-app', appPickerBoyApiRouter);
 
 // handle 404
 app.use(function (req, res, next) {

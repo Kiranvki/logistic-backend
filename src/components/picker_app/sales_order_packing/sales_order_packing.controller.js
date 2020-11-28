@@ -1,5 +1,8 @@
 // controllers 
 const SalesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
+const PockerBoyCtrl = require('../../employee/picker_boy/picker_boy.controller');
+const AttendanceCtrl = require('../onBoard/app_picker_user_attendance/app_picker_user_attendance.controller');
+
 // const CustomerPaymentCtrl = require('../customers_payment_mapping/customers_payment_mapping.controller');
 // const CustomerInvoiceCtrl = require('../customers_invoice_mapping/customers_invoice_mapping.controller');
 // const CustomerDebitNoteCtrl = require('../customers_debit_mapping/customers_debit_mapping.controller');
@@ -12,6 +15,7 @@ const BaseController = require('../../baseController');
 const Model = require('./models/sales_order_packing.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
+const moment = require('moment');
 const {
   error,
   info
@@ -41,6 +45,62 @@ class areaSalesManagerController extends BaseController {
   }
 
 
+  // do something 
+  getUserDetails = async (req, res) => {
+    try {
+      info('Get Picker Boy Details !');
+      let date = new Date();
+      let endOfTheDay = moment(date).set({
+        h: 24,
+        m: 59,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+      let startOfTheDay = moment(date).set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // inserting the new user into the db
+      let pickerBoyDetails = await PockerBoyCtrl.getPickerBoyFullDetails(req.user._id);
+
+      // is inserted 
+      if (pickerBoyDetails.success && !_.isEmpty(pickerBoyDetails.data)) {
+        // fetch the attendance 
+        let attendanceDetails = await AttendanceCtrl.getAttendanceDetailsForADay(req.user._id, startOfTheDay, endOfTheDay)
+          .then((data) => {
+            if (data.success) {
+              let totalWorkingInMins = 0;
+              // get the total working in mins 
+              if (data.data.attendanceLog && data.data.attendanceLog.length)
+                totalWorkingInMins = _.sumBy(data.data.attendanceLog, 'totalWorkingInMins')
+              return {
+                isFirstCheckedIn: data.data.attendanceLog ? data.data.attendanceLog.length ? 1 : 0 : 0,
+                attendanceLog: data.data.attendanceLog ? data.data.attendanceLog.length ? data.data.attendanceLog[data.data.attendanceLog.length - 1] : [] : [],
+                totalWorkingInMinsTillLastCheckOut: totalWorkingInMins
+              }
+            } else return {
+              isFirstCheckedIn: 0,
+              attendanceLog: {},
+              totalWorkingInMinsTillLastCheckOut: 0
+            };
+          });
+
+        // success response 
+        return this.success(req, res, this.status.HTTP_OK, {
+          ...pickerBoyDetails.data,
+          attendanceDetails: attendanceDetails
+        }, this.messageTypes.userDetailsFetchedSuccessfully);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
 
   // get user details 
   get = async (req, res) => {
@@ -71,9 +131,9 @@ class areaSalesManagerController extends BaseController {
 
         return this.success(req, res, this.status.HTTP_OK, {
           ...salesOrderData.data
-        }, this.messageTypes.userDetailsFetchedSuccessfully);
+        }, this.messageTypes.toDoSalesOrderDetailsFetchedSuccessfully);
       }
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.toDoSalesOrderDetailsFetchedSuccessfully);
 
       // catch any runtime error 
     } catch (err) {

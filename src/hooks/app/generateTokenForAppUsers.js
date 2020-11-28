@@ -30,6 +30,7 @@ module.exports = async (req, res, next) => {
           employerName: req.body.isValidPickerBoy.employerName,
           contactMobile: req.body.isValidPickerBoy.contactMobile,
           cityId: req.body.isValidPickerBoy.cityId,
+          locationId: req.body.isValidPickerBoy.locationId,
           fullName: req.body.isValidPickerBoy.fullName,
           email: req.body.isValidPickerBoy.email
         })

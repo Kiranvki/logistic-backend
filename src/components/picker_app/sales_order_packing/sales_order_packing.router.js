@@ -36,15 +36,28 @@ const {
   verifyUserToken
 } = require('../../../hooks/Auth');
 
+// auth 
+const {
+  verifyAppToken
+} = require('../../../hooks/app/Auth');
+
 // exporting the user routes 
 function userRoutes() {
   //open, closed
   return (open, closed) => {
 
+
+    // get picker Boy details 
+    closed.route('/user/details').get(
+      verifyAppToken, // verify app user token 
+      ctrl.getUserDetails // controller function 
+    );
+
+
     // sync with goFrugal  
-    open.route('/sales-order/').get(
+    open.route('/sales-order/to-do').get(
       //  [joiGoFrugalSync], // joi validation
-      verifyUserToken,
+      verifyAppToken,
       ctrl.getSalesOrder // get controller 
     );
 
