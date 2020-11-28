@@ -121,19 +121,37 @@ class areaSalesManagerController extends BaseController {
   getSalesOrder = async (req, res) => {
     try {
       info('Getting  Sales Order  Data !');
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt';
+      let skip = parseInt(page - 1) * pageSize;
       let locationId = req.user.locationId || 0; // locationId 
       let cityId = req.user.cityId || 'N/A'; // cityId 
 
+      //creating the object with query details to pass , in order to get the sales order details
+      let salesQueryDetails = {
+        page,
+        pageSize,
+        searchKey,
+        sortBy,
+        locationId,
+        cityId
+      }
       // inserting data into the db 
-      let salesOrderData = await SalesOrderCtrl.getSalesOrderDetails(locationId, cityId);
+      let salesOrderData = await SalesOrderCtrl.getSalesOrderDetails(salesQueryDetails);
       // success
       if (salesOrderData.success) {
-
         return this.success(req, res, this.status.HTTP_OK, {
-          ...salesOrderData.data
+          results: salesOrderData.data,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: salesOrderData.total
+          }
         }, this.messageTypes.toDoSalesOrderDetailsFetchedSuccessfully);
       }
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.toDoSalesOrderDetailsFetchedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchToDoSalesOrderDetails);
 
       // catch any runtime error 
     } catch (err) {

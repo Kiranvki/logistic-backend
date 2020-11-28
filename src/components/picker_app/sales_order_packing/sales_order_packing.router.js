@@ -55,8 +55,7 @@ function userRoutes() {
 
 
     // sync with goFrugal  
-    open.route('/sales-order/to-do').get(
-      //  [joiGoFrugalSync], // joi validation
+    closed.route('/sales-order/to-do').get(
       verifyAppToken,
       ctrl.getSalesOrder // get controller 
     );

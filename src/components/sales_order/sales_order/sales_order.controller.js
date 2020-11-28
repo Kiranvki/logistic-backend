@@ -16,7 +16,7 @@ const {
   error,
   info
 } = require('../../../utils').logging;
-
+const moment = require('moment');
 // self apis
 const {
   hitTallyCustomerAccountsSync,
@@ -42,71 +42,110 @@ class areaSalesManagerController extends BaseController {
 
 
   // Internal Function get sales order details 
-  getSalesOrderDetails = (locationId, cityId) => {
+  getSalesOrderDetails = async (salesQueryDetails) => {
     try {
       info('Get Sales Order details !');
+      let { sortBy, page, pageSize, locationId, cityId, searchKey } = salesQueryDetails
+      let sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+      let startOfTheDay = moment().set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
 
-      // get details 
-      return Model.find({
+      // getting the end of the day 
+      let endOfTheDay = moment().set({
+        h: 24,
+        m: 24,
+        s: 0,
+        millisecond: 0
+      }).toDate();
 
-        locationId: pareseInt(locationId),
-        cityId: cityId
-
-      }).lean().then((res) => {
-        if (res && !_.isEmpty(res)) {
-          return {
-            success: true,
-            data: res
-          }
-        } else {
-          error('Error Searching Data in Sales Order DB!');
-          return {
-            success: false
-          }
+      let searchObject = {
+        // 'isPacked': 0,
+        'locationId': parseInt(locationId),
+        'cityId': cityId,
+        'createdAt': {
+          '$gte': startOfTheDay,
+          '$lte': endOfTheDay
         }
-      }).catch(err => {
-        error(err);
-        return {
-          success: false,
-          error: err
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'customerName': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customerCode': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+
+      let totalCount = await Model.aggregate([{
+        $match: {
+          ...searchObject
         }
-      });
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let salesOrderList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'onlineReferenceNo': 1,
+          'customerCode': 1,
+          'customerName': 1,
+          'customerType': 1,
+          'invoiceNo': 1,
+          'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
+        }
+      }
+      ]).allowDiskUse(true)
+
+      return {
+        success: true,
+        data: salesOrderList,
+        total: totalCount
+      };
 
       // catch any runtime error 
     } catch (err) {
       error(err);
-      //  this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-  // internal function 
-  isEmpIdUnique = async (empId) => {
-    try {
-      info('Checking whether the Employee Id is unique or not!');
-
-      // creating the data inside the database 
-      return Model
-        .findOne({
-          'employeeId': empId,
-          'isDeleted': 0
-        })
-        .lean()
-        .then((res) => {
-          if (res && !_.isEmpty(res))
-            return {
-              success: false,
-            };
-          else return {
-            success: true
-          }
-        });
-    } catch (err) {
-      error(err);
       return {
         success: false,
-        error: err
       }
     }
   }
+
 
   // get user details 
   get = async (req, res) => {

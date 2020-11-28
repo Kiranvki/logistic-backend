@@ -3,5 +3,6 @@ module.exports = {
     goFrugalServerError: 'Go Frugal Server Error! Please try after sometime !',
     salesOrderInsertInitiated: 'SalesOrder Sync Initiated, Please check after 10 mins !',
     toDoSalesOrderDetailsFetchedSuccessfully: 'To Do SalesOrder Details Fetched Successfully !',
+    unableToFetchToDoSalesOrderDetails: 'To Do SalesOrder Details not Fetched !',
     salesOrderNotFound: 'To Do SalesOrder Details Not Found !',
 };
