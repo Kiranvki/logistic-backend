@@ -10,5 +10,6 @@ module.exports = {
   isUserCheckedIn: require('./isUserCheckedIn'),
   generateMonthDaysAndOtherMetaData: require('./generateMonthDaysAndOtherMetaData'),
   getAllAppUserWhoAreNotCheckedOut: require('./getAllAppUserWhoAreNotCheckedOut'),
-  isValidPickerBoy: require('./isValidPickerBoy')
+  isValidPickerBoy: require('./isValidPickerBoy'),
+  isValidSalesOrder: require('./isValidSalesOrder')
 }

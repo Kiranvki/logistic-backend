@@ -117,8 +117,8 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  // create a new entry
-  getSalesOrder = async (req, res) => {
+  // get to do sales order details
+  getToDoSalesOrder = async (req, res) => {
     try {
       info('Getting  Sales Order  Data !');
       let page = req.query.page || 1,
@@ -153,6 +153,87 @@ class areaSalesManagerController extends BaseController {
       }
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchToDoSalesOrderDetails);
 
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  // get details 
+  getSalesOrder = async (req, res) => {
+    try {
+      info('SalesOrder GET DETAILS !');
+
+      // get the sale Order Details
+      let saleOrderDetails = req.body.saleOrderDetails;
+
+      // check if inserted 
+      if (saleOrderDetails && !_.isEmpty(saleOrderDetails)) return this.success(req, res, this.status.HTTP_OK, saleOrderDetails, this.messageTypes.salesOrderDetailsFetched);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+  // get details 
+  packingStage = async (req, res) => {
+    try {
+      info('SalesOrder GET DETAILS !');
+
+      // get the sale Order Details
+      let saleOrderDetails = req.body.saleOrderDetails;
+
+      let dataToInsert = {
+        ...saleOrderDetails,
+        'salesOrderId': saleOrderDetails._id,
+        'nameToDisplay': req.body.brandName,
+        'pickerBoyId': req.user._id,
+
+      };
+      //deleting the id
+      delete dataToInsert._id;
+      // inserting data into the db 
+      let isInserted = await Model.create(dataToInsert);
+
+      // check if inserted 
+      if (isInserted && !_.isEmpty(isInserted)) {
+        info('added in sales order packing collection  !');
+        //updating sales order 
+        let changeTheSalesOrderStatus = await SalesOrderCtrl.updateSaledOrderToPack(dataToInsert.salesOrderId)
+        if (changeTheSalesOrderStatus.success) {
+          return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesOrderAddedInPackingStage);
+        } else {
+          error('Error while adding in packing collection !');
+
+          // sales order id
+          let salesOrderId = isInserted._id || '';
+          // creating data to insert
+          let dataToUpdate = {
+            $set: {
+              isDeleted: 1
+            }
+          };
+          // inserting data into the db 
+          let isUpdated = await Model.findOneAndUpdate({
+            _id: mongoose.Types.ObjectId(salesOrderId)
+          }, dataToUpdate, {
+            new: true,
+            upsert: false,
+            lean: true
+          })
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotAddedInPackingStage);
+        }
+        // user onboarded 
+
+      } else {
+        error('Error while adding in packing collection !');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotAddedInPackingStage);
+      }
       // catch any runtime error 
     } catch (err) {
       error(err);

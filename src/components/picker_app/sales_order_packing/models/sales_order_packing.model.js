@@ -11,9 +11,19 @@ const salesOrderPacking = new Schema({
       select: ['fullName', 'employeeId']
     }
   },
+
+  'salesOrderId': {
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'salesorder',
+  },
   'cityId': {
     type: 'String',
     enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
+  },
+  isDeleted: {
+    type: Number,
+    default: 0
   },
   'orderPK': {
     type: 'Number'

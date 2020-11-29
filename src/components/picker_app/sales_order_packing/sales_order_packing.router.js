@@ -18,9 +18,7 @@ const {
 
 // hooks 
 const {
-  setupDataForGoFrugalApi, // setup the gofrugal api
-  getTheDetailsFromGoFrugal, // get the details from go frugal
-
+  isValidSalesOrder    // check is valid sales order id 
   // isValidCustomer, // check whether the customer is valid or not 
   // setupDataForTallyOtherApi, // setup data for tally api
   // readCsvForCustomerDataSync, // read tally csv data for customer data sync 
@@ -29,7 +27,7 @@ const {
   // getTheOtherDetailsFromTallyServer, // get the details from the tally server 
   // checkWhetherCustomerListIsAlreadySyncing, // check whether customer list is already syncing 
   // getAllTheInvoicesAndRefreshAsPerThePaymentReceived, // get all invoices and refresh as per the payment received
-} = require('../../../hooks');
+} = require('../../../hooks/app');
 
 // auth 
 const {
@@ -53,12 +51,26 @@ function userRoutes() {
       ctrl.getUserDetails // controller function 
     );
 
-
-    // sync with goFrugal  
+    // get the to do sales order for today
     closed.route('/sales-order/to-do').get(
       verifyAppToken,
+      ctrl.getToDoSalesOrder // get controller 
+    );
+
+    // get the single sale order details
+    closed.route('/sales-order/:saleOrderId').get(
+      verifyAppToken,
+      isValidSalesOrder,
       ctrl.getSalesOrder // get controller 
     );
+
+    // add the salesorder in the packing stage
+    closed.route('/sales-order/start-pack/:saleOrderId').patch(
+      verifyAppToken,
+      isValidSalesOrder,
+      ctrl.packingStage // get controller 
+    );
+
 
     /*
     
