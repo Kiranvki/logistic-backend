@@ -1,5 +1,5 @@
 // user controller 
-const ctrl = require('./sales_order_packing.controller');
+const ctrl = require('./pickerboy_salesorder_items_mapping.controller');
 
 // library
 const multer = require('multer');
@@ -14,7 +14,7 @@ const {
   joiCustomersList, // get the list of customers in db
   joiGetCustomerOther, // get customer other details 
   joiInvoicePaymentRefresh, // joi invoice payment sync 
-} = require('./sales_order_packing.validators');
+} = require('./pickerboy_salesorder_items_mapping.validators');
 
 // hooks 
 const {
@@ -51,8 +51,8 @@ function userRoutes() {
       ctrl.getUserDetails // controller function 
     );
 
-    // get the to do sales order for today
-    closed.route('/sales-order/to-do').get(
+    // get the todays task sales order for today
+    closed.route('/sales-order/todays-task').get(
       verifyAppToken,
       ctrl.getToDoSalesOrder // get controller 
     );

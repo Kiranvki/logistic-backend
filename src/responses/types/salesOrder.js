@@ -6,6 +6,7 @@ module.exports = {
     unableToFetchToDoSalesOrderDetails: 'To Do SalesOrder Details not Fetched !',
     salesOrderNotFound: 'To Do SalesOrder Details Not Found !',
     salesOrderDetailsFetched: 'SalesOrder Details Fetched Successfully !.',
+    salesOrderDetailsNotFetched: 'SalesOrder Details not Fetched !.',
     salesOrderIdInvalidEitherDeletedOrDeactivated: 'sales Order Id is either deleted or deactivated !',
     invalidSalesOrderId: 'The Sales Order id is Invalid !',
     salesOrderNotAddedInPackingStage: 'Unable to add Sales Order in packing step !',

@@ -12,7 +12,7 @@ const AttendanceCtrl = require('../onBoard/app_picker_user_attendance/app_picker
 
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
-const Model = require('./models/sales_order_packing.model');
+const Model = require('./models/pickerboy_salesorder_mapping.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const moment = require('moment');
@@ -181,55 +181,25 @@ class areaSalesManagerController extends BaseController {
 
 
   // get details 
-  packingStage = async (req, res) => {
+  pickingState = async (req, res) => {
     try {
-      info('SalesOrder GET DETAILS !');
+      info('Add SalesOrder in Picking state a !');
 
       // get the sale Order Details
       let saleOrderDetails = req.body.saleOrderDetails;
 
       let dataToInsert = {
-        ...saleOrderDetails,
         'salesOrderId': saleOrderDetails._id,
-        'nameToDisplay': req.body.brandName,
         'pickerBoyId': req.user._id,
-
+        'createdBy': req.user.email
       };
-      //deleting the id
-      delete dataToInsert._id;
+
       // inserting data into the db 
       let isInserted = await Model.create(dataToInsert);
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-        info('added in sales order packing collection  !');
-        //updating sales order 
-        let changeTheSalesOrderStatus = await SalesOrderCtrl.updateSaledOrderToPack(dataToInsert.salesOrderId)
-        if (changeTheSalesOrderStatus.success) {
-          return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesOrderAddedInPackingStage);
-        } else {
-          error('Error while adding in packing collection !');
-
-          // sales order id
-          let salesOrderId = isInserted._id || '';
-          // creating data to insert
-          let dataToUpdate = {
-            $set: {
-              isDeleted: 1
-            }
-          };
-          // inserting data into the db 
-          let isUpdated = await Model.findOneAndUpdate({
-            _id: mongoose.Types.ObjectId(salesOrderId)
-          }, dataToUpdate, {
-            new: true,
-            upsert: false,
-            lean: true
-          })
-          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotAddedInPackingStage);
-        }
-        // user onboarded 
-
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesOrderAddedInPackingStage);
       } else {
         error('Error while adding in packing collection !');
         return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotAddedInPackingStage);
@@ -241,6 +211,85 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
+
+  // get details while scanning state
+  scanState = async (req, res) => {
+    try {
+      info('Get SalesOrder details after Picking state !');
+
+      // get the sale Order Details
+      let salesOrderData = await Model.aggregate([{
+        $match: {
+          '_id': mongoose.Types.ObjectId(req.params.pickerBoySaleOrderId)
+        }
+      },
+      {
+        $lookup: {
+          from: 'salesorders',
+          let: {
+            'id': '$salesOrderId'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                // 'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$_id', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'invoiceNo': 1,
+                'onlineReferenceNo': 1,
+                'onlineChildReferenceNo': 1,
+                'customerId': 1,
+                'customerName': 1,
+                'customerType': 1,
+                'orderItems': 1,
+                'deliveryDate': 1,
+              }
+            }
+          ],
+          as: 'salesOrdersDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$salesOrdersDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          'pickerBoyId': 1,
+          'customerType': 1,
+          'salesOrderId': 1,
+          'salesOrdersDetails.invoiceNo': 1,
+          'salesOrdersDetails.onlineReferenceNo': 1,
+          'salesOrdersDetails.onlineChildReferenceNo': 1,
+          'salesOrdersDetails.customerId': 1,
+          'salesOrdersDetails.customerName': 1,
+          'salesOrdersDetails.customerType': 1,
+          'salesOrdersDetails.orderItems': 1,
+          'salesOrdersDetails.orderItems': 1,
+        }
+      }
+      ])
+
+      // check if inserted 
+      if (salesOrderData && !_.isEmpty(salesOrderData)) {
+        return this.success(req, res, this.status.HTTP_OK, salesOrderData, this.messageTypes.salesOrderDetailsFetched);
+      } else {
+        error('Error while getting the sales Order data after picking state !');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderDetailsNotFetched);
+      }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
   // get Customer list 
   getList = async (req, res) => {
     try {
