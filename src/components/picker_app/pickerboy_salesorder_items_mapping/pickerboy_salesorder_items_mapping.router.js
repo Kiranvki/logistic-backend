@@ -45,31 +45,13 @@ function userRoutes() {
   return (open, closed) => {
 
 
-    // get picker Boy details 
-    closed.route('/user/details').get(
-      verifyAppToken, // verify app user token 
-      ctrl.getUserDetails // controller function 
-    );
-
-    // get the todays task sales order for today
-    closed.route('/sales-order/todays-task').get(
-      verifyAppToken,
-      ctrl.getToDoSalesOrder // get controller 
-    );
-
-    // get the single sale order details
-    closed.route('/sales-order/:saleOrderId').get(
-      verifyAppToken,
-      isValidSalesOrder,
-      ctrl.getSalesOrder // get controller 
-    );
-
     // add the salesorder in the packing stage
-    closed.route('/sales-order/start-pack/:saleOrderId').patch(
+    closed.route('/sales-order/add-item/:pickerBoySalesOrderMappingId').patch(
       verifyAppToken,
-      isValidSalesOrder,
-      ctrl.packingStage // get controller 
+      //   isValidSalesOrder,
+      ctrl.addItems // get controller 
     );
+
 
 
     /*

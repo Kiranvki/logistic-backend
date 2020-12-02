@@ -72,10 +72,17 @@ function userRoutes() {
     );
 
     // once we have started picking then get the salesorder data for adding the item.
-    closed.route('/sales-order/scan-order/:pickerBoySaleOrderId').get(
+    closed.route('/sales-order/scan-order/:pickerBoySalesOrderMappingId').get(
       verifyAppToken,
       //  isValidSalesOrder,
       ctrl.scanState // get controller 
+    );
+
+    // view order basket api
+    closed.route('/sales-order/view-order-basket/:pickerBoySalesOrderMappingId').patch(
+      verifyAppToken,
+      //   isValidSalesOrder,
+      ctrl.viewOrderBasket // get controller 
     );
     /*
     

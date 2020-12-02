@@ -220,7 +220,7 @@ class areaSalesManagerController extends BaseController {
       // get the sale Order Details
       let salesOrderData = await Model.aggregate([{
         $match: {
-          '_id': mongoose.Types.ObjectId(req.params.pickerBoySaleOrderId)
+          '_id': mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId)
         }
       },
       {
@@ -290,6 +290,106 @@ class areaSalesManagerController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+  // get details while scanning state
+  viewOrderBasket = async (req, res) => {
+    try {
+      info('View the Order Basket !');
+
+      // get the basket data
+      let salesOrderData = await Model.aggregate([{
+        $match: {
+          '_id': mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId)
+        }
+      },
+      {
+        $lookup: {
+          from: 'pickerboysalesorderitemsmappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                '$expr': {
+                  '$eq': ['$pickerBoySalesOrderMappingId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'itemName': 1,
+                'itemId': 1,
+                'quantity': 1
+
+              }
+            }
+          ],
+          as: 'availableItemDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'salesorders',
+          let: {
+            'id': '$salesOrderId'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                // 'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$_id', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'status': 1,
+                'onlineChildReferenceNo': 1,
+                'onlineReferenceNo': 1,
+                'orderItems': 1,
+                'otherChargesTaxInclusive': 1,
+                'customerType': 1,
+                'salesOrderId': 1,
+              }
+            }
+          ],
+          as: 'salesOrdersDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$salesOrdersDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+
+          'salesOrdersDetails.onlineChildReferenceNo': 1,
+          'salesOrdersDetails.orderItems': 1,
+          'pickerBoyId': 1,
+          'customerType': 1,
+          'salesOrderId': 1,
+          'availableItemDetails': 1
+        }
+      }
+      ])
+
+      // check if inserted 
+      if (salesOrderData && !_.isEmpty(salesOrderData)) {
+        return this.success(req, res, this.status.HTTP_OK, salesOrderData, this.messageTypes.salesOrderDetailsFetched);
+      } else {
+        error('Error while getting the sales Order data after picking state !');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderDetailsNotFetched);
+      }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
   // get Customer list 
   getList = async (req, res) => {
     try {

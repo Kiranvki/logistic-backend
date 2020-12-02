@@ -179,60 +179,30 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-
-  // get details 
-  packingStage = async (req, res) => {
+  //adding the new items after each scan
+  addItems = async (req, res) => {
     try {
-      info('SalesOrder GET DETAILS !');
-
-      // get the sale Order Details
-      let saleOrderDetails = req.body.saleOrderDetails;
+      info('Add items after scanning  !');
+      let pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || ''
 
       let dataToInsert = {
-        ...saleOrderDetails,
-        'salesOrderId': saleOrderDetails._id,
-        'nameToDisplay': req.body.brandName,
-        'pickerBoyId': req.user._id,
-
+        'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
+        'itemId': req.body.itemId,
+        'itemName': req.body.itemName,
+        'quantity': req.body.quantity,
+        'suppliedQty': req.body.suppliedQty,
+        'createdBy': req.user.email
       };
-      //deleting the id
-      delete dataToInsert._id;
+
       // inserting data into the db 
       let isInserted = await Model.create(dataToInsert);
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-        info('added in sales order packing collection  !');
-        //updating sales order 
-        let changeTheSalesOrderStatus = await SalesOrderCtrl.updateSaledOrderToPack(dataToInsert.salesOrderId)
-        if (changeTheSalesOrderStatus.success) {
-          return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesOrderAddedInPackingStage);
-        } else {
-          error('Error while adding in packing collection !');
-
-          // sales order id
-          let salesOrderId = isInserted._id || '';
-          // creating data to insert
-          let dataToUpdate = {
-            $set: {
-              isDeleted: 1
-            }
-          };
-          // inserting data into the db 
-          let isUpdated = await Model.findOneAndUpdate({
-            _id: mongoose.Types.ObjectId(salesOrderId)
-          }, dataToUpdate, {
-            new: true,
-            upsert: false,
-            lean: true
-          })
-          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotAddedInPackingStage);
-        }
-        // user onboarded 
-
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.itemAddedInsalesOrderAfterScan);
       } else {
         error('Error while adding in packing collection !');
-        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotAddedInPackingStage);
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToAddItemInsalesOrderAfterScan);
       }
       // catch any runtime error 
     } catch (err) {
@@ -240,6 +210,7 @@ class areaSalesManagerController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
 
   // get Customer list 
   getList = async (req, res) => {

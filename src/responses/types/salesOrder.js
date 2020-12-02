@@ -11,4 +11,7 @@ module.exports = {
     invalidSalesOrderId: 'The Sales Order id is Invalid !',
     salesOrderNotAddedInPackingStage: 'Unable to add Sales Order in packing step !',
     salesOrderAddedInPackingStage: ' Sales Order added in packing step Successfully !',
+    itemAddedInsalesOrderAfterScan: 'Item added in SalesOrder Details after scan Successfully !.',
+    unableToAddItemInsalesOrderAfterScan: 'Unable to add Item  in SalesOrder Details after scan !.',
+
 };

@@ -32,6 +32,10 @@ const pickerBoySalesOrderItemsMapping = new Schema({
     default: 1
   },
 
+  'createdBy': {
+    type: String,
+  },
+
 }, {
   timestamps: true
 });
