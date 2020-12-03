@@ -265,6 +265,7 @@ class areaSalesManagerController extends BaseController {
           'pickerBoyId': 1,
           'customerType': 1,
           'salesOrderId': 1,
+          'salesOrdersDetails.deliveryDate': 1,
           'salesOrdersDetails.invoiceNo': 1,
           'salesOrdersDetails.onlineReferenceNo': 1,
           'salesOrdersDetails.onlineChildReferenceNo': 1,
@@ -350,7 +351,8 @@ class areaSalesManagerController extends BaseController {
                 'orderItems': 1,
                 'otherChargesTaxInclusive': 1,
                 'customerType': 1,
-                'salesOrderId': 1,
+                'deliveryDate': 1,
+                'customerId': 1,
               }
             }
           ],
@@ -365,9 +367,14 @@ class areaSalesManagerController extends BaseController {
       },
       {
         $project: {
-
+          'salesOrdersDetails.status': 1,
           'salesOrdersDetails.onlineChildReferenceNo': 1,
+          'salesOrdersDetails.onlineReferenceNo': 1,
           'salesOrdersDetails.orderItems': 1,
+          'salesOrdersDetails.otherChargesTaxInclusive': 1,
+          'salesOrdersDetails.customerType': 1,
+          'salesOrdersDetails.deliveryDate': 1,
+          'salesOrdersDetails.customerId': 1,
           'pickerBoyId': 1,
           'customerType': 1,
           'salesOrderId': 1,

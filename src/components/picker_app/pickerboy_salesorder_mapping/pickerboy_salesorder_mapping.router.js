@@ -79,7 +79,7 @@ function userRoutes() {
     );
 
     // view order basket api
-    closed.route('/sales-order/view-order-basket/:pickerBoySalesOrderMappingId').patch(
+    closed.route('/sales-order/view-order-basket/:pickerBoySalesOrderMappingId').get(
       verifyAppToken,
       //   isValidSalesOrder,
       ctrl.viewOrderBasket // get controller 
