@@ -20,6 +20,10 @@ const {
   error,
   info
 } = require('../../../utils').logging;
+//DMS API
+const {
+  getCustomerDetails
+} = require('../../../inter_service_api/dms_dashboard_v1/v1');
 
 // self apis
 const {
@@ -102,20 +106,8 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  // get user details 
-  get = async (req, res) => {
-    try {
-      info('Zoho Details Controller !');
 
-      // success 
-      return this.success(req, res, this.status.HTTP_OK, req.body.userData, this.messageTypes.userDetailsFetched);
 
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
 
   // get to do sales order details
   getToDoSalesOrder = async (req, res) => {
@@ -735,239 +727,17 @@ class areaSalesManagerController extends BaseController {
 
       // getting the data from request 
       let customerId = req.params.customerId;
+      let cityId = req.params.cityId;
 
-      // project data 
-      let fieldsToProject = {
-        'goFrugalId': 1,
-        'cityId': 1, // comparison field 
-        'name': 1,
-        'customerId': 1,
-        'mobile': 1,
-        'salesMan': 1,
-        'status': 1,
-        'type': 1,
-        'creditLimit': 1,
-        'dbStatus': 1,
-        'isDeleted': 1
+      let customerDataFromMicroService = await getCustomerDetails(customerId, cityId);
+      if (customerDataFromMicroService.success) {
+        // success
+        return this.success(req, res, this.status.HTTP_OK, customerDataFromMicroService.data, this.messageTypes.customerDetailsFetchedSuccessfully);
       }
-
-      // getting th data from the customer db
-      let customerList = await Model.aggregate([{
-        '$match': {
-          '_id': mongoose.Types.ObjectId(customerId),
-          'isDeleted': 0,
-          'dbStatus': 1
-        }
-      }, {
-        '$lookup': {
-          from: 'customersaccountmappings',
-          localField: '_id',
-          foreignField: 'customerId',
-          as: 'customerAccounts'
-        }
-      }, {
-        '$unwind': {
-          path: '$customerAccounts',
-          preserveNullAndEmptyArrays: true
-        }
-      }, {
-        '$lookup': {
-          from: 'draftbeatplancustomers',
-          let: {
-            'id': '$_id'
-          },
-          pipeline: [
-            {
-              $match: {
-                'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$customerId', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                'beatPlanId': 1,
-                'status': 1,
-                'isDeleted': 1,
-              }
-            }, {
-              $group: {
-                _id: '$beatPlanId'
-              }
-            }, {
-              '$lookup': {
-                from: 'draftbeatplans',
-                let: {
-                  'id': '$_id'
-                },
-                pipeline: [
-                  {
-                    $match: {
-                      'status': 1,
-                      'isDeleted': 0,
-                      '$expr': {
-                        '$eq': ['$_id', '$$id']
-                      }
-                    }
-                  }, {
-                    $project: {
-                      '_id': 1,
-                      'status': 1,
-                      'isDeleted': 1,
-                    }
-                  }, {
-                    '$lookup': {
-                      from: 'draftbeatplansalesmanmappings',
-                      let: {
-                        'id': '$_id'
-                      },
-                      pipeline: [
-                        {
-                          $match: {
-                            'status': 1,
-                            'isDeleted': 0,
-                            '$expr': {
-                              '$eq': ['$beatPlanId', '$$id']
-                            }
-                          }
-                        }, {
-                          $project: {
-                            'salesmanId': 1,
-                            'status': 1,
-                            'isDeleted': 1,
-                          }
-                        }, {
-                          '$lookup': {
-                            from: 'salesmanagers',
-                            let: {
-                              'id': '$salesmanId'
-                            },
-                            pipeline: [
-                              {
-                                $match: {
-                                  'status': 1,
-                                  'isDeleted': 0,
-                                  '$expr': {
-                                    '$eq': ['$_id', '$$id']
-                                  }
-                                }
-                              }, {
-                                $project: {
-                                  'employerName': 1,
-                                  'employeeId': 1,
-                                  'isWaycoolEmp': 1,
-                                  'fullName': 1,
-                                  'email': 1,
-                                  'contactMobile': 1,
-                                  'profilePic': 1,
-                                  'status': 1,
-                                  'isDeleted': 1,
-                                }
-                              }, {
-                                '$lookup': {
-                                  from: 'asmsalesmanmappings',
-                                  let: {
-                                    'id': '$_id'
-                                  },
-                                  pipeline: [
-                                    {
-                                      $match: {
-                                        'status': 1,
-                                        'isDeleted': 0,
-                                        '$expr': {
-                                          '$eq': ['$salesmanId', '$$id']
-                                        }
-                                      }
-                                    }, {
-                                      $project: {
-                                        'asmId': 1,
-                                        'salesmanId': 1,
-                                        'status': 1,
-                                        'isDeleted': 1,
-                                      }
-                                    }, {
-                                      '$lookup': {
-                                        from: 'areasalesmanagers',
-                                        let: {
-                                          'id': '$asmId'
-                                        },
-                                        pipeline: [
-                                          {
-                                            $match: {
-                                              'status': 1,
-                                              'isDeleted': 0,
-                                              '$expr': {
-                                                '$eq': ['$_id', '$$id']
-                                              }
-                                            }
-                                          }, {
-                                            $project: {
-                                              'profilePic': 1,
-                                              'employeeId': 1,
-                                              'fullName': 1,
-                                              'status': 1,
-                                              'isDeleted': 1,
-                                            }
-                                          }
-                                        ],
-                                        as: 'asm'
-                                      }
-                                    }, {
-                                      '$unwind': {
-                                        path: '$asm',
-                                        preserveNullAndEmptyArrays: true
-                                      }
-                                    }
-                                  ],
-                                  as: 'asmMapping'
-                                }
-                              }, {
-                                '$unwind': {
-                                  path: '$asmMapping',
-                                  preserveNullAndEmptyArrays: true
-                                }
-                              }
-                            ],
-                            as: 'salesman'
-                          }
-                        }, {
-                          '$unwind': {
-                            path: '$salesman',
-                            preserveNullAndEmptyArrays: true
-                          }
-                        }
-                      ],
-                      as: 'salesman'
-                    }
-                  }, {
-                    '$unwind': {
-                      path: '$salesman',
-                      preserveNullAndEmptyArrays: true
-                    }
-                  }
-                ],
-                as: 'beatPlan'
-              }
-            }, {
-              '$unwind': {
-                path: '$beatPlan',
-                preserveNullAndEmptyArrays: true
-              }
-            }, {
-              $match: {
-                'beatPlan.status': {
-                  $exists: true
-                }
-              }
-            }
-          ],
-          as: 'beatPlans',
-        }
-      }]).allowDiskUse(true);
-
-      // success
-      return this.success(req, res, this.status.HTTP_OK, customerList[0], this.messageTypes.customerDetailsFetched);
+      else {
+        error('Unable to fetch Customer Details!');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedCustomerDetails);
+      }
 
       // catch any runtime error
     } catch (err) {
@@ -1018,23 +788,6 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  // get the minified list 
-  getMinifiedListOld = async (req, res) => {
-    try {
-      info('Get the Customer List !');
-
-      // get all the valid customers 
-      let customerList = await CustomerAccountsCtrl.getMinifiedList(req);
-
-      // success
-      return this.success(req, res, this.status.HTTP_OK, customerList, this.messageTypes.customerDetailsFetched);
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
 
   // get the minified list 
   getMinifiedList = async (req, res) => {

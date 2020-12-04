@@ -51,6 +51,12 @@ function userRoutes() {
       ctrl.getUserDetails // controller function 
     );
 
+    // get customer details 
+    closed.route('/customer/details/:customerId/city/:cityId').get(
+      verifyAppToken, // verify app user token 
+      ctrl.getCustomerDetails // controller function 
+    );
+
     // get the todays task sales order for today
     closed.route('/sales-order/todays-task').get(
       verifyAppToken,

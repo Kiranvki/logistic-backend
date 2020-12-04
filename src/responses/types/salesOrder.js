@@ -13,5 +13,6 @@ module.exports = {
     salesOrderAddedInPackingStage: ' Sales Order added in packing step Successfully !',
     itemAddedInsalesOrderAfterScan: 'Item added in SalesOrder Details after scan Successfully !.',
     unableToAddItemInsalesOrderAfterScan: 'Unable to add Item  in SalesOrder Details after scan !.',
-
+    customerDetailsFetchedSuccessfully: 'Customer Details Fetched Successfully !',
+    unableToFetchedCustomerDetails: 'Unable to fetch Customer Details!',
 };
