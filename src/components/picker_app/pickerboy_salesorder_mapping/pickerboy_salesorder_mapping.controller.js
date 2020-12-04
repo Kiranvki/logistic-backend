@@ -122,12 +122,42 @@ class areaSalesManagerController extends BaseController {
     try {
       info('Getting  Sales Order  Data !');
       let page = req.query.page || 1,
+        assignedSalesOrderId = [],
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
         searchKey = req.query.search || '',
         sortBy = req.query.sortBy || 'createdAt';
       let skip = parseInt(page - 1) * pageSize;
       let locationId = req.user.locationId || 0; // locationId 
       let cityId = req.user.cityId || 'N/A'; // cityId 
+
+      let startOfTheDay = moment().set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // getting the end of the day 
+      let endOfTheDay = moment().set({
+        h: 24,
+        m: 24,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      //finding the total sales order records, which are already assigned to the pickerboy
+
+      let assignedSalesOrderData = await Model.find({
+        'createdAt': {
+          '$gte': startOfTheDay,
+          '$lte': endOfTheDay
+        }
+      }, { 'salesOrderId': 1 }).lean()
+
+
+      if (assignedSalesOrderData && !_.isEmpty(assignedSalesOrderData)) {
+        assignedSalesOrderId = assignedSalesOrderData.map(data => data.salesOrderId)
+      }
 
       //creating the object with query details to pass , in order to get the sales order details
       let salesQueryDetails = {
@@ -136,9 +166,15 @@ class areaSalesManagerController extends BaseController {
         searchKey,
         sortBy,
         locationId,
-        cityId
+        cityId,
+        startOfTheDay,
+        endOfTheDay,
+        assignedSalesOrderId
       }
-      // inserting data into the db 
+
+
+
+      // finding the  data from the db 
       let salesOrderData = await SalesOrderCtrl.getSalesOrderDetails(salesQueryDetails);
       // success
       if (salesOrderData.success) {

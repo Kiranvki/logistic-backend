@@ -8,12 +8,13 @@ const {
 } = require('../../utils').logging;
 
 // exporting the hooks 
-module.exports = async (url, authToken, city, page) => {
+module.exports = async (url, authToken, city, page, startDate, endDate) => {
   try {
     info(`Getting Sales Order  from GoFrugal ${city} for page ${page}!`);
 
+
     // check whether the document type already exist or not 
-    return request.get(url + '?page=' + page)
+    return request.get(url + '?q=createdAt>=' + startDate + ',createdAt<=' + endDate + '&page=' + page)
       .set('Content-Type', 'application/json')
       .set('accept', 'application/json')
       .set('x-auth-token', authToken)

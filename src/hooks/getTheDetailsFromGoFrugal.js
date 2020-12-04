@@ -32,6 +32,7 @@ module.exports = async (req, res, next) => {
   try {
     info('Get the Sales Order List !');
 
+
     // request variables 
     let city = req.params.city || 'chennai',
       accessToken = req.body.accessToken || '',
@@ -39,6 +40,18 @@ module.exports = async (req, res, next) => {
       page = 1,
       totalPages = 1,
       salesOrderList = [];
+
+    let date = new Date()
+    date.setDate(date.getDate() - 1)
+    let n = date.toISOString().slice(0, 10);
+    let startDate = n + " " +
+      ("00").slice(-2) + ":" +
+      ("00").slice(-2) + ":" +
+      ("00").slice(-2)
+    let endDate = n + " " +
+      ("23").slice(-2) + ":" +
+      ("55").slice(-2) + ":" +
+      ("00").slice(-2)
 
     await SalesOrderSyncCtrl.markANewSalesOrderListSync(city);
 
@@ -48,7 +61,7 @@ module.exports = async (req, res, next) => {
     do {
       info(`Fetching Data from GoFrugal For Page ${page} out of ${totalPages}`);
       // check whether the document type already exist or not 
-      let getSalesOrderListData = await getSalesOrderList(url, accessToken, city, page);
+      let getSalesOrderListData = await getSalesOrderList(url, accessToken, city, page, startDate, endDate);
 
       // current page and total page
       if (getSalesOrderListData.currentPage && getSalesOrderListData.totalPages && !isNaN(getSalesOrderListData.currentPage) && !isNaN(getSalesOrderListData.totalPages)) {

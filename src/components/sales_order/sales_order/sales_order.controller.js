@@ -124,29 +124,20 @@ class areaSalesManagerController extends BaseController {
   getSalesOrderDetails = async (salesQueryDetails) => {
     try {
       info('Get Sales Order details !');
-      let { sortBy, page, pageSize, locationId, cityId, searchKey } = salesQueryDetails
+      let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay, assignedSalesOrderId } = salesQueryDetails
       let sortingArray = {};
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
-      let startOfTheDay = moment().set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0
-      }).toDate();
 
-      // getting the end of the day 
-      let endOfTheDay = moment().set({
-        h: 24,
-        m: 24,
-        s: 0,
-        millisecond: 0
-      }).toDate();
 
       let searchObject = {
         // 'isPacked': 0,
+        '_id': {
+          $nin: assignedSalesOrderId
+        },
         'locationId': parseInt(locationId),
         'cityId': cityId,
+
         'deliveryDate': {
           '$gte': startOfTheDay,
           '$lte': endOfTheDay
