@@ -7,6 +7,7 @@ const multipartMiddleware = multer();
 
 // custom joi validation
 const {
+  joiCustomerGetDetails, //joi get customer details
   joiTallySync, // joi tally sync
   joiTallyUpload, // joi tally upload 
   joiCustomerGet, // joi customer get 
@@ -53,6 +54,7 @@ function userRoutes() {
 
     // get customer details 
     closed.route('/customer/details/:customerId/city/:cityId').get(
+      [joiCustomerGetDetails], // joi validation
       verifyAppToken, // verify app user token 
       ctrl.getCustomerDetails // controller function 
     );

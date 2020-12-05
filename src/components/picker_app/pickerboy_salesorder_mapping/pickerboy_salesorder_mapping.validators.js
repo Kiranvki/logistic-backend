@@ -100,6 +100,12 @@ const schemas = {
   joiInvoicePaymentRefresh: Joi.object().keys({
     city: Joi.string().trim().label('City Id').lowercase().required().valid(['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']),
   }),
+  // joi customer get details 
+  joiCustomerGetDetails: Joi.object().keys({
+    customerId: Joi.number().integer().label('Customer Id').required(),
+    cityId: Joi.string().trim().lowercase().label('city Id').required().valid(['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']),
+  }),
+
 }
 // joi options
 const options = {
@@ -273,6 +279,27 @@ module.exports = {
   joiInvoicePaymentRefresh: (req, res, next) => {
     // getting the schemas 
     let schema = schemas.joiInvoicePaymentRefresh;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate(req.params, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+  // joi Customer get details
+  joiCustomerGetDetails: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiCustomerGetDetails;
     let option = options.basic;
 
     // validating the schema 
