@@ -15,11 +15,32 @@ const pickerBoySalesOrderItemsMapping = new Schema({
   'itemName': {
     type: String,
   },
+
+  'salePrice': {
+    required: true,
+    type: Number,
+  },
   'quantity': {
     required: true,
     type: Number,
   },
   'suppliedQty': {
+    required: true,
+    type: Number,
+  },
+  'itemAmount': {
+    required: true,
+    type: Number,
+  },
+  'taxPercentage': {
+    required: true,
+    type: Number,
+  },
+  'discountPercentage': {
+    required: true,
+    type: Number,
+  },
+  'freeQty': {
     required: true,
     type: Number,
   },
@@ -31,7 +52,6 @@ const pickerBoySalesOrderItemsMapping = new Schema({
     type: Number,
     default: 1
   },
-
   'createdBy': {
     type: String,
   },
