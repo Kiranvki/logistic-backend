@@ -45,8 +45,6 @@ class pickerUserSessionController extends BaseController {
   // login authentication
   loginRequest = async (req, res) => {
     try {
-      console.log('hellp');
-
       info('OTP generation and DB entry !');
 
       // getting the salesman id 
