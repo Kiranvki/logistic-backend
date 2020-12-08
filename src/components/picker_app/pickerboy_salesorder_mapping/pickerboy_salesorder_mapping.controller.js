@@ -70,7 +70,10 @@ class areaSalesManagerController extends BaseController {
                 'itemName': 1,
                 'itemId': 1,
                 'quantity': 1,
-                'suppliedQty': 1
+                'suppliedQty': 1,
+                'salePrice': 1,
+                'taxPercentage': 1,
+                'discountPercentage': 1,
 
               }
             }

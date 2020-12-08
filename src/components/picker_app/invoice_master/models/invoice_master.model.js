@@ -123,11 +123,9 @@ const invoiceMaster = new Schema({
     },
   },
 
-
+  // SAP fields
   'itemDetails': [
     {
-
-
       'hsnCode': {
         type: 'String',
       },
@@ -165,12 +163,77 @@ const invoiceMaster = new Schema({
         type: 'Number',
       },
     }],
+  'invoiceDate': {
+    type: 'Date',
+  },
 
-  'grandTotal': {
+  'totalQuantitySupplied': {
+    type: 'Number',
+  },
+  'totalQuantityDemanded': {
+    type: 'Number',
+  },
+  'totalAmount': {
+    type: 'Number',
+  },
+  'totalTax': {
+    type: 'Number',
+  },
+  'totalDiscount': {
+    type: 'Number',
+  },
+  'totalNetValue': {
     type: 'Number',
   },
 
+  'itemSupplied': [
+    {
 
+      'itemId': {
+        type: 'Number'
+      },
+      'itemName': {
+        type: 'String'
+      },
+
+      'salePrice': {
+        type: 'Number'
+      },
+      'quantity': {
+        type: 'Number'
+      },
+      'suppliedQty': {
+        type: 'Number'
+      },
+      'itemAmount': {
+        type: 'Number'
+      },
+
+      'taxPercentage': {
+        type: 'Number'
+      },
+
+      'discountPercentage': {
+        type: 'Number'
+      },
+      'freeQty': {
+        type: 'Number'
+      },
+      'discountForSingleItem': {
+        type: 'Number'
+      },
+
+      'amountAfterDiscountForSingle': {
+        type: 'Number'
+      },
+      'taxValueForSingleItem': {
+        type: 'Number'
+      },
+      'netValueForSingleItem': {
+        type: 'Number'
+      },
+    }
+  ],
 
 }, {
   timestamps: true

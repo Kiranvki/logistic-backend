@@ -15,4 +15,5 @@ module.exports = {
     unableToAddItemInsalesOrderAfterScan: 'Unable to add Item  in SalesOrder Details after scan !.',
     customerDetailsFetchedSuccessfully: 'Customer Details Fetched Successfully !',
     unableToFetchedCustomerDetails: 'Unable to fetch Customer Details!',
+    itemAlreadyAdded: 'Item Already Added after Scan!',
 };

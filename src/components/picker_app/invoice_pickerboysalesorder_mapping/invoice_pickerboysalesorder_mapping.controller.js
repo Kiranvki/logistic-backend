@@ -1,17 +1,23 @@
 // controllers 
-//const SalesOrderSyncCtrl = require('../sales_order_sync/sales_order_sync.controller');
-const pickerBoySalesOrderMappingctrl = require('../pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
+// const SalesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
+// const PockerBoyCtrl = require('../../employee/picker_boy/picker_boy.controller');
+// const AttendanceCtrl = require('../onBoard/app_picker_user_attendance/app_picker_user_attendance.controller');
 
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
-const Model = require('./models/invoice_master.model');
+const Model = require('./models/invoice_pickerboysalesorder_mapping.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
+const moment = require('moment');
 const {
   error,
   info
 } = require('../../../utils').logging;
-const moment = require('moment');
+//DMS API
+const {
+  getCustomerDetails
+} = require('../../../inter_service_api/dms_dashboard_v1/v1');
+
 // self apis
 const {
   hitTallyCustomerAccountsSync,
@@ -34,191 +40,172 @@ class areaSalesManagerController extends BaseController {
     super();
     this.messageTypes = this.messageTypes.salesOrder;
   }
-  getDetails = async (saleOrderId) => {
+
+  // internal function to get the basket items details
+  viewOrderBasketInternal = async (pickerBoySalesOrderMappingId) => {
     try {
-      info('Get saleOrderId  details !');
+      info('Internal funct to View the Order Basket !');
 
-      // get details 
-      return await Model.findOne({
-        _id: mongoose.Types.ObjectId(saleOrderId),
-        // status: 1,
-        // isDeleted: 0
-      }).lean().then((res) => {
-        if (res && !_.isEmpty(res)) {
-          return {
-            success: true,
-            data: res
-          }
-        } else {
-          error('Error Searching Data in saleOrder DB!');
-          return {
-            success: false
-          }
-        }
-      }).catch(err => {
-        error(err);
-        return {
-          success: false,
-          error: err
-        }
-      });
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
-  updateSaledOrderToPack = async (saleOrderId) => {
-    try {
-      info('Get saleOrderId  details !');
-
-      // creating data to insert
-      let dataToUpdate = {
-        $set: {
-          isPacked: 1
-        }
-      };
-
-      // get details 
-      return await Model.findOneAndUpdate({
-        _id: mongoose.Types.ObjectId(saleOrderId)
-      }, dataToUpdate, {
-        new: true,
-        upsert: false,
-        lean: true
-      })
-        .then((res) => {
-          if (res && !_.isEmpty(res)) {
-            return {
-              success: true,
-              data: res
-            }
-          } else {
-            error('Error Searching Data in saleOrder DB!');
-            return {
-              success: false
-            }
-          }
-        }).catch(err => {
-          error(err);
-          return {
-            success: false,
-            error: err
-          }
-        });
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-  // Internal Function get sales order details 
-  getSalesOrderDetails = async (salesQueryDetails) => {
-    try {
-      info('Get Sales Order details !');
-      let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay, assignedSalesOrderId } = salesQueryDetails
-      let sortingArray = {};
-      sortingArray[sortBy] = -1;
-      let skip = parseInt(page - 1) * pageSize;
-
-
-      let searchObject = {
-        // 'isPacked': 0,
-        '_id': {
-          $nin: assignedSalesOrderId
-        },
-        'locationId': parseInt(locationId),
-        'cityId': cityId,
-
-        'deliveryDate': {
-          '$gte': startOfTheDay,
-          '$lte': endOfTheDay
-        }
-      };
-
-      // creating a match object
-      if (searchKey !== '')
-        searchObject = {
-          ...searchObject,
-          '$or': [{
-            'customerName': {
-              $regex: searchKey,
-              $options: 'is'
-            }
-          }, {
-            'customerCode': {
-              $regex: searchKey,
-              $options: 'is'
-            }
-          }]
-        };
-
-      let totalCount = await Model.aggregate([{
+      // get the basket data
+      let salesOrderData = await Model.aggregate([{
         $match: {
-          ...searchObject
+          '_id': mongoose.Types.ObjectId(pickerBoySalesOrderMappingId)
         }
       },
       {
-        $count: 'sum'
-      }
-      ]).allowDiskUse(true);
+        $lookup: {
+          from: 'pickerboysalesorderitemsmappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                '$expr': {
+                  '$eq': ['$pickerBoySalesOrderMappingId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'itemName': 1,
+                'itemId': 1,
+                'quantity': 1,
+                'suppliedQty': 1,
+                'salePrice': 1,
+                'taxPercentage': 1,
+                'discountPercentage': 1,
 
-      // calculating the total number of applications for the given scenario
-      if (totalCount[0] !== undefined)
-        totalCount = totalCount[0].sum;
-      else
-        totalCount = 0;
-
-      // get list  
-      let salesOrderList = await Model.aggregate([{
-        $match: {
-          ...searchObject
+              }
+            }
+          ],
+          as: 'availableItemDetails'
         }
-      }, {
-        $sort: sortingArray
-      }, {
-        $skip: skip
-      }, {
-        $limit: pageSize
+      },
+      {
+        $lookup: {
+          from: 'salesorders',
+          let: {
+            'id': '$salesOrderId'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                // 'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$_id', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'status': 1,
+                'onlineChildReferenceNo': 1,
+                'onlineReferenceNo': 1,
+                'orderItems': 1,
+                'otherChargesTaxInclusive': 1,
+                'customerType': 1,
+                'deliveryDate': 1,
+                'customerId': 1,
+              }
+            }
+          ],
+          as: 'salesOrdersDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$salesOrdersDetails',
+          preserveNullAndEmptyArrays: true
+        }
       },
       {
         $project: {
-          'onlineReferenceNo': 1,
-          'customerCode': 1,
-          'customerName': 1,
+          'salesOrdersDetails.status': 1,
+          'salesOrdersDetails.onlineChildReferenceNo': 1,
+          'salesOrdersDetails.onlineReferenceNo': 1,
+          'salesOrdersDetails.orderItems': 1,
+          'salesOrdersDetails.otherChargesTaxInclusive': 1,
+          'salesOrdersDetails.customerType': 1,
+          'salesOrdersDetails.deliveryDate': 1,
+          'salesOrdersDetails.customerId': 1,
+          'pickerBoyId': 1,
           'customerType': 1,
-          'invoiceNo': 1,
-          'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
+          'salesOrderId': 1,
+          'availableItemDetails': 1
         }
       }
-      ]).allowDiskUse(true)
+      ])
 
-      return {
-        success: true,
-        data: salesOrderList,
-        total: totalCount
-      };
-
+      // check if inserted 
+      if (salesOrderData && !_.isEmpty(salesOrderData)) {
+        return {
+          success: true,
+          data: salesOrderData
+        }
+      } else {
+        error('Error Searching Data in SO DB!');
+        return {
+          success: false,
+        }
+      }
       // catch any runtime error 
     } catch (err) {
       error(err);
       return {
         success: false,
+        error: err
       }
     }
   }
-
-
-  // get user details 
-  get = async (req, res) => {
+  // do something 
+  getUserDetails = async (req, res) => {
     try {
-      info('Zoho Details Controller !');
+      info('Get Picker Boy Details !');
+      let date = new Date();
+      let endOfTheDay = moment(date).set({
+        h: 24,
+        m: 59,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+      let startOfTheDay = moment(date).set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
 
-      // success 
-      return this.success(req, res, this.status.HTTP_OK, req.body.userData, this.messageTypes.userDetailsFetched);
+      // inserting the new user into the db
+      let pickerBoyDetails = await PockerBoyCtrl.getPickerBoyFullDetails(req.user._id);
+
+      // is inserted 
+      if (pickerBoyDetails.success && !_.isEmpty(pickerBoyDetails.data)) {
+        // fetch the attendance 
+        let attendanceDetails = await AttendanceCtrl.getAttendanceDetailsForADay(req.user._id, startOfTheDay, endOfTheDay)
+          .then((data) => {
+            if (data.success) {
+              let totalWorkingInMins = 0;
+              // get the total working in mins 
+              if (data.data.attendanceLog && data.data.attendanceLog.length)
+                totalWorkingInMins = _.sumBy(data.data.attendanceLog, 'totalWorkingInMins')
+              return {
+                isFirstCheckedIn: data.data.attendanceLog ? data.data.attendanceLog.length ? 1 : 0 : 0,
+                attendanceLog: data.data.attendanceLog ? data.data.attendanceLog.length ? data.data.attendanceLog[data.data.attendanceLog.length - 1] : [] : [],
+                totalWorkingInMinsTillLastCheckOut: totalWorkingInMins
+              }
+            } else return {
+              isFirstCheckedIn: 0,
+              attendanceLog: {},
+              totalWorkingInMinsTillLastCheckOut: 0
+            };
+          });
+
+        // success response 
+        return this.success(req, res, this.status.HTTP_OK, {
+          ...pickerBoyDetails.data,
+          attendanceDetails: attendanceDetails
+        }, this.messageTypes.userDetailsFetchedSuccessfully);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
 
       // catch any runtime error 
     } catch (err) {
@@ -227,119 +214,318 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  // generating a invoice here
-  generateInvoice = async (req, res) => {
+
+
+
+  // get to do sales order details
+  getToDoSalesOrder = async (req, res) => {
     try {
-      info('Genarating Invoice !');
-      let totalQuantityDemanded = 0,
-        totalQuantitySupplied = 0,
-        totalAmount = 0,
-        totalTax = 0,
-        totalDiscount = 0,
-        totalNetValue = 0;
-      let pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || req.body.pickerBoySalesOrderMappingId; // pickerBoySalesOrderMappingId 
+      info('Getting  Sales Order  Data !');
+      let page = req.query.page || 1,
+        assignedSalesOrderId = [],
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt';
+      let skip = parseInt(page - 1) * pageSize;
+      let locationId = req.user.locationId || 0; // locationId 
+      let cityId = req.user.cityId || 'N/A'; // cityId 
 
-      // getting the basket items
+      let startOfTheDay = moment().set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
 
-      let basketItemData = await pickerBoySalesOrderMappingctrl.viewOrderBasketInternal(pickerBoySalesOrderMappingId);
+      // getting the end of the day 
+      let endOfTheDay = moment().set({
+        h: 24,
+        m: 24,
+        s: 0,
+        millisecond: 0
+      }).toDate();
 
-      console.log('basketItemData', basketItemData);
+      //finding the total sales order records, which are already assigned to the pickerboy
 
-      // basket item data check 
-      if (basketItemData.success) {
-        //perform the invoice calculation
-
-        //calculating the total quantity supplied and demanded
-        await basketItemData.data[0].availableItemDetails.map((v, i) => {
-          totalQuantitySupplied = v.suppliedQty + totalQuantitySupplied
-          totalQuantityDemanded = v.quantity + totalQuantityDemanded
-        });
-
-
-        //calculating the discount and tax
-        for (let item of basketItemData.data[0].availableItemDetails) {
-          //calculating discount
-          console.log('item', item);
-          console.log('item.discountPercentage', item.discountPercentage);
-          console.log('item.salePrice', item.salePrice);
-          let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.salePrice).toFixed(2))
-          let discountForSupliedItem = discountForSingleItem * item.suppliedQty
-          totalDiscount = totalDiscount + discountForSupliedItem;
-
-          //calculating selling price after discount
-
-          let amountAfterDiscountForSingle = item.salePrice - discountForSingleItem;
-          let amountAfterDiscountForSuppliedItem = amountAfterDiscountForSingle * item.suppliedQty
-          totalAmount = totalAmount + amountAfterDiscountForSuppliedItem;
-
-          // calculating the tax amount 
-
-          let taxValueForSingleItem = parseFloat((amountAfterDiscountForSingle * item.taxPercentage / 100).toFixed(2))
-          let taxValueForSuppliedItem = taxValueForSingleItem * item.suppliedQty
-          totalTax = totalTax + taxValueForSuppliedItem;
-
-          //calculating net amount 
-          let netValueForSingleItem = discountForSingleItem - taxValueForSingleItem;
-          let netValueForSuppliedItem = netValueForSingleItem * item.suppliedQty
-          totalNetValue = totalNetValue + netValueForSuppliedItem;
-
-          //adding all the values in item object
-          item.discountForSingleItem = discountForSingleItem;
-          item.amountAfterDiscountForSingle = amountAfterDiscountForSingle;
-          item.taxValueForSingleItem = taxValueForSingleItem;
-          item.netValueForSingleItem = netValueForSingleItem;
-          console.log('item', item);
-
+      let assignedSalesOrderData = await Model.find({
+        'createdAt': {
+          '$gte': startOfTheDay,
+          '$lte': endOfTheDay
         }
-
-        basketItemData.data[0].totalQuantitySupplied = totalQuantitySupplied
-        basketItemData.data[0].totalQuantityDemanded = totalQuantityDemanded
-        basketItemData.data[0].totalAmount = totalAmount
-        basketItemData.data[0].totalTax = totalTax
-        basketItemData.data[0].totalDiscount = totalDiscount
-        basketItemData.data[0].totalNetValue = totalNetValue
-        // if basket data not exist 
+      }, { 'salesOrderId': 1 }).lean()
 
 
-        //adding the invoice details in DB
-
-        let dataToInsert = {
-          'invoiceDate': new Date(),
-          totalQuantitySupplied,
-          totalQuantityDemanded,
-          totalAmount,
-          totalTax,
-          totalDiscount,
-          totalNetValue,
-          'itemSupplied': basketItemData.data[0].availableItemDetails
-        }
-
-        // inserting data into the db 
-        let isInserted = await Model.create(dataToInsert);
-        // check if inserted 
-        if (isInserted && !_.isEmpty(isInserted)) {
-          info('Invoice Successfully Created !');
-
-          // creating a invoice and salesOrder Mapping
-          let invoiceSalesOrderMappingObject = {
-            pickerBoySalesOrderMappingId,
-            invoiceId: isInserted._id
-          }
-
-          // create asm salesman mapping
-          await AsmSalesmanMappingCtrl.create(req.body.asmSalesmanMappingObject, req.user);
-
-          // returning success
-          return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesmanCreated)
-        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesmanNotCreated);
-
-      } else {
-        error('Data not in DB');
-
+      if (assignedSalesOrderData && !_.isEmpty(assignedSalesOrderData)) {
+        assignedSalesOrderId = assignedSalesOrderData.map(data => data.salesOrderId)
       }
-      // success 
-      return this.success(req, res, this.status.HTTP_OK, basketItemData.data, this.messageTypes.salesOrderInsertInitiated);
 
+      //creating the object with query details to pass , in order to get the sales order details
+      let salesQueryDetails = {
+        page,
+        pageSize,
+        searchKey,
+        sortBy,
+        locationId,
+        cityId,
+        startOfTheDay,
+        endOfTheDay,
+        assignedSalesOrderId
+      }
+
+
+
+      // finding the  data from the db 
+      let salesOrderData = await SalesOrderCtrl.getSalesOrderDetails(salesQueryDetails);
+      // success
+      if (salesOrderData.success) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: salesOrderData.data,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: salesOrderData.total
+          }
+        }, this.messageTypes.toDoSalesOrderDetailsFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchToDoSalesOrderDetails);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  // get details 
+  getSalesOrder = async (req, res) => {
+    try {
+      info('SalesOrder GET DETAILS !');
+
+      // get the sale Order Details
+      let saleOrderDetails = req.body.saleOrderDetails;
+
+      // check if inserted 
+      if (saleOrderDetails && !_.isEmpty(saleOrderDetails)) return this.success(req, res, this.status.HTTP_OK, saleOrderDetails, this.messageTypes.salesOrderDetailsFetched);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+  // get details 
+  pickingState = async (req, res) => {
+    try {
+      info('Add SalesOrder in Picking state a !');
+
+      // get the sale Order Details
+      let saleOrderDetails = req.body.saleOrderDetails;
+
+      let dataToInsert = {
+        'salesOrderId': saleOrderDetails._id,
+        'pickerBoyId': req.user._id,
+        'createdBy': req.user.email
+      };
+
+      // inserting data into the db 
+      let isInserted = await Model.create(dataToInsert);
+
+      // check if inserted 
+      if (isInserted && !_.isEmpty(isInserted)) {
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesOrderAddedInPackingStage);
+      } else {
+        error('Error while adding in packing collection !');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotAddedInPackingStage);
+      }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+  // get details while scanning state
+  scanState = async (req, res) => {
+    try {
+      info('Get SalesOrder details after Picking state !');
+
+      // get the sale Order Details
+      let salesOrderData = await Model.aggregate([{
+        $match: {
+          '_id': mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId)
+        }
+      },
+      {
+        $lookup: {
+          from: 'salesorders',
+          let: {
+            'id': '$salesOrderId'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                // 'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$_id', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'invoiceNo': 1,
+                'onlineReferenceNo': 1,
+                'onlineChildReferenceNo': 1,
+                'customerId': 1,
+                'customerName': 1,
+                'customerType': 1,
+                'orderItems': 1,
+                'deliveryDate': 1,
+              }
+            }
+          ],
+          as: 'salesOrdersDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$salesOrdersDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          'pickerBoyId': 1,
+          'customerType': 1,
+          'salesOrderId': 1,
+          'salesOrdersDetails.deliveryDate': 1,
+          'salesOrdersDetails.invoiceNo': 1,
+          'salesOrdersDetails.onlineReferenceNo': 1,
+          'salesOrdersDetails.onlineChildReferenceNo': 1,
+          'salesOrdersDetails.customerId': 1,
+          'salesOrdersDetails.customerName': 1,
+          'salesOrdersDetails.customerType': 1,
+          'salesOrdersDetails.orderItems': 1,
+          'salesOrdersDetails.orderItems': 1,
+        }
+      }
+      ])
+
+      // check if inserted 
+      if (salesOrderData && !_.isEmpty(salesOrderData)) {
+        return this.success(req, res, this.status.HTTP_OK, salesOrderData, this.messageTypes.salesOrderDetailsFetched);
+      } else {
+        error('Error while getting the sales Order data after picking state !');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderDetailsNotFetched);
+      }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  // get details while scanning state
+  viewOrderBasket = async (req, res) => {
+    try {
+      info('View the Order Basket !');
+
+      // get the basket data
+      let salesOrderData = await Model.aggregate([{
+        $match: {
+          '_id': mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId)
+        }
+      },
+      {
+        $lookup: {
+          from: 'pickerboysalesorderitemsmappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                '$expr': {
+                  '$eq': ['$pickerBoySalesOrderMappingId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'itemName': 1,
+                'itemId': 1,
+                'quantity': 1,
+                'suppliedQty': 1
+              }
+            }
+          ],
+          as: 'availableItemDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'salesorders',
+          let: {
+            'id': '$salesOrderId'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                // 'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$_id', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'status': 1,
+                'onlineChildReferenceNo': 1,
+                'onlineReferenceNo': 1,
+                'orderItems': 1,
+                'otherChargesTaxInclusive': 1,
+                'customerType': 1,
+                'deliveryDate': 1,
+                'customerId': 1,
+              }
+            }
+          ],
+          as: 'salesOrdersDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$salesOrdersDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          'salesOrdersDetails.status': 1,
+          'salesOrdersDetails.onlineChildReferenceNo': 1,
+          'salesOrdersDetails.onlineReferenceNo': 1,
+          'salesOrdersDetails.orderItems': 1,
+          'salesOrdersDetails.otherChargesTaxInclusive': 1,
+          'salesOrdersDetails.customerType': 1,
+          'salesOrdersDetails.deliveryDate': 1,
+          'salesOrdersDetails.customerId': 1,
+          'pickerBoyId': 1,
+          'customerType': 1,
+          'salesOrderId': 1,
+          'availableItemDetails': 1
+        }
+      }
+      ])
+
+      // check if inserted 
+      if (salesOrderData && !_.isEmpty(salesOrderData)) {
+        return this.success(req, res, this.status.HTTP_OK, salesOrderData, this.messageTypes.salesOrderDetailsFetched);
+      } else {
+        error('Error while getting the sales Order data after picking state !');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderDetailsNotFetched);
+      }
       // catch any runtime error 
     } catch (err) {
       error(err);
@@ -605,7 +791,42 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
+  // Internal Function get customer details 
+  getDetails = (customerId) => {
+    try {
+      info('Get Customer details !');
 
+      // get details 
+      return Model.findOne({
+        _id: mongoose.Types.ObjectId(customerId),
+        dbStatus: 1,
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in Customer DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
 
   // get customer details 
   getCustomerDetails = async (req, res) => {
@@ -614,239 +835,17 @@ class areaSalesManagerController extends BaseController {
 
       // getting the data from request 
       let customerId = req.params.customerId;
+      let cityId = req.params.cityId;
 
-      // project data 
-      let fieldsToProject = {
-        'goFrugalId': 1,
-        'cityId': 1, // comparison field 
-        'name': 1,
-        'customerId': 1,
-        'mobile': 1,
-        'salesMan': 1,
-        'status': 1,
-        'type': 1,
-        'creditLimit': 1,
-        'dbStatus': 1,
-        'isDeleted': 1
+      let customerDataFromMicroService = await getCustomerDetails(customerId, cityId);
+      if (customerDataFromMicroService.success) {
+        // success
+        return this.success(req, res, this.status.HTTP_OK, customerDataFromMicroService.data, this.messageTypes.customerDetailsFetchedSuccessfully);
       }
-
-      // getting th data from the customer db
-      let customerList = await Model.aggregate([{
-        '$match': {
-          '_id': mongoose.Types.ObjectId(customerId),
-          'isDeleted': 0,
-          'dbStatus': 1
-        }
-      }, {
-        '$lookup': {
-          from: 'customersaccountmappings',
-          localField: '_id',
-          foreignField: 'customerId',
-          as: 'customerAccounts'
-        }
-      }, {
-        '$unwind': {
-          path: '$customerAccounts',
-          preserveNullAndEmptyArrays: true
-        }
-      }, {
-        '$lookup': {
-          from: 'draftbeatplancustomers',
-          let: {
-            'id': '$_id'
-          },
-          pipeline: [
-            {
-              $match: {
-                'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$customerId', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                'beatPlanId': 1,
-                'status': 1,
-                'isDeleted': 1,
-              }
-            }, {
-              $group: {
-                _id: '$beatPlanId'
-              }
-            }, {
-              '$lookup': {
-                from: 'draftbeatplans',
-                let: {
-                  'id': '$_id'
-                },
-                pipeline: [
-                  {
-                    $match: {
-                      'status': 1,
-                      'isDeleted': 0,
-                      '$expr': {
-                        '$eq': ['$_id', '$$id']
-                      }
-                    }
-                  }, {
-                    $project: {
-                      '_id': 1,
-                      'status': 1,
-                      'isDeleted': 1,
-                    }
-                  }, {
-                    '$lookup': {
-                      from: 'draftbeatplansalesmanmappings',
-                      let: {
-                        'id': '$_id'
-                      },
-                      pipeline: [
-                        {
-                          $match: {
-                            'status': 1,
-                            'isDeleted': 0,
-                            '$expr': {
-                              '$eq': ['$beatPlanId', '$$id']
-                            }
-                          }
-                        }, {
-                          $project: {
-                            'salesmanId': 1,
-                            'status': 1,
-                            'isDeleted': 1,
-                          }
-                        }, {
-                          '$lookup': {
-                            from: 'salesmanagers',
-                            let: {
-                              'id': '$salesmanId'
-                            },
-                            pipeline: [
-                              {
-                                $match: {
-                                  'status': 1,
-                                  'isDeleted': 0,
-                                  '$expr': {
-                                    '$eq': ['$_id', '$$id']
-                                  }
-                                }
-                              }, {
-                                $project: {
-                                  'employerName': 1,
-                                  'employeeId': 1,
-                                  'isWaycoolEmp': 1,
-                                  'fullName': 1,
-                                  'email': 1,
-                                  'contactMobile': 1,
-                                  'profilePic': 1,
-                                  'status': 1,
-                                  'isDeleted': 1,
-                                }
-                              }, {
-                                '$lookup': {
-                                  from: 'asmsalesmanmappings',
-                                  let: {
-                                    'id': '$_id'
-                                  },
-                                  pipeline: [
-                                    {
-                                      $match: {
-                                        'status': 1,
-                                        'isDeleted': 0,
-                                        '$expr': {
-                                          '$eq': ['$salesmanId', '$$id']
-                                        }
-                                      }
-                                    }, {
-                                      $project: {
-                                        'asmId': 1,
-                                        'salesmanId': 1,
-                                        'status': 1,
-                                        'isDeleted': 1,
-                                      }
-                                    }, {
-                                      '$lookup': {
-                                        from: 'areasalesmanagers',
-                                        let: {
-                                          'id': '$asmId'
-                                        },
-                                        pipeline: [
-                                          {
-                                            $match: {
-                                              'status': 1,
-                                              'isDeleted': 0,
-                                              '$expr': {
-                                                '$eq': ['$_id', '$$id']
-                                              }
-                                            }
-                                          }, {
-                                            $project: {
-                                              'profilePic': 1,
-                                              'employeeId': 1,
-                                              'fullName': 1,
-                                              'status': 1,
-                                              'isDeleted': 1,
-                                            }
-                                          }
-                                        ],
-                                        as: 'asm'
-                                      }
-                                    }, {
-                                      '$unwind': {
-                                        path: '$asm',
-                                        preserveNullAndEmptyArrays: true
-                                      }
-                                    }
-                                  ],
-                                  as: 'asmMapping'
-                                }
-                              }, {
-                                '$unwind': {
-                                  path: '$asmMapping',
-                                  preserveNullAndEmptyArrays: true
-                                }
-                              }
-                            ],
-                            as: 'salesman'
-                          }
-                        }, {
-                          '$unwind': {
-                            path: '$salesman',
-                            preserveNullAndEmptyArrays: true
-                          }
-                        }
-                      ],
-                      as: 'salesman'
-                    }
-                  }, {
-                    '$unwind': {
-                      path: '$salesman',
-                      preserveNullAndEmptyArrays: true
-                    }
-                  }
-                ],
-                as: 'beatPlan'
-              }
-            }, {
-              '$unwind': {
-                path: '$beatPlan',
-                preserveNullAndEmptyArrays: true
-              }
-            }, {
-              $match: {
-                'beatPlan.status': {
-                  $exists: true
-                }
-              }
-            }
-          ],
-          as: 'beatPlans',
-        }
-      }]).allowDiskUse(true);
-
-      // success
-      return this.success(req, res, this.status.HTTP_OK, customerList[0], this.messageTypes.customerDetailsFetched);
+      else {
+        error('Unable to fetch Customer Details!');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedCustomerDetails);
+      }
 
       // catch any runtime error
     } catch (err) {
@@ -897,23 +896,6 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  // get the minified list 
-  getMinifiedListOld = async (req, res) => {
-    try {
-      info('Get the Customer List !');
-
-      // get all the valid customers 
-      let customerList = await CustomerAccountsCtrl.getMinifiedList(req);
-
-      // success
-      return this.success(req, res, this.status.HTTP_OK, customerList, this.messageTypes.customerDetailsFetched);
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
 
   // get the minified list 
   getMinifiedList = async (req, res) => {

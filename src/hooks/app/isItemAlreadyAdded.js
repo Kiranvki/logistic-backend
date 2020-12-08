@@ -31,7 +31,7 @@ module.exports = async (req, res, next) => {
                 next();
             } else {
                 error('Item already added!');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.salesOrderIdInvalidEitherDeletedOrDeactivated);
+                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.itemAlreadyAdded);
             }
         } else {
             error('The SaleOrder ID is Invalid !');
