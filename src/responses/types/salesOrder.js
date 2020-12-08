@@ -16,4 +16,9 @@ module.exports = {
     customerDetailsFetchedSuccessfully: 'Customer Details Fetched Successfully !',
     unableToFetchedCustomerDetails: 'Unable to fetch Customer Details!',
     itemAlreadyAdded: 'Item Already Added after Scan!',
+    //picker sales order mapping id
+
+    invalidPickerBoySalesOrderMappingId: 'The Picker Boy Sales Order Mapping Id is Invalid !',
+    pickerBoySalesOrderIdInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id is either deleted or deactivated !',
+
 };

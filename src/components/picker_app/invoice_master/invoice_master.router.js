@@ -17,9 +17,7 @@ const {
 
 // hooks 
 const {
-  setupDataForGoFrugalApi, // setup the gofrugal api
-  getTheDetailsFromGoFrugal, // get the details from go frugal
-
+  isInvoiceGenerated, // check whether the invoice is already generated
   // isValidCustomer, // check whether the customer is valid or not 
   // setupDataForTallyOtherApi, // setup data for tally api
   // readCsvForCustomerDataSync, // read tally csv data for customer data sync 
@@ -28,12 +26,17 @@ const {
   // getTheOtherDetailsFromTallyServer, // get the details from the tally server 
   // checkWhetherCustomerListIsAlreadySyncing, // check whether customer list is already syncing 
   // getAllTheInvoicesAndRefreshAsPerThePaymentReceived, // get all invoices and refresh as per the payment received
-} = require('../../../hooks');
+} = require('../../../hooks/app');
 
 // auth 
 const {
   verifyUserToken
 } = require('../../../hooks/Auth');
+
+// auth 
+const {
+  verifyAppToken
+} = require('../../../hooks/app/Auth');
 
 // exporting the user routes 
 function userRoutes() {
@@ -43,6 +46,8 @@ function userRoutes() {
     // generating invoice
     closed.route('/invoice/:pickerBoySalesOrderMappingId').get(
       ///  [joiGoFrugalSync], // joi validation
+      isInvoiceGenerated, // check whether the invoice is already generated
+      verifyAppToken, // verify app user token 
       ctrl.generateInvoice // post controller 
     );
 

@@ -1,6 +1,7 @@
 // controllers 
 //const SalesOrderSyncCtrl = require('../sales_order_sync/sales_order_sync.controller');
 const pickerBoySalesOrderMappingctrl = require('../pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
+const invoicePickerBoySalesOrderMappingctrl = require('../invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller');
 
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
@@ -320,14 +321,19 @@ class areaSalesManagerController extends BaseController {
         if (isInserted && !_.isEmpty(isInserted)) {
           info('Invoice Successfully Created !');
 
-          // creating a invoice and salesOrder Mapping
+          // creating a invoice and picker salesOrder Mapping
           let invoiceSalesOrderMappingObject = {
             pickerBoySalesOrderMappingId,
-            invoiceId: isInserted._id
+            invoiceId: isInserted._id,
+            createdBy: req.user.email
           }
 
-          // create asm salesman mapping
-          await AsmSalesmanMappingCtrl.create(req.body.asmSalesmanMappingObject, req.user);
+          // create invoice and pickersalesorder mapping
+          await invoicePickerBoySalesOrderMappingctrl.create(invoiceSalesOrderMappingObject);
+
+          //changing the state of pickerboy salesorder maaping id to the generate invoice state
+
+          await pickerBoySalesOrderMappingctrl.changeStateToInvoiceGenerated(pickerBoySalesOrderMappingId)
 
           // returning success
           return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesmanCreated)

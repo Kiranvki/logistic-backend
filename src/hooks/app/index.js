@@ -13,4 +13,5 @@ module.exports = {
   isValidPickerBoy: require('./isValidPickerBoy'),
   isValidSalesOrder: require('./isValidSalesOrder'),
   isItemAlreadyAdded: require('./isItemAlreadyAdded'),
+  isInvoiceGenerated: require('./isInvoiceGenerated'), //check whether the invoice is already generated
 }
