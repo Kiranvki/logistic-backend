@@ -1,6 +1,5 @@
 // user controller 
 const ctrl = require('./invoice_master.controller');
-
 // library
 const multer = require('multer');
 const multipartMiddleware = multer();
@@ -41,12 +40,10 @@ function userRoutes() {
   //open, closed
   return (open, closed) => {
 
-    // sync with goFrugal  
-    open.route('/goFrugal/sync/city/:city').get(
-      [joiGoFrugalSync], // joi validation
-      setupDataForGoFrugalApi, // setup data for gofrugal
-      getTheDetailsFromGoFrugal, // get the data from go frugal 
-      ctrl.syncWithGoFrugal // get controller 
+    // generating invoice
+    closed.route('/invoice/:pickerBoySalesOrderMappingId').get(
+      ///  [joiGoFrugalSync], // joi validation
+      ctrl.generateInvoice // post controller 
     );
 
     /*

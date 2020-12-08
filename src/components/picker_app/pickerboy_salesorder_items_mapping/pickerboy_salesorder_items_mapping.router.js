@@ -7,6 +7,7 @@ const multipartMiddleware = multer();
 
 // custom joi validation
 const {
+  joiAddItem, //joi add item
   joiTallySync, // joi tally sync
   joiTallyUpload, // joi tally upload 
   joiCustomerGet, // joi customer get 
@@ -18,7 +19,9 @@ const {
 
 // hooks 
 const {
-  isValidSalesOrder    // check is valid sales order id 
+  isValidSalesOrder, //
+  isItemAlreadyAdded, //check whether the item is already added or not
+  // check is valid sales order id 
   // isValidCustomer, // check whether the customer is valid or not 
   // setupDataForTallyOtherApi, // setup data for tally api
   // readCsvForCustomerDataSync, // read tally csv data for customer data sync 
@@ -47,8 +50,9 @@ function userRoutes() {
 
     // add the salesorder in the packing stage
     closed.route('/sales-order/add-item/:pickerBoySalesOrderMappingId').patch(
+      [joiAddItem],
+      isItemAlreadyAdded, // check whether the item is already added
       verifyAppToken,
-      //   isValidSalesOrder,
       ctrl.addItems // get controller 
     );
 

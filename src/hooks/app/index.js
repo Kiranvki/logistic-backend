@@ -11,5 +11,6 @@ module.exports = {
   generateMonthDaysAndOtherMetaData: require('./generateMonthDaysAndOtherMetaData'),
   getAllAppUserWhoAreNotCheckedOut: require('./getAllAppUserWhoAreNotCheckedOut'),
   isValidPickerBoy: require('./isValidPickerBoy'),
-  isValidSalesOrder: require('./isValidSalesOrder')
+  isValidSalesOrder: require('./isValidSalesOrder'),
+  isItemAlreadyAdded: require('./isItemAlreadyAdded'),
 }

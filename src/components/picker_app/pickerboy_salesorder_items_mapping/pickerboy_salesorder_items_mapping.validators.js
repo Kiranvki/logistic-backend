@@ -34,7 +34,7 @@ const schemas = {
         }
       }
     }).required(),
-    contactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').options({
+    contactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('itemId').options({
       language: {
         string: {
           regex: {
@@ -86,14 +86,22 @@ const schemas = {
   }),
 
   // joi get customer other details 
-  joiGetCustomerOther: Joi.object().keys({
+  joiAddItem: Joi.object().keys({
     params: {
-      customerId: Joi.string().trim().label('Customer Id').required(),
-      type: Joi.string().trim().label('Type').required().valid(['payment', 'invoice', 'debit', 'credit']),
+      pickerBoySalesOrderMappingId: Joi.string().trim().label('PickerBoy SalesOrder Mapping Id').required(),
     },
-    query: {
-      search: Joi.string().trim().label('Search').optional().allow('')
-    }
+    body: Joi.object({
+      itemId: Joi.number().integer().label('itemId').required(),
+      itemName: Joi.string().trim().label('itemName').required(),
+      salePrice: Joi.number().integer().label('salePrice').required(),
+      quantity: Joi.number().integer().label('quantity').required(),
+      suppliedQty: Joi.number().integer().label('suppliedQty').required(),
+      itemAmount: Joi.number().integer().label('itemAmount').required(),
+      taxPercentage: Joi.number().integer().label('taxPercentage').required(),
+      discountPercentage: Joi.number().integer().label('discountPercentage').required(),
+      freeQty: Joi.number().integer().label('freeQty').required(),
+
+    }).min(1)
   }),
 
   // joi invoice payment refresh  
@@ -228,9 +236,9 @@ module.exports = {
   },
 
   // joi get customer other 
-  joiGetCustomerOther: (req, res, next) => {
+  joiAddItem: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiGetCustomerOther;
+    let schema = schemas.joiAddItem;
     let option = options.basic;
 
     // validating the schema 

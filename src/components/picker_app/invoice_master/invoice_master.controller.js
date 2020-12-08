@@ -1,5 +1,6 @@
 // controllers 
 //const SalesOrderSyncCtrl = require('../sales_order_sync/sales_order_sync.controller');
+const pickerBoySalesOrderMappingctrl = require('../pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
 
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
@@ -226,34 +227,80 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  // create a new entry
-  syncWithGoFrugal = async (req, res) => {
+  // generating a invoice here
+  generateInvoice = async (req, res) => {
     try {
-      info('Creating Sales Order  Data !');
-      let city = req.params.city || req.body.city; // city 
-      let errors = [];
-      let salesOrderList = req.body.salesOrderList;
-      // inserting data into the db 
+      info('Genarating Invoice !');
+      let totalQuantityDemanded = 0,
+        totalQuantitySupplied = 0,
+        totalAmount = 0,
+        totalTax = 0,
+        totalDiscount = 0,
+        totalNetValue = 0;
+      let pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || req.body.pickerBoySalesOrderMappingId; // pickerBoySalesOrderMappingId 
 
-      await Model.create(salesOrderList)
-        .catch((err) => {
-          error(`ERROR OCCURED FOR CITY - ${city},  ERROR - ${err}`);
-          errors.push({
-            city: city,
-            error: err
-          })
+      // getting the basket items
+
+      let basketItemData = await pickerBoySalesOrderMappingctrl.viewOrderBasketInternal(pickerBoySalesOrderMappingId);
+
+      console.log('basketItemData', basketItemData);
+
+      // basket item data check 
+      if (basketItemData.success) {
+        //perform the invoice calculation
+
+        //calculating the total quantity supplied and demanded
+        await basketItemData.data[0].availableItemDetails.map((v, i) => {
+          totalQuantitySupplied = v.suppliedQty + totalQuantitySupplied
+          totalQuantityDemanded = v.quantity + totalQuantityDemanded
         });
 
 
-      // go frugal sync
-      req.cronLogger.info(`SALES ORDER GO FRUGAL SYNC | ${new Date()} | CITY - ${city} | TOTAL COUNT - ${req.body.salesOrderList.length} | ERROR - ${errors.length} | ${JSON.stringify(errors)} !`);
+        //calculating the discount and tax
+        for (let item of basketItemData.data[0].availableItemDetails) {
+          //calculating discount
+          console.log('item', item);
+          console.log('item.discountPercentage', item.discountPercentage);
+          console.log('item.salePrice', item.salePrice);
+          let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.salePrice).toFixed(2))
+          let discountForSupliedItem = discountForSingleItem * item.suppliedQty
+          totalDiscount = totalDiscount + discountForSupliedItem;
 
+          //calculating selling price after discount
 
-      // mark sales order sync completed 
-      await SalesOrderSyncCtrl.markSalesOrderSyncSuccess(city);
+          let amountAfterDiscountForSingle = item.salePrice - discountForSingleItem;
+          let amountAfterDiscountForSuppliedItem = amountAfterDiscountForSingle * item.suppliedQty
+          totalAmount = totalAmount + amountAfterDiscountForSuppliedItem;
 
+          // calculating the tax amount 
+
+          let taxValueForSingleItem = parseFloat((amountAfterDiscountForSingle * item.taxPercentage / 100).toFixed(2))
+          let taxValueForSuppliedItem = taxValueForSingleItem * item.suppliedQty
+          totalTax = totalTax + taxValueForSuppliedItem;
+
+          //calculating net amount 
+          let netValueForSingleItem = discountForSingleItem - taxValueForSingleItem;
+          let netValueForSuppliedItem = netValueForSingleItem * item.suppliedQty
+          totalNetValue = totalNetValue + netValueForSuppliedItem;
+
+          //adding all the values in item object
+          item.discountForSingleItem = discountForSingleItem;
+          item.amountAfterDiscountForSingle = amountAfterDiscountForSingle;
+          item.taxValueForSingleItem = taxValueForSingleItem;
+          item.netValueForSingleItem = netValueForSingleItem;
+          console.log('item', item);
+
+        }
+
+        basketItemData.data[0].totalQuantitySupplied = totalQuantitySupplied
+        basketItemData.data[0].totalQuantityDemanded = totalQuantityDemanded
+        // if basket data not exist 
+      } else {
+        error('Data not in DB');
+
+      }
       // success 
-      return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.salesOrderInsertInitiated);
+      return this.success(req, res, this.status.HTTP_OK, basketItemData.data, this.messageTypes.salesOrderInsertInitiated);
 
       // catch any runtime error 
     } catch (err) {

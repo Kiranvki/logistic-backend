@@ -3,13 +3,6 @@ const SalesOrderCtrl = require('../../sales_order/sales_order/sales_order.contro
 const PockerBoyCtrl = require('../../employee/picker_boy/picker_boy.controller');
 const AttendanceCtrl = require('../onBoard/app_picker_user_attendance/app_picker_user_attendance.controller');
 
-// const CustomerPaymentCtrl = require('../customers_payment_mapping/customers_payment_mapping.controller');
-// const CustomerInvoiceCtrl = require('../customers_invoice_mapping/customers_invoice_mapping.controller');
-// const CustomerDebitNoteCtrl = require('../customers_debit_mapping/customers_debit_mapping.controller');
-// const CustomerCreditNoteCtrl = require('../customers_credit_mapping/customers_credit_mapping.controller');
-// const CustomerAccountsCtrl = require('../customers_account_mapping/customers_account_mapping.controller');
-// const DraftSalesmanCtrl = require('../../beat_plan/draft_day_customers/draft_day_customers.controller');
-
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 const Model = require('./models/pickerboy_salesorder_mapping.model');
@@ -48,7 +41,119 @@ class areaSalesManagerController extends BaseController {
     this.messageTypes = this.messageTypes.salesOrder;
   }
 
+  // internal function to get the basket items details
+  viewOrderBasketInternal = async (pickerBoySalesOrderMappingId) => {
+    try {
+      info('Internal funct to View the Order Basket !');
 
+      // get the basket data
+      let salesOrderData = await Model.aggregate([{
+        $match: {
+          '_id': mongoose.Types.ObjectId(pickerBoySalesOrderMappingId)
+        }
+      },
+      {
+        $lookup: {
+          from: 'pickerboysalesorderitemsmappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                '$expr': {
+                  '$eq': ['$pickerBoySalesOrderMappingId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'itemName': 1,
+                'itemId': 1,
+                'quantity': 1,
+                'suppliedQty': 1
+
+              }
+            }
+          ],
+          as: 'availableItemDetails'
+        }
+      },
+      {
+        $lookup: {
+          from: 'salesorders',
+          let: {
+            'id': '$salesOrderId'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                // 'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$_id', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'status': 1,
+                'onlineChildReferenceNo': 1,
+                'onlineReferenceNo': 1,
+                'orderItems': 1,
+                'otherChargesTaxInclusive': 1,
+                'customerType': 1,
+                'deliveryDate': 1,
+                'customerId': 1,
+              }
+            }
+          ],
+          as: 'salesOrdersDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$salesOrdersDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          'salesOrdersDetails.status': 1,
+          'salesOrdersDetails.onlineChildReferenceNo': 1,
+          'salesOrdersDetails.onlineReferenceNo': 1,
+          'salesOrdersDetails.orderItems': 1,
+          'salesOrdersDetails.otherChargesTaxInclusive': 1,
+          'salesOrdersDetails.customerType': 1,
+          'salesOrdersDetails.deliveryDate': 1,
+          'salesOrdersDetails.customerId': 1,
+          'pickerBoyId': 1,
+          'customerType': 1,
+          'salesOrderId': 1,
+          'availableItemDetails': 1
+        }
+      }
+      ])
+
+      // check if inserted 
+      if (salesOrderData && !_.isEmpty(salesOrderData)) {
+        return {
+          success: true,
+          data: salesOrderData
+        }
+      } else {
+        error('Error Searching Data in SO DB!');
+        return {
+          success: false,
+        }
+      }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
   // do something 
   getUserDetails = async (req, res) => {
     try {
@@ -348,8 +453,8 @@ class areaSalesManagerController extends BaseController {
               $project: {
                 'itemName': 1,
                 'itemId': 1,
-                'quantity': 1
-
+                'quantity': 1,
+                'suppliedQty': 1
               }
             }
           ],

@@ -37,7 +37,7 @@ class timeout {
 }
 
 // getting the model 
-class areaSalesManagerController extends BaseController {
+class pickerSalesOrderMappingController extends BaseController {
   // constructor 
   constructor() {
     super();
@@ -493,6 +493,43 @@ class areaSalesManagerController extends BaseController {
           }
         } else {
           error('Error Searching Data in Customer DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  // Internal Function get customer details 
+  getAddedItemDetails = (pickerBoySalesOrderMappingId, itemId) => {
+    try {
+      info('Get Added Item details !');
+
+      // get details 
+      return Model.findOne({
+        pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
+        itemId: itemId,
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching item in PickerBoy Item SalesOrder Mapping DB!');
           return {
             success: false
           }
@@ -1476,4 +1513,4 @@ class areaSalesManagerController extends BaseController {
 }
 
 // exporting the modules 
-module.exports = new areaSalesManagerController();
+module.exports = new pickerSalesOrderMappingController();
