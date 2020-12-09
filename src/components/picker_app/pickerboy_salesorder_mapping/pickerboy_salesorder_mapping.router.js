@@ -8,7 +8,7 @@ const multipartMiddleware = multer();
 // custom joi validation
 const {
   joiCustomerGetDetails, //joi get customer details
-  joiTallySync, // joi tally sync
+  joiStartPickSalesOrder, // joi start pick sales order
   joiTallyUpload, // joi tally upload 
   joiCustomerGet, // joi customer get 
   joiGoFrugalSync, // sync data with gofrugal 
@@ -19,15 +19,8 @@ const {
 
 // hooks 
 const {
-  isValidSalesOrder    // check is valid sales order id 
-  // isValidCustomer, // check whether the customer is valid or not 
-  // setupDataForTallyOtherApi, // setup data for tally api
-  // readCsvForCustomerDataSync, // read tally csv data for customer data sync 
-  // getCustomerIdsBasedOnFiltering, // get the customer ids based on filtering 
-  // getTheCustomerDetailsAsPerType, // get the customer details as per the type 
-  // getTheOtherDetailsFromTallyServer, // get the details from the tally server 
-  // checkWhetherCustomerListIsAlreadySyncing, // check whether customer list is already syncing 
-  // getAllTheInvoicesAndRefreshAsPerThePaymentReceived, // get all invoices and refresh as per the payment received
+  isValidSalesOrder,  // check is valid sales order id 
+  isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
 } = require('../../../hooks/app');
 
 // auth 
@@ -74,8 +67,10 @@ function userRoutes() {
 
     // add the salesorder in the packing stage
     closed.route('/sales-order/start-pick/:saleOrderId').patch(
-      verifyAppToken,
-      isValidSalesOrder,
+      [joiStartPickSalesOrder], // joi validation
+      verifyAppToken,  // verify app token
+      isValidSalesOrder, //check whether the valid salesOrder Id
+      isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
       ctrl.pickingState // get controller 
     );
 

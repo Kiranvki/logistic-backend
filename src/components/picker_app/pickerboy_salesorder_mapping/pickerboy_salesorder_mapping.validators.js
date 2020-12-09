@@ -68,9 +68,9 @@ const schemas = {
     }
   }),
 
-  // joi get customer details
-  joiCustomerGet: Joi.object().keys({
-    customerId: Joi.string().trim().label('Customer Id').required(),
+  // joi start pick salesorder
+  joiStartPickSalesOrder: Joi.object().keys({
+    saleOrderId: Joi.string().trim().label('SaleOrder Id').required(),
   }),
 
   // joi tally sync 
@@ -192,9 +192,9 @@ module.exports = {
   },
 
   // joi customer get 
-  joiCustomerGet: (req, res, next) => {
+  joiStartPickSalesOrder: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiCustomerGet;
+    let schema = schemas.joiStartPickSalesOrder;
     let option = options.basic;
 
     // validating the schema 

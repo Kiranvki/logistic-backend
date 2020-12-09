@@ -785,55 +785,7 @@ class pickerboySalesOrderMappingController extends BaseController {
     }
   }
 
-  // internal function
-  getAllCustomersWithCityName = async (city) => {
-    try {
-      info('Get the Customer List ! for ', city);
 
-      // project data 
-      let dataToProject = {
-        'goFrugalId': 1,
-        'cityId': 1,
-        'name': 1,
-        'customerId': 1,
-        'mobile': 1,
-        'email': 1,
-        'salesMan': 1,
-        'salesManCode': 1,
-        'salesManMobile': 1,
-        'status': 1,
-        'type': 1,
-        'dbStatus': 1,
-        'isDeleted': 1
-      }
-
-      // search object
-      let searchObject = { 'cityId': city, 'isDeleted': 0 };
-
-      // getting th data from the customer db
-      let customerList = await Model.aggregate([{
-        '$project': dataToProject
-      }, {
-        '$match': {
-          ...searchObject
-        }
-      }]).allowDiskUse(true);
-
-      // success
-      return {
-        success: true,
-        data: customerList
-      };
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
-      }
-    }
-  }
 
   // Internal Function get pickerboy sales order mapping details
   getDetails = (pickerBoySalesOrderMappingId) => {
@@ -852,6 +804,45 @@ class pickerboySalesOrderMappingController extends BaseController {
           }
         } else {
           error('Error Searching Data in PickerBoy SalesOrder Mapping DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
+  // Internal Function get  sales order  details
+  getSalesOrderDetails = (saleOrderId) => {
+    try {
+      info('Get SalesOrder  Details !');
+
+      // get details 
+      return Model.findOne({
+        salesOrderId: mongoose.Types.ObjectId(saleOrderId),
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching sales order in PickerBoy SalesOrder Mapping DB!');
           return {
             success: false
           }

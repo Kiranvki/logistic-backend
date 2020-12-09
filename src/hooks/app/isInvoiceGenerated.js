@@ -1,5 +1,5 @@
 // Controller
-const pickerSalesOrderMappingCtrl = require('../../components/picker_app/pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
+const invoicePickerSalesOrderMappingCtrl = require('../../components/picker_app/invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller');
 const invoiceCtrl = require('../../components/picker_app/invoice_master/invoice_master.controller');
 
 // Responses & others utils 
@@ -34,7 +34,7 @@ module.exports = async (req, res, next) => {
 
                     //get the invoice data and respond
 
-                    //   await   invoiceCtrl
+                    let invoicePickerSO = await invoicePickerSalesOrderMappingCtrl.getInvoiceDetails(pickerBoySalesOrderMappingId)
 
                 } else {
                     req.body.pickerBoySalesOrderMappingDetails = isValidPickerSalesOrderId.data

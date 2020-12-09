@@ -73,6 +73,56 @@ class areaSalesManagerController extends BaseController {
       }
     }
   }
+
+
+
+  // Internal Function to get the invoice details
+  getInvoiceDetails = async (pickerBoySalesOrderMappingId) => {
+    try {
+      info('Get the Invoice  Details !');
+
+      let invoiceData = await Model.aggregate([{
+        $match: {
+          'pickerBoySalesOrderMappingId': mongoose.Types.ObjectId(pickerBoySalesOrderMappingId)
+        }
+      },
+      {
+        $project: {
+          'invoiceId': 1
+        }
+      },
+      {
+        $lookup: {
+          from: 'invoicemasters',
+          localField: "invoiceId",
+          foreignField: "_id",
+          as: 'invoiceDetails'
+        }
+      },
+      ])
+
+      // check if inserted 
+      if (invoiceData && !_.isEmpty(invoiceData)) {
+        return {
+          success: true,
+          data: data
+        }
+      } else {
+        error('Error while getting the invoice data from pickerboy salesorder mapping id !');
+        return {
+          success: false
+        }
+      }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
 }
 
 // exporting the modules 

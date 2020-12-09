@@ -17,7 +17,7 @@ module.exports = {
     unableToFetchedCustomerDetails: 'Unable to fetch Customer Details!',
     itemAlreadyAdded: 'Item Already Added after Scan!',
     //picker sales order mapping id
-
+    salesOrderAlreadyAddedInPickerState: 'Sales Order  Already Added in Picker State!',
     invalidPickerBoySalesOrderMappingId: 'The Picker Boy Sales Order Mapping Id is Invalid !',
     pickerBoySalesOrderIdInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id is either deleted or deactivated !',
 
