@@ -41,6 +41,87 @@ class pickerboySalesOrderMappingController extends BaseController {
     this.messageTypes = this.messageTypes.salesOrder;
   }
 
+  // do something 
+  getUserDetails = async (req, res) => {
+    try {
+      info('Get Picker Boy Details !');
+      let date = new Date();
+      let endOfTheDay = moment(date).set({
+        h: 24,
+        m: 59,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+      let startOfTheDay = moment(date).set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // inserting the new user into the db
+      let pickerBoyDetails = await PockerBoyCtrl.getPickerBoyFullDetails(req.user._id);
+
+      // is inserted 
+      if (pickerBoyDetails.success && !_.isEmpty(pickerBoyDetails.data)) {
+        // fetch the attendance 
+        let attendanceDetails = await AttendanceCtrl.getAttendanceDetailsForADay(req.user._id, startOfTheDay, endOfTheDay)
+          .then((data) => {
+            if (data.success) {
+              let totalWorkingInMins = 0;
+              // get the total working in mins 
+              if (data.data.attendanceLog && data.data.attendanceLog.length)
+                totalWorkingInMins = _.sumBy(data.data.attendanceLog, 'totalWorkingInMins')
+              return {
+                isFirstCheckedIn: data.data.attendanceLog ? data.data.attendanceLog.length ? 1 : 0 : 0,
+                attendanceLog: data.data.attendanceLog ? data.data.attendanceLog.length ? data.data.attendanceLog[data.data.attendanceLog.length - 1] : [] : [],
+                totalWorkingInMinsTillLastCheckOut: totalWorkingInMins
+              }
+            } else return {
+              isFirstCheckedIn: 0,
+              attendanceLog: {},
+              totalWorkingInMinsTillLastCheckOut: 0
+            };
+          });
+
+        // success response 
+        return this.success(req, res, this.status.HTTP_OK, {
+          ...pickerBoyDetails.data,
+          attendanceDetails: attendanceDetails
+        }, this.messageTypes.userDetailsFetchedSuccessfully);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+  // get customer details 
+  getCustomerDetails = async (req, res) => {
+    try {
+      info('Get the Customer List !');
+
+      // getting the data from request 
+      let customerId = req.params.customerId;
+      let cityId = req.params.cityId;
+
+      let customerDataFromMicroService = await getCustomerDetails(customerId, cityId);
+      if (customerDataFromMicroService.success) {
+        // success
+        return this.success(req, res, this.status.HTTP_OK, customerDataFromMicroService.data, this.messageTypes.customerDetailsFetchedSuccessfully);
+      }
+      else {
+        error('Unable to fetch Customer Details!');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedCustomerDetails);
+      }
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
   // internal function to get the basket items details
   viewOrderBasketInternal = async (pickerBoySalesOrderMappingId) => {
     try {
@@ -157,62 +238,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       }
     }
   }
-  // do something 
-  getUserDetails = async (req, res) => {
-    try {
-      info('Get Picker Boy Details !');
-      let date = new Date();
-      let endOfTheDay = moment(date).set({
-        h: 24,
-        m: 59,
-        s: 0,
-        millisecond: 0
-      }).toDate();
-      let startOfTheDay = moment(date).set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0
-      }).toDate();
 
-      // inserting the new user into the db
-      let pickerBoyDetails = await PockerBoyCtrl.getPickerBoyFullDetails(req.user._id);
-
-      // is inserted 
-      if (pickerBoyDetails.success && !_.isEmpty(pickerBoyDetails.data)) {
-        // fetch the attendance 
-        let attendanceDetails = await AttendanceCtrl.getAttendanceDetailsForADay(req.user._id, startOfTheDay, endOfTheDay)
-          .then((data) => {
-            if (data.success) {
-              let totalWorkingInMins = 0;
-              // get the total working in mins 
-              if (data.data.attendanceLog && data.data.attendanceLog.length)
-                totalWorkingInMins = _.sumBy(data.data.attendanceLog, 'totalWorkingInMins')
-              return {
-                isFirstCheckedIn: data.data.attendanceLog ? data.data.attendanceLog.length ? 1 : 0 : 0,
-                attendanceLog: data.data.attendanceLog ? data.data.attendanceLog.length ? data.data.attendanceLog[data.data.attendanceLog.length - 1] : [] : [],
-                totalWorkingInMinsTillLastCheckOut: totalWorkingInMins
-              }
-            } else return {
-              isFirstCheckedIn: 0,
-              attendanceLog: {},
-              totalWorkingInMinsTillLastCheckOut: 0
-            };
-          });
-
-        // success response 
-        return this.success(req, res, this.status.HTTP_OK, {
-          ...pickerBoyDetails.data,
-          attendanceDetails: attendanceDetails
-        }, this.messageTypes.userDetailsFetchedSuccessfully);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
 
 
 
@@ -577,216 +603,6 @@ class pickerboySalesOrderMappingController extends BaseController {
     }
   }
 
-  // get Customer list 
-  getList = async (req, res) => {
-    try {
-      info('Get the Customer List !');
-
-      // getting the data from request 
-      let page = req.query.page || 1,
-        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        city = req.params.city,
-        searchKey = req.query.search || '',
-        isFilterApplicable = req.body.isFilterApplicable,
-        validCustomerIds = req.body.validCustomerIds,
-        sortBy = req.query.sortBy || 'createdAt',
-        sortingArray = {},
-        customerType = process.env.customerType || 'GENERAL TRADE';
-
-      sortingArray[sortBy] = 1;
-      let skip = parseInt(page - 1) * pageSize;
-
-      // project data 
-      let fieldsToProject = {
-        'goFrugalId': 1,
-        'cityId': 1, // comparison field 
-        'name': 1,
-        'customerId': 1,
-        'mobile': 1,
-        'salesMan': 1,
-        'status': 1,
-        'type': 1,
-        'creditLimit': 1,
-        'dbStatus': 1,
-        'createdAt': 1,
-        'isDeleted': 1,
-        'email': 1
-      }
-
-      let searchObject = {
-        'cityId': city,
-        // 'type': customerType,
-        'isDeleted': 0
-      };
-
-      // creating a match object
-      if (searchKey !== '' && isNaN(searchKey)) {
-        searchObject = {
-          ...searchObject,
-          '$or': [{
-            'name': {
-              $regex: searchKey,
-              $options: 'is'
-            }
-          }
-            // , {
-            //   'email': {
-            //     $regex: searchKey,
-            //     $options: 'is'
-            //   }
-            // }
-          ]
-        };
-      } else if (searchKey !== '' && !isNaN(searchKey)) {
-        searchObject = {
-          ...searchObject,
-          '$or': [{
-            'goFrugalId': parseInt(searchKey)
-          }]
-        };
-      }
-      // if filter is applicable 
-      if (isFilterApplicable) {
-        searchObject = {
-          ...searchObject,
-          _id: {
-            $in: validCustomerIds
-          }
-        }
-      }
-
-      // get the total customer
-      let totalCustomer = await Model.countDocuments({
-        ...searchObject
-      });
-
-      // getting th data from the customer db
-      let customerList = await Model.aggregate([{
-        '$project': fieldsToProject
-      }, {
-        '$sort': sortingArray
-      }, {
-        '$match': {
-          ...searchObject
-        }
-      }, {
-        '$skip': skip
-      }, {
-        '$limit': pageSize
-      }, {
-        '$lookup': {
-          from: 'customersaccountmappings',
-          let: {
-            'id': '$goFrugalId',
-            'city': '$cityId'
-          },
-          pipeline: [
-            {
-              $match: {
-                'dbStatus': 1,
-                'isDeleted': 0,
-                'cityId': city,
-                '$expr': {
-                  '$eq': ['$goFrugalId', '$$id']
-                }
-              }
-            }, {
-              '$project': {
-                'group': 1,
-                'subGroup': 1,
-                'overdueOutStanding': 1,
-                'onAccount': 1,
-                'totalOutStanding': 1,
-                'creditDays': 1
-              }
-            }
-          ],
-          as: 'customerAccounts'
-        }
-      },
-      // {
-      //   '$lookup': {
-      //     from: 'customersaccountmappings',
-      //     localField: '_id',
-      //     foreignField: 'customerId',
-      //     as: 'customerAccounts'
-      //   }
-      // },
-      // {
-      //   '$unwind': {
-      //     path: '$customerAccounts',
-      //     preserveNullAndEmptyArrays: true
-      //   }
-      // }, 
-      {
-        "$addFields": {
-          "customerAccounts": {
-            $ifNull: [{ $arrayElemAt: ['$customerAccounts', -1] }, {
-              'group': 'N/A',
-              'subGroup': 'N/A',
-              'overdueOutStanding': 0,
-              'onAccount': 0,
-              'totalOutStanding': 0,
-              'creditDays': 0
-            }]
-          }
-        }
-      }, {
-        '$project': {
-          'customerAccounts': 1,
-          'goFrugalId': 1,
-          '_id': 1,
-          'cityId': 1,
-          'mobile': { $ifNull: ["$mobile", "N/A"] },
-          'status': 1,
-          'creditLimit': { $ifNull: ["$creditLimit", "N/A"] },
-          'name': 1,
-        }
-      }]).allowDiskUse(true);
-
-      let getTheStatusBasedOnCity = await CustomerSyncCtrl.getTheStatusBasedOnCity(city);
-      let todayDate = new Date();
-      let todayDay = todayDate.getDay();
-      let weekDays = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
-
-      // get the salesman assigned 
-      for (let i = 0; i < customerList.length; i++) {
-        let salesmanName = await DraftSalesmanCtrl.getTheSalesmanUsingCustomerId(customerList[i]._id, weekDays[todayDay]);
-        if (salesmanName.success)
-          customerList[i].salesmanName = salesmanName.data[0].draftBeatPlan.salesman ? salesmanName.data[0].draftBeatPlan.salesman.salesman : {
-            '_id': '',
-            'employerName': '',
-            'fullName': 'N/A',
-            'employeeId': 'N/A'
-          };
-        else customerList[i].salesmanName = {
-          '_id': '',
-          'employerName': '',
-          'fullName': 'NOT ASSIGNED',
-          'employeeId': 'N/A'
-        };
-      }
-
-      // success
-      return this.success(req, res, this.status.HTTP_OK, {
-        results: customerList,
-        pageMeta: {
-          skip: parseInt(skip),
-          pageSize: pageSize,
-          total: totalCustomer
-        },
-        syncStatus: getTheStatusBasedOnCity.success ? getTheStatusBasedOnCity.data : {}
-      }, this.messageTypes.customerDetailsFetched);
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
-
-
   // Internal Function get pickerboy sales order mapping details
   getDetails = (pickerBoySalesOrderMappingId) => {
     try {
@@ -864,36 +680,6 @@ class pickerboySalesOrderMappingController extends BaseController {
       }
     }
   }
-
-  // get customer details 
-  getCustomerDetails = async (req, res) => {
-    try {
-      info('Get the Customer List !');
-
-      // getting the data from request 
-      let customerId = req.params.customerId;
-      let cityId = req.params.cityId;
-
-      let customerDataFromMicroService = await getCustomerDetails(customerId, cityId);
-      if (customerDataFromMicroService.success) {
-        // success
-        return this.success(req, res, this.status.HTTP_OK, customerDataFromMicroService.data, this.messageTypes.customerDetailsFetchedSuccessfully);
-      }
-      else {
-        error('Unable to fetch Customer Details!');
-        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedCustomerDetails);
-      }
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
-
-
-
 
 
 }
