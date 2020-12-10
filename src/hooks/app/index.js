@@ -15,4 +15,5 @@ module.exports = {
   isItemAlreadyAdded: require('./isItemAlreadyAdded'),
   isInvoiceGenerated: require('./isInvoiceGenerated'), //check whether the invoice is already generated
   isAlreadyAddedInPickingState: require('./isAlreadyAddedInPickingState'), // check whether the salesOrderId is already added into the picker state
+  checkWhetherItsAValidItemUpdate: require('./checkWhetherItsAValidItemUpdate'), // check whether the valid item update
 }

@@ -37,140 +37,6 @@ class pickerSalesOrderMappingController extends BaseController {
   }
 
 
-  // do something 
-  getUserDetails = async (req, res) => {
-    try {
-      info('Get Picker Boy Details !');
-      let date = new Date();
-      let endOfTheDay = moment(date).set({
-        h: 24,
-        m: 59,
-        s: 0,
-        millisecond: 0
-      }).toDate();
-      let startOfTheDay = moment(date).set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0
-      }).toDate();
-
-      // inserting the new user into the db
-      let pickerBoyDetails = await PockerBoyCtrl.getPickerBoyFullDetails(req.user._id);
-
-      // is inserted 
-      if (pickerBoyDetails.success && !_.isEmpty(pickerBoyDetails.data)) {
-        // fetch the attendance 
-        let attendanceDetails = await AttendanceCtrl.getAttendanceDetailsForADay(req.user._id, startOfTheDay, endOfTheDay)
-          .then((data) => {
-            if (data.success) {
-              let totalWorkingInMins = 0;
-              // get the total working in mins 
-              if (data.data.attendanceLog && data.data.attendanceLog.length)
-                totalWorkingInMins = _.sumBy(data.data.attendanceLog, 'totalWorkingInMins')
-              return {
-                isFirstCheckedIn: data.data.attendanceLog ? data.data.attendanceLog.length ? 1 : 0 : 0,
-                attendanceLog: data.data.attendanceLog ? data.data.attendanceLog.length ? data.data.attendanceLog[data.data.attendanceLog.length - 1] : [] : [],
-                totalWorkingInMinsTillLastCheckOut: totalWorkingInMins
-              }
-            } else return {
-              isFirstCheckedIn: 0,
-              attendanceLog: {},
-              totalWorkingInMinsTillLastCheckOut: 0
-            };
-          });
-
-        // success response 
-        return this.success(req, res, this.status.HTTP_OK, {
-          ...pickerBoyDetails.data,
-          attendanceDetails: attendanceDetails
-        }, this.messageTypes.userDetailsFetchedSuccessfully);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
-  // get user details 
-  get = async (req, res) => {
-    try {
-      info('Zoho Details Controller !');
-
-      // success 
-      return this.success(req, res, this.status.HTTP_OK, req.body.userData, this.messageTypes.userDetailsFetched);
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
-  // get to do sales order details
-  getToDoSalesOrder = async (req, res) => {
-    try {
-      info('Getting  Sales Order  Data !');
-      let page = req.query.page || 1,
-        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey = req.query.search || '',
-        sortBy = req.query.sortBy || 'createdAt';
-      let skip = parseInt(page - 1) * pageSize;
-      let locationId = req.user.locationId || 0; // locationId 
-      let cityId = req.user.cityId || 'N/A'; // cityId 
-
-      //creating the object with query details to pass , in order to get the sales order details
-      let salesQueryDetails = {
-        page,
-        pageSize,
-        searchKey,
-        sortBy,
-        locationId,
-        cityId
-      }
-      // inserting data into the db 
-      let salesOrderData = await SalesOrderCtrl.getSalesOrderDetails(salesQueryDetails);
-      // success
-      if (salesOrderData.success) {
-        return this.success(req, res, this.status.HTTP_OK, {
-          results: salesOrderData.data,
-          pageMeta: {
-            skip: parseInt(skip),
-            pageSize: pageSize,
-            total: salesOrderData.total
-          }
-        }, this.messageTypes.toDoSalesOrderDetailsFetchedSuccessfully);
-      }
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchToDoSalesOrderDetails);
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
-  // get details 
-  getSalesOrder = async (req, res) => {
-    try {
-      info('SalesOrder GET DETAILS !');
-
-      // get the sale Order Details
-      let saleOrderDetails = req.body.saleOrderDetails;
-
-      // check if inserted 
-      if (saleOrderDetails && !_.isEmpty(saleOrderDetails)) return this.success(req, res, this.status.HTTP_OK, saleOrderDetails, this.messageTypes.salesOrderDetailsFetched);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
   //adding the new items after each scan
   addItems = async (req, res) => {
     try {
@@ -208,7 +74,40 @@ class pickerSalesOrderMappingController extends BaseController {
     }
   }
 
+  // patch the request 
+  patchItems = async (req, res) => {
+    try {
+      info('Item PATCH REQUEST !');
+      let itemId = req.body.itemId, // itemId  
+        pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || '';
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          ...req.body.toChangeObject
+        }
+      };
 
+      // inserting data into the db 
+      let isUpdated = await Model.findOneAndUpdate({
+        pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
+        itemId: itemId,
+        isDeleted: 0
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      });
+
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.brandUpdatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.brandNotUpdated);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
 
 
   // Internal Function get customer details 

@@ -9,11 +9,9 @@ const multipartMiddleware = multer();
 const {
   joiCustomerGetDetails, //joi get customer details
   joiStartPickSalesOrder, // joi start pick sales order
-  joiTallyUpload, // joi tally upload 
-  joiCustomerGet, // joi customer get 
-  joiGoFrugalSync, // sync data with gofrugal 
-  joiCustomersList, // get the list of customers in db
-  joiGetCustomerOther, // get customer other details 
+  joiSalesOrderDetails, // joi sales order details
+  joiScanSalesOrder, // joi scan order
+  joiViewOrderBasket,  // joi view order basket
 
 } = require('./pickerboy_salesorder_mapping.validators');
 
@@ -60,6 +58,7 @@ function userRoutes() {
 
     // get the single sale order details
     closed.route('/sales-order/:saleOrderId').get(
+      [joiSalesOrderDetails],
       verifyAppToken,
       isValidSalesOrder,
       ctrl.getSalesOrder // get controller 
@@ -76,6 +75,7 @@ function userRoutes() {
 
     // once we have started picking then get the salesorder data for adding the item.
     closed.route('/sales-order/scan-order/:pickerBoySalesOrderMappingId').get(
+      [joiScanSalesOrder], //joi scan order
       verifyAppToken,
       //  isValidSalesOrder,
       ctrl.scanState // get controller 
@@ -83,6 +83,7 @@ function userRoutes() {
 
     // view order basket api
     closed.route('/sales-order/view-order-basket/:pickerBoySalesOrderMappingId').get(
+      [joiViewOrderBasket],
       verifyAppToken,
       //   isValidSalesOrder,
       ctrl.viewOrderBasket // get controller 
