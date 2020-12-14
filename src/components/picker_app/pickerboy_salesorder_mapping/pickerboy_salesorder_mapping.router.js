@@ -12,7 +12,7 @@ const {
   joiSalesOrderDetails, // joi sales order details
   joiScanSalesOrder, // joi scan order
   joiViewOrderBasket,  // joi view order basket
-
+  joiOngoingDelivery, // joi ongoing sales order details
 } = require('./pickerboy_salesorder_mapping.validators');
 
 // hooks 
@@ -35,7 +35,6 @@ const {
 function userRoutes() {
   //open, closed
   return (open, closed) => {
-
 
     // get picker Boy details 
     closed.route('/user/details').get(
@@ -87,6 +86,13 @@ function userRoutes() {
       verifyAppToken,   // verify app token
       //   isValidSalesOrder,
       ctrl.viewOrderBasket // get controller 
+    );
+
+    // get the ongoing SO/invoice status
+    closed.route('/on-going').get(
+      [joiOngoingDelivery],
+      verifyAppToken,   // verify app token
+      ctrl.onGoingOrders // ongoing SO/invoice status
     );
 
   };

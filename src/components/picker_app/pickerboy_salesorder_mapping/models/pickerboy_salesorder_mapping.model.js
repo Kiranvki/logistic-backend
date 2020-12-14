@@ -11,9 +11,9 @@ const pickerBoySalesOrderMapping = new Schema({
       select: ['fullName', 'employeeId']
     }
   },
-date_field :{
- type: Date,
-},
+  'pickingDate': {
+    type: Date,
+  },
   'createdBy': {
     type: String,
   },

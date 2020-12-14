@@ -36,6 +36,26 @@ const schemas = {
     cityId: Joi.string().trim().lowercase().label('city Id').required().valid(['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']),
   }),
 
+  // joi ongoing sales order details
+  joiOngoingDelivery: Joi.object().keys({
+    query: {
+      page: Joi.number().integer().min(1).label('Page').required(),
+      search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
+    },
+    body: {
+      searchDate: Joi.date().format('DD-MM-YYYY')
+        .timestamp('unix')
+        .label('Date').options({
+          convert: true,
+          language: {
+            any: {
+              format: 'should be a valid format (DD-MM-YYYY)',
+            }
+          }
+        }).optional()
+    }
+  }),
+
 }
 // joi options
 const options = {
@@ -150,6 +170,27 @@ module.exports = {
 
     // validating the schema 
     schema.validate(req.params, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+  // joi on-going list 
+  joiOngoingDelivery: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiOngoingDelivery;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate({ query: req.query, body: req.body }, option).then(() => {
       next();
       // if error occured
     }).catch((err) => {

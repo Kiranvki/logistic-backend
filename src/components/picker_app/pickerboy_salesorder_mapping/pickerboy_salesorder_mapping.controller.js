@@ -397,7 +397,8 @@ class pickerboySalesOrderMappingController extends BaseController {
       let dataToInsert = {
         'salesOrderId': saleOrderDetails._id,
         'pickerBoyId': req.user._id,
-        'createdBy': req.user.email
+        'createdBy': req.user.email,
+        'pickingDate': new Date()
       };
 
       // inserting data into the db 
@@ -603,6 +604,169 @@ class pickerboySalesOrderMappingController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+  // ongoing SO/invoice status
+  onGoingOrders = async (req, res) => {
+    try {
+      info('View the Ongoing Orders !');
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt';
+      let sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+      let searchDate = req.body.searchDate || ''
+
+      let startOfTheDay = moment().set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // getting the end of the day 
+      let endOfTheDay = moment().set({
+        h: 24,
+        m: 24,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      if (searchDate && !_.isEmpty(searchDate)) {
+        console.log('he');
+
+        startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+        // getting the end of the day 
+        endOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+      }
+
+
+      let searchObject = {
+
+        'pickingDate': {
+          '$gte': startOfTheDay,
+          '$lte': endOfTheDay
+        }
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'createdBy': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'pickerBoyId': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+      console.log('searchObject', searchObject);
+
+      let totalCount = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let salesOrderList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'salesOrderId': 1,
+          'pickerBoyId': 1,
+          'InvoiceId': 1,
+          'state': 1,
+        }
+      }, {
+        $lookup: {
+          from: 'salesorders',
+          let: {
+            'id': '$salesOrderId'
+          },
+          pipeline: [
+            {
+              $match: {
+                '$expr': {
+                  '$eq': ['$_id', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'status': 1,
+                'onlineChildReferenceNo': 1,
+                'onlineReferenceNo': 1,
+                // 'orderItems': 1,
+                'otherChargesTaxInclusive': 1,
+                'customerType': 1,
+                'salesOrderId': 1,
+                'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
+
+              }
+            }
+          ],
+          as: 'salesOrdersDetails'
+        }
+      },
+
+      ]).allowDiskUse(true)
+      // success
+      if (true) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          salesOrderList
+          // results: salesOrderData.data,
+          // pageMeta: {
+          //   skip: parseInt(skip),
+          //   pageSize: pageSize,
+          //   total: salesOrderData.total
+          // }
+        }, this.messageTypes.toDoSalesOrderDetailsFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchToDoSalesOrderDetails);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
 
   // Internal Function get pickerboy sales order mapping details
   getDetails = (pickerBoySalesOrderMappingId) => {
