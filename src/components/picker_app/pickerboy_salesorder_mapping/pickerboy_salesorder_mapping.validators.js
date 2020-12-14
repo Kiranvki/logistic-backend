@@ -17,12 +17,12 @@ const schemas = {
 
   // joi salesorder details
   joiSalesOrderDetails: Joi.object().keys({
-    pickerBoySalesOrderMappingId: Joi.string().trim().label('PickerBoy SalesOrder Mapping Id').required(),
+    saleOrderId: Joi.string().trim().label('SaleOrder Id').required(),
   }),
 
   // joi Scan Sales Order details
   joiScanSalesOrder: Joi.object().keys({
-    saleOrderId: Joi.string().trim().label('SaleOrder Id').required(),
+    pickerBoySalesOrderMappingId: Joi.string().trim().label('PickerBoy SalesOrder Mapping Id').required(),
   }),
 
   // joi view order basket

@@ -527,7 +527,8 @@ class pickerboySalesOrderMappingController extends BaseController {
                 'itemName': 1,
                 'itemId': 1,
                 'quantity': 1,
-                'suppliedQty': 1
+                'suppliedQty': 1,
+                'salePrice': 1
               }
             }
           ],

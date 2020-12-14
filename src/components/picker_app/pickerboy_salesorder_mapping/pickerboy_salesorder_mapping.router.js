@@ -52,14 +52,14 @@ function userRoutes() {
 
     // get the todays task sales order for today
     closed.route('/sales-order/todays-task').get(
-      verifyAppToken,
+      verifyAppToken,   // verify app token
       ctrl.getToDoSalesOrder // get controller 
     );
 
     // get the single sale order details
     closed.route('/sales-order/:saleOrderId').get(
       [joiSalesOrderDetails],
-      verifyAppToken,
+      verifyAppToken,   // verify app token
       isValidSalesOrder,
       ctrl.getSalesOrder // get controller 
     );
@@ -76,7 +76,7 @@ function userRoutes() {
     // once we have started picking then get the salesorder data for adding the item.
     closed.route('/sales-order/scan-order/:pickerBoySalesOrderMappingId').get(
       [joiScanSalesOrder], //joi scan order
-      verifyAppToken,
+      verifyAppToken,  // verify app token
       //  isValidSalesOrder,
       ctrl.scanState // get controller 
     );
@@ -84,7 +84,7 @@ function userRoutes() {
     // view order basket api
     closed.route('/sales-order/view-order-basket/:pickerBoySalesOrderMappingId').get(
       [joiViewOrderBasket],
-      verifyAppToken,
+      verifyAppToken,   // verify app token
       //   isValidSalesOrder,
       ctrl.viewOrderBasket // get controller 
     );

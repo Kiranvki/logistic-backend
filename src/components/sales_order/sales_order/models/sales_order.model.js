@@ -3,11 +3,6 @@ const Schema = mongoose.Schema;
 
 // schema
 const salesOrder = new Schema({
-  // 'isPacked': {
-  //   type: Number,
-  //   default: 0,
-  //   enum: [0, 1]
-  // },
   'cityId': {
     type: 'String',
     enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
