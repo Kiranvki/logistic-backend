@@ -23,7 +23,7 @@ class newVehicleController extends BaseController {
     try {
       //Initializing the field
 
-      info('New Vehicle Controller !');
+      info('Transporter Vehicle Controller !');
 
       // // creating data to insert
       // let dataToInsert = {
@@ -46,8 +46,8 @@ class newVehicleController extends BaseController {
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.newVehicleCreated);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.newVehicleNotCreated);
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.transporterMasterCreated);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterMasterNotCreated);
 
       // catch any runtime error 
     } catch (err) {
@@ -60,18 +60,18 @@ class newVehicleController extends BaseController {
     // get details 
     getNewVehicle = async (req, res) => {
         try {
-          info('Vehicle GET DETAILS !');
+          info('Transporter Vehicle GET DETAILS !');
     
           // inserting data into the db 
           // let transporter = await Model.findOne({
           let vehicle = await Model.findById({
     
-            _id: mongoose.Types.ObjectId(req.params.transporterMasterid)
+            _id: mongoose.Types.ObjectId(req.params.transporterVehiclerid)
           }).lean();
     
           // check if inserted 
-          if (vehicle && !_.isEmpty(vehicle)) return this.success(req, res, this.status.HTTP_OK, vehicle, this.messageTypes.vehicleFetched);
-          else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotFetched);
+          if (vehicle && !_.isEmpty(vehicle)) return this.success(req, res, this.status.HTTP_OK, vehicle, this.messageTypes.transporterMasterFetched);
+          else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterMasterNotFetched);
     
           // catch any runtime error 
         } catch (err) {
@@ -87,7 +87,7 @@ class newVehicleController extends BaseController {
     
             // inserting the new user into the db
           let isUpdated = await Model.update({
-            _id: mongoose.Types.ObjectId(req.params.transporterMasterid),
+            _id: mongoose.Types.ObjectId(req.params.transporterVehiclerid),
           }, {
             $set: {
               ...req.body
@@ -97,8 +97,8 @@ class newVehicleController extends BaseController {
           if (isUpdated && !_.isEmpty(isUpdated)) {
             // success response 
             isUpdated.password = undefined;
-            return this.success(req, res, this.status.HTTP_OK, req.body, this.messageTypes.vehicleUpdated);
-          } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotUpdated);
+            return this.success(req, res, this.status.HTTP_OK, req.body, this.messageTypes.transporterMasterUpdated);
+          } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterMasterNotUpdated);
     
           // catch any runtime error 
         } catch (err) {
@@ -115,7 +115,7 @@ class newVehicleController extends BaseController {
     
           // inserting the new user into the db
         let isUpdated = await Model.findByIdAndDelete({
-          _id: mongoose.Types.ObjectId(req.params.transporterMasterid),
+          _id: mongoose.Types.ObjectId(req.params.transporterVehiclerid),
         }, {
           $set: {
             ...req.body
@@ -125,8 +125,8 @@ class newVehicleController extends BaseController {
         if (isUpdated && !_.isEmpty(isUpdated)) {
           // success response 
           isUpdated.password = undefined;
-          return this.success(req, res, this.status.HTTP_OK, req.body, this.messageTypes.vehicleDeleted);
-        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotDeleted);
+          return this.success(req, res, this.status.HTTP_OK, req.body, this.messageTypes.transporterDeleted);
+        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotDeleted);
     
         // catch any runtime error 
       } catch (err) {

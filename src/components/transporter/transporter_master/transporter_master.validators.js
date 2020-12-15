@@ -9,12 +9,12 @@ const Response = require('../../../responses/response');
 // add joi schema 
 const schemas = {
 joiVehicle  : Joi.object().keys({
-    // regNumber:  Joi.string().trim().label('Regestration Number').required().max(12),
-    // vehicleType: Joi.string().trim().label('Vehicle Type').required().max(12),
-    // vehicleModel: Joi.string().trim().label('Vehicle Model').required().max(12),
-    // height:Joi.string().trim().label('Vehicle Model').required().max(12),
-    // length: Joi.string().trim().label('Length').required().max(12),
-    // breadth: Joi.string().trim().label('Breadth').required().max(12)
+    regNumber:  Joi.string().trim().label('Regestration Number').required().max(12),
+    vehicleType: Joi.string().trim().label('Vehicle Type').required().max(12),
+    vehicleModel: Joi.string().trim().label('Vehicle Model').required().max(12),
+    height:Joi.string().trim().label('Vehicle Model').required().max(12),
+    length: Joi.string().trim().label('Length').required().max(12),
+    breadth: Joi.string().trim().label('Breadth').required().max(12)
 })
 }
 

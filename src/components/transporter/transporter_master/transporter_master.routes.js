@@ -8,14 +8,14 @@ const {
 function vehicleMaster() {
     return (open, closed) => {
 
-        open.route('/transporterMaster').post(
+        closed.route('/transporterVehicle').post(
              [joiVehicle], // joi validation
              // verifyAppToken,
              // isValidSalesOrder,
              ctrl.post // controller function 
            );
 
-           open.route('/transporterMaster/:transporterMasterid').get(
+           closed.route('/transporterVehicle/:transporterVehiclerid').get(
             //  [transporterMaster], // joi validation
             // setupDataForGoFrugalApi, // setup data for gofrugal
             // getTheDetailsFromGoFrugal, // get the data from go frugal 
@@ -23,14 +23,14 @@ function vehicleMaster() {
           );
     
     
-          open.route('/transporterMaster/:transporterMasterid').patch(
+          closed.route('/transporterVehicle/:transporterVehicleid').patch(
             // [joiGoFrugalSync], // joi validation
             // setupDataForGoFrugalApi, // setup data for gofrugal
             // getTheDetailsFromGoFrugal, // get the data from go frugal 
             ctrl.patchNewVehicle // get controller 
           );
     
-          open.route('/transporterMaster/:transporterMasterid').delete(
+          closed.route('/transporterVehicle/:transporterVehiclerid').delete(
             // [joiDeleteTransporeter], // joi validation
             // setupDataForGoFrugalApi, // setup data for gofrugal
             // getTheDetailsFromGoFrugal, // get the data from go frugal 

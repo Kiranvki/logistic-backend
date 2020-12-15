@@ -42,40 +42,6 @@ class rateCategoryController extends BaseController {
     }
 
 
-//       // internal function to create invoice and  picker_salesorder mapping
-//   post = async (createObj) => {
-//     try {
-//       info('Create Invoice and picker_salesorder Mapping !');
-
-//       // create a mapping for invoice and  picker_salesorder
-//       return Model.create(createObj)
-//         .then((res) => {
-//           if (res && !_.isEmpty(res))
-//             return {
-//               success: true,
-//               data: res
-//             };
-//           else return {
-//             success: false
-//           }
-//         }).catch((err) => {
-//           console.error(err);
-//           return {
-//             success: false,
-//             error: err
-//           }
-//         });
-
-//       // catch any runtime error 
-//     } catch (err) {
-//       error(err);
-//       return {
-//         success: false,
-//         error: err
-//       }
-//     }
-//   }
-
       // get details 
   getRateCategory = async (req, res) => {
     try {
@@ -98,6 +64,66 @@ class rateCategoryController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+  
+ // patch the request 
+ patchtRateCategory = async (req, res) => {
+  try {
+
+    info('Transporter CHANGE ! !');
+    // creating data to insert
+    let dataToUpdate = {
+      $set: {
+        ...req.body,
+      }
+    };
+
+    // inserting data into the db 
+    let isUpdated = await Model.findOneAndUpdate({
+      _id: mongoose.Types.ObjectId(req.params.ratecategoryId)
+    }, dataToUpdate, {
+      new: true,
+      upsert: false,
+      lean: true
+    });
+
+    // check if inserted 
+    if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated);
+    else return this.errors(req, res, this.status.HTTP_CONFLICT);
+
+    // catch any runtime error 
+  } catch (err) {
+    error(err);
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  }
+}
+
+
+
+deleteRateCategory = async (req, res) => {
+  try {
+    info('New Vehicle Delete!');
+
+    // inserting the new user into the db
+  let isUpdated = await Model.findByIdAndDelete({
+    _id: mongoose.Types.ObjectId(req.params.ratecategoryId),
+  }, {
+    $set: {
+      ...req.body
+    }
+  })
+  
+  // check if inserted 
+  if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});
+  else return this.errors(req, res, this.status.HTTP_CONFLICT);
+
+  // catch any runtime error 
+} catch (err) {
+  error(err);
+  this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+}
+}
+
 }
 
 

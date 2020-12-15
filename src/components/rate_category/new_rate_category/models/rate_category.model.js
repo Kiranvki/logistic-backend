@@ -22,14 +22,6 @@ const rateCategoryModel = new Schema({
         },
         'addetionalAmount': {
             type: 'Number'
-        },
-        'status': {
-            type: Number,
-            default: 1
-        },
-        'isDeleted': {
-            type: Number,
-            default: 0
         }
     },
     'vehicleDetails':

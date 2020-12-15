@@ -5,20 +5,33 @@ const ctrl = require('./rate_category.controller');
 function ratecategory(){
     return (open, closed)=>{
     // add the transporterMaster in the packing stage 
-    open.route('/ratecategory').post(
+    closed.route('/ratecategory').post(
         //[joiTransporterCreate], // joi validation
         // verifyAppToken,
         // isValidSalesOrder,
         ctrl.post // controller function 
       );
 
-      open.route('/ratecategory/:ratecategoryId').get(
+      closed.route('/:ratecategoryId').get(
         //[joiTransporterMaster], // joi validation
         // setupDataForGoFrugalApi, // setup data for gofrugal
         // getTheDetailsFromGoFrugal, // get the data from go frugal 
         ctrl.getRateCategory // get controller 
       );
 
+      closed.route('/:ratecategoryId').patch(
+        //[joiTransporterMaster], // joi validation
+        // setupDataForGoFrugalApi, // setup data for gofrugal
+        // getTheDetailsFromGoFrugal, // get the data from go frugal 
+        ctrl.patchtRateCategory // get controller 
+      );
+
+      closed.route('/:ratecategoryId').delete(
+        // [joiDeleteTransporeter], // joi validation
+        // setupDataForGoFrugalApi, // setup data for gofrugal
+        // getTheDetailsFromGoFrugal, // get the data from go frugal 
+        ctrl.deleteRateCategory // get controller 
+      );
 
     }
 }
