@@ -2,29 +2,35 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 // schema
 const transporterMaster = new Schema({
-
-    code: {
+    regNumber: {
+        type: String
+    },
+    vehicleType: {
+        type: String
+    },
+    vehicleModel: {
+        type: String
+    },
+    height:{
         type: Number
     },
-    name: {
-        type: String
-    },
-    noOfRateCategories: {
+    length:{
         type: Number
     },
-    emailID: {
-        type: String
+    breadth: {
+        type: Number
     },
-    contactNo: {
-        type: String
+    status: {
+        type: Number,
+        default: 1
     },
-    location: {
-        type: String
+    isDeleted: {
+        type: Number,
+        default: 0
     }
-},
-    {
-        timestamps: true
-    });
+}, {
+    timestamps: true
+});
 
 
 // exporting the entire module

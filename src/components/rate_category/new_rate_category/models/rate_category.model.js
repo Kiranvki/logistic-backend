@@ -2,8 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 //schema
 const rateCategoryModel = new Schema({
-    // 'rateCategoryDetails':
-    //{
+    'rateCategoryDetails':
+    {
         'rateCategory': {
             type: 'String'
         },
@@ -23,25 +23,41 @@ const rateCategoryModel = new Schema({
         'addetionalAmount': {
             type: 'Number'
         },
-    //},
-    // 'vehicleDetails':
-    // {
+        'status': {
+            type: Number,
+            default: 1
+        },
+        'isDeleted': {
+            type: Number,
+            default: 0
+        }
+    },
+    'vehicleDetails':
+    {
         'selectNoOfVehicles': {
             type: 'Number'
         },
-        'transporterName': {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'newvehicle',
-            autopopulate: {
-                select: ['transporterName','vehicleModel']
-            }
-        }
+        // 'transporterName': {
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: 'newvehicle',
+        //     autopopulate: {
+        //         select: ['transporterName','vehicleModel']
+        //     }
+        // }
     },
-
-// },
+    status: {
+        type: Number,
+        default: 1
+    },
+    isDeleted: {
+        type: Number,
+        default: 0
+    }
+},
     {
         timestamps: true
     });
+
 
     // creating indexes
     rateCategoryModel.index({

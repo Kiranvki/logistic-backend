@@ -9,33 +9,45 @@ const {
   info
 } = require('../../../utils').logging;
 
+
 // getting the model 
-class transporterMasterController extends BaseController {
-  // constructor 
-  constructor() {
-    super();
-    this.messageTypes = this.messageTypes.transporterMaster;
-  }
+class newVehicleController extends BaseController {
+    // constructor 
+    constructor() {
+      super();
+      this.messageTypes = this.messageTypes.transporterMaster;
+    }
 
-
-  // create a new entry
+     // create a new entry
   post = async (req, res) => {
-       //let dataToInsert = new Model(req.body)
-
     try {
       //Initializing the field
-      //let TransporterMasterResult;
-      info('Transporter Master Controller !');
 
+      info('New Vehicle Controller !');
+
+      // // creating data to insert
+      // let dataToInsert = {
+      //   'transporterName': req.body.transporterName,
+      //   'regNumber': req.body.regNumber,
+      //   'vehicleType': req.body.vehicleType,
+      //   'vehicleModel': req.body.vehicleModel,
+      //   'length': req.body.length,
+      //   'breadth': req.body.breadth
+      // }
+        
       // inserting data into the db 
       let isInserted = await Model.create({
         ...req.body
       });
 
+
+      // // inserting data into the db 
+      // let isInserted = await Model.create(dataToInsert);
+
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.transporterMasterCreated);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterMasterNotCreated);
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.newVehicleCreated);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.newVehicleNotCreated);
 
       // catch any runtime error 
     } catch (err) {
@@ -45,84 +57,86 @@ class transporterMasterController extends BaseController {
   }
 
 
-  // get details 
-  getTransporterMaster = async (req, res) => {
-    try {
-      info('Transporter GET DETAILS !');
-
-      // inserting data into the db 
-      // let transporter = await Model.findOne({
-      let transporter = await Model.findById({
-
-        _id: mongoose.Types.ObjectId(req.params.transporterid)
-      }).lean();
-
-      // check if inserted 
-      if (transporter && !_.isEmpty(transporter)) return this.success(req, res, this.status.HTTP_OK, transporter, this.messageTypes.transporterMasterFetched);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterMasterNotFetched);
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
-  // patch the request 
-    patchTransporterStatus = async (req, res) => {
-      try {
-        info('TRANSPORTER STATUS CHANGE !');
-
-        // inserting the new user into the db
-      let isUpdated = await Model.update({
-        _id: mongoose.Types.ObjectId(req.params.transporterid),
-      }, {
-        $set: {
-          ...req.body
+    // get details 
+    getNewVehicle = async (req, res) => {
+        try {
+          info('Vehicle GET DETAILS !');
+    
+          // inserting data into the db 
+          // let transporter = await Model.findOne({
+          let vehicle = await Model.findById({
+    
+            _id: mongoose.Types.ObjectId(req.params.transporterMasterid)
+          }).lean();
+    
+          // check if inserted 
+          if (vehicle && !_.isEmpty(vehicle)) return this.success(req, res, this.status.HTTP_OK, vehicle, this.messageTypes.vehicleFetched);
+          else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotFetched);
+    
+          // catch any runtime error 
+        } catch (err) {
+          error(err);
+          this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
         }
-      })
-       // is inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) {
-        // success response 
-        isUpdated.password = undefined;
-        return this.success(req, res, this.status.HTTP_OK, req.body, this.messageTypes.transporterMasterUpdated);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterMasterNotUpdated);
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
-  //Delete Transporter
-
-  deleteTransporter = async (req, res) => {
-    try {
-      info('Transporter Delete!');
-
-      // inserting the new user into the db
-    let isUpdated = await Model.findByIdAndRemove({
-      _id: mongoose.Types.ObjectId(req.params.transporterid),
-    }, {
-      $set: {
-        ...req.body
       }
-    })
-     // is inserted 
-    if (isUpdated && !_.isEmpty(isUpdated)) {
-      // success response 
-      isUpdated.password = undefined;
-      return this.success(req, res, this.status.HTTP_OK, req.body, this.messageTypes.transporterDeleted);
-    } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotDeleted);
+    
+      // patch the request 
+      patchNewVehicle = async (req, res) => {
+          try {
+            info('Vehicle STATUS CHANGE !');
+    
+            // inserting the new user into the db
+          let isUpdated = await Model.update({
+            _id: mongoose.Types.ObjectId(req.params.transporterMasterid),
+          }, {
+            $set: {
+              ...req.body
+            }
+          })
+           // is inserted 
+          if (isUpdated && !_.isEmpty(isUpdated)) {
+            // success response 
+            isUpdated.password = undefined;
+            return this.success(req, res, this.status.HTTP_OK, req.body, this.messageTypes.vehicleUpdated);
+          } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotUpdated);
+    
+          // catch any runtime error 
+        } catch (err) {
+          error(err);
+          this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+        }
+      }
+    
+      //Delete Transporter
+    
+      deleterNewVehicle = async (req, res) => {
+        try {
+          info('New Vehicle Delete!');
+    
+          // inserting the new user into the db
+        let isUpdated = await Model.findByIdAndDelete({
+          _id: mongoose.Types.ObjectId(req.params.transporterMasterid),
+        }, {
+          $set: {
+            ...req.body
+          }
+        })
+         // is inserted 
+        if (isUpdated && !_.isEmpty(isUpdated)) {
+          // success response 
+          isUpdated.password = undefined;
+          return this.success(req, res, this.status.HTTP_OK, req.body, this.messageTypes.vehicleDeleted);
+        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotDeleted);
+    
+        // catch any runtime error 
+      } catch (err) {
+        error(err);
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      }
+    }
 
-    // catch any runtime error 
-  } catch (err) {
-    error(err);
-    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-  }
 }
+  
 
-}
 // exporting the modules 
-module.exports = new transporterMasterController();
+module.exports = new newVehicleController();
