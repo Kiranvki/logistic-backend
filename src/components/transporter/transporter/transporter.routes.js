@@ -8,7 +8,7 @@ const {
 function transporter() {
   return (open, closed) => {
     // add the salesorder in the packing stage
-    open.route('/transporter').post(
+    closed.route('/transporter').post(
       [joiTransporter], // joi validation
       // verifyAppToken,
       // isValidSalesOrder,
@@ -17,12 +17,12 @@ function transporter() {
     
 
     // get all 
-    open.route('/transporter').get(
+    closed.route('/').get(
       [joiTransporterElementList], // joi validation
       ctrl.getList // get controller 
     );
 
-    open.route('/transporter/:transporterid').get(
+    closed.route('/:transporterid').get(
       //  [transporterMaster], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
@@ -30,14 +30,14 @@ function transporter() {
     );
 
 
-    open.route('/transporter/:transporterid').patch(
+    closed.route('/:transporterid').patch(
        [joiTransporterElementPatch], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.patchTransporter // get controller 
     );
 
-    open.route('/transporter/:transporterid').delete(
+    closed.route('/:transporterid').delete(
       // [joiDeleteTransporeter], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
