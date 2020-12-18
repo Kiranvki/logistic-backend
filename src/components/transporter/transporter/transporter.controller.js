@@ -23,7 +23,7 @@ class transporterController extends BaseController {
     try {
       //Initializing the field
       //let TransporterMasterResult;
-      info('Transporter Controller !');
+      info('Creating Transporter !');
 
       // inserting data into the db 
       let isInserted = await Model.create({
@@ -78,12 +78,12 @@ class transporterController extends BaseController {
           searchObject = {
             ...searchObject,
             '$or': [{
-              'roles': {
+              'name': {
                 $regex: searchKey,
                 $options: 'is'
               }
             }, {
-              'designation': {
+              'contactNo': {
                 $regex: searchKey,
                 $options: 'is'
               }
@@ -103,15 +103,16 @@ class transporterController extends BaseController {
           $skip: skip
         }, {
           $limit: pageSize
-        },
-        {
-          $project: {
+        // },
+        // {
+        //   $project: {
   
-            'name': 1,
-            'isDeleted': 1
-          }
+        //     'name': 1,
+        //     'isDeleted': 1
+        //   }
         }
-        ]).allowDiskUse(true);
+        ])
+        //.allowDiskUse(true);
   
         // success 
         return this.success(req, res, this.status.HTTP_OK, {

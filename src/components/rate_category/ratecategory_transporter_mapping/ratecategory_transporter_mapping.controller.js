@@ -44,3 +44,4 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
 // exporting the modules 
 module.exports = new ratecategoryTransporterMappingCtrl();
 
+  

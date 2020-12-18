@@ -5,22 +5,22 @@ const Schema = mongoose.Schema;
 const vehicleMaster = new Schema({
 
   'regNumber': {
-    type: Number,
+    type: String,
   },
   'vehicleType': {
     type: String,
   },
   'vehicleModel': {
-    type: Number,
+    type: String,
   },
   'height': {
-    type: Number,
+    type: String,
   },
   'length': {
     type: Number,
   },
   'breadth': {
-    type: Number,
+    type: String,
   },
   status: {
     type: Number,
@@ -35,7 +35,7 @@ isDeleted: {
     timestamps: true
 });
 
-pickerBoySalesOrderMapping.index({
+vehicleMaster.index({
   'regNumber': 1
 });
 

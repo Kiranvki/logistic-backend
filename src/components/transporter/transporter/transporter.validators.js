@@ -14,7 +14,7 @@ const schemas = {
                 language: {
                     string: {
                         regex: {
-                            base: 'should be a valid last Name'
+                            base: 'should be a valid Name'
                         }
                     }
                 }
@@ -37,7 +37,7 @@ const schemas = {
                     }
                 }
             }).optional().allow(''),
-            email: Joi.string().email().trim().label('Email').required().max(256),
+            email: Joi.string().email().trim().label('Email').required().max(256),//need change
             altEmail: Joi.string().email().trim().label('Alternative Email').optional().allow(''),
         },
         locationDetails: {

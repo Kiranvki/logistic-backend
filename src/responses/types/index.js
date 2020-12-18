@@ -6,5 +6,6 @@ module.exports = {
   appUserOnBoard: require('./appUserOnBoard'), // app user onboard
   appUserAttendance: require('./appUserAttendance'), // app user attendance
   salesOrder: require('./salesOrder'), // sales order
-  transporterMaster: require('./transporter'), // transporter
+  transporterMaster: require('./transporter'), // transporter 
+  //vehicleMaster: require('./vehicle')
 };

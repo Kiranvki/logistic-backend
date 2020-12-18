@@ -2,16 +2,16 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // schema
-const transporterMasterMapping = new Schema({
+const transporterVehiclerMapping = new Schema({
   'transporterId': {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'transporter',
-    required: true
+    //required: true
   },
-  'transporterMasterId': {
+  'vehicleId': {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'transporterMaster',
-    required: true
+    ref: 'vehicle',
+    //required: true
   },
   status: {
     type: Number,
@@ -28,10 +28,9 @@ const transporterMasterMapping = new Schema({
 
 
 // creating index
-transporterMasterMapping.index({
-  'transporterId': 1,
-  'transporterMasterId': 1
+transporterVehiclerMapping.index({
+ 'regNumber':1
 });
 
 // exporting the entire module
-module.exports = mongoose.model('transporterMasterMapping', transporterMasterMapping);
+module.exports = mongoose.model('transporterVehiclerMapping', transporterVehiclerMapping);

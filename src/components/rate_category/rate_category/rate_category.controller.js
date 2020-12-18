@@ -41,6 +41,91 @@ class rateCategoryController extends BaseController {
 
     }
 
+    
+  // get ratecategory list 
+  getList = async (req, res) => {
+    console.log("dsadasdaffafdsgsdgsfGFFHDNDFNDnN");
+    try {
+      info('Get the Cost Element List  !');
+      // get the query params
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        sortingArray = {};
+
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // project data 
+      // let dataToProject = {
+      //   firstName: 1,
+      //   lastName: 1,
+      //   employeeId: 1,
+      //   status: 1,
+      //   reportingTo: 1
+      // }
+
+      // get the list of asm in the allocated city
+      let searchObject = {
+        'isDeleted': 0,
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'rateCategory': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'rateCategoryType': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+
+      // get the total cost Element
+      let totalcostElement = await Model.countDocuments({
+        ...searchObject
+      });
+
+      // get the distributor list
+      let costElementList = await Model.aggregate([{
+        '$sort': sortingArray
+      }, {
+        '$match': {
+          ...searchObject
+        }
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': pageSize
+      }])
+
+
+      // success 
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: costElementList,
+        pageMeta: {
+          skip: parseInt(skip),
+          pageSize: pageSize,
+          total: totalcostElement
+        }
+      }, 
+      //this.messageTypes.costElementsDetailsFetched
+      );
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
 
       // get details 
   getRateCategory = async (req, res) => {
@@ -122,6 +207,7 @@ deleteRateCategory = async (req, res) => {
   error(err);
   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
 }
+   
 }
 
 }

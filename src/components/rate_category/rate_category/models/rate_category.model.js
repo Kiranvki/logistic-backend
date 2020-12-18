@@ -9,7 +9,7 @@ const rateCategoryModel = new Schema({
         },
         'rateCategoryType': {
             type: 'String',
-            enum: ['Daily', 'Monthly']
+            enum: ['Daily', 'Monthly', 'weekly']
         },
         'fixedRentalAmount': {
             type: 'Number'
@@ -27,7 +27,8 @@ const rateCategoryModel = new Schema({
     'vehicleDetails':
     {
         'selectNoOfVehicles': {
-            type: 'Number'
+            type: 'Number',
+            enum: [1,2,3]
         },
         // 'transporterName': {
         //     type: mongoose.Schema.Types.ObjectId,

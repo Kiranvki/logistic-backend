@@ -31,9 +31,10 @@ const transporterRateMapping = new Schema({
   timestamps: true
 });
 
-invoicePickerBoySalesOrderMapping.index({
+transporterRateMapping.index({
   'transporterId': 1,
-  'ratecategoryId': 1
+  'ratecategoryId': 1,
+  'status': 1
 });
 
 // exporting the entire module

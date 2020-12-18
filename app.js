@@ -43,6 +43,11 @@ const transporterMasterAPIRouter = express.Router(); // Protected routes
 const rateCategoryRouter = express.Router(); // Open routes
 const rateCategoryAPIRouter = express.Router(); // Protected routes
 
+
+//Vehicle
+const vehicleRouter = express.Router(); // Open routes
+const vehicleAPIRouter = express.Router(); // Protected routes
+
 /* Fetch router files and apply them to our routers */
 glob('./src/components/picker_app/onBoard/*', null, (err, items) => {
   items.forEach(component => {
@@ -105,6 +110,17 @@ glob('./src/components/rate_category/*', null, (err, items) => {
   });
 });
 
+/* Fetch router files and apply them to our routers */
+glob('./src/components/vehicle/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      vehicleRouter,
+      vehicleAPIRouter,
+    );
+  });
+});
+
+
 
 
 // Admin Panel Routes
@@ -127,9 +143,14 @@ app.use('/app/api/v1/picker-app', appPickerBoyApiRouter);
 app.use('/v1/transporter', transporterMasterRouter);
 app.use('/api/v1/transporter', transporterMasterAPIRouter);
 
-//Transporter
+//Ratecategory
 app.use('/v1/ratecategory', rateCategoryRouter);
 app.use('/api/v1/ratecategory', rateCategoryAPIRouter);
+
+//Vehicle
+app.use('/v1/vehicle', vehicleRouter);
+app.use('/api/v1/vehicle', vehicleAPIRouter);
+
 // handle 404
 app.use(function (req, res, next) {
   res.status(404);

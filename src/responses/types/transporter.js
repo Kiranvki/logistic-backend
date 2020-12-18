@@ -23,12 +23,7 @@ module.exports = {
     transporterNotUpdated : 'New Transporter Not Updated Successfully !',
     transporterDeleted : 'New Transporter Deleted Successfully !',
     transporterNotDeleted : "New Transporter Not Deleted Successfully !",
-    vehicleCreated: 'Vehicle Successfully Created',
-    vehicleNotCreated: 'Vehicle Not Created Successfully',
-    vehicleFetched : 'Vehicle Fetched Successfully !',
-    vehicleNotFetched : 'Vehicle Not Fetched Successfully !',
-    vehicleNotUpdated : 'Vehicle Updated Successfully !',
-    vehicleNotUpdated : 'Vehicle Not Updated Successfully !',
-    vehicleDeleted : 'Vehicle Deleted Successfully !',
-    vehicleNotDeleted : "Vehicle Not Deleted Successfully !"
+    transporterRatecategory: 'Transporter Ratecategory Successfully Created ',
+    transporterRatecateNotCreated: "Ratecategory Not Successfully Created",
+   
 }

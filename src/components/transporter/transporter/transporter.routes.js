@@ -7,7 +7,7 @@ const {
 
 function transporter() {
   return (open, closed) => {
-    // add the salesorder in the packing stage
+    // add the transporter in the packing stage
     closed.route('/transporter').post(
       [joiTransporter], // joi validation
       // verifyAppToken,
@@ -16,11 +16,13 @@ function transporter() {
     );
     
 
-    // get all 
-    closed.route('/').get(
-      [joiTransporterElementList], // joi validation
-      ctrl.getList // get controller 
+    closed.route('/transporter').get(
+      //[joiTransporterCreate], // joi validation
+      // verifyAppToken,
+      // isValidSalesOrder,
+      ctrl.getList // controller function 
     );
+
 
     closed.route('/:transporterid').get(
       //  [transporterMaster], // joi validation
