@@ -13,12 +13,15 @@ const {
   joiScanSalesOrder, // joi scan order
   joiViewOrderBasket,  // joi view order basket
   joiOngoingDelivery, // joi ongoing sales order details
+  joiPendingDelivery, //  joi pending SO
+  joiHistoryOfSO, // joi history of SO
 } = require('./pickerboy_salesorder_mapping.validators');
 
 // hooks 
 const {
   isValidSalesOrder,  // check is valid sales order id 
   isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
+  checkWhetherItsAValidPickerUpdate, //check whether its a valid picker profile update
 } = require('../../../hooks/app');
 
 // auth 
@@ -40,6 +43,13 @@ function userRoutes() {
     closed.route('/user/details').get(
       verifyAppToken, // verify app user token 
       ctrl.getUserDetails // controller function 
+    );
+
+    // update picker Boy details 
+    closed.route('/user/update').get(
+      verifyAppToken, // verify app user token 
+      checkWhetherItsAValidPickerUpdate,//check whether its a valid picker profile update
+      ctrl.updatetUserDetails // update user details
     );
 
     // get customer details 
@@ -90,11 +100,26 @@ function userRoutes() {
 
     // get the ongoing SO/invoice status
     closed.route('/on-going').get(
-      [joiOngoingDelivery],
+      [joiOngoingDelivery], // joi ongoing delivery
       verifyAppToken,   // verify app token
       ctrl.onGoingOrders // ongoing SO/invoice status
     );
 
+    // get the pending invoice status
+    closed.route('/pending').get(
+      [joiPendingDelivery], // joi pending SO
+      verifyAppToken,   // verify app token
+      ctrl.getPendingSalesOrder // ongoing SO/invoice status
+    );
+
+
+
+    // get the history invoice status
+    closed.route('/history').get(
+      [joiHistoryOfSO], // joi history SO
+      verifyAppToken,   // verify app token
+      ctrl.getHistoryOfSalesOrder // history SO/invoice status
+    );
   };
 }
 

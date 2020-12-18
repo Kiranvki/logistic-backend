@@ -216,6 +216,100 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
+  // Internal Function get the partial sales order details 
+  getPartialSalesOrder = async (salesQueryDetails) => {
+    try {
+      info('Get Partial Sales Order details !');
+      let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
+      let sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+
+      let searchObject = {
+        // 'isPacked': 0,
+        'fulfillmentStatus': 1,
+        'locationId': parseInt(locationId),
+        'cityId': cityId,
+
+        'deliveryDate': {
+          '$gte': startOfTheDay,
+          '$lte': endOfTheDay
+        }
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'customerName': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customerCode': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+
+      let totalCount = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let salesOrderList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'onlineReferenceNo': 1,
+          'customerCode': 1,
+          'customerName': 1,
+          'customerType': 1,
+          'invoiceNo': 1,
+          'fulfillmentStatus': 1,
+          'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
+        }
+      }
+      ]).allowDiskUse(true)
+
+      return {
+        success: true,
+        data: salesOrderList,
+        total: totalCount
+      };
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+      }
+    }
+  }
 
   // get user details 
   get = async (req, res) => {

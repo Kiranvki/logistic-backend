@@ -304,7 +304,7 @@ class PickerBoyController extends BaseController {
   }
 
   // get details of picker
-  getDetails = (pickerBoyId) => {
+  getDetails = async (pickerBoyId) => {
     try {
       info('Get picker details !');
 

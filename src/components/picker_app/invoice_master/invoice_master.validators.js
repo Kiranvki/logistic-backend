@@ -73,11 +73,11 @@ const schemas = {
     customerId: Joi.string().trim().label('Customer Id').required(),
   }),
 
-  // joi tally sync 
-  joiTallySync: Joi.object().keys({
-    type: Joi.string().trim().label('Type').required().valid(['payment', 'invoice', 'debit', 'credit']),
-    city: Joi.string().trim().label('City Id').lowercase().required().valid(['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']),
+  // joi start pick salesorder
+  joiGetInvoiceDetails: Joi.object().keys({
+    invoiceId: Joi.string().trim().label('Invoice Id').required(),
   }),
+
 
   // joi tally upload 
   joiTallyUpload: Joi.object().keys({

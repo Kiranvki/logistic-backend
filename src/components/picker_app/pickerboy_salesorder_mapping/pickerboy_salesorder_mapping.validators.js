@@ -56,6 +56,32 @@ const schemas = {
     }
   }),
 
+  //  joi pending SO
+  joiPendingDelivery: Joi.object().keys({
+    query: {
+      page: Joi.number().integer().min(1).label('Page').required(),
+      search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
+    },
+    body: {
+      searchDate: Joi.date().format('DD-MM-YYYY')
+        .timestamp('unix')
+        .label('Date').options({
+          convert: true,
+          language: {
+            any: {
+              format: 'should be a valid format (DD-MM-YYYY)',
+            }
+          }
+        }).optional()
+    }
+  }),
+
+  //  joi History SO
+  joiHistoryOfSO: Joi.object().keys({
+    page: Joi.number().integer().min(1).label('Page').required(),
+    search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
+  }),
+
 }
 // joi options
 const options = {
@@ -191,6 +217,49 @@ module.exports = {
 
     // validating the schema 
     schema.validate({ query: req.query, body: req.body }, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+  //  joi pending SO
+  joiPendingDelivery: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiPendingDelivery;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate({ query: req.query, body: req.body }, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+
+  //  joi History SO
+  joiHistoryOfSO: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiHistoryOfSO;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate(req.query, option).then(() => {
       next();
       // if error occured
     }).catch((err) => {

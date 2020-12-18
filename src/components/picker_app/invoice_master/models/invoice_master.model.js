@@ -185,7 +185,10 @@ const invoiceMaster = new Schema({
   'totalNetValue': {
     type: 'Number',
   },
-
+  'isDelivered': {
+    type: 'Number',
+    default: 0
+  },
   'itemSupplied': [
     {
 

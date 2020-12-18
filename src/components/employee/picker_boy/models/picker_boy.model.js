@@ -82,6 +82,9 @@ const pickerBoy = new Schema({
   dateOfJoining: {
     type: Date
   },
+  dateOfBirth: {
+    type: Date
+  },
 
   profilePic: {
     type: mongoose.Schema.Types.ObjectId,
