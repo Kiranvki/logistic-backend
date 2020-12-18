@@ -31,7 +31,10 @@ module.exports = {
       'getUserDetailsP2': '/portal/',
       'getUserDetailsP3': '/details/',
       'getUserBulkDetailsP1': '/v1/internal/user/portal/',
-      'getUserBulkDetailsP2': '/bulk/details'
+      'getUserBulkDetailsP2': '/bulk/details',
+      'apiToAutoCheckout': '/v1/picker/user/attendance/auto/check-out',
+      'baseUrl': 'http://localhost',
+      'port': '3003',
 
     },
     env_staging: {
@@ -62,8 +65,10 @@ module.exports = {
       'getUserDetailsP2': '/portal/',
       'getUserDetailsP3': '/details/',
       'getUserBulkDetailsP1': '/v1/internal/user/portal/',
-      'getUserBulkDetailsP2': '/bulk/details'
-
+      'getUserBulkDetailsP2': '/bulk/details',
+      'apiToAutoCheckout': '/v1/picker/user/attendance/auto/check-out',
+      'baseUrl': 'http://localhost',
+      'port': '3003',
     },
     env_production: {
       'watch': false,
@@ -93,8 +98,10 @@ module.exports = {
       'getUserDetailsP2': '/portal/',
       'getUserDetailsP3': '/details/',
       'getUserBulkDetailsP1': '/v1/internal/user/portal/',
-      'getUserBulkDetailsP2': '/bulk/details'
-
+      'getUserBulkDetailsP2': '/bulk/details',
+      'apiToAutoCheckout': '/v1/picker/user/attendance/auto/check-out',
+      'baseUrl': 'http://localhost',
+      'port': '3003',
     }
   }]
 };

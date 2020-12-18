@@ -8,33 +8,27 @@ const {
 } = require('../../utils').logging;
 
 // exporting the hooks 
-module.exports = async (city) => {
+module.exports = async (reqId) => {
   try {
-    info(`Getting Customer Account base from Tally for city !`);
+    info(`Auto Checkout PickerBoy Users!`);
 
     // getting the url 
     let baseUrl = process.env.baseUrl,
       port = process.env.port,
-      apiToSyncTallyCustomerAccounts = process.env.apiToSyncTallyCustomerAccounts;
-
-    info(`HITTING SERVER FOR ${city} for Customer Accounts Sync !`);
-
-    // getting the url 
-    let url = `${baseUrl}:${port}${apiToSyncTallyCustomerAccounts}/${city}`;
-
-    console.log('The url her eis ---> ', url);
+      apiToAutoCheckout = process.env.apiToAutoCheckout;
 
     // hit the tally ERP api and get the documents
-    await request.get(url)
+    return request.get(`${baseUrl}:${port}${apiToAutoCheckout}`)
       .timeout({
         response: 99999, // Wait mins for the server to start sending,
         deadline: 99999, // but allow  minute for the file to finish loading.
       })
+      .retry(1)
       .then((res) => {
         return { success: true, data: res.body };
         // catch any runtime error
       }, (err) => {
-        error(err.body);
+        error(err);
         if (err.timeout) {
           return {
             success: false,
@@ -47,11 +41,6 @@ module.exports = async (city) => {
           };
         }
       });
-
-    // return 
-    return {
-      success: true
-    };
 
     // catch any runtime error 
   } catch (e) {

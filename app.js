@@ -3,7 +3,10 @@ const express = require('express');
 const middlewares = require('./src/middleware');
 const app = express();
 const glob = require('glob');
+const cron = require('./src/utils/cron');
 
+// running the beat plan publish cron
+cron();
 // custom logger 
 const appLogger = require('./src/utils/logger');
 const cronLogger = require('./src/utils/cronLogger');

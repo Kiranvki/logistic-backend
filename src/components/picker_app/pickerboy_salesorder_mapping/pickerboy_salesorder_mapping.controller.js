@@ -97,6 +97,64 @@ class pickerboySalesOrderMappingController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+  // do something 
+  updatetUserDetails = async (req, res) => {
+    try {
+      info('Get Picker Boy Details !');
+      let date = new Date();
+      let endOfTheDay = moment(date).set({
+        h: 24,
+        m: 59,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+      let startOfTheDay = moment(date).set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // inserting the new user into the db
+      let pickerBoyDetails = await PockerBoyCtrl.getPickerBoyFullDetails(req.user._id);
+
+      // is inserted 
+      if (pickerBoyDetails.success && !_.isEmpty(pickerBoyDetails.data)) {
+        // fetch the attendance 
+        let attendanceDetails = await AttendanceCtrl.getAttendanceDetailsForADay(req.user._id, startOfTheDay, endOfTheDay)
+          .then((data) => {
+            if (data.success) {
+              let totalWorkingInMins = 0;
+              // get the total working in mins 
+              if (data.data.attendanceLog && data.data.attendanceLog.length)
+                totalWorkingInMins = _.sumBy(data.data.attendanceLog, 'totalWorkingInMins')
+              return {
+                isFirstCheckedIn: data.data.attendanceLog ? data.data.attendanceLog.length ? 1 : 0 : 0,
+                attendanceLog: data.data.attendanceLog ? data.data.attendanceLog.length ? data.data.attendanceLog[data.data.attendanceLog.length - 1] : [] : [],
+                totalWorkingInMinsTillLastCheckOut: totalWorkingInMins
+              }
+            } else return {
+              isFirstCheckedIn: 0,
+              attendanceLog: {},
+              totalWorkingInMinsTillLastCheckOut: 0
+            };
+          });
+
+        // success response 
+        return this.success(req, res, this.status.HTTP_OK, {
+          ...pickerBoyDetails.data,
+          attendanceDetails: attendanceDetails
+        }, this.messageTypes.userDetailsFetchedSuccessfully);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
   // get customer details 
   getCustomerDetails = async (req, res) => {
     try {
@@ -634,7 +692,6 @@ class pickerboySalesOrderMappingController extends BaseController {
       }).toDate();
 
       if (searchDate && !_.isEmpty(searchDate)) {
-        console.log('he');
 
         startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
           h: 0,
@@ -845,6 +902,260 @@ class pickerboySalesOrderMappingController extends BaseController {
       }
     }
   }
+
+  // get pending salesorder details
+  getPendingSalesOrder = async (req, res) => {
+    try {
+      info('Getting  the Pending Sales Order  Data !');
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = req.user.locationId || 0, // locationId 
+        cityId = req.user.cityId || 'N/A', // cityId 
+        searchDate = req.body.searchDate || '';
+
+      let startOfTheDay = moment().set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // getting the end of the day 
+      let endOfTheDay = moment().set({
+        h: 24,
+        m: 24,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      if (searchDate && !_.isEmpty(searchDate)) {
+        console.log('he');
+
+        startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+        // getting the end of the day 
+        endOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+      }
+
+      //creating the object with query details to pass , in order to get the sales order details
+      let salesQueryDetails = {
+        page,
+        pageSize,
+        searchKey,
+        sortBy,
+        locationId,
+        cityId,
+        startOfTheDay,
+        endOfTheDay
+      }
+      console.log('salesQueryDetails', salesQueryDetails);
+
+      // finding the  data from the db 
+      let salesOrderData = await SalesOrderCtrl.getPartialSalesOrder(salesQueryDetails);
+      // success
+      if (salesOrderData.success) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: salesOrderData.data,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: salesOrderData.total
+          }
+        }, this.messageTypes.pendingSalesOrderFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+
+  // get history salesorder details
+  getHistoryOfSalesOrder = async (req, res) => {
+    try {
+      info('Getting  the Pending Sales Order  Data !');
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = req.user.locationId || 0, // locationId 
+        cityId = req.user.cityId || 'N/A', // cityId 
+        searchDate = req.body.searchDate || '';
+
+      let startOfTheDay = moment().set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // getting the end of the day 
+      let endOfTheDay = moment().set({
+        h: 24,
+        m: 24,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      if (searchDate && !_.isEmpty(searchDate)) {
+        console.log('he');
+
+        startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+        // getting the end of the day 
+        endOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+      }
+
+      //creating the object with query details to pass , in order to get the sales order details
+      let salesQueryDetails = {
+        page,
+        pageSize,
+        searchKey,
+        sortBy,
+        locationId,
+        cityId,
+        startOfTheDay,
+        endOfTheDay
+      }
+      console.log('salesQueryDetails', salesQueryDetails);
+
+      // finding the  data from the db 
+      let salesOrderData = await SalesOrderCtrl.getPartialSalesOrder(salesQueryDetails);
+      // success
+      if (salesOrderData.success) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: salesOrderData.data,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: salesOrderData.total
+          }
+        }, this.messageTypes.pendingSalesOrderFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+  // get the last picker time from pickerboy
+  getLastPickingTimeUsingPickerBoyId = async (userId, date) => {
+    try {
+      info('Get The last picking time  using the pickerboy id !');
+
+      // get the end of the day
+      let endOfTheDay = moment(date).set({
+        h: 24,
+        m: 59,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // get the start of the day
+      let startOfTheDay = moment(date).set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // updating the model with the latest invoices
+      return Model.aggregate([{
+        '$match': {
+
+          'pickerBoyId': mongoose.Types.ObjectId(userId),
+          'pickingDate': {
+            $gte: startOfTheDay,
+            $lte: endOfTheDay
+          }
+        }
+      }, {
+        '$sort': {
+          'createdAt': -1
+        }
+      }, {
+        '$limit': 1
+      }, {
+        '$project': {
+          'pickerBoyId': 1,
+          'pickingDate': {
+            '$dateToString': {
+              format: "%Y-%m-%d",
+              date: "$pickingDate",
+              timezone: "+05:30"
+            }
+          },
+          'pickingDateHour': {
+            '$dateToString': {
+              format: "%H",
+              date: "$pickingDate",
+              timezone: "+05:30"
+            }
+          },
+          'pickingDateMin': {
+            '$dateToString': {
+              format: "%M",
+              date: "$pickingDate",
+              timezone: "+05:30"
+            }
+          },
+        }
+      }]).allowDiskUse(true)
+        .then((res) => {
+          if (res && res.length) {
+            // success 
+            return {
+              success: true,
+              data: res[res.length - 1]
+            }
+          } else {
+            return {
+              success: false
+            }
+          }
+        });
+
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
 
 
 }

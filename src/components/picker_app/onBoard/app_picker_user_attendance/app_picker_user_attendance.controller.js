@@ -522,7 +522,7 @@ class userController extends BaseController {
     try {
       info('Get All the Non Checked Out Users !');
 
-      // get the attendance of the salesman 
+      // get the attendance of the picker boy 
       return Model.aggregate([{
         $match: {
           'status': 1,
@@ -597,11 +597,11 @@ class userController extends BaseController {
   }
 
   // check out User
-  checkOutUserManually = async (salesmanId, attendanceId, attendanceLogId, checkInTimeInMins, date, hr, min) => {
+  checkOutUserManually = async (pickerBoyId, attendanceId, attendanceLogId, checkInTimeInMins, date, hr, min) => {
     try {
       info('Checking Out User !');
 
-      let user = salesmanId, // user 
+      let user = pickerBoyId, // user 
         todaysDate = date; // todays date
 
       let timeOfTheDayInMins = parseInt(hr) * 60 + parseInt(min); // getting the time in mins 

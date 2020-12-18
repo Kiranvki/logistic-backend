@@ -8,10 +8,7 @@ const Response = require('../../../responses/response');
 
 // add joi schema 
 const schemas = {
-  // joi zoho details 
-  joiZohoDetails: Joi.object().keys({
-    empId: Joi.string().trim().label('emp id').required().max(12),
-  }),
+
 
   // create a new salesman
   joiPickerBoyCreate: Joi.object().keys({
@@ -87,30 +84,6 @@ const schemas = {
     status: Joi.string().trim().lowercase().valid(['active', 'inactive']).optional().allow(''),
   }),
 
-  // get joi salesman list for filter
-  joiSalesmanListForFilter: Joi.object().keys({
-    search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
-  }),
-
-  // get salesman's onboarded customers list
-  joiSalesmanOnboardedCustomersList: Joi.object().keys({
-    query: {
-      page: Joi.number().integer().min(1).label('Page').required(),
-      search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
-    },
-    params: {
-      salesmanId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Salesman Id').optional().allow('').options({
-        language: {
-          string: {
-            regex: {
-              base: 'should be a valid mongoose Id'
-            }
-          }
-        }
-      }),
-    }
-  }),
-
   // joi saleman details 
   joiPickerBoyGetDetails: Joi.object().keys({
     pickerBoyId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('PickerBoy Id').required().options({
@@ -124,121 +97,14 @@ const schemas = {
     })
   }),
 
-  // joi salesman change status
-  joiSalesmanChangeStatus: Joi.object().keys({
-    salesmanId: Joi.string().trim().label('Salesman Id').required(),
-    type: Joi.string().trim().valid(['activate', 'deactivate']).label('Type').required()
-  }),
+
 
   // joi in in params
   joiIdInParams: Joi.object().keys({
-    salesmanId: Joi.string().trim().label('Salesman Id').required(),
+    pickerBoyId: Joi.string().trim().label('PickerBoy Id').required(),
   }),
 
-  // joi salesman patch 
-  joiSalesmanPatch: Joi.object().keys({
-    params: {
-      salesmanId: Joi.string().trim().label('Salesman Id').required(),
-    },
-    body: Joi.object({
-      contactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').options({
-        language: {
-          string: {
-            regex: {
-              base: 'should be a valid Phone Number'
-            }
-          }
-        }
-      }).optional().allow(''),
-      email: Joi.string().email().trim().label('email').optional().max(256).allow(''),
-      profilePic: Joi.string().trim().label('Profile Pic').optional().allow('').regex(/^[a-fA-F0-9]{24}$/).options({
-        language: {
-          string: {
-            regex: {
-              base: 'should be a valid mongoose Id'
-            }
-          }
-        }
-      }),
-      reportingManagerId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Reporting Manager Id').optional().allow('').options({
-        language: {
-          string: {
-            regex: {
-              base: 'should be a valid mongoose Id'
-            }
-          }
-        }
-      }),
-    }).min(1)
-  }),
 
-  // joi salesman asm bulk mapping 
-  joiSalesmanAsmBulkMapping: Joi.object().keys({
-    salesmanIds: Joi.array().items(Joi.string().trim().label('Salesman Id').required()).min(1),
-    reportingManagerId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Reporting Manager Id').optional().allow('').options({
-      language: {
-        string: {
-          regex: {
-            base: 'should be a valid mongoose Id'
-          }
-        }
-      }
-    }),
-  }),
-
-  // joi salesman report validation 
-  joiSalesmanReport: Joi.object().keys({
-    dates: Joi.array().items(Joi.date().format('DD/MM/YYYY').options({
-      convert: true,
-      language: {
-        any: {
-          format: 'should be a valid format'
-        }
-      }
-    })).unique().min(1).required().label("Dates"),
-  }),
-
-  // joi salesman report download
-  joiSalesmanReportDownload: Joi.object().keys({
-    query: {
-      type: Joi.string().trim().valid(['pdf', 'csv']).required()
-    },
-    body: {
-      dates: Joi.array().items(Joi.date().format('DD/MM/YYYY').options({
-        convert: true,
-        language: {
-          any: {
-            format: 'should be a valid format'
-          }
-        }
-      })).unique().min(1).required().label("Dates"),
-    }
-  }),
-
-  // joi salesman detailed report 
-  joiSalesmanReportDetails: Joi.object().keys({
-    params: {
-      salesmanId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Salesman Id').optional().allow('').options({
-        language: {
-          string: {
-            regex: {
-              base: 'should be a valid mongoose Id'
-            }
-          }
-        }
-      }),
-    },
-    body: {
-      dates: Joi.array().items(Joi.date().format('DD/MM/YYYY').options({
-        convert: true,
-        language: {
-          any: {
-            format: 'should be a valid format'
-          }
-        }
-      })).unique().min(1).required().label("Dates"),
-    }
-  }),
 };
 
 const options = {
@@ -262,26 +128,7 @@ const options = {
 
 module.exports = {
 
-  // exports validate get zoho details 
-  joiZohoDetails: (req, res, next) => {
-    // getting the schemas 
-    let schema = schemas.joiZohoDetails;
-    let option = options.basic;
 
-    // validating the schema 
-    schema.validate(req.query, option).then(() => {
-      next();
-      // if error occured
-    }).catch((err) => {
-      let error = [];
-      err.details.forEach(element => {
-        error.push(element.message);
-      });
-
-      // returning the response 
-      Response.joierrors(req, res, err);
-    });
-  },
 
   // create a new salesman
   joiPickerBoyCreate: (req, res, next) => {
@@ -334,48 +181,6 @@ module.exports = {
     });
   },
 
-  // get the salesman onboarded customers list
-  joiSalesmanOnboardedCustomersList: (req, res, next) => {
-    // getting the schemas 
-    let schema = schemas.joiSalesmanOnboardedCustomersList;
-    let option = options.basic;
-
-    // validating the schema 
-    schema.validate({ query: req.query, params: req.params }, option).then(() => {
-      next();
-      // if error occured
-    }).catch((err) => {
-      let error = [];
-      err.details.forEach(element => {
-        error.push(element.message);
-      });
-
-      // returning the response 
-      Response.joierrors(req, res, err);
-    });
-  },
-
-  // get the salesman list for filters 
-  joiSalesmanListForFilter: (req, res, next) => {
-    // getting the schemas 
-    let schema = schemas.joiSalesmanListForFilter;
-    let option = options.basic;
-
-    // validating the schema 
-    schema.validate(req.query, option).then(() => {
-      next();
-      // if error occured
-    }).catch((err) => {
-      let error = [];
-      err.details.forEach(element => {
-        error.push(element.message);
-      });
-
-      // returning the response 
-      Response.joierrors(req, res, err);
-    });
-  },
-
   // joi PickerBoy details
   joiPickerBoyGetDetails: (req, res, next) => {
     // getting the schemas 
@@ -397,26 +202,7 @@ module.exports = {
     });
   },
 
-  // joi salesman status change 
-  joiSalesmanChangeStatus: (req, res, next) => {
-    // getting the schemas 
-    let schema = schemas.joiSalesmanChangeStatus;
-    let option = options.basic;
 
-    // validating the schema 
-    schema.validate(req.params, option).then(() => {
-      next();
-      // if error occured
-    }).catch((err) => {
-      let error = [];
-      err.details.forEach(element => {
-        error.push(element.message);
-      });
-
-      // returning the response 
-      Response.joierrors(req, res, err);
-    });
-  },
 
   // joi id in params
   joiIdInParams: (req, res, next) => {
@@ -439,126 +225,5 @@ module.exports = {
     });
   },
 
-  // joi salesman patch function 
-  joiSalesmanPatch: (req, res, next) => {
-    // getting the schemas 
-    let schema = schemas.joiSalesmanPatch;
-    let option = options.basic;
 
-    // replacing space with - 
-    if (req.body.contactMobile) {
-      req.body.contactMobile = req.body.contactMobile.replace(/\s/g, '-')
-
-      // splitting as per - 
-      let contactArray = req.body.contactMobile ? req.body.contactMobile.split('-') : [];
-
-      if (contactArray.length > 1) {
-        req.body.contactMobile = contactArray[1];
-      } else if (req.body.contactMobile) req.body.contactMobile = contactArray[0];
-    }
-
-    // validating the schema 
-    schema.validate({ params: req.params, body: req.body }, option).then(() => {
-      next();
-      // if error occured
-    }).catch((err) => {
-      let error = [];
-      err.details.forEach(element => {
-        error.push(element.message);
-      });
-
-      // returning the response 
-      Response.joierrors(req, res, err);
-    });
-  },
-
-  // joi salesman asm bulk mapping 
-  joiSalesmanAsmBulkMapping: (req, res, next) => {
-    // getting the schemas 
-    let schema = schemas.joiSalesmanAsmBulkMapping;
-    let option = options.basic;
-
-    // validating the schema 
-    schema.validate(req.body, option).then(() => {
-      next();
-      // if error occured
-    }).catch((err) => {
-      let error = [];
-      err.details.forEach(element => {
-        error.push(element.message);
-      });
-
-      // returning the response 
-      Response.joierrors(req, res, err);
-    });
-  },
-
-  // get salesman report 
-  joiSalesmanReport: (req, res, next) => {
-    // getting the schemas 
-    let schema = schemas.joiSalesmanReport;
-    let option = options.basic;
-
-    // validating the schema 
-    schema.validate(req.body, option).then(() => {
-      next();
-      // if error occured
-    }).catch((err) => {
-      let error = [];
-      err.details.forEach(element => {
-        error.push(element.message);
-      });
-
-      // returning the response 
-      Response.joierrors(req, res, err);
-    });
-  },
-
-  // get salesman report download 
-  joiSalesmanReportDownload: (req, res, next) => {
-    // getting the schemas 
-    let schema = schemas.joiSalesmanReportDownload;
-    let option = options.basic;
-
-    // validating the schema 
-    schema.validate({
-      query: req.query,
-      body: req.body
-    }, option).then(() => {
-      next();
-      // if error occured
-    }).catch((err) => {
-      let error = [];
-      err.details.forEach(element => {
-        error.push(element.message);
-      });
-
-      // returning the response 
-      Response.joierrors(req, res, err);
-    });
-  },
-
-  // get salesman details report 
-  joiSalesmanReportDetails: (req, res, next) => {
-    // getting the schemas 
-    let schema = schemas.joiSalesmanReportDetails;
-    let option = options.basic;
-
-    // validating the schema 
-    schema.validate({
-      params: req.params,
-      body: req.body
-    }, option).then(() => {
-      next();
-      // if error occured
-    }).catch((err) => {
-      let error = [];
-      err.details.forEach(element => {
-        error.push(element.message);
-      });
-
-      // returning the response 
-      Response.joierrors(req, res, err);
-    });
-  },
 }

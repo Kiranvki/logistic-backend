@@ -7,6 +7,16 @@ const salesOrder = new Schema({
     type: 'String',
     enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
   },
+  'fulfillmentStatus': {
+    type: 'Number',
+    default: 0,
+    enum: [0, 1, 2]
+    /**
+   * state 0 : Not started
+   * state 1 : Partially fulfilled 
+   * state 2 : Fully fulfilled
+   */
+  },
   'orderPK': {
     type: 'Number'
   },

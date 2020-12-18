@@ -49,13 +49,13 @@ function userRoutes() {
       ctrl.getUserAttendanceForAMonth, // controller function
     )
 
-    /*
-      // get auto checkout 
-      open.route('/user/attendance/auto/check-out').get(
-        getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out of the app
-        ctrl.autoCheckout, // controller function
-      )
-*/
+
+    // get auto checkout 
+    open.route('/user/attendance/auto/check-out').get(
+      getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out of the app
+      ctrl.autoCheckout, // controller function
+    )
+
   };
 }
 
