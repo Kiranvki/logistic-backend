@@ -36,6 +36,7 @@ module.exports = async (req, res, next) => {
         millisecond: 0
       }).toDate();
     }
+    console.log('dateOfBirth', dateOfBirth);
 
     if (objectId.isValid(pickerBoyId)) {
       // check whether the document type already exist or not 
@@ -45,12 +46,18 @@ module.exports = async (req, res, next) => {
       if (getPickerBoyDetails.success) {
         info('VALID PickerBoy!');
 
-        let DateOfBirthFromDb = moment(getPickerBoyDetails.data.dateOfBirth, 'DD-MM-YYYY').set({
-          h: 0,
-          m: 0,
-          s: 0,
-          millisecond: 0
-        }).toDate();
+        let DateOfBirthFromDb = '';
+        if (dateOfBirth && !_.isEmpty(dateOfBirth)) {
+          DateOfBirthFromDb = moment(getPickerBoyDetails.data.dateOfBirth, 'DD-MM-YYYY').set({
+            h: 0,
+            m: 0,
+            s: 0,
+            millisecond: 0
+          }).toDate();
+        }
+
+        console.log('DateOfBirthFromDb', DateOfBirthFromDb);
+
         // check whether the field values are changed or not 
         if (fullName && fullName == getPickerBoyDetails.data.fullName) isNotChanged.push('fullName');
         else if (fullName) toChangeObject = { ...toChangeObject, 'fullName': fullName }
