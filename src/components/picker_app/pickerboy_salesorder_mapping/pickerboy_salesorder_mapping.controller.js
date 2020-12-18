@@ -101,52 +101,26 @@ class pickerboySalesOrderMappingController extends BaseController {
   // do something 
   updatetUserDetails = async (req, res) => {
     try {
-      info('Get Picker Boy Details !');
-      let date = new Date();
-      let endOfTheDay = moment(date).set({
-        h: 24,
-        m: 59,
-        s: 0,
-        millisecond: 0
-      }).toDate();
-      let startOfTheDay = moment(date).set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0
-      }).toDate();
+      info('Picker Boy  Profile PATCH REQUEST !');
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          ...req.body.toChangeObject
+        }
+      };
 
-      // inserting the new user into the db
-      let pickerBoyDetails = await PockerBoyCtrl.getPickerBoyFullDetails(req.user._id);
+      // inserting data into the db 
+      let isUpdated = await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(req.user._id)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      });
 
-      // is inserted 
-      if (pickerBoyDetails.success && !_.isEmpty(pickerBoyDetails.data)) {
-        // fetch the attendance 
-        let attendanceDetails = await AttendanceCtrl.getAttendanceDetailsForADay(req.user._id, startOfTheDay, endOfTheDay)
-          .then((data) => {
-            if (data.success) {
-              let totalWorkingInMins = 0;
-              // get the total working in mins 
-              if (data.data.attendanceLog && data.data.attendanceLog.length)
-                totalWorkingInMins = _.sumBy(data.data.attendanceLog, 'totalWorkingInMins')
-              return {
-                isFirstCheckedIn: data.data.attendanceLog ? data.data.attendanceLog.length ? 1 : 0 : 0,
-                attendanceLog: data.data.attendanceLog ? data.data.attendanceLog.length ? data.data.attendanceLog[data.data.attendanceLog.length - 1] : [] : [],
-                totalWorkingInMinsTillLastCheckOut: totalWorkingInMins
-              }
-            } else return {
-              isFirstCheckedIn: 0,
-              attendanceLog: {},
-              totalWorkingInMinsTillLastCheckOut: 0
-            };
-          });
-
-        // success response 
-        return this.success(req, res, this.status.HTTP_OK, {
-          ...pickerBoyDetails.data,
-          attendanceDetails: attendanceDetails
-        }, this.messageTypes.userDetailsFetchedSuccessfully);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.asmUpdatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.asmNotUpdated);
 
       // catch any runtime error 
     } catch (err) {
