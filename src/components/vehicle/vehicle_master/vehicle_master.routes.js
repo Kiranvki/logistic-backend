@@ -6,21 +6,21 @@ const {
 function vehicle() {
   return (open, closed) => {
     // add the vehicle in the packing stage
-    closed.route('/vehicle').post(
-      //[joivehicle], // joi validation
+    closed.route('/').post(
+      [joivehicle], // joi validation
       // verifyAppToken,
       // isValidSalesOrder,
       ctrl.post // controller function 
     );
 
-    closed.route('/vehicle').get(
+    closed.route('/').get(
       //  [transporterMaster], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.getVehicle // get controller 
     );
 
-    closed.route('/:vehicleid').get(
+    closed.route('/:vehicleId').get(
         //[joiTransporterCreate], // joi validation
         // verifyAppToken,
         // isValidSalesOrder,
@@ -29,14 +29,14 @@ function vehicle() {
   
 
 
-    closed.route('/:vehicleid').patch(
+    closed.route('/:vehicleId').patch(
        //[joiTransporterElementPatch], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.patchVehicle // get controller 
     );
 
-    closed.route('/:vehicleid').delete(
+    closed.route('/:vehicleId').delete(
       // [joiDeleteTransporeter], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 

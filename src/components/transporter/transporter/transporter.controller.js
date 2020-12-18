@@ -78,12 +78,12 @@ class transporterController extends BaseController {
           searchObject = {
             ...searchObject,
             '$or': [{
-              'name': {
+              'vehicleDetails.name': {
                 $regex: searchKey,
                 $options: 'is'
               }
             }, {
-              'contactNo': {
+              'locationDetails.address': {
                 $regex: searchKey,
                 $options: 'is'
               }
@@ -110,7 +110,7 @@ class transporterController extends BaseController {
         //     'name': 1,
         //     'isDeleted': 1
         //   }
-        }
+        },
         ])
         //.allowDiskUse(true);
   

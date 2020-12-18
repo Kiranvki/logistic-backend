@@ -94,13 +94,13 @@ getTransporterVehicle = async (transporterId) => {
     },
     {
       $project: {
-        'transporterMasterId': 1
+        'vehicleId': 1
       }
     },
     {
       $lookup: {
-        from: 'transporterMaster',
-        localField: "transporterMasterId",
+        from: 'vehiclemaster',
+        localField: "vehicleId",
         foreignField: "_id",
         as: 'vehicleDetails'
       }

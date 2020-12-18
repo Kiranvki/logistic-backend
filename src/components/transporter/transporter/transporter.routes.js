@@ -8,7 +8,7 @@ const {
 function transporter() {
   return (open, closed) => {
     // add the transporter in the packing stage
-    closed.route('/transporter').post(
+    closed.route('/').post(
       [joiTransporter], // joi validation
       // verifyAppToken,
       // isValidSalesOrder,
@@ -16,7 +16,7 @@ function transporter() {
     );
     
 
-    closed.route('/transporter').get(
+    closed.route('/').get(
       //[joiTransporterCreate], // joi validation
       // verifyAppToken,
       // isValidSalesOrder,
