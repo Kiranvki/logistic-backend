@@ -7,5 +7,6 @@ module.exports = {
   appUserAttendance: require('./appUserAttendance'), // app user attendance
   salesOrder: require('./salesOrder'), // sales order
   transporterMaster: require('./transporter'), // transporter 
+  rateCategory: require('./rateCategory'), // rate category
   //vehicleMaster: require('./vehicle')
 };

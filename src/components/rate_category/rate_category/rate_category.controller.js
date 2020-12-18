@@ -2,46 +2,66 @@ const moment = require('moment');
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 const Model = require('./models/rate_category.model');
+const rateTransporterVehicleMappingCtrl = require('../ratecategory_transporter_vehicle_mapping/ratecategory_transporter_vehicle_mapping.controller');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const {
-    error,
-    info
+  error,
+  info
 } = require('../../../utils').logging;
 
 //getting the model 
 class rateCategoryController extends BaseController {
-    //constructor
-    constructor() {
-        super();
-        this.messageTypes = this.messageTypes.ratectegory;
-    }
+  //constructor
+  constructor() {
+    super();
+    this.messageTypes = this.messageTypes.rateCategory;
+  }
 
-     //create a new entry
-    post = async (req, res) => {
+  //create a new entry
+  post = async (req, res) => {
+    try {
+      //Initializing the field
+      info('Creating a new Rate category !');
 
-        try {
-            //Initializing the field
-            info('Rate category Controller !');
+      let dataToInsert = {
+        'rateCategoryDetails': req.body.rateCategoryDetails,
+        'noOfVehicles': req.body.noOfVehicles
+      }
+      //inserting data into the db
+      let isInserted = await Model.create(dataToInsert);
 
-            //inserting data into the db
-            let isInserted = await Model.create({
-                ...req.body
-            });
-            // check if inserted 
-            if (isInserted && !_.isEmpty(isInserted)) {
-                return this.success(req, res, this.status.HTTP_OK, isInserted);
-            } else return this.errors(req, res, this.status.HTTP_CONFLICT);
+      // check if inserted 
+      if (isInserted && !_.isEmpty(isInserted)) {
+        //inserting the transporter and vehicle mapping
+        if (req.body.vehicleDetails && Array.isArray(req.body.vehicleDetails) && req.body.vehicleDetails.length) {
+          let transporterVehicleRateCategoryMapping = [];
+          for (let data of req.body.vehicleDetails) {
+            let vehicleData = {
+              transporterId: data.transporterId,
+              vehicleId: data.vehicleId,
+              rateCategoryId: isInserted._id
+            }
+            transporterVehicleRateCategoryMapping.push(vehicleData);
 
-            // catch any runtime error 
-        } catch (err) {
-            error(err);
-            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+          }
+          //Inserting the mapping into the DB
+          await rateTransporterVehicleMappingCtrl.create(transporterVehicleRateCategoryMapping);
         }
 
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.rateCategoryCreated);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryNotCreated);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
 
-    
+  }
+
+
   // get ratecategory list 
   getList = async (req, res) => {
     console.log("dsadasdaffafdsgsdgsfGFFHDNDFNDnN");
@@ -115,8 +135,8 @@ class rateCategoryController extends BaseController {
           pageSize: pageSize,
           total: totalcostElement
         }
-      }, 
-      //this.messageTypes.costElementsDetailsFetched
+      },
+        //this.messageTypes.costElementsDetailsFetched
       );
 
       // catch any runtime error 
@@ -127,7 +147,7 @@ class rateCategoryController extends BaseController {
 
   }
 
-      // get details 
+  // get details 
   getRateCategory = async (req, res) => {
     try {
       info('RateCategory GET DETAILS !');
@@ -150,65 +170,65 @@ class rateCategoryController extends BaseController {
     }
   }
 
-  
- // patch the request 
- patchtRateCategory = async (req, res) => {
-  try {
 
-    info('Transporter CHANGE ! !');
-    // creating data to insert
-    let dataToUpdate = {
-      $set: {
-        ...req.body,
-      }
-    };
+  // patch the request 
+  patchtRateCategory = async (req, res) => {
+    try {
 
-    // inserting data into the db 
-    let isUpdated = await Model.findOneAndUpdate({
-      _id: mongoose.Types.ObjectId(req.params.ratecategoryId)
-    }, dataToUpdate, {
-      new: true,
-      upsert: false,
-      lean: true
-    });
+      info('Transporter CHANGE ! !');
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          ...req.body,
+        }
+      };
 
-    // check if inserted 
-    if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated);
-    else return this.errors(req, res, this.status.HTTP_CONFLICT);
+      // inserting data into the db 
+      let isUpdated = await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(req.params.ratecategoryId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      });
 
-    // catch any runtime error 
-  } catch (err) {
-    error(err);
-    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-  }
-}
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT);
 
-
-
-deleteRateCategory = async (req, res) => {
-  try {
-    info('New Vehicle Delete!');
-
-    // inserting the new user into the db
-  let isUpdated = await Model.findByIdAndDelete({
-    _id: mongoose.Types.ObjectId(req.params.ratecategoryId),
-  }, {
-    $set: {
-      ...req.body
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
-  })
-  
-  // check if inserted 
-  if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});
-  else return this.errors(req, res, this.status.HTTP_CONFLICT);
+  }
 
-  // catch any runtime error 
-} catch (err) {
-  error(err);
-  this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-}
-   
-}
+
+
+  deleteRateCategory = async (req, res) => {
+    try {
+      info('New Vehicle Delete!');
+
+      // inserting the new user into the db
+      let isUpdated = await Model.findByIdAndDelete({
+        _id: mongoose.Types.ObjectId(req.params.ratecategoryId),
+      }, {
+        $set: {
+          ...req.body
+        }
+      })
+
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});
+      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
 
 }
 

@@ -7,17 +7,16 @@ const ratecategoryTransporterMapping = new Schema({
     required: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: 'transporterMaster',
-    // autopopulate: {
-    //   select: ['distributorName']
-    // }
   },
   'ratecategoryId': {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: 'rateCategoryModel',
-    // autopopulate: {
-    //   select: ['name']
-    // }
+  },
+  'vehicleId': {
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'vehicleMaster',
   },
   'status': {
     type: Number,
