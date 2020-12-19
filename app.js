@@ -147,8 +147,8 @@ app.use('/v1/transporter', transporterMasterRouter);
 app.use('/api/v1/transporter', transporterMasterAPIRouter);
 
 //Ratecategory
-app.use('/v1/ratecategory', rateCategoryRouter);
-app.use('/api/v1/ratecategory', rateCategoryAPIRouter);
+app.use('/v1/rate-category', rateCategoryRouter);
+app.use('/api/v1/rate-category', rateCategoryAPIRouter);
 
 //Vehicle
 app.use('/v1/vehicle', vehicleRouter);

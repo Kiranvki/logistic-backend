@@ -2,22 +2,21 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 // schema
-const ratecategoryTransporterMapping = new Schema({
+const ratecategoryTransporterVehicleMapping = new Schema({
   'transporterId': {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: 'transporterMaster',
-    // autopopulate: {
-    //   select: ['distributorName']
-    // }
   },
-  'ratecategoryId': {
+  'rateCategoryId': {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: 'rateCategoryModel',
-    // autopopulate: {
-    //   select: ['name']
-    // }
+  },
+  'vehicleId': {
+    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'vehicleMaster',
   },
   'status': {
     type: Number,
@@ -32,12 +31,13 @@ const ratecategoryTransporterMapping = new Schema({
 });
 
 // creating indexes
-ratecategoryTransporterMapping.index({
+ratecategoryTransporterVehicleMapping.index({
   'transporterId': 1,
   'ratecategoryId': 1,
+  'vehicleId': 1,
   'status': 1,
   'createdAt': 1
 });
 
 // exporting the entire module
-module.exports = mongoose.model('ratecategoryTransporterMapping', ratecategoryTransporterMapping);
+module.exports = mongoose.model('ratecategoryTransporterVehicleMapping', ratecategoryTransporterVehicleMapping);

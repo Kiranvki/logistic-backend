@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const rateCategoryModel = new Schema({
     'rateCategoryDetails':
     {
-        'rateCategory': {
+        'rateCategoryName': {
             type: 'String'
         },
         'rateCategoryType': {
@@ -20,29 +20,20 @@ const rateCategoryModel = new Schema({
         'includedDistance': {
             type: 'Number'
         },
-        'addetionalAmount': {
+        'additionalAmount': {
             type: 'Number'
         }
     },
-    'vehicleDetails':
-    {
-        'selectNoOfVehicles': {
-            type: 'Number',
-            enum: [1,2,3]
-        },
-        // 'transporterName': {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: 'newvehicle',
-        //     autopopulate: {
-        //         select: ['transporterName','vehicleModel']
-        //     }
-        // }
+
+    'noOfVehicles': {
+        type: 'Number',
     },
-    status: {
+
+    'status': {
         type: Number,
         default: 1
     },
-    isDeleted: {
+    'isDeleted': {
         type: Number,
         default: 0
     }
@@ -52,10 +43,10 @@ const rateCategoryModel = new Schema({
     });
 
 
-    // creating indexes
-    rateCategoryModel.index({
-        'vehicleDetails': 1
-    })
+// creating indexes
+rateCategoryModel.index({
+    'rateCategoryDetails.rateCategoryName': 1
+})
 
 // exporting the entire module
 module.exports = mongoose.model('rateCategoryModel', rateCategoryModel);
