@@ -64,9 +64,8 @@ class rateCategoryController extends BaseController {
 
   // get ratecategory list 
   getList = async (req, res) => {
-    console.log("dsadasdaffafdsgsdgsfGFFHDNDFNDnN");
     try {
-      info('Get the Cost Element List  !');
+      info('Get the Rate Category List  !');
       // get the query params
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
@@ -76,15 +75,6 @@ class rateCategoryController extends BaseController {
 
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
-
-      // project data 
-      // let dataToProject = {
-      //   firstName: 1,
-      //   lastName: 1,
-      //   employeeId: 1,
-      //   status: 1,
-      //   reportingTo: 1
-      // }
 
       // get the list of asm in the allocated city
       let searchObject = {
@@ -96,30 +86,31 @@ class rateCategoryController extends BaseController {
         searchObject = {
           ...searchObject,
           '$or': [{
-            'rateCategory': {
+            'rateCategoryDetails.rateCategoryName': {
               $regex: searchKey,
               $options: 'is'
             }
           }, {
-            'rateCategoryType': {
+            'rateCategoryDetails.rateCategoryType': {
               $regex: searchKey,
               $options: 'is'
             }
           }]
         };
 
-      // get the total cost Element
-      let totalcostElement = await Model.countDocuments({
+      // get the total rate category
+      let totalRateCategory = await Model.countDocuments({
         ...searchObject
       });
 
       // get the distributor list
-      let costElementList = await Model.aggregate([{
-        '$sort': sortingArray
-      }, {
+      let rateCategoryList = await Model.aggregate([{
         '$match': {
           ...searchObject
         }
+      },
+      {
+        '$sort': sortingArray
       }, {
         '$skip': skip
       }, {
