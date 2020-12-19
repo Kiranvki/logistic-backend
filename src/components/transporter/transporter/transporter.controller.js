@@ -46,7 +46,7 @@ class transporterController extends BaseController {
     // get transporter list 
     getList = async (req, res) => {
       try {
-        info('Get the Roles List !');
+        info('Get the Transporter List !');
   
         // get the query params
         let page = req.query.page || 1,

@@ -5,14 +5,14 @@ const ctrl = require('./rate_category.controller');
 function ratecategory(){
     return (open, closed)=>{
     // add the rate category controller in the packing stage 
-    closed.route('/ratecategory').post(
+    closed.route('/').post(
         //[joiTransporterCreate], // joi validation
         // verifyAppToken,
         // isValidSalesOrder,
         ctrl.post // controller function 
       );
 
-      closed.route('/ratecategory').get(
+      closed.route('/').get(
         //[joiTransporterCreate], // joi validation
         // verifyAppToken,
         // isValidSalesOrder,
