@@ -1,7 +1,7 @@
 const moment = require('moment');
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
-const Model = require('./models/ratecategory_transporter_mapping.model')
+const Model = require('./models/ratecategory_transporter_vehicle_mapping.model')
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const {
