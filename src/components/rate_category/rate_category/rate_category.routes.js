@@ -40,7 +40,7 @@ function ratecategory() {
     );
 
 
-    closed.route('/:ratecategoryId').get(
+    closed.route('/:rateCategoryId').get(
       //[joiTransporterMaster], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
@@ -48,18 +48,19 @@ function ratecategory() {
     );
 
 
-    closed.route('/:ratecategoryId').patch(
+    closed.route('/:rateCategoryId').patch(
       //[joiTransporterMaster], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.patchtRateCategory // get controller 
     );
 
-    closed.route('/:ratecategoryId').delete(
+    //deleting the rate category, vehicle and transporter mapping
+    closed.route('/:rateCategoryId').delete(
       // [joiDeleteTransporeter], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
-      ctrl.deleteRateCategory // get controller 
+      ctrl.deleteRateCategoryVehicleTranporterMapping // delete controller 
     );
 
   }

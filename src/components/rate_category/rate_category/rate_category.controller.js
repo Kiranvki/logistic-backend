@@ -115,20 +115,25 @@ class rateCategoryController extends BaseController {
         '$skip': skip
       }, {
         '$limit': pageSize
-      }])
+      }, {
+        $project: {
+          'rateCategoryDetails': 1,
+          'noOfVehicles': 1,
+          'status': 1,
+        }
+      }
+      ]).allowDiskUse(true);
 
 
       // success 
       return this.success(req, res, this.status.HTTP_OK, {
-        results: costElementList,
+        results: rateCategoryList,
         pageMeta: {
           skip: parseInt(skip),
           pageSize: pageSize,
-          total: totalcostElement
+          total: totalRateCategory
         }
-      },
-        //this.messageTypes.costElementsDetailsFetched
-      );
+      }, this.messageTypes.rateCategoryDetailsFetched);
 
       // catch any runtime error 
     } catch (err) {
@@ -141,18 +146,56 @@ class rateCategoryController extends BaseController {
   // get details 
   getRateCategory = async (req, res) => {
     try {
-      info('RateCategory GET DETAILS !');
+      info('GET Rate Category DETAILS !');
 
-      // inserting data into the db 
-      // let transporter = await Model.findOne({
-      let rateCategory = await Model.findById({
+      let rateCategoryData = await Model.aggregate([{
+        $match: {
+          _id: mongoose.Types.ObjectId(req.params.rateCategoryId)
+        }
+      },
+        , {
+        $lookup: {
+          from: 'ratecategoryTransporterVehicleMapping',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                'status': 1,
+                'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$rateCategoryId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'status': 1,
+                'isDeleted': 1,
+                'vehicleId': 1,
+                'transporterId': 1
+              }
+            }
+          ],
+          as: 'transporterVehicleMapping'
+        }
+      },
+      {
+        $lookup: {
+          from: 'vehicleMaster',
+          localField: "transporterVehicleMapping.vehicleId",
+          foreignField: "_id",
+          as: 'vehicle'
+        }
+      },
+      ]).allowDiskUse(true);
 
-        _id: mongoose.Types.ObjectId(req.params.ratecategoryId)
-      }).lean();
 
-      // check if inserted 
-      if (rateCategory && !_.isEmpty(rateCategory)) return this.success(req, res, this.status.HTTP_OK, rateCategory);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+      // check if data is present or not 
+      if (rateCategoryData && !_.isEmpty(rateCategoryData)) {
+        return this.success(req, res, this.status.HTTP_OK, rateCategoryData, this.messageTypes.rateCategoryDetailsFetched);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryDetailsNotFound);
 
       // catch any runtime error 
     } catch (err) {
@@ -196,18 +239,17 @@ class rateCategoryController extends BaseController {
 
 
 
-  deleteRateCategory = async (req, res) => {
+  deleteRateCategoryVehicleTranporterMapping = async (req, res) => {
     try {
-      info('New Vehicle Delete!');
+      info('Rate category Vehicle Tranporter  Delete!');
+      let mappingIdData = {
+        'rateCategoryId': req.params.rateCategoryId || '',
+        'transporterId': req.body.transporterId || '',
+        'vehicleId': req.body.vehicleId || ''
+      }
 
-      // inserting the new user into the db
-      let isUpdated = await Model.findByIdAndDelete({
-        _id: mongoose.Types.ObjectId(req.params.ratecategoryId),
-      }, {
-        $set: {
-          ...req.body
-        }
-      })
+      let deleteMappingResult = rateTransporterVehicleMappingCtrl.deleteMapping(mappingIdData);
+
 
       // check if inserted 
       if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});

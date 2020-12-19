@@ -1,7 +1,8 @@
 module.exports = {
     rateCategoryCreated: 'Rate Category Created Successfully !',
     rateCategoryNotCreated: 'Unable to Create Rate Category !',
-
+    rateCategoryDetailsFetched: 'Rate Category Details Fetched Successfully !.',
+    rateCategoryDetailsNotFound: 'Rate Category Details Not Fetched !',
 
     asmAlreadyCreated: 'Area Sales Manager already created !',
     invalidAsmId: 'The ASM id is Invalid !',
