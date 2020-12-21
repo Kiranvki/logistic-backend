@@ -54,7 +54,7 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
 
 
   // delete mapping function
-  create = async (mappingIdData) => {
+  deleteMapping = async (mappingIdData) => {
     try {
       info('Rate category Vehicle Tranporter  Delete !');
 

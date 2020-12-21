@@ -99,9 +99,9 @@ class rateCategoryController extends BaseController {
         };
 
       // // get the total rate category
-      // let totalRateCategory = await Model.countDocuments({
-      //   ...searchObject
-      // });
+      let totalRateCategory = await Model.countDocuments({
+        ...searchObject
+      });
 
       // get the distributor list
       let rateCategoryList = await Model.aggregate([{
@@ -115,13 +115,105 @@ class rateCategoryController extends BaseController {
         '$skip': skip
       }, {
         '$limit': pageSize
-      }, {
+      },
+      // {
+      //   $project: {
+      //     'rateCategoryDetails': 1,
+      //     'noOfVehicles': 1,
+      //     'status': 1,
+      //   }
+      // }
+
+      {
+        $lookup: {
+          from: 'ratecategorytransportervehiclemappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$rateCategoryId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                'status': 1,
+                'isDeleted': 1,
+                'vehicleId': 1,
+                'transporterId': 1
+              }
+            }
+          ],
+          as: 'transporterVehicleMapping'
+        }
+      },
+      {
+        $lookup: {
+          from: 'vehiclemasters',
+          localField: "transporterVehicleMapping.vehicleId",
+          foreignField: "_id",
+          as: 'vehicle'
+        }
+      },
+      {
+        $lookup: {
+          from: 'transporters',
+          localField: "transporterVehicleMapping.transporterId",
+          foreignField: "_id",
+          as: 'transporter'
+        }
+      },
+      {
         $project: {
+          vehicle: {
+            $filter: {
+              input: "$vehicle",
+              as: "vehicle",
+              cond: {
+                $and: {
+                  $eq: ["$$vehicle.isDeleted", 0]
+                }
+              }
+            }
+          },
+          transporter: {
+            $filter: {
+              input: "$transporter",
+              as: "transporter",
+              cond: {
+                $and: {
+                  // $eq: ["$$salesman.status", 1],
+                  $eq: ["$$transporter.isDeleted", 0]
+                }
+              }
+            }
+          },
           'rateCategoryDetails': 1,
           'noOfVehicles': 1,
           'status': 1,
+          'isDeleted': 1,
+          '_id': 1,
         }
-      }
+      },
+      {
+        $project: {
+          //   'transporter': 1,
+          'rateCategoryDetails': 1,
+          'noOfVehicles': 1,
+          'status': 1,
+          'isDeleted': 1,
+          '_id': 1,
+          'transporter.vehicleDetails.name': 1,
+          'vehicle.tonnage': 1,
+          'vehicle.vehicleType': 1,
+          'vehicle.vehicleModel': 1,
+        }
+      },
+
       ]).allowDiskUse(true);
 
 
@@ -153,16 +245,16 @@ class rateCategoryController extends BaseController {
           _id: mongoose.Types.ObjectId(req.params.rateCategoryId)
         }
       },
-        , {
+      {
         $lookup: {
-          from: 'ratecategoryTransporterVehicleMapping',
+          from: 'ratecategorytransportervehiclemappings',
           let: {
             'id': '$_id'
           },
           pipeline: [
             {
               $match: {
-                'status': 1,
+                // 'status': 1,
                 'isDeleted': 0,
                 '$expr': {
                   '$eq': ['$rateCategoryId', '$$id']
@@ -182,10 +274,64 @@ class rateCategoryController extends BaseController {
       },
       {
         $lookup: {
-          from: 'vehicleMaster',
+          from: 'vehiclemasters',
           localField: "transporterVehicleMapping.vehicleId",
           foreignField: "_id",
           as: 'vehicle'
+        }
+      },
+      {
+        $lookup: {
+          from: 'transporters',
+          localField: "transporterVehicleMapping.transporterId",
+          foreignField: "_id",
+          as: 'transporter'
+        }
+      },
+      {
+        $project: {
+          vehicle: {
+            $filter: {
+              input: "$vehicle",
+              as: "vehicle",
+              cond: {
+                $and: {
+                  $eq: ["$$vehicle.isDeleted", 0]
+                }
+              }
+            }
+          },
+          transporter: {
+            $filter: {
+              input: "$transporter",
+              as: "transporter",
+              cond: {
+                $and: {
+                  // $eq: ["$$salesman.status", 1],
+                  $eq: ["$$transporter.isDeleted", 0]
+                }
+              }
+            }
+          },
+          'rateCategoryDetails': 1,
+          'noOfVehicles': 1,
+          'status': 1,
+          'isDeleted': 1,
+          '_id': 1,
+        }
+      },
+      {
+        $project: {
+          //   'transporter': 1,
+          'rateCategoryDetails': 1,
+          'noOfVehicles': 1,
+          'status': 1,
+          'isDeleted': 1,
+          '_id': 1,
+          'transporter.vehicleDetails.name': 1,
+          'vehicle.tonnage': 1,
+          'vehicle.vehicleType': 1,
+          'vehicle.vehicleModel': 1,
         }
       },
       ]).allowDiskUse(true);
