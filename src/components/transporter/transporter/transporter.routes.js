@@ -32,16 +32,16 @@ function transporter() {
     );
 
     closed.route('/:transporterId').get(
-      [joiTransporterGetDetails], // joi validation
+      //[joiTransporterGetDetails], // joi validation
       // verifyAppToken,
       isValidTransporter,
       ctrl.getTransporter // controller function 
     );
 
     closed.route('/:transporterId').patch(
-       [joiTransporterElementPatch], // joi validation
+       //[joiTransporterElementPatch], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
-      checkWhetherItsAValidTransporterUpdate, // check whether its a valid update 
+      isValidTransporter, // check whether its a valid update 
       ctrl.patchTransporter // get controller 
     );
 

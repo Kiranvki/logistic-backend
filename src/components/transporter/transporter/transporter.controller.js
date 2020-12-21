@@ -132,29 +132,6 @@ class transporterController extends BaseController {
   }
 
 
-
-    // // get pickerBoyData details
-    // getTransporter = async (req, res) => {
-    //   try {
-    //     info('pickerBoy GET DETAILS !');
-  
-    //     // get pickerBoy details
-    //     let transporter = await Model.aggregate([{
-    //       $match: {
-    //         _id: mongoose.Types.ObjectId(req.params.transporterId)
-    //       }
-    //     }]).allowDiskUse(true);
-  
-    //     // check if inserted 
-    //     if (transporter && transporter.length) return this.success(req, res, this.status.HTTP_OK, transporter[transporter.length - 1], this.messageTypes.transporterFetched);
-    //     else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotFetched);
-  
-    //     // catch any runtime error 
-    //   } catch (err) {
-    //     error(err);
-    //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    //   }
-    // }
   
   // get details 
   getTransporter = async (req, res) => {
@@ -181,7 +158,7 @@ class transporterController extends BaseController {
     }
   }
 
-  // patch the request 
+  // // patch the request 
   patchTransporter = async (req, res) => {
     try {
 
