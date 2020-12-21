@@ -5,6 +5,8 @@ module.exports = {
     rateCategoryDetailsNotFound: 'Rate Category Details Not Fetched !',
     rateCategoryVehicleTransporterMappingDeletedSuccessfully: 'RateCategory Vehicle Transporter Mapping Deleted Successfully !',
     rateCategoryVehicleTransporterMappingNotDeletedSuccessfully: 'RateCategory Vehicle Transporter Mapping  Not Deleted!',
+    rateCategoryDeletedSuccessfully: 'RateCategory Deleted Successfully !',
+    rateCategoryNotDeletedSuccessfully: 'RateCategory  Not Deleted!',
 
     asmAlreadyCreated: 'Area Sales Manager already created !',
     invalidAsmId: 'The ASM id is Invalid !',

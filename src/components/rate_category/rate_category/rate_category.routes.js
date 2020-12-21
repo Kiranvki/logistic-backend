@@ -56,13 +56,20 @@ function ratecategory() {
     );
 
     //deleting the rate category, vehicle and transporter mapping
-    closed.route('/:rateCategoryVehicleTransporterMappingId').delete(
+    closed.route('/rate-category-mapping/:rateCategoryVehicleTransporterMappingId').delete(
       // [joiDeleteTransporeter], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.deleteRateCategoryVehicleTranporterMapping // delete controller 
     );
 
+    //deleting the rate category itself
+    closed.route('/:rateCategoryId').delete(
+      // [joiDeleteTransporeter], // joi validation
+      // setupDataForGoFrugalApi, // setup data for gofrugal
+      // getTheDetailsFromGoFrugal, // get the data from go frugal 
+      ctrl.deleteRateCategory // delete controller 
+    );
   }
 }
 

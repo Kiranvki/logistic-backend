@@ -378,6 +378,41 @@ class rateCategoryController extends BaseController {
 
   }
 
+  deleteRateCategory = async (req, res) => {
+    try {
+      info('Rate category  Delete!');
+
+      let rateCategoryId = req.params.rateCategoryId || '';
+
+      // creating data to update
+      let dataToUpdate = {
+        $set: {
+          status: 0,
+          isDeleted: 1
+        }
+      };
+
+      // inserting data into the db 
+      let isUpdated = await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(rateCategoryId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      })
+
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.rateCategoryDeletedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryNotDeletedSuccessfully);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
+
 }
 
 
