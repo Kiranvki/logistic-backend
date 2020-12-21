@@ -116,14 +116,6 @@ class rateCategoryController extends BaseController {
       }, {
         '$limit': pageSize
       },
-      // {
-      //   $project: {
-      //     'rateCategoryDetails': 1,
-      //     'noOfVehicles': 1,
-      //     'status': 1,
-      //   }
-      // }
-
       {
         $lookup: {
           from: 'ratecategorytransportervehiclemappings',
@@ -141,67 +133,49 @@ class rateCategoryController extends BaseController {
               }
             }, {
               $project: {
+                '_id': 1,
                 'status': 1,
                 'isDeleted': 1,
                 'vehicleId': 1,
                 'transporterId': 1
               }
-            }
+            },
+            {
+              $lookup: {
+                from: 'vehiclemasters',
+                localField: "vehicleId",
+                foreignField: "_id",
+                as: 'vehicle'
+              }
+
+            },
+            {
+              $unwind: {
+                path: '$vehicle',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'transporters',
+                localField: "transporterId",
+                foreignField: "_id",
+                as: 'transporter'
+              }
+            },
+            {
+              $unwind: {
+                path: '$transporter',
+                preserveNullAndEmptyArrays: true
+              }
+            },
           ],
           as: 'transporterVehicleMapping'
         }
       },
-      {
-        $lookup: {
-          from: 'vehiclemasters',
-          localField: "transporterVehicleMapping.vehicleId",
-          foreignField: "_id",
-          as: 'vehicle'
-        }
-      },
-      {
-        $lookup: {
-          from: 'transporters',
-          localField: "transporterVehicleMapping.transporterId",
-          foreignField: "_id",
-          as: 'transporter'
-        }
-      },
+
       {
         $project: {
-          vehicle: {
-            $filter: {
-              input: "$vehicle",
-              as: "vehicle",
-              cond: {
-                $and: {
-                  $eq: ["$$vehicle.isDeleted", 0]
-                }
-              }
-            }
-          },
-          transporter: {
-            $filter: {
-              input: "$transporter",
-              as: "transporter",
-              cond: {
-                $and: {
-                  // $eq: ["$$salesman.status", 1],
-                  $eq: ["$$transporter.isDeleted", 0]
-                }
-              }
-            }
-          },
-          'rateCategoryDetails': 1,
-          'noOfVehicles': 1,
-          'status': 1,
-          'isDeleted': 1,
-          '_id': 1,
-        }
-      },
-      {
-        $project: {
-          //   'transporter': 1,
           'rateCategoryDetails': 1,
           'noOfVehicles': 1,
           'status': 1,
@@ -210,9 +184,14 @@ class rateCategoryController extends BaseController {
           'transporter.vehicleDetails.name': 1,
           'transporter._id': 1,
           'vehicle._id': 1,
-          'vehicle.tonnage': 1,
-          'vehicle.vehicleType': 1,
-          'vehicle.vehicleModel': 1,
+          'transporterVehicleMapping._id': 1,
+          'transporterVehicleMapping.status': 1,
+          'transporterVehicleMapping.vehicle._id': 1,
+          'transporterVehicleMapping.vehicle.vehicleType': 1,
+          'transporterVehicleMapping.vehicle.vehicleModel': 1,
+          'transporterVehicleMapping.vehicle.tonnage': 1,
+          'transporterVehicleMapping.transporter._id': 1,
+          'transporterVehicleMapping.transporter.vehicleDetails.name': 1,
         }
       },
 
@@ -264,64 +243,47 @@ class rateCategoryController extends BaseController {
               }
             }, {
               $project: {
+                '_id': 1,
                 'status': 1,
                 'isDeleted': 1,
                 'vehicleId': 1,
                 'transporterId': 1
               }
-            }
+            },
+            {
+              $lookup: {
+                from: 'vehiclemasters',
+                localField: "vehicleId",
+                foreignField: "_id",
+                as: 'vehicle'
+              }
+
+            },
+            {
+              $unwind: {
+                path: '$vehicle',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'transporters',
+                localField: "transporterId",
+                foreignField: "_id",
+                as: 'transporter'
+              }
+            },
+            {
+              $unwind: {
+                path: '$transporter',
+                preserveNullAndEmptyArrays: true
+              }
+            },
           ],
           as: 'transporterVehicleMapping'
         }
       },
-      {
-        $lookup: {
-          from: 'vehiclemasters',
-          localField: "transporterVehicleMapping.vehicleId",
-          foreignField: "_id",
-          as: 'vehicle'
-        }
-      },
-      {
-        $lookup: {
-          from: 'transporters',
-          localField: "transporterVehicleMapping.transporterId",
-          foreignField: "_id",
-          as: 'transporter'
-        }
-      },
-      {
-        $project: {
-          vehicle: {
-            $filter: {
-              input: "$vehicle",
-              as: "vehicle",
-              cond: {
-                $and: {
-                  $eq: ["$$vehicle.isDeleted", 0]
-                }
-              }
-            }
-          },
-          transporter: {
-            $filter: {
-              input: "$transporter",
-              as: "transporter",
-              cond: {
-                $and: {
-                  // $eq: ["$$salesman.status", 1],
-                  $eq: ["$$transporter.isDeleted", 0]
-                }
-              }
-            }
-          },
-          'rateCategoryDetails': 1,
-          'noOfVehicles': 1,
-          'status': 1,
-          'isDeleted': 1,
-          '_id': 1,
-        }
-      },
+
       {
         $project: {
           //   'transporter': 1,
@@ -333,9 +295,14 @@ class rateCategoryController extends BaseController {
           'transporter.vehicleDetails.name': 1,
           'transporter._id': 1,
           'vehicle._id': 1,
-          'vehicle.tonnage': 1,
-          'vehicle.vehicleType': 1,
-          'vehicle.vehicleModel': 1,
+          'transporterVehicleMapping._id': 1,
+          'transporterVehicleMapping.status': 1,
+          'transporterVehicleMapping.vehicle._id': 1,
+          'transporterVehicleMapping.vehicle.vehicleType': 1,
+          'transporterVehicleMapping.vehicle.vehicleModel': 1,
+          'transporterVehicleMapping.vehicle.tonnage': 1,
+          'transporterVehicleMapping.transporter._id': 1,
+          'transporterVehicleMapping.transporter.vehicleDetails.name': 1,
         }
       },
       ]).allowDiskUse(true);
