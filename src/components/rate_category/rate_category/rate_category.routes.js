@@ -56,7 +56,7 @@ function ratecategory() {
     );
 
     //deleting the rate category, vehicle and transporter mapping
-    closed.route('/:rateCategoryId').delete(
+    closed.route('/:rateCategoryVehicleTransporterMappingId').delete(
       // [joiDeleteTransporeter], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 

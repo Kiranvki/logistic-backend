@@ -54,7 +54,7 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
 
 
   // delete mapping function
-  deleteMapping = async (mappingIdData) => {
+  deleteMapping = async (rateCategoryVehicleTransporterMappingId) => {
     try {
       info('Rate category Vehicle Tranporter  Delete Internal Function !');
 
@@ -66,15 +66,12 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
         }
       };
 
-      // checking mappingIdData object
-      if (mappingIdData && !_.isEmpty(mappingIdData)) {
+      // checking rateCategoryVehicleTransporterMappingId is present
+      if (rateCategoryVehicleTransporterMappingId && !_.isEmpty(rateCategoryVehicleTransporterMappingId)) {
 
-        let { rateCategoryId, transporterId, vehicleId } = mappingIdData
-        // inserting data into the db 
+        // updating data into the db 
         return Model.findOneAndUpdate({
-          transporterId: mongoose.Types.ObjectId(transporterId),
-          vehicleId: mongoose.Types.ObjectId(vehicleId),
-          rateCategoryId: mongoose.Types.ObjectId(rateCategoryId),
+          _id: mongoose.Types.ObjectId(rateCategoryVehicleTransporterMappingId),
         }, dataToUpdate, {
           new: true,
           upsert: false,

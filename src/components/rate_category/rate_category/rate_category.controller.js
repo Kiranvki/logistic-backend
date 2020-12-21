@@ -359,13 +359,11 @@ class rateCategoryController extends BaseController {
   deleteRateCategoryVehicleTranporterMapping = async (req, res) => {
     try {
       info('Rate category Vehicle Tranporter  Delete!');
-      let mappingIdData = {
-        'rateCategoryId': req.params.rateCategoryId || '',
-        'transporterId': req.body.transporterId || '',
-        'vehicleId': req.body.vehicleId || ''
-      }
 
-      let deleteMappingResult = await rateTransporterVehicleMappingCtrl.deleteMapping(mappingIdData);
+      let rateCategoryVehicleTransporterMappingId = req.params.rateCategoryVehicleTransporterMappingId || '';
+
+
+      let deleteMappingResult = await rateTransporterVehicleMappingCtrl.deleteMapping(rateCategoryVehicleTransporterMappingId);
 
 
       // check if updated 
