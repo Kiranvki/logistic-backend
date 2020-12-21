@@ -25,5 +25,6 @@ module.exports = {
     transporterNotDeleted : "New Transporter Not Deleted Successfully !",
     transporterRatecategory: 'Transporter Ratecategory Successfully Created ',
     transporterRatecateNotCreated: "Ratecategory Not Successfully Created",
-   
+    transporterIdIsInvalidOrDeactivated: 'Transporter Id is Invalid or Deactivated !',
+    transporterId: 'Transporter is Invalid !',
 }

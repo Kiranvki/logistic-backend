@@ -43,105 +43,131 @@ class transporterController extends BaseController {
   }
 
 
-    // get transporter list 
-    getList = async (req, res) => {
-      try {
-        info('Get the Transporter List !');
-  
-        // get the query params
-        let page = req.query.page || 1,
-          pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-          searchKey = req.query.search || '',
-          sortBy = req.query.sortBy || 'createdAt',
-          sortingArray = {};
-  
-        sortingArray[sortBy] = -1;
-        let skip = parseInt(page - 1) * pageSize;
-  
-        // project data 
-        // let dataToProject = {
-        //   firstName: 1,
-        //   lastName: 1,
-        //   employeeId: 1,
-        //   status: 1,
-        //   reportingTo: 1
-        // }
-  
-        // get the list of asm in the allocated city
-        let searchObject = {
-          'isDeleted': 0,
-  
+  // get transporter list 
+  getList = async (req, res) => {
+    try {
+      info('Get the Transporter List !');
+
+      // get the query params
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        sortingArray = {};
+
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // project data 
+      // let dataToProject = {
+      //   firstName: 1,
+      //   lastName: 1,
+      //   employeeId: 1,
+      //   status: 1,
+      //   reportingTo: 1
+      // }
+
+      // get the list of asm in the allocated city
+      let searchObject = {
+        'isDeleted': 0,
+
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'vehicleDetails.name': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'locationDetails.address': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
         };
-  
-        // creating a match object
-        if (searchKey !== '')
-          searchObject = {
-            ...searchObject,
-            '$or': [{
-              'vehicleDetails.name': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }, {
-              'locationDetails.address': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }]
-          };
-  
-  
-  
-        // get the Transporter list 
-        let transporterList = await Model.aggregate([{
-          $match: {
-            ...searchObject
-          }
-        }, {
-          $sort: sortingArray
-        }, {
-          $skip: skip
-        }, {
-          $limit: pageSize
+
+
+
+      // get the Transporter list 
+      let transporterList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
         // },
         // {
         //   $project: {
-  
+
         //     'name': 1,
         //     'isDeleted': 1
         //   }
-        },
-        ])
-        //.allowDiskUse(true);
-  
-        // success 
-        return this.success(req, res, this.status.HTTP_OK, {
-          results: transporterList,
-          pageMeta: {
-            skip: parseInt(skip),
-            pageSize: pageSize,
-            // total: totalAsms
-          }
-        }, this.messageTypes.transporterFetched);
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-      }
-    }
-  
+      },
+      ])
+      //.allowDiskUse(true);
 
+      // success 
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: transporterList,
+        pageMeta: {
+          skip: parseInt(skip),
+          pageSize: pageSize,
+          // total: totalAsms
+        }
+      }, this.messageTypes.transporterFetched);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+
+    // // get pickerBoyData details
+    // getTransporter = async (req, res) => {
+    //   try {
+    //     info('pickerBoy GET DETAILS !');
+  
+    //     // get pickerBoy details
+    //     let transporter = await Model.aggregate([{
+    //       $match: {
+    //         _id: mongoose.Types.ObjectId(req.params.transporterId)
+    //       }
+    //     }]).allowDiskUse(true);
+  
+    //     // check if inserted 
+    //     if (transporter && transporter.length) return this.success(req, res, this.status.HTTP_OK, transporter[transporter.length - 1], this.messageTypes.transporterFetched);
+    //     else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotFetched);
+  
+    //     // catch any runtime error 
+    //   } catch (err) {
+    //     error(err);
+    //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    //   }
+    // }
+  
   // get details 
   getTransporter = async (req, res) => {
+
     try {
       info('Transporter GET DETAILS !');
-
+      // get the brand id 
+      let transporterId = req.params.transporterId;
       // inserting data into the db 
       // let transporter = await Model.findOne({
       let transporter = await Model.findById({
 
-        _id: mongoose.Types.ObjectId(req.params.transporterid)
+        _id: mongoose.Types.ObjectId(transporterId)
       }).lean();
 
       // check if inserted 
@@ -169,7 +195,7 @@ class transporterController extends BaseController {
 
       // inserting data into the db 
       let isUpdated = await Model.findOneAndUpdate({
-        _id: mongoose.Types.ObjectId(req.params.transporterid)
+        _id: mongoose.Types.ObjectId(req.params.transporterId)
       }, dataToUpdate, {
         new: true,
         upsert: false,
@@ -195,24 +221,24 @@ class transporterController extends BaseController {
       info('New Vehicle Delete!');
 
       // inserting the new user into the db
-    let isUpdated = await Model.findByIdAndDelete({
-      _id: mongoose.Types.ObjectId(req.params.transporterid),
-    }, {
-      $set: {
-        ...req.body
-      }
-    })
-    
-    // check if inserted 
-    if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.transporterDeleted);
-    else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotDeleted);
+      let isUpdated = await Model.findByIdAndDelete({
+        _id: mongoose.Types.ObjectId(req.params.transporterId),
+      }, {
+        $set: {
+          ...req.body
+        }
+      })
 
-    // catch any runtime error 
-  } catch (err) {
-    error(err);
-    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.transporterDeleted);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotDeleted);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
   }
-}
 
 }
 // exporting the modules 

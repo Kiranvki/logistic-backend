@@ -3,7 +3,13 @@ const {
   joiTransporter,
   joiTransporterElementList,
   joiTransporterElementPatch,
-} = require('./transporter.validators')
+} = require('./transporter.validators');
+
+// hooks 
+const {
+  isValidTransporter, // check whether the brand manager id valid or not
+} = require('../../../hooks');
+
 
 function transporter() {
   return (open, closed) => {
@@ -23,23 +29,21 @@ function transporter() {
       ctrl.getList // controller function 
     );
 
-
-    closed.route('/:transporterid').get(
-      //  [transporterMaster], // joi validation
-      // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
-      ctrl.getTransporter // get controller 
+    closed.route('/:transporterId').get(
+      //[joiTransporterCreate], // joi validation
+      // verifyAppToken,
+      isValidTransporter,
+      ctrl.getTransporter // controller function 
     );
 
-
-    closed.route('/:transporterid').patch(
+    closed.route('/:transporterId').patch(
        [joiTransporterElementPatch], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.patchTransporter // get controller 
     );
 
-    closed.route('/:transporterid').delete(
+    closed.route('/:transporterId').delete(
       // [joiDeleteTransporeter], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 

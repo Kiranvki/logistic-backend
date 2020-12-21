@@ -98,10 +98,10 @@ class rateCategoryController extends BaseController {
           }]
         };
 
-      // get the total rate category
-      let totalRateCategory = await Model.countDocuments({
-        ...searchObject
-      });
+      // // get the total rate category
+      // let totalRateCategory = await Model.countDocuments({
+      //   ...searchObject
+      // });
 
       // get the distributor list
       let rateCategoryList = await Model.aggregate([{
@@ -120,11 +120,11 @@ class rateCategoryController extends BaseController {
 
       // success 
       return this.success(req, res, this.status.HTTP_OK, {
-        results: costElementList,
+        results: rateCategoryList,
         pageMeta: {
           skip: parseInt(skip),
           pageSize: pageSize,
-          total: totalcostElement
+         // total: totalcostElement
         }
       },
         //this.messageTypes.costElementsDetailsFetched
