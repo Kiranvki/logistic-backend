@@ -56,7 +56,7 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
   // delete mapping function
   deleteMapping = async (mappingIdData) => {
     try {
-      info('Rate category Vehicle Tranporter  Delete !');
+      info('Rate category Vehicle Tranporter  Delete Internal Function !');
 
       // creating data to insert
       let dataToUpdate = {
@@ -68,12 +68,13 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
 
       // checking mappingIdData object
       if (mappingIdData && !_.isEmpty(mappingIdData)) {
+
         let { rateCategoryId, transporterId, vehicleId } = mappingIdData
         // inserting data into the db 
-        return await Model.findOneAndUpdate({
-          transporterId: mongoose.Types.ObjectId(rateCategoryId),
-          vehicleId: mongoose.Types.ObjectId(transporterId),
-          rateCategoryId: mongoose.Types.ObjectId(vehicleId),
+        return Model.findOneAndUpdate({
+          transporterId: mongoose.Types.ObjectId(transporterId),
+          vehicleId: mongoose.Types.ObjectId(vehicleId),
+          rateCategoryId: mongoose.Types.ObjectId(rateCategoryId),
         }, dataToUpdate, {
           new: true,
           upsert: false,

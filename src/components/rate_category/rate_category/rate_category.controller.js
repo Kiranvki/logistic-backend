@@ -394,12 +394,12 @@ class rateCategoryController extends BaseController {
         'vehicleId': req.body.vehicleId || ''
       }
 
-      let deleteMappingResult = rateTransporterVehicleMappingCtrl.deleteMapping(mappingIdData);
+      let deleteMappingResult = await rateTransporterVehicleMappingCtrl.deleteMapping(mappingIdData);
 
 
-      // check if inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+      // check if updated 
+      if (deleteMappingResult.success) return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.rateCategoryVehicleTransporterMappingDeletedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryVehicleTransporterMappingNotDeletedSuccessfully);
 
       // catch any runtime error 
     } catch (err) {
