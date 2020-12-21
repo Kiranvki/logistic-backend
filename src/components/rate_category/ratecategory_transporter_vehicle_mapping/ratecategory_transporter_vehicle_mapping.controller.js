@@ -52,6 +52,55 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
     }
   }
 
+
+  // delete mapping function
+  create = async (mappingIdData) => {
+    try {
+      info('Rate category Vehicle Tranporter  Delete !');
+
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          status: 0,
+          isDeleted: 1
+        }
+      };
+
+      // checking mappingIdData object
+      if (mappingIdData && !_.isEmpty(mappingIdData)) {
+        let { rateCategoryId, transporterId, vehicleId } = mappingIdData
+        // inserting data into the db 
+        return await Model.findOneAndUpdate({
+          transporterId: mongoose.Types.ObjectId(rateCategoryId),
+          vehicleId: mongoose.Types.ObjectId(transporterId),
+          rateCategoryId: mongoose.Types.ObjectId(vehicleId),
+        }, dataToUpdate, {
+          new: true,
+          upsert: false,
+          lean: true
+        })
+          .then((res) => {
+            if (res)
+              return {
+                success: true,
+              };
+            else return {
+              success: false
+            }
+          });
+      } else return {
+        success: false
+      };
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
 }
 
 // exporting the modules 
