@@ -8,5 +8,6 @@ module.exports = {
   isValidPickerBoyId: require('./app/isValidPickerBoyId'),  //check whether the picker id is correct or not
   generateOtp: require('./app/generateOtp'), // generate the OTP
   isValidAgencyId: require('./isValidAgencyId'),//check whether the agencyId is valid or not
-  isValidTransporter: require('./isValidTransporterId')
+  isValidTransporter: require('./isValidTransporterId'),
+  checkWhetherItsAValidTransporterUpdate : require('./checkWhetherItsAValidTransporterUpdate')
 }

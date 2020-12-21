@@ -166,6 +166,26 @@ const schemas = {
     }).min(1)
   }),
 
+
+  joiTransporterGetDetails: Joi.object().keys({
+    brandId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
+      language: {
+        string: {
+          regex: {
+            base: 'should be a valid mongoose Id.'
+          }
+        }
+      }
+    }).required(),
+  }),
+
+   // get asm list 
+   joiTransporterList: Joi.object().keys({
+    page: Joi.number().integer().min(1).label('Page').required(),
+    search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
+  }),
+
+
 }
 
 // joi options
@@ -210,6 +230,48 @@ module.exports = {
         });
     },
 
+      // joi Transporter get details 
+  joiTransporterGetDetails: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiTransporterGetDetails;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate(req.params, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+      
+  // joi asm list 
+  joiTransporterList: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiTransporterList;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate(req.query, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+         // returning the response 
+         Response.joierrors(req, res, err);
+        });
+      },
+
     // joi Transporter list 
     joiTransporterElementList: (req, res, next) => {
         // getting the schemas 
@@ -230,7 +292,6 @@ module.exports = {
             Response.joierrors(req, res, err);
         });
     },
-
 
      // joi cost element patch
   joiTransporterElementPatch: (req, res, next) => {

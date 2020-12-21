@@ -131,11 +131,7 @@ class rateCategoryController extends BaseController {
         pageMeta: {
           skip: parseInt(skip),
           pageSize: pageSize,
-<<<<<<< HEAD
-         // total: totalcostElement
-=======
           total: totalRateCategory
->>>>>>> c000cda6448917e382a87cdfdbd4d9d4a2d07972
         }
       }, this.messageTypes.rateCategoryDetailsFetched);
 

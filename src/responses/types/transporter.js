@@ -27,4 +27,6 @@ module.exports = {
     transporterRatecateNotCreated: "Ratecategory Not Successfully Created",
     transporterIdIsInvalidOrDeactivated: 'Transporter Id is Invalid or Deactivated !',
     transporterId: 'Transporter is Invalid !',
+    dataIsNotChanged: 'Following Data is Not Changed - ',
+    transporterIdInvalidEitherDeletedOrDeactivated: 'transporter Id is either deleted or deactivated !',
 }

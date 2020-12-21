@@ -1,13 +1,15 @@
 const ctrl = require('./transporter.controller');
 const {
   joiTransporter,
-  joiTransporterElementList,
+  joiTransporterGetDetails,
+  joiTransporterList,
   joiTransporterElementPatch,
 } = require('./transporter.validators');
 
 // hooks 
 const {
-  isValidTransporter, // check whether the brand manager id valid or not
+  isValidTransporter, // check whether the Transporter id valid or not
+  checkWhetherItsAValidTransporterUpdate, // check whether the its a valid Transporter update
 } = require('../../../hooks');
 
 
@@ -23,14 +25,14 @@ function transporter() {
     
 
     closed.route('/').get(
-      //[joiTransporterCreate], // joi validation
+      [joiTransporterList], // joi validation
       // verifyAppToken,
       // isValidSalesOrder,
       ctrl.getList // controller function 
     );
 
     closed.route('/:transporterId').get(
-      //[joiTransporterCreate], // joi validation
+      [joiTransporterGetDetails], // joi validation
       // verifyAppToken,
       isValidTransporter,
       ctrl.getTransporter // controller function 
@@ -39,7 +41,7 @@ function transporter() {
     closed.route('/:transporterId').patch(
        [joiTransporterElementPatch], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
+      checkWhetherItsAValidTransporterUpdate, // check whether its a valid update 
       ctrl.patchTransporter // get controller 
     );
 
