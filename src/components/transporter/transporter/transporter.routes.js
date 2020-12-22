@@ -1,8 +1,11 @@
 const ctrl = require('./transporter.controller');
 const {
+  // joiTransporterGetDetails,/
   joiTransporter,
-  joiTransporterGetDetails,
   joiTransporterList,
+  joiTransporterGetDetails,
+  joiTransporterPatch,
+  joiIdInParams,
   joiTransporterElementPatch,
 } = require('./transporter.validators');
 
@@ -22,7 +25,7 @@ function transporter() {
       // isValidSalesOrder,
       ctrl.post // controller function 
     );
-    
+
 
     closed.route('/').get(
       [joiTransporterList], // joi validation
@@ -32,23 +35,29 @@ function transporter() {
     );
 
     closed.route('/:transporterId').get(
-      //[joiTransporterGetDetails], // joi validation
+      [joiTransporterGetDetails], // joi validation
       // verifyAppToken,
       isValidTransporter,
       ctrl.getTransporter // controller function 
     );
 
+    // get minified list
+    closed.route('/minified/list').get(
+      // [joiCustomersList], // joi validation
+      // verifyUserToken, // verify user token
+      ctrl.getMinifiedList // get controller 
+    );
     closed.route('/:transporterId').patch(
-       //[joiTransporterElementPatch], // joi validation
+      [joiTransporterPatch], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
-      isValidTransporter, // check whether its a valid update 
+      //isValidTransporter, // check whether its a valid update 
       ctrl.patchTransporter // get controller 
     );
 
     closed.route('/:transporterId').delete(
-      // [joiDeleteTransporeter], // joi validation
+       [joiIdInParams], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
+      isValidTransporter, // get the data from go frugal 
       ctrl.deleteTransporter // get controller 
     );
   };

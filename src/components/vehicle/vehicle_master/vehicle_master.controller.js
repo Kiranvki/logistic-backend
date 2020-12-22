@@ -148,10 +148,10 @@ class vehicleController extends BaseController {
       }
     
 
-    // get details 
+    // // get details 
     getList = async (req, res) => {
         try {
-          info('Transporter Vehicle GET DETAILS !');
+          info('Vehicle GET DETAILS !');
     
           // inserting data into the db 
           // let transporter = await Model.findOne({
@@ -171,6 +171,7 @@ class vehicleController extends BaseController {
         }
       }
     
+
       // patch the request 
       patchVehicle = async (req, res) => {
           try {

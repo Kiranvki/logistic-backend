@@ -3,7 +3,10 @@ const Schema = mongoose.Schema;
 
 //schema
 const transporter = new Schema({
-    
+    // transporterId: {
+    //     required: true,
+    //     type: mongoose.Schema.Types.ObjectId,
+    // },
     vehicleDetails: {
         name: {
             type: String

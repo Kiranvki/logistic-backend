@@ -22,6 +22,9 @@ const vehicleMaster = new Schema({
   'breadth': {
     type: String,
   },
+  'tonnage':{
+    type: Number,
+  },
   status: {
     type: Number,
     default: 1
