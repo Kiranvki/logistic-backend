@@ -8,14 +8,14 @@ const Response = require('../../../responses/response');
 
 // add joi schema 
 const schemas = {
-    joivehicle  : Joi.object().keys({
-    regNumber:  Joi.string().trim().label('Regestration Number').required().max(12),
-    vehicleType: Joi.string().trim().label('Vehicle Type').required().max(12),
-    vehicleModel: Joi.string().trim().label('Vehicle Model').required().max(12),
-    height:Joi.string().trim().label('Vehicle Model').required().max(12),
-    length: Joi.string().trim().label('Length').required().max(12),
-    breadth: Joi.string().trim().label('Breadth').required().max(12)
-})
+    joiVehicleCreate: Joi.object().keys({
+        regNumber: Joi.string().trim().label('Regestration Number').required().max(12),
+        vehicleType: Joi.string().trim().label('Vehicle Type').required().max(12),
+        vehicleModel: Joi.string().trim().label('Vehicle Model').required().max(12),
+        height: Joi.string().trim().label('Vehicle Model').required().max(12),
+        length: Joi.string().trim().label('Length').required().max(12),
+        breadth: Joi.string().trim().label('Breadth').required().max(12)
+    })
 }
 
 // joi options
@@ -38,10 +38,10 @@ const options = {
     }
 };
 
-module.exports = { 
-    joivehicle: (req, res, next) => {
+module.exports = {
+    joiVehicleCreate: (req, res, next) => {
         // getting the schemas 
-        let schema = schemas.joivehicle;
+        let schema = schemas.joiVehicleCreate;
         let option = options.basic;
 
         // validating the schema 

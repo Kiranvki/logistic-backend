@@ -22,7 +22,7 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
   // create function
   create = async (createObj) => {
     try {
-      info('Creating vehicle transporter rateCategory Mapping !');
+      info('Creating vehicle transporter rateCategory Multiple Mapping (Array) !');
 
       // checking day object 
       if (createObj && createObj.length) {
@@ -52,7 +52,37 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
     }
   }
 
+  createSingle = async (createObj) => {
+    try {
+      info('Creating vehicle transporter rateCategory Single Mapping !');
 
+      // checking day object 
+      if (createObj && !_.isElement(createObj)) {
+        // creating the data inside the database 
+        return Model
+          .insertMany(createObj)
+          .then((res) => {
+            if (res)
+              return {
+                success: true,
+              };
+            else return {
+              success: false
+            }
+          });
+      } else return {
+        success: false
+      };
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
   // delete mapping function
   deleteMapping = async (rateCategoryVehicleTransporterMappingId) => {
     try {

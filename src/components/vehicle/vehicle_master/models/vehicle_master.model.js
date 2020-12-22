@@ -14,7 +14,7 @@ const vehicleMaster = new Schema({
     type: String,
   },
   'height': {
-    type: String,
+    type: Number,
   },
   'length': {
     type: Number,
@@ -22,24 +22,25 @@ const vehicleMaster = new Schema({
   'breadth': {
     type: String,
   },
-  'tonnage':{
+  'tonnage': {
     type: Number,
   },
-  status: {
+  'status': {
     type: Number,
     default: 1
-},
-isDeleted: {
+  },
+  'isDeleted': {
     type: Number,
     default: 0
-}
+  }
 },
-{
+  {
     timestamps: true
-});
+  });
 
 vehicleMaster.index({
-  'regNumber': 1
+  'regNumber': 1,
+  'vehicleModel': 1
 });
 
 // exporting the entire module
