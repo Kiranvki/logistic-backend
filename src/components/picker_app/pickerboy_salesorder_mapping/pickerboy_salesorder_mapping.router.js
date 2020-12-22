@@ -46,7 +46,7 @@ function userRoutes() {
     );
 
     // update picker Boy details 
-    closed.route('/user/update').get(
+    closed.route('/user/update').patch(
       verifyAppToken, // verify app user token 
       checkWhetherItsAValidPickerUpdate,//check whether its a valid picker profile update
       ctrl.updatetUserDetails // update user details

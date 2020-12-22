@@ -23,6 +23,9 @@ module.exports = {
     salesOrderAlreadyAddedInPickerState: 'Sales Order  Already Added in Picker State!',
     invalidPickerBoySalesOrderMappingId: 'The Picker Boy Sales Order Mapping Id is Invalid !',
     pickerBoySalesOrderIdInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id is either deleted or deactivated !',
+    pickerBoyDetailsUpdated: 'PickerBoy Details Updated Successfully  !',
+    pickerBoyDetailsNotUpdated: 'Error! Updating PickerBoy details !',
+
     // pending sales order details
     pendingSalesOrderFetchedSuccessfully: 'Pending SalesOrder Details Fetched Successfully !',
     unableToFetchedPendingSalesOrder: 'Unable to fetch Pending SalesOrder Details!',

@@ -25,51 +25,38 @@ module.exports = async (req, res, next) => {
     // get the picker id   
     let pickerBoyId = req.params.pickerBoyId || req.user._id, // picker id 
       fullName = req.body.fullName,
-      dateOfBirth = req.body.dateOfBirth,
+      dateOfBirth = req.body.dateOfBirth || '',
       isNotChanged = [],
-      toChangeObject = []; // change object 
-    if (dateOfBirth && !_.isEmpty(dateOfBirth)) {
-      dateOfBirth = moment(dateOfBirth, 'DD-MM-YYYY').set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0
-      }).toDate();
-    }
-    console.log('dateOfBirth', dateOfBirth);
+      toChangeObject = [],// change object 
+      DateOfBirthFromDb = moment();
+
 
     if (objectId.isValid(pickerBoyId)) {
       // check whether the document type already exist or not 
       let getPickerBoyDetails = await PickerBoyCtrl.getDetails(pickerBoyId);
 
-      // if asm details fetched successfully
+      // if picker details fetched successfully
       if (getPickerBoyDetails.success) {
         info('VALID PickerBoy!');
 
-        let DateOfBirthFromDb = '';
         if (dateOfBirth && !_.isEmpty(dateOfBirth)) {
-          DateOfBirthFromDb = moment(getPickerBoyDetails.data.dateOfBirth, 'DD-MM-YYYY').set({
-            h: 0,
-            m: 0,
-            s: 0,
-            millisecond: 0
-          }).toDate();
+          dateOfBirth = moment(dateOfBirth, 'DD-MM-YYYY').toDate();
+          DateOfBirthFromDb = moment(getPickerBoyDetails.data.dateOfBirth, 'DD-MM-YYYY').toDate();
+          //checking both dates are same
+          if (moment(DateOfBirthFromDb).isSame(dateOfBirth)) {
+            isNotChanged.push('dateOfBirth')
+          } else {
+            toChangeObject = { ...toChangeObject, 'dateOfBirth': dateOfBirth }
+          }
         }
 
-        console.log('DateOfBirthFromDb', DateOfBirthFromDb);
-
-        // check whether the field values are changed or not 
         if (fullName && fullName == getPickerBoyDetails.data.fullName) isNotChanged.push('fullName');
         else if (fullName) toChangeObject = { ...toChangeObject, 'fullName': fullName }
-        if (dateOfBirth && dateOfBirth == DateOfBirthFromDb) isNotChanged.push('dateOfBirth')
-        else if (dateOfBirth) toChangeObject = { ...toChangeObject, 'dateOfBirth': DateOfBirthFromDb }
 
 
         // including it to request body 
         req.body.toChangeObject = toChangeObject;
         req.body.isNotChanged = isNotChanged;
-        req.body.asmMappingChangeObject = asmMappingChangeObject;
-
 
         // if there is nothing to change
         if (isNotChanged.length)

@@ -1,6 +1,6 @@
 // controllers 
 const SalesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
-const PockerBoyCtrl = require('../../employee/picker_boy/picker_boy.controller');
+const PickerBoyCtrl = require('../../employee/picker_boy/picker_boy.controller');
 const AttendanceCtrl = require('../onBoard/app_picker_user_attendance/app_picker_user_attendance.controller');
 
 const BasicCtrl = require('../../basic_config/basic_config.controller');
@@ -60,7 +60,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       }).toDate();
 
       // inserting the new user into the db
-      let pickerBoyDetails = await PockerBoyCtrl.getPickerBoyFullDetails(req.user._id);
+      let pickerBoyDetails = await PickerBoyCtrl.getPickerBoyFullDetails(req.user._id);
 
       // is inserted 
       if (pickerBoyDetails.success && !_.isEmpty(pickerBoyDetails.data)) {
@@ -102,25 +102,14 @@ class pickerboySalesOrderMappingController extends BaseController {
   updatetUserDetails = async (req, res) => {
     try {
       info('Picker Boy  Profile PATCH REQUEST !');
-      // creating data to insert
-      let dataToUpdate = {
-        $set: {
-          ...req.body.toChangeObject
-        }
-      };
+      let id = req.user._id || '';
 
       // inserting data into the db 
-      let isUpdated = await Model.findOneAndUpdate({
-        _id: mongoose.Types.ObjectId(req.user._id)
-      }, dataToUpdate, {
-        new: true,
-        upsert: false,
-        lean: true
-      });
+      let isUpdated = await PickerBoyCtrl.updateDetails(req.body.toChangeObject, id);
 
-      // check if inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.asmUpdatedSuccessfully);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.asmNotUpdated);
+      // check if updated 
+      if (isUpdated.success) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.pickerBoyDetailsUpdated);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerBoyDetailsNotUpdated);
 
       // catch any runtime error 
     } catch (err) {
