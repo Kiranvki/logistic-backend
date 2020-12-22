@@ -8,5 +8,5 @@ module.exports = {
   salesOrder: require('./salesOrder'), // sales order
   transporterMaster: require('./transporter'), // transporter 
   rateCategory: require('./rateCategory'), // rate category
-  //vehicleMaster: require('./vehicle')
+  vehicle: require('./vehicle') // vehicle message
 };

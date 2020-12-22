@@ -5,6 +5,7 @@ module.exports = {
     vehicleNotFetched: 'Vehicle Master Not Fetched Successfully !',
     vehicleUpdated: 'Vehicle Master Updated Successfully !',
     vehicleNotUpdated: 'Vehicle Master Not Updated Successfully !',
-    VehicleDeleted: 'Vehicle Master Deleted Successfully !',
-    VehicleNotDeleted: 'Vehicle Master Not Deleted Successfully !',
+    VehicleDeleted: 'Vehicle Deleted Successfully !',
+    VehicleNotDeleted: 'Vehicle Not Deleted !',
+
 }

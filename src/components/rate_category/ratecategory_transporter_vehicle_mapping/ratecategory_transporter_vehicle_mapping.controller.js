@@ -60,7 +60,7 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
       if (createObj && !_.isElement(createObj)) {
         // creating the data inside the database 
         return Model
-          .insertMany(createObj)
+          .create(createObj)
           .then((res) => {
             if (res)
               return {

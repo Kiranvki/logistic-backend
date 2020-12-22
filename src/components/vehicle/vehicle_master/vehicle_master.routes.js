@@ -40,7 +40,7 @@ function vehicle() {
       // [joiDeleteTransporeter], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
-      ctrl.deleterVehicle // get controller 
+      ctrl.deleteVehicle // get controller 
     );
   };
 

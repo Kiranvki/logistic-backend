@@ -16,7 +16,7 @@ class vehicleController extends BaseController {
   // constructor 
   constructor() {
     super();
-    this.messageTypes = this.messageTypes.vehicleMaster;
+    this.messageTypes = this.messageTypes.vehicle;
   }
 
   // create a new entry
@@ -207,24 +207,35 @@ class vehicleController extends BaseController {
 
   //Delete Transporter
 
-  deleterVehicle = async (req, res) => {
+  deleteVehicle = async (req, res) => {
     try {
-      info('New Vehicle Delete!');
+      info('Vehicle Delete!');
 
-      // inserting the new user into the db
-      let isUpdated = await Model.findByIdAndDelete({
-        _id: mongoose.Types.ObjectId(req.params.vehicleid),
-      }, {
+      // asm id  
+      let vehicleId = req.params.vehicleId;
+
+      // creating data to insert
+      let dataToUpdate = {
         $set: {
-          ...req.body
+          status: 0,
+          isDeleted: 1
         }
+      };
+
+      // deleting distributor  data into the db
+      let isUpdated = await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(vehicleId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
       })
-      // is inserted 
+
+      // is updated 
       if (isUpdated && !_.isEmpty(isUpdated)) {
         // success response 
-        isUpdated.password = undefined;
-        return this.success(req, res, this.status.HTTP_OK, req.body);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT);
+        return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.VehicleDeleted);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.VehicleNotDeleted);
 
       // catch any runtime error 
     } catch (err) {
