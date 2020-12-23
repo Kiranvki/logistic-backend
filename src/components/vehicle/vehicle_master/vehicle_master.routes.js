@@ -18,8 +18,6 @@ function vehicle() {
     // get all 
     closed.route('/').get(
       //  [transporterMaster], // joi validation
-      // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.getVehicle // get controller 
     );
 

@@ -105,7 +105,7 @@ class areaSalesManagerController extends BaseController {
       if (invoiceData && !_.isEmpty(invoiceData)) {
         return {
           success: true,
-          data: data
+          data: invoiceData
         }
       } else {
         error('Error while getting the invoice data from pickerboy salesorder mapping id !');
@@ -120,6 +120,43 @@ class areaSalesManagerController extends BaseController {
         success: false,
         error: err
       }
+    }
+  }
+
+  // Internal Function get invoice  details
+  getDetails = (pickerBoySalesOrderMappingId) => {
+    try {
+      info('Check invoice is created or not !');
+
+      // get details 
+      return Model.findOne({
+        pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
+        // status: 1,
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in Mapping DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
 

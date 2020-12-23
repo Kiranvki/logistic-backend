@@ -33,7 +33,7 @@ class areaSalesManagerController extends BaseController {
   // constructor 
   constructor() {
     super();
-    this.messageTypes = this.messageTypes.salesOrder;
+    this.messageTypes = this.messageTypes.invoice;
   }
   getDetails = async (saleOrderId) => {
     try {
@@ -260,9 +260,7 @@ class areaSalesManagerController extends BaseController {
         //calculating the discount and tax
         for (let item of basketItemData.data[0].availableItemDetails) {
           //calculating discount
-          console.log('item', item);
-          console.log('item.discountPercentage', item.discountPercentage);
-          console.log('item.salePrice', item.salePrice);
+
           let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.salePrice).toFixed(2))
           let discountForSupliedItem = discountForSingleItem * item.suppliedQty
           totalDiscount = totalDiscount + discountForSupliedItem;
@@ -333,18 +331,17 @@ class areaSalesManagerController extends BaseController {
 
           //changing the state of pickerboy salesorder maaping id to the generate invoice state
 
-          await pickerBoySalesOrderMappingctrl.changeStateToInvoiceGenerated(pickerBoySalesOrderMappingId)
+          // await pickerBoySalesOrderMappingctrl.changeStateToInvoiceGenerated(pickerBoySalesOrderMappingId)
 
           // returning success
-          return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesmanCreated)
-        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesmanNotCreated);
+          return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.invoiceCreated)
+        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.invoiceNotCreated);
 
       } else {
         error('Data not in DB');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.invoiceNotCreated);
 
       }
-      // success 
-      return this.success(req, res, this.status.HTTP_OK, basketItemData.data, this.messageTypes.salesOrderInsertInitiated);
 
       // catch any runtime error 
     } catch (err) {

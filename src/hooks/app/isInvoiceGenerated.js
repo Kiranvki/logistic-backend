@@ -24,28 +24,30 @@ module.exports = async (req, res, next) => {
         if (objectId.isValid(pickerBoySalesOrderMappingId)) {
 
             // check whether the sale Order id is unique or not
-            let isValidPickerSalesOrderId = await pickerSalesOrderMappingCtrl.getDetails(pickerBoySalesOrderMappingId)
+            let isValidPickerSalesOrderId = await invoicePickerSalesOrderMappingCtrl.getDetails(pickerBoySalesOrderMappingId)
 
-            // if email is unique
+            // 
             if (isValidPickerSalesOrderId.success) {
                 info('Valid PickerBoy SalesOrder Mapping Id')
-                if (isValidPickerSalesOrderId.data.state == 2) {
-                    info('Invoice already generated')
 
-                    //get the invoice data and respond
+                info('Invoice already generated')
 
-                    let invoicePickerSO = await invoicePickerSalesOrderMappingCtrl.getInvoiceDetails(pickerBoySalesOrderMappingId)
+                //get the invoice data and respond
 
-                } else {
-                    req.body.pickerBoySalesOrderMappingDetails = isValidPickerSalesOrderId.data
+                let invoicePickerSO = await invoicePickerSalesOrderMappingCtrl.getInvoiceDetails(pickerBoySalesOrderMappingId)
+                if (invoicePickerSO.success) {
 
-                    next();
+                    return Response.success(req, res, StatusCodes.HTTP_OK, invoicePickerSO.data, MessageTypes.invoice.invoicesDetailsFetched)
+
                 }
 
-            } else {
 
-                error('INVALID PickerBoy SalesOrder Mapping Id!');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.pickerBoySalesOrderIdInvalidEitherDeletedOrDeactivated);
+
+
+            } else {
+                //invoice not created,  creating new one
+                next();
+
             }
         } else {
             error('The PickerBoy SalesOrder Mapping Id is Invalid !');
