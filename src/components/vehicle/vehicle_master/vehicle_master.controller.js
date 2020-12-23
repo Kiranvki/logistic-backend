@@ -64,7 +64,7 @@ class vehicleController extends BaseController {
 
 
   // get Vehicle list 
-  getVehicle = async (req, res) => {
+  getVehicleList = async (req, res) => {
     try {
       info('Get the Vehicle List !');
 
@@ -78,19 +78,9 @@ class vehicleController extends BaseController {
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
 
-      // project data 
-      // let dataToProject = {
-      //   firstName: 1,
-      //   lastName: 1,
-      //   employeeId: 1,
-      //   status: 1,
-      //   reportingTo: 1
-      // }
-
       // get the list of asm in the allocated city
       let searchObject = {
         'isDeleted': 0,
-
       };
 
       // creating a match object
@@ -103,36 +93,95 @@ class vehicleController extends BaseController {
               $options: 'is'
             }
           }, {
-            'vehicleType': {
+            'vehicleModel': {
               $regex: searchKey,
               $options: 'is'
             }
           }]
         };
 
+      // // get the total rate category
+      let totalVehicle = await Model.countDocuments({
+        ...searchObject
+      });
 
 
       // get the Vehicle list 
       let vehicleList = await Model.aggregate([{
-        $match: {
+        '$match': {
           ...searchObject
         }
       }, {
-        $sort: sortingArray
+        '$sort': sortingArray
       }, {
-        $skip: skip
+        '$skip': skip
       }, {
-        $limit: pageSize
-        // },
-        // {
-        //   $project: {
-
-        //     'name': 1,
-        //     'isDeleted': 1
-        //   }
-      }
-      ])
-      //.allowDiskUse(true);
+        '$limit': pageSize
+      },
+      {
+        $lookup: {
+          from: 'ratecategorytransportervehiclemappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$vehicleId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                '_id': 1,
+                'status': 1,
+                'isDeleted': 1,
+                'vehicleId': 1,
+                'transporterId': 1
+              }
+            },
+            {
+              $lookup: {
+                from: 'transporters',
+                localField: "transporterId",
+                foreignField: "_id",
+                as: 'transporter'
+              }
+            },
+            {
+              $unwind: {
+                path: '$transporter',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+          ],
+          as: 'transporterDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$transporterDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          '_id': 1,
+          'regNumber': 1,
+          'vehicleType': 1,
+          'vehicleModel': 1,
+          'height': 1,
+          'length': 1,
+          'breadth': 1,
+          'tonnage': 1,
+          'status': 1,
+          'transporterId': '$transporterDetails.transporter._id',
+          'transporterName': '$transporterDetails.transporter.vehicleDetails.name',
+        }
+      },
+      ]).allowDiskUse(true);
 
       // success 
       return this.success(req, res, this.status.HTTP_OK, {
@@ -140,7 +189,7 @@ class vehicleController extends BaseController {
         pageMeta: {
           skip: parseInt(skip),
           pageSize: pageSize,
-          // total: totalAsms
+          total: totalVehicle
         }
       }
         // this.messageTypes.transporterFetched
@@ -227,20 +276,86 @@ class vehicleController extends BaseController {
   }
 
   // // get details 
-  getList = async (req, res) => {
+  getDetails = async (req, res) => {
     try {
       info('Vehicle GET DETAILS !');
 
-      // inserting data into the db 
-      // let transporter = await Model.findOne({
-      let vehicle = await Model.findById({
+      // get the brand id 
+      let vehicleId = req.params.vehicleId;
 
-        _id: mongoose.Types.ObjectId(req.params.vehicleid)
-      }).lean();
+      let vehicleData = await Model.aggregate([{
+        '$match': {
+          '_id': mongoose.Types.ObjectId(vehicleId),
+        }
+      },
+      {
+        $lookup: {
+          from: 'ratecategorytransportervehiclemappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$vehicleId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                '_id': 1,
+                'status': 1,
+                'isDeleted': 1,
+                'vehicleId': 1,
+                'transporterId': 1
+              }
+            },
+            {
+              $lookup: {
+                from: 'transporters',
+                localField: "transporterId",
+                foreignField: "_id",
+                as: 'transporter'
+              }
+            },
+            {
+              $unwind: {
+                path: '$transporter',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+          ],
+          as: 'transporterDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$transporterDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          '_id': 1,
+          'regNumber': 1,
+          'vehicleType': 1,
+          'vehicleModel': 1,
+          'height': 1,
+          'length': 1,
+          'breadth': 1,
+          'tonnage': 1,
+          'status': 1,
+          'transporterId': '$transporterDetails.transporter._id',
+          'transporterName': '$transporterDetails.transporter.vehicleDetails.name',
+        }
+      },
+      ]).allowDiskUse(true);
 
-      // check if inserted 
-      if (vehicle && !_.isEmpty(vehicle)) return this.success(req, res, this.status.HTTP_OK, vehicle);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+      // check if data is present
+      if (vehicleData && !_.isEmpty(vehicleData)) return this.success(req, res, this.status.HTTP_OK, vehicleData, this.messageTypes.vehicleDetailsFetched);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotFetched);
 
       // catch any runtime error 
     } catch (err) {

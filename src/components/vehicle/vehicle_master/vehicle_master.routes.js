@@ -18,7 +18,7 @@ function vehicle() {
     // get all 
     closed.route('/').get(
       //  [transporterMaster], // joi validation
-      ctrl.getVehicle // get controller 
+      ctrl.getVehicleList // get controller 
     );
 
     // get minified list
@@ -33,7 +33,7 @@ function vehicle() {
       //[joiTransporterCreate], // joi validation
       // verifyAppToken,
       // isValidSalesOrder,
-      ctrl.getList // controller function 
+      ctrl.getDetails // controller function 
     );
 
 
