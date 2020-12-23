@@ -1,11 +1,13 @@
 const ctrl = require('./vehicle_master.controller');
 const {
-  joiVehicleCreate
+  joiVehicleCreate, // create vehicle
+  joiVehicleList, //  get vehicle list 
 } = require('./vehicle_master.validators')
 
 function vehicle() {
   return (open, closed) => {
-    // add the vehicle in the packing stage
+
+    // post 
     closed.route('/').post(
       [joiVehicleCreate], // joi validation
       // verifyAppToken,
@@ -13,12 +15,21 @@ function vehicle() {
       ctrl.post // controller function 
     );
 
+    // get all 
     closed.route('/').get(
       //  [transporterMaster], // joi validation
       // setupDataForGoFrugalApi, // setup data for gofrugal
       // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.getVehicle // get controller 
     );
+
+    // get minified list
+    closed.route('/minified/list').get(
+      [joiVehicleList], // joi validation
+      ctrl.getListMinified // get controller 
+    );
+
+
 
     closed.route('/:vehicleId').get(
       //[joiTransporterCreate], // joi validation

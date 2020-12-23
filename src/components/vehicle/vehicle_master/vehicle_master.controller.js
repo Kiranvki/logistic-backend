@@ -152,7 +152,79 @@ class vehicleController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+  // get the minified list 
+  getListMinified = async (req, res) => {
+    try {
+      info('Get Minified List of Vehicle !');
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        sortingArray = {};
 
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // project data 
+      let dataToProject = {
+        _id: 1,
+        vehicleModel: 1,
+      }
+
+      // get the list of asm in the allocated city
+      let searchObject = {
+        'isDeleted': 0,
+        'status': 1
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'vehicleModel': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+
+      // get the total vehicle
+      let totalVehicle = await Model.countDocuments({
+        ...searchObject
+      });
+
+      // get the vehicle list
+      let vehicleList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      }, {
+        $project: dataToProject
+      }]).allowDiskUse(true);
+
+      // success 
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: vehicleList,
+        pageMeta: {
+          skip: parseInt(skip),
+          pageSize: pageSize,
+          total: totalVehicle
+        }
+      }, this.messageTypes.vehicleDetailsFetched);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
 
   // // get details 
   getList = async (req, res) => {
