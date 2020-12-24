@@ -139,7 +139,8 @@ class vehicleController extends BaseController {
                 'status': 1,
                 'isDeleted': 1,
                 'vehicleId': 1,
-                'transporterId': 1
+                'transporterId': 1,
+                'rateCategoryId': 1
               }
             },
             {
@@ -156,13 +157,27 @@ class vehicleController extends BaseController {
                 preserveNullAndEmptyArrays: true
               }
             },
+            {
+              $lookup: {
+                from: 'ratecategorymodels',
+                localField: "rateCategoryId",
+                foreignField: "_id",
+                as: 'rateCategory'
+              }
+            },
+            {
+              $unwind: {
+                path: '$rateCategory',
+                preserveNullAndEmptyArrays: true
+              }
+            },
           ],
-          as: 'transporterDetails'
+          as: 'transporterRateCategoryDetails'
         }
       },
       {
         $unwind: {
-          path: '$transporterDetails',
+          path: '$transporterRateCategoryDetails',
           preserveNullAndEmptyArrays: true
         }
       },
@@ -177,8 +192,11 @@ class vehicleController extends BaseController {
           'breadth': 1,
           'tonnage': 1,
           'status': 1,
-          'transporterId': '$transporterDetails.transporter._id',
-          'transporterName': '$transporterDetails.transporter.vehicleDetails.name',
+          'rateCategoryId': '$transporterRateCategoryDetails.rateCategory._id',
+          'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
+
+          'transporterId': '$transporterRateCategoryDetails.transporter._id',
+          'transporterName': '$transporterRateCategoryDetails.transporter.vehicleDetails.name',
         }
       },
       ]).allowDiskUse(true);
@@ -309,7 +327,8 @@ class vehicleController extends BaseController {
                 'status': 1,
                 'isDeleted': 1,
                 'vehicleId': 1,
-                'transporterId': 1
+                'transporterId': 1,
+                'rateCategoryId': 1
               }
             },
             {
@@ -326,13 +345,27 @@ class vehicleController extends BaseController {
                 preserveNullAndEmptyArrays: true
               }
             },
+            {
+              $lookup: {
+                from: 'ratecategorymodels',
+                localField: "rateCategoryId",
+                foreignField: "_id",
+                as: 'rateCategory'
+              }
+            },
+            {
+              $unwind: {
+                path: '$rateCategory',
+                preserveNullAndEmptyArrays: true
+              }
+            },
           ],
-          as: 'transporterDetails'
+          as: 'transporterRateCategoryDetails'
         }
       },
       {
         $unwind: {
-          path: '$transporterDetails',
+          path: '$transporterRateCategoryDetails',
           preserveNullAndEmptyArrays: true
         }
       },
@@ -347,8 +380,11 @@ class vehicleController extends BaseController {
           'breadth': 1,
           'tonnage': 1,
           'status': 1,
-          'transporterId': '$transporterDetails.transporter._id',
-          'transporterName': '$transporterDetails.transporter.vehicleDetails.name',
+          'rateCategoryId': '$transporterRateCategoryDetails.rateCategory._id',
+          'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
+
+          'transporterId': '$transporterRateCategoryDetails.transporter._id',
+          'transporterName': '$transporterRateCategoryDetails.transporter.vehicleDetails.name',
         }
       },
       ]).allowDiskUse(true);
