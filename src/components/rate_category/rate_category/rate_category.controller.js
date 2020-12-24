@@ -177,7 +177,8 @@ class rateCategoryController extends BaseController {
       {
         $project: {
           'rateCategoryDetails': 1,
-          'noOfVehicles': 1,
+          // 'noOfVehicles': 1,
+          'noOfVehicles': { $cond: { if: { $isArray: "$transporterVehicleMapping" }, then: { $size: "$transporterVehicleMapping" }, else: "NA" } },
           'status': 1,
           'isDeleted': 1,
           '_id': 1,
@@ -287,8 +288,9 @@ class rateCategoryController extends BaseController {
       {
         $project: {
           //   'transporter': 1,
+          //  'noOfVehicles': 1,
           'rateCategoryDetails': 1,
-          'noOfVehicles': 1,
+          'noOfVehicles': { $cond: { if: { $isArray: "$transporterVehicleMapping" }, then: { $size: "$transporterVehicleMapping" }, else: "NA" } },
           'status': 1,
           'isDeleted': 1,
           '_id': 1,
