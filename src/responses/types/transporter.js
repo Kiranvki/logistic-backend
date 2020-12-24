@@ -29,4 +29,9 @@ module.exports = {
     transporterId: 'Transporter is Invalid !',
     dataIsNotChanged: 'Following Data is Not Changed - ',
     transporterIdInvalidEitherDeletedOrDeactivated: 'transporter Id is either deleted or deactivated !',
+
+
+    transporterActivatedSuccessfully:" Transporter Activated Successfully !",
+    transporterDeactivatedSuccessfully: " Transporter Deactivated Successfully !",
+    transporterNotUpdated: "Error! Updating Transporter !"
 }
