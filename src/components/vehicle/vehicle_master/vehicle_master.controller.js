@@ -192,8 +192,9 @@ class vehicleController extends BaseController {
           'breadth': 1,
           'tonnage': 1,
           'status': 1,
-          'rateCategoryId': '$transporterRateCategoryDetails.rateCategory._id',
-          'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
+          // 'rateCategoryId': '$transporterRateCategoryDetails.rateCategory._id',
+          // 'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
+          'rateCategoryDetails': '$transporterRateCategoryDetails.rateCategory',
 
           'transporterId': '$transporterRateCategoryDetails.transporter._id',
           'transporterName': '$transporterRateCategoryDetails.transporter.vehicleDetails.name',
@@ -380,8 +381,9 @@ class vehicleController extends BaseController {
           'breadth': 1,
           'tonnage': 1,
           'status': 1,
-          'rateCategoryId': '$transporterRateCategoryDetails.rateCategory._id',
-          'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
+          // 'rateCategoryId': '$transporterRateCategoryDetails.rateCategory._id',
+          // 'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
+          'rateCategoryDetails': '$transporterRateCategoryDetails.rateCategory',
 
           'transporterId': '$transporterRateCategoryDetails.transporter._id',
           'transporterName': '$transporterRateCategoryDetails.transporter.vehicleDetails.name',
