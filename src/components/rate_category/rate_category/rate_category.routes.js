@@ -39,6 +39,13 @@ function ratecategory() {
       ctrl.getList // controller function 
     );
 
+    // get minified list
+    closed.route('/minified/list').get(
+      //[joiTransporterCreate], // joi validation
+      // verifyAppToken,
+      // isValidSalesOrder,
+      ctrl.getListMinified // controller function 
+    );
 
     closed.route('/:rateCategoryId').get(
       //[joiTransporterMaster], // joi validation

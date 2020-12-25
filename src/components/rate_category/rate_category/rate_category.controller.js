@@ -217,6 +217,103 @@ class rateCategoryController extends BaseController {
 
   }
 
+  // get minfied ratecategory list 
+  getListMinified = async (req, res) => {
+    try {
+      info('Get the Rate Category List  !');
+      // get the query params
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        sortingArray = {};
+
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // get the list of asm in the allocated city
+      let searchObject = {
+        'isDeleted': 0,
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'rateCategoryDetails.rateCategoryName': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'rateCategoryDetails.rateCategoryType': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+
+      // // get the total rate category
+      let totalRateCategory = await Model.countDocuments({
+        ...searchObject
+      });
+
+      // get the distributor list
+      let rateCategoryList = await Model.aggregate([{
+        '$match': {
+          ...searchObject
+        }
+      },
+      {
+        '$sort': sortingArray
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': pageSize
+      },
+      {
+        $project: {
+          'rateCategoryName': '$rateCategoryDetails.rateCategoryName',
+          // 'noOfVehicles': 1,
+          // 'noOfVehicles': { $cond: { if: { $isArray: "$transporterVehicleMapping" }, then: { $size: "$transporterVehicleMapping" }, else: "NA" } },
+          // 'status': 1,
+          // 'isDeleted': 1,
+          // '_id': 1,
+          // 'transporter.vehicleDetails.name': 1,
+          // 'transporter._id': 1,
+          // 'vehicle._id': 1,
+          // 'transporterVehicleMapping._id': 1,
+          // 'transporterVehicleMapping.status': 1,
+          // 'transporterVehicleMapping.vehicle._id': 1,
+          // 'transporterVehicleMapping.vehicle.vehicleType': 1,
+          // 'transporterVehicleMapping.vehicle.vehicleModel': 1,
+          // 'transporterVehicleMapping.vehicle.tonnage': 1,
+          // 'transporterVehicleMapping.transporter._id': 1,
+          // 'transporterVehicleMapping.transporter.vehicleDetails.name': 1,
+        }
+      },
+
+      ]).allowDiskUse(true);
+
+
+      // success 
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: rateCategoryList,
+        pageMeta: {
+          skip: parseInt(skip),
+          pageSize: pageSize,
+          total: totalRateCategory
+        }
+      }, this.messageTypes.rateCategoryDetailsFetched);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
+
   // get details 
   getRateCategory = async (req, res) => {
     try {

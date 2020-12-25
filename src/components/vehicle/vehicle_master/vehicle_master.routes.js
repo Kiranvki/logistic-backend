@@ -40,15 +40,11 @@ function vehicle() {
 
     closed.route('/:vehicleId').patch(
       //[joiTransporterElementPatch], // joi validation
-      // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.patchVehicle // get controller 
     );
 
     closed.route('/:vehicleId').delete(
       // [joiDeleteTransporeter], // joi validation
-      // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
       ctrl.deleteVehicle // get controller 
     );
   };
