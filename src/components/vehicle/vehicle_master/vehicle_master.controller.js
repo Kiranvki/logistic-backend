@@ -19,6 +19,42 @@ class vehicleController extends BaseController {
     this.messageTypes = this.messageTypes.vehicle;
   }
 
+  // Internal Function get vehicle details
+  getDetails = (vehicleId) => {
+    try {
+      info('Get vehicle details Internal!');
+
+      // get details 
+      return Model.findOne({
+        _id: mongoose.Types.ObjectId(vehicleId),
+        // status: 1,
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in vehicle DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+    }
+  }
+
   // create a new entry
   post = async (req, res) => {
     try {
@@ -294,8 +330,8 @@ class vehicleController extends BaseController {
     }
   }
 
-  // // get details 
-  getDetails = async (req, res) => {
+  //  get details 
+  getVehicleDetails = async (req, res) => {
     try {
       info('Vehicle GET DETAILS !');
 
@@ -406,22 +442,27 @@ class vehicleController extends BaseController {
   // patch the request 
   patchVehicle = async (req, res) => {
     try {
-      info('Vehicle STATUS CHANGE !');
 
-      // inserting the new user into the db
-      let isUpdated = await Model.update({
-        _id: mongoose.Types.ObjectId(req.params.vehicleid),
-      }, {
+      info('Vehicle PATCH REQUEST !');
+      // creating data to insert
+      let dataToUpdate = {
         $set: {
-          ...req.body
+          ...req.body.toChangeObject
         }
-      })
-      // is inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) {
-        // success response 
-        isUpdated.password = undefined;
-        return this.success(req, res, this.status.HTTP_OK, req.body);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT);
+      };
+
+      // inserting data into the db 
+      let isUpdated = await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(req.params.vehicleId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      });
+
+      // check if updated 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.vehicleUpdatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotUpdated);
 
       // catch any runtime error 
     } catch (err) {
