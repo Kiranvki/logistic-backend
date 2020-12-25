@@ -67,13 +67,13 @@ module.exports = async (req, res, next) => {
 
                 // if there is nothing to change
                 if (isNotChanged.length)
-                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.brand.dataIsNotChanged, req.body.isNotChanged);
+                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.vehicle.dataIsNotChanged, req.body.isNotChanged);
                 else next(); // move on
 
                 // invalid Brand
             } else {
                 error('INVALID Brand!');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.brand.vehicleIdInvalidEitherDeletedOrDeactivated);
+                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.vehicle.vehicleIdInvalidEitherDeletedOrDeactivated);
             }
 
             // asm id is invalid 

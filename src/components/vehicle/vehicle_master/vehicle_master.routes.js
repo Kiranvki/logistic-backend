@@ -45,6 +45,7 @@ function vehicle() {
     closed.route('/:vehicleId').patch(
       //[joiTransporterElementPatch], // joi validation
       //verifyUserToken, // verify user token
+      checkWhetherItsAValidVehicleUpdate,  // check whether its a valid update 
       ctrl.patchVehicle // get controller 
     );
 
