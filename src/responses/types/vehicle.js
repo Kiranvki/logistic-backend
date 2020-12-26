@@ -9,6 +9,6 @@ module.exports = {
     vehicleNotDeleted: 'Vehicle Not Deleted !',
     dataIsNotChanged: 'Following Data is Not Changed - ',
     vehicleIdInvalidEitherDeletedOrDeactivated: 'Vehicle Id is either deleted or deactivated !',
-
+    invalidVehicleId: 'The Vehicle id is Invalid !',
 
 }

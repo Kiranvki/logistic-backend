@@ -10,12 +10,31 @@ const Response = require('../../../responses/response');
 const schemas = {
     //vehicle create
     joiVehicleCreate: Joi.object().keys({
-        regNumber: Joi.string().trim().label('Regestration Number').required(),
+        regNumber: Joi.string().trim().label('Registration Number').required(),
         vehicleType: Joi.string().trim().label('Vehicle Type').required(),
         vehicleModel: Joi.string().trim().label('Vehicle Model').required(),
-        height: Joi.number().label('Vehicle Model').required(),
+        height: Joi.number().label('Height').required(),
         length: Joi.number().label('Length').required(),
-        breadth: Joi.number().label('Breadth').required()
+        breadth: Joi.number().label('Breadth').required(),
+        tonnage: Joi.number().label('Tonnage').required(),
+        transporterId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
+            language: {
+                string: {
+                    regex: {
+                        base: 'should be a valid mongoose Id.'
+                    }
+                }
+            }
+        }).optional().allow(''), // keeping it optional for now,will have to make it required
+        rateCategoryId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('RateCategory Id').required().options({
+            language: {
+                string: {
+                    regex: {
+                        base: 'should be a valid mongoose Id.'
+                    }
+                }
+            }
+        }).optional().allow(''),// keeping it optional for now,will have to make it required
     }),
 
     // get vehicle list 
@@ -23,6 +42,42 @@ const schemas = {
         page: Joi.number().integer().min(1).label('Page').required(),
         search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
     }),
+
+    // joi vehicle get details 
+    joiVehicleGetDetails: Joi.object().keys({
+        vehicleId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Vehicle Id').required().options({
+            language: {
+                string: {
+                    regex: {
+                        base: 'should be a valid mongoose Id.'
+                    }
+                }
+            }
+        }).required(),
+    }),
+
+
+    // joi vehicle patch
+    joiVehiclePatch: Joi.object().keys({
+        params: {
+            vehicleId: Joi.string().trim().label('Vehicle Id')
+        },
+        body: Joi.object({
+            regNumber: Joi.string().trim().label('Registration Number').optional(),
+            vehicleType: Joi.string().trim().label('Vehicle Type').optional(),
+            vehicleModel: Joi.string().trim().label('Vehicle Model').optional(),
+            height: Joi.number().label('Height').optional(),
+            length: Joi.number().label('Length').optional(),
+            breadth: Joi.number().label('Breadth').optional(),
+            tonnage: Joi.number().label('Tonnage').optional(),
+        }).min(1)
+    }),
+
+    // joi in in params
+    joiIdInParams: Joi.object().keys({
+        vehicleId: Joi.string().trim().label('Vehicle Id').required(),
+    }),
+
 }
 
 // joi options
@@ -66,7 +121,7 @@ module.exports = {
         });
     },
 
-    // joi asm list 
+    // joi vehicle list
     joiVehicleList: (req, res, next) => {
         // getting the schemas 
         let schema = schemas.joiVehicleList;
@@ -74,6 +129,69 @@ module.exports = {
 
         // validating the schema 
         schema.validate(req.query, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
+
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
+
+    // joi vehicle get details 
+    joiVehicleGetDetails: (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.joiVehicleGetDetails;
+        let option = options.basic;
+
+        // validating the schema 
+        schema.validate(req.params, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
+
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
+
+    // joi vehicle patch
+    joiVehiclePatch: (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.joiVehiclePatch;
+        let option = options.basic;
+
+        // validating the schema 
+        schema.validate({ params: req.params, body: req.body }, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
+
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
+
+    // check whether id in params
+    joiIdInParams: (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.joiIdInParams;
+        let option = options.basic;
+
+        // validating the schema 
+        schema.validate(req.params, option).then(() => {
             next();
             // if error occured
         }).catch((err) => {

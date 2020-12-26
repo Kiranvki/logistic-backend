@@ -2,10 +2,14 @@ const ctrl = require('./vehicle_master.controller');
 const {
   joiVehicleCreate, // create vehicle
   joiVehicleList, //  get vehicle list 
+  joiVehicleGetDetails, // get vehicle details
+  joiVehiclePatch, // patch vehicle
+  joiIdInParams, // joi vehicle id in params
 } = require('./vehicle_master.validators')
 
 // hooks 
 const {
+  isValidVehicle, // check whether the Vehicle id valid or not
   isValidTransporter, // check whether the Transporter id valid or not
   checkWhetherItsAValidVehicleUpdate, // check whether the its a valid Vehicle update
 } = require('../../../hooks');
@@ -22,7 +26,7 @@ function vehicle() {
 
     // get all 
     closed.route('/').get(
-      //  [transporterMaster], // joi validation
+      [joiVehicleList], // joi validation
       //verifyUserToken, // verify user token
       ctrl.getVehicleList // get controller 
     );
@@ -35,15 +39,15 @@ function vehicle() {
     );
 
     closed.route('/:vehicleId').get(
-      //[joiTransporterCreate], // joi validation
+      [joiVehicleGetDetails], // joi validation
       //verifyUserToken, // verify user token
-      // isValidSalesOrder,
+      isValidVehicle, // check is valid vehicle id 
       ctrl.getVehicleDetails // controller function 
     );
 
     //patch
     closed.route('/:vehicleId').patch(
-      //[joiTransporterElementPatch], // joi validation
+      [joiVehiclePatch], // joi validation
       //verifyUserToken, // verify user token
       checkWhetherItsAValidVehicleUpdate,  // check whether its a valid update 
       ctrl.patchVehicle // get controller 
@@ -51,12 +55,12 @@ function vehicle() {
 
     //delete
     closed.route('/:vehicleId').delete(
-      // [joiDeleteTransporeter], // joi validation
+      [joiIdInParams], // joi validation
       //verifyUserToken, // verify user token
+      isValidVehicle, // check is valid vehicle id 
       ctrl.deleteVehicle // delete controller 
     );
 
   };
-
 }
 module.exports = vehicle();
