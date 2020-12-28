@@ -18,6 +18,41 @@ class rateCategoryController extends BaseController {
     this.messageTypes = this.messageTypes.rateCategory;
   }
 
+  // Internal Function get rateCategory  details
+  getDetails = (rateCategoryId) => {
+    try {
+      info('Get Rate Category  details !');
+
+      // get details 
+      return Model.findOne({
+        _id: mongoose.Types.ObjectId(rateCategoryId),
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in Rate Category DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+    }
+  }
+
   //create a new entry
   post = async (req, res) => {
     try {
@@ -424,27 +459,41 @@ class rateCategoryController extends BaseController {
   // patch the request 
   patchtRateCategory = async (req, res) => {
     try {
-
-      info('Transporter CHANGE ! !');
+      let rateCategoryDetails = {},
+        toChangeObject = req.body.toChangeObject || '',
+        rateCategoryDataFromDb = req.body.rateCategoryDataFromDb || '';
+      info('Rate Category CHANGE !');
       // creating data to insert
+
+      rateCategoryDetails = {
+        'rateCategoryName': toChangeObject.rateCategoryName ? toChangeObject.rateCategoryName : rateCategoryDataFromDb.rateCategoryName,
+        'rateCategoryType': toChangeObject.rateCategoryType ? toChangeObject.rateCategoryType : rateCategoryDataFromDb.rateCategoryType,
+        'fixedRentalAmount': toChangeObject.fixedRentalAmount ? toChangeObject.fixedRentalAmount : rateCategoryDataFromDb.fixedRentalAmount,
+        'includedAmount': toChangeObject.includedAmount ? toChangeObject.includedAmount : rateCategoryDataFromDb.includedAmount,
+        'includedDistance': toChangeObject.includedDistance ? toChangeObject.includedDistance : rateCategoryDataFromDb.includedDistance,
+        'additionalAmount': toChangeObject.additionalAmount ? toChangeObject.additionalAmount : rateCategoryDataFromDb.additionalAmount
+      }
+      console.log('rateCategoryDetails', rateCategoryDetails);
+
       let dataToUpdate = {
         $set: {
-          ...req.body,
+          'rateCategoryDetails': rateCategoryDetails
         }
       };
 
       // inserting data into the db 
       let isUpdated = await Model.findOneAndUpdate({
-        _id: mongoose.Types.ObjectId(req.params.ratecategoryId)
+        _id: mongoose.Types.ObjectId(req.params.rateCategoryId)
       }, dataToUpdate, {
         new: true,
         upsert: false,
         lean: true
       });
+      console.log('isUpdated', isUpdated);
 
       // check if inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.rateCategoryUpdatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryNotUpdated);
 
       // catch any runtime error 
     } catch (err) {

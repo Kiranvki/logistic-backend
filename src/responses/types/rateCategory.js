@@ -8,6 +8,9 @@ module.exports = {
     rateCategoryDeletedSuccessfully: 'RateCategory Deleted Successfully !',
     rateCategoryNotDeletedSuccessfully: 'RateCategory  Not Deleted!',
     rateCategoryIdInvalidEitherDeletedOrDeactivated: 'Rate Category Id is either deleted or deactivated !',
-
+    dataIsNotChanged: 'Following Data is Not Changed - ',
+    rateCategoryUpdatedSuccessfully: 'Rate Category Updated Successfully !',
+    rateCategoryNotUpdated: 'Error! Updating Rate Category !',
+    invalidRateCategoryId: 'The Rate Category Id is Invalid !',
 
 };

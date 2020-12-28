@@ -21,13 +21,12 @@ module.exports = async (req, res, next) => {
         let objectId = mongoose.Types.ObjectId;
 
         // get the data
-        let regNumber = req.body.regNumber, // regNumber  
-            vehicleType = req.body.vehicleType, // vehicleType  
-            vehicleModel = req.body.vehicleModel,
-            height = req.body.height, // height  
-            length = req.body.length, // email  
-            breadth = req.body.breadth,
-            tonnage = req.body.tonnage,
+        let rateCategoryName = req.body.rateCategoryDetails.rateCategoryName || '', // rateCategoryName  
+            rateCategoryType = req.body.rateCategoryDetails.rateCategoryType || '', // rateCategoryType  
+            fixedRentalAmount = req.body.rateCategoryDetails.fixedRentalAmount || '',
+            includedAmount = req.body.rateCategoryDetails.includedAmount, // includedAmount  
+            includedDistance = req.body.rateCategoryDetails.includedDistance, // includedDistance  
+            additionalAmount = req.body.rateCategoryDetails.additionalAmount,
 
             // get the rate category id from params
             rateCategoryId = req.params.rateCategoryId,
@@ -41,28 +40,26 @@ module.exports = async (req, res, next) => {
 
             // if asm details fetched successfully
             if (getBrandDetails.success) {
-                info('VALID Brand!');
+                info('VALID rateCategory!');
 
                 // check whether the field values are changed or not 
-                if (regNumber && regNumber == getBrandDetails.data.regNumber) isNotChanged.push('regNumber');
-                else if (regNumber) toChangeObject = { ...toChangeObject, 'regNumber': regNumber }
-                if (vehicleType && vehicleType == getBrandDetails.data.vehicleType) isNotChanged.push('vehicleType')
-                else if (vehicleType) toChangeObject = { ...toChangeObject, 'vehicleType': vehicleType }
-                if (vehicleModel && vehicleModel == getBrandDetails.data.vehicleModel) isNotChanged.push('vehicleModel')
-                else if (vehicleModel) toChangeObject = { ...toChangeObject, 'vehicleModel': vehicleModel }
-                if (height && height == getBrandDetails.data.height) isNotChanged.push('height');
-                else if (height) toChangeObject = { ...toChangeObject, 'height': height }
-                if (length && length == getBrandDetails.data.length) isNotChanged.push('length')
-                else if (length) toChangeObject = { ...toChangeObject, 'length': length }
-                if (breadth && breadth == getBrandDetails.data.breadth) isNotChanged.push('breadth')
-                else if (breadth) toChangeObject = { ...toChangeObject, 'breadth': breadth }
-                if (tonnage && tonnage == getBrandDetails.data.tonnage) isNotChanged.push('tonnage')
-                else if (tonnage) toChangeObject = { ...toChangeObject, 'tonnage': tonnage }
-
+                if (rateCategoryName && rateCategoryName == getBrandDetails.data.rateCategoryDetails.rateCategoryName) isNotChanged.push('rateCategoryName');
+                else if (rateCategoryName) toChangeObject = { ...toChangeObject, 'rateCategoryName': rateCategoryName }
+                if (rateCategoryType && rateCategoryType == getBrandDetails.data.rateCategoryDetails.rateCategoryType) isNotChanged.push('rateCategoryType')
+                else if (rateCategoryType) toChangeObject = { ...toChangeObject, 'rateCategoryType': rateCategoryType }
+                if (fixedRentalAmount && fixedRentalAmount == getBrandDetails.data.rateCategoryDetails.fixedRentalAmount) isNotChanged.push('fixedRentalAmount')
+                else if (fixedRentalAmount) toChangeObject = { ...toChangeObject, 'fixedRentalAmount': fixedRentalAmount }
+                if (includedAmount && includedAmount == getBrandDetails.data.rateCategoryDetails.includedAmount) isNotChanged.push('includedAmount');
+                else if (includedAmount) toChangeObject = { ...toChangeObject, 'includedAmount': includedAmount }
+                if (includedDistance && includedDistance == getBrandDetails.data.rateCategoryDetails.includedDistance) isNotChanged.push('includedDistance')
+                else if (includedDistance) toChangeObject = { ...toChangeObject, 'includedDistance': includedDistance }
+                if (additionalAmount && additionalAmount == getBrandDetails.data.rateCategoryDetails.additionalAmount) isNotChanged.push('additionalAmount')
+                else if (additionalAmount) toChangeObject = { ...toChangeObject, 'additionalAmount': additionalAmount }
 
                 // including it to request body 
                 req.body.toChangeObject = toChangeObject;
                 req.body.isNotChanged = isNotChanged;
+                req.body.rateCategoryDataFromDb = getBrandDetails.data.rateCategoryDetails;
 
                 // if there is nothing to change
                 if (isNotChanged.length)
@@ -71,14 +68,14 @@ module.exports = async (req, res, next) => {
 
                 // invalid Brand
             } else {
-                error('INVALID Brand!');
+                error('INVALID Rate Category!');
                 return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.rateCategory.rateCategoryIdInvalidEitherDeletedOrDeactivated);
             }
 
             // asm id is invalid 
         } else {
-            error('The Brand ID is Invalid !');
-            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidAsmId);
+            error('The Rate Category ID is Invalid !');
+            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.rateCategory.invalidRateCategoryId);
         }
 
         // catch any runtime error 
