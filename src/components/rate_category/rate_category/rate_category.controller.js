@@ -526,6 +526,36 @@ class rateCategoryController extends BaseController {
 
   }
 
+
+  addRateCategoryVehicleTranporterMapping = async (req, res) => {
+    try {
+      info('Add Mapping of Rate category, Vehicle  and Tranporter  !');
+      //initializing variable
+      let transporterId = req.body.transporterId || '',
+        vehicleId = req.body.vehicleId || '',
+        rateCategoryId = req.params.rateCategoryId || '';
+
+      // creating a mapping object
+      let rateTransporterVehicleMappingObject = {
+        vehicleId,
+        transporterId,
+        rateCategoryId
+      }
+      //creating mapping of transporter vehicle and rate category 
+      let addMappingResult = await rateTransporterVehicleMappingCtrl.createSingle(rateTransporterVehicleMappingObject);
+
+      // check if added 
+      if (addMappingResult.success) return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.rateCategoryVehicleTransporterMappingAddedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryVehicleTransporterMappingNotAddedSuccessfully);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
+
   deleteRateCategory = async (req, res) => {
     try {
       info('Rate category  Delete!');

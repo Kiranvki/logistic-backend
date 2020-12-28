@@ -12,5 +12,7 @@ module.exports = {
     rateCategoryUpdatedSuccessfully: 'Rate Category Updated Successfully !',
     rateCategoryNotUpdated: 'Error! Updating Rate Category !',
     invalidRateCategoryId: 'The Rate Category Id is Invalid !',
+    rateCategoryVehicleTransporterMappingAddedSuccessfully: 'RateCategory Vehicle Transporter Mapping Added Successfully !',
+    rateCategoryVehicleTransporterMappingNotAddedSuccessfully: 'RateCategory Vehicle Transporter Mapping  Not Added!',
 
 };

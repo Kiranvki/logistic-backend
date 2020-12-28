@@ -7,14 +7,11 @@ const {
   joiAsmList, // get asm list 
   joiAsmPatch, // joi asm patch
   joiIdInParams, // joi asm id in params
-  joiZohoDetails, // zoho
-  joiAsmGetDetails, // asm get details
-  joiAsmChangeStatus, // asm change status
+
 } = require('./rate_category.validators');
 
 // hooks 
 const {
-  isValidAsm, // check whether the asm is valid 
   checkWhetherItsAValidRateCategoryUpdate,
 } = require('../../../hooks');
 
@@ -30,51 +27,57 @@ function ratecategory() {
     // post
     closed.route('/').post(
       //[joiRateCategoryCreate], // joi validation
-      // verifyAppToken,
-      ctrl.post // controller function 
+      //verifyUserToken,      // verify user token
+      ctrl.post              // controller function 
     );
 
     closed.route('/').get(
       //[joiTransporterCreate], // joi validation
-      // verifyAppToken,
+      //verifyUserToken,        // verify user token
       // isValidSalesOrder,
-      ctrl.getList // controller function 
+      ctrl.getList            // controller function 
     );
 
     // get minified list
     closed.route('/minified/list').get(
       //[joiTransporterCreate], // joi validation
-      // verifyAppToken,
+      //verifyUserToken, // verify user token
       // isValidSalesOrder,
       ctrl.getListMinified // controller function 
     );
 
     closed.route('/:rateCategoryId').get(
-      //[joiTransporterMaster], // joi validation
-
-      ctrl.getRateCategory // get controller 
+      //[joiTransporterMaster],     // joi validation
+      //verifyUserToken,            // verify user token
+      ctrl.getRateCategory          // get controller 
     );
 
 
     closed.route('/:rateCategoryId').patch(
-      //[joiTransporterMaster], // joi validation
+      //[joiTransporterMaster],   // joi validation
+      //verifyUserToken,          // verify user token
       checkWhetherItsAValidRateCategoryUpdate,  // check whether its a valid update 
-      ctrl.patchtRateCategory // get controller 
+      ctrl.patchtRateCategory     // get controller 
     );
-
-
 
     //deleting the rate category itself
     closed.route('/:rateCategoryId').delete(
       // [joiDeleteTransporeter], // joi validation
+      //verifyUserToken,          // verify user token
+      ctrl.deleteRateCategory     // delete controller 
+    );
 
-      ctrl.deleteRateCategory // delete controller 
+    //adding the rate category, vehicle and transporter mapping
+    closed.route('/rate-category-mapping/add-vehicle/:rateCategoryId').patch(
+      // [joiDeleteTransporeter],   // joi validation
+      //verifyUserToken,            // verify user token
+      ctrl.addRateCategoryVehicleTranporterMapping // delete controller 
     );
 
     //deleting the rate category, vehicle and transporter mapping
     closed.route('/rate-category-mapping/:rateCategoryVehicleTransporterMappingId').delete(
-      // [joiDeleteTransporeter], // joi validation
-
+      // [joiDeleteTransporeter],   // joi validation
+      //verifyUserToken,            // verify user token
       ctrl.deleteRateCategoryVehicleTranporterMapping // delete controller 
     );
   }
