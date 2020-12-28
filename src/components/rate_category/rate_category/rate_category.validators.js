@@ -8,44 +8,61 @@ const Response = require('../../../responses/response');
 
 // add joi schema 
 const schemas = {
-    //vehicle create
-    joiVehicleCreate: Joi.object().keys({
-        regNumber: Joi.string().trim().label('Registration Number').required(),
-        vehicleType: Joi.string().trim().label('Vehicle Type').required(),
-        vehicleModel: Joi.string().trim().label('Vehicle Model').required(),
-        height: Joi.number().label('Height').required(),
-        length: Joi.number().label('Length').required(),
-        breadth: Joi.number().label('Breadth').required(),
-        tonnage: Joi.number().label('Tonnage').required(),
-        transporterId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
-            language: {
-                string: {
-                    regex: {
-                        base: 'should be a valid mongoose Id.'
+
+    //Rate Category create
+    joiRateCategoryCreate: Joi.object().keys({
+        rateCategoryDetails: Joi.object().keys({
+            rateCategoryName: Joi.string().trim().label('Rate Category Name').required(),
+            rateCategoryType: Joi.string().trim().label('Rate Category Type').required(),
+            fixedRentalAmount: Joi.number().label('Fixed Rental Amount').required(),
+            includedAmount: Joi.number().label('Included Amount').required(),
+            includedDistance: Joi.number().label('Included Distance').required(),
+            additionalAmount: Joi.number().label('Additional Amount').required(),
+        }),
+
+        noOfVehicles: Joi.number().label('Number Of Vehicles').required()
+            .valid(Joi.ref('vehicleDetails.length')).options({
+                language: {
+                    any: {
+                        allowOnly: 'Mismatch',
                     }
                 }
-            }
-        }).optional().allow(''), // keeping it optional for now,will have to make it required
-        rateCategoryId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('RateCategory Id').required().options({
-            language: {
-                string: {
-                    regex: {
-                        base: 'should be a valid mongoose Id.'
+            }),
+
+        vehicleDetails: Joi.array().items(
+            Joi.object().keys({
+                transporterId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
+                    language: {
+                        string: {
+                            regex: {
+                                base: 'should be a valid mongoose Id.'
+                            }
+                        }
                     }
-                }
-            }
-        }).optional().allow(''),// keeping it optional for now,will have to make it required
+                }).optional().allow(''), // keeping it optional for now,will have to make it required
+
+                rateCategoryId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('RateCategory Id').required().options({
+                    language: {
+                        string: {
+                            regex: {
+                                base: 'should be a valid mongoose Id.'
+                            }
+                        }
+                    }
+                }).optional().allow(''),// keeping it optional for now,will have to make it required
+            })
+        ).min(1).max(20),
     }),
 
-    // get vehicle list 
-    joiVehicleList: Joi.object().keys({
+    // get Rate Category list
+    joiRateCategoryList: Joi.object().keys({
         page: Joi.number().integer().min(1).label('Page').required(),
         search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
     }),
 
-    // joi vehicle get details 
-    joiVehicleGetDetails: Joi.object().keys({
-        vehicleId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Vehicle Id').required().options({
+    // joi Rate Category get details
+    joiRateCategoryGetDetails: Joi.object().keys({
+        rateCategoryId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Rate Category Id').required().options({
             language: {
                 string: {
                     regex: {
@@ -73,9 +90,9 @@ const schemas = {
         }).min(1)
     }),
 
-    // joi in in params
+    // joi id in params
     joiIdInParams: Joi.object().keys({
-        vehicleId: Joi.string().trim().label('Vehicle Id').required(),
+        rateCategoryId: Joi.string().trim().label('rateCategory Id').required(),
     }),
 
 }
@@ -101,9 +118,9 @@ const options = {
 };
 
 module.exports = {
-    joiVehicleCreate: (req, res, next) => {
+    joiRateCategoryCreate: (req, res, next) => {
         // getting the schemas 
-        let schema = schemas.joiVehicleCreate;
+        let schema = schemas.joiRateCategoryCreate;
         let option = options.basic;
 
         // validating the schema 
@@ -121,10 +138,10 @@ module.exports = {
         });
     },
 
-    // joi vehicle list
-    joiVehicleList: (req, res, next) => {
+    // joi Rate Category list
+    joiRateCategoryList: (req, res, next) => {
         // getting the schemas 
-        let schema = schemas.joiVehicleList;
+        let schema = schemas.joiRateCategoryList;
         let option = options.basic;
 
         // validating the schema 
@@ -143,9 +160,9 @@ module.exports = {
     },
 
     // joi vehicle get details 
-    joiVehicleGetDetails: (req, res, next) => {
+    joiRateCategoryGetDetails: (req, res, next) => {
         // getting the schemas 
-        let schema = schemas.joiVehicleGetDetails;
+        let schema = schemas.joiRateCategoryGetDetails;
         let option = options.basic;
 
         // validating the schema 
@@ -204,5 +221,8 @@ module.exports = {
             Response.joierrors(req, res, err);
         });
     },
+
+
+
 
 }

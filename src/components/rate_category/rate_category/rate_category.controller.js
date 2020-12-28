@@ -19,7 +19,7 @@ class rateCategoryController extends BaseController {
   }
 
   // Internal Function get rateCategory  details
-  getDetails = (rateCategoryId) => {
+  getDetails = async (rateCategoryId) => {
     try {
       info('Get Rate Category  details !');
 

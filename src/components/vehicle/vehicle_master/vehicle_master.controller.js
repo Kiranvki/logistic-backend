@@ -86,8 +86,11 @@ class vehicleController extends BaseController {
           transporterId,
           rateCategoryId
         }
-        //creating mapping of transporter vehicle and rate category 
-        await rateTransporterVehicleMappingCtrl.createSingle(rateTransporterVehicleMappingObject);
+
+        if (transporterId && !_.isEmpty(transporterId) && rateCategoryId && !_.isEmpty(rateCategoryId)) {
+          //creating mapping of transporter vehicle and rate category 
+          await rateTransporterVehicleMappingCtrl.createSingle(rateTransporterVehicleMappingObject);
+        }
         return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.vehicleCreated);
       } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotCreated);
 

@@ -13,4 +13,5 @@ module.exports = {
   checkWhetherItsAValidVehicleUpdate: require('./checkWhetherItsAValidVehicleUpdate'), //hook to check Whether Its A Valid Vehicle Update or not
   isValidVehicle: require('./isValidVehicle'), // check whether the Valid Vehicle id
   checkWhetherItsAValidRateCategoryUpdate: require('./checkWhetherItsAValidRateCategoryUpdate'), // checkWhetherItsAValidRateCategoryUpdate
+  isValidRateCategory: require('./isValidRateCategory'),// check whether the RateCategory id valid or not
 }
