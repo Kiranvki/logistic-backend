@@ -15,6 +15,7 @@ const {
 // hooks 
 const {
   isValidAsm, // check whether the asm is valid 
+  checkWhetherItsAValidRateCategoryUpdate,
 } = require('../../../hooks');
 
 // auth 
@@ -25,7 +26,8 @@ const {
 // exporting the rate category routes 
 function ratecategory() {
   return (open, closed) => {
-    // add the rate category controller in the packing stage 
+
+    // post
     closed.route('/').post(
       //[joiRateCategoryCreate], // joi validation
       // verifyAppToken,
@@ -49,33 +51,31 @@ function ratecategory() {
 
     closed.route('/:rateCategoryId').get(
       //[joiTransporterMaster], // joi validation
-      // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
+
       ctrl.getRateCategory // get controller 
     );
 
 
     closed.route('/:rateCategoryId').patch(
       //[joiTransporterMaster], // joi validation
-      // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
+      checkWhetherItsAValidRateCategoryUpdate,  // check whether its a valid update 
       ctrl.patchtRateCategory // get controller 
+    );
+
+
+
+    //deleting the rate category itself
+    closed.route('/:rateCategoryId').delete(
+      // [joiDeleteTransporeter], // joi validation
+
+      ctrl.deleteRateCategory // delete controller 
     );
 
     //deleting the rate category, vehicle and transporter mapping
     closed.route('/rate-category-mapping/:rateCategoryVehicleTransporterMappingId').delete(
       // [joiDeleteTransporeter], // joi validation
-      // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
-      ctrl.deleteRateCategoryVehicleTranporterMapping // delete controller 
-    );
 
-    //deleting the rate category itself
-    closed.route('/:rateCategoryId').delete(
-      // [joiDeleteTransporeter], // joi validation
-      // setupDataForGoFrugalApi, // setup data for gofrugal
-      // getTheDetailsFromGoFrugal, // get the data from go frugal 
-      ctrl.deleteRateCategory // delete controller 
+      ctrl.deleteRateCategoryVehicleTranporterMapping // delete controller 
     );
   }
 }
