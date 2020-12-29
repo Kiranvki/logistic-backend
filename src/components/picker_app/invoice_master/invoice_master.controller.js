@@ -274,19 +274,22 @@ class areaSalesManagerController extends BaseController {
           // calculating the tax amount 
 
           let taxValueForSingleItem = parseFloat((amountAfterDiscountForSingle * item.taxPercentage / 100).toFixed(2))
+          let amountAfterTaxForSingle = amountAfterDiscountForSingle + taxValueForSingleItem;
           let taxValueForSuppliedItem = taxValueForSingleItem * item.suppliedQty
           totalTax = totalTax + taxValueForSuppliedItem;
 
           //calculating net amount 
-          let netValueForSingleItem = discountForSingleItem - taxValueForSingleItem;
+          let netValueForSingleItem = amountAfterDiscountForSingle - taxValueForSingleItem;
           let netValueForSuppliedItem = netValueForSingleItem * item.suppliedQty
           totalNetValue = totalNetValue + netValueForSuppliedItem;
 
           //adding all the values in item object
           item.discountForSingleItem = discountForSingleItem;
           item.amountAfterDiscountForSingle = amountAfterDiscountForSingle;
+          item.amountAfterTaxForSingle = amountAfterTaxForSingle;
           item.taxValueForSingleItem = taxValueForSingleItem;
           item.netValueForSingleItem = netValueForSingleItem;
+
           console.log('item', item);
 
         }

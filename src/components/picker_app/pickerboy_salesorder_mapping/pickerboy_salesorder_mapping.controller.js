@@ -525,6 +525,11 @@ class pickerboySalesOrderMappingController extends BaseController {
     try {
       info('View the Order Basket !');
 
+      // initializing the value
+      let totalQuantityDemanded = 0, totalQuantitySupplied = 0,
+        totalAmount = 0, totalTax = 0,
+        totalDiscount = 0, totalNetValue = 0;
+
       // get the basket data
       let salesOrderData = await Model.aggregate([{
         $match: {
@@ -546,11 +551,14 @@ class pickerboySalesOrderMappingController extends BaseController {
               }
             }, {
               $project: {
+
                 'itemName': 1,
                 'itemId': 1,
                 'quantity': 1,
                 'suppliedQty': 1,
-                'salePrice': 1
+                'salePrice': 1,
+                'taxPercentage': 1,
+                'discountPercentage': 1,
               }
             }
           ],
@@ -614,6 +622,55 @@ class pickerboySalesOrderMappingController extends BaseController {
 
       // check if inserted 
       if (salesOrderData && !_.isEmpty(salesOrderData)) {
+        //calculating the total basket amount -- needs to moved into hook
+        //calculating the total quantity supplied and demanded
+
+        await salesOrderData[0].availableItemDetails.map((v, i) => {
+          totalQuantitySupplied = v.suppliedQty + totalQuantitySupplied
+          totalQuantityDemanded = v.quantity + totalQuantityDemanded
+        });
+
+        //calculating the discount and tax
+        for (let item of salesOrderData[0].availableItemDetails) {
+          //calculating discount
+
+          let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.salePrice).toFixed(2))
+          let discountForSupliedItem = discountForSingleItem * item.suppliedQty
+          totalDiscount = totalDiscount + discountForSupliedItem;
+
+          //calculating selling price after discount
+
+          let amountAfterDiscountForSingle = item.salePrice - discountForSingleItem;
+          let amountAfterDiscountForSuppliedItem = amountAfterDiscountForSingle * item.suppliedQty
+          totalAmount = totalAmount + amountAfterDiscountForSuppliedItem;
+
+          // calculating the tax amount 
+
+          let taxValueForSingleItem = parseFloat((amountAfterDiscountForSingle * item.taxPercentage / 100).toFixed(2))
+          let amountAfterTaxForSingle = amountAfterDiscountForSingle + taxValueForSingleItem;
+          let taxValueForSuppliedItem = taxValueForSingleItem * item.suppliedQty
+          totalTax = totalTax + taxValueForSuppliedItem;
+
+          //calculating net amount 
+          let netValueForSingleItem = amountAfterDiscountForSingle - taxValueForSingleItem;
+          let netValueForSuppliedItem = netValueForSingleItem * item.suppliedQty
+          totalNetValue = totalNetValue + netValueForSuppliedItem;
+
+          //adding all the values in item object
+          item.discountForSingleItem = discountForSingleItem;
+          item.amountAfterDiscountForSingle = amountAfterDiscountForSingle;
+          item.amountAfterTaxForSingle = amountAfterTaxForSingle;
+          item.taxValueForSingleItem = taxValueForSingleItem;
+          item.netValueForSingleItem = netValueForSingleItem;
+
+        }
+
+        salesOrderData[0].totalQuantitySupplied = totalQuantitySupplied
+        salesOrderData[0].totalQuantityDemanded = totalQuantityDemanded
+        salesOrderData[0].totalAmount = totalAmount
+        salesOrderData[0].totalTax = totalTax
+        salesOrderData[0].totalDiscount = totalDiscount
+        salesOrderData[0].totalNetValue = totalNetValue
         return this.success(req, res, this.status.HTTP_OK, salesOrderData, this.messageTypes.salesOrderDetailsFetched);
       } else {
         error('Error while getting the sales Order data after picking state !');

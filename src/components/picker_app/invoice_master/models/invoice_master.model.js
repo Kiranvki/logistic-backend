@@ -229,6 +229,9 @@ const invoiceMaster = new Schema({
       'amountAfterDiscountForSingle': {
         type: 'Number'
       },
+      'amountAfterTaxForSingle': {
+        type: 'Number'
+      },
       'taxValueForSingleItem': {
         type: 'Number'
       },
