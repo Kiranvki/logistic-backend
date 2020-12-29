@@ -5,7 +5,7 @@ const Response = require('../responses/response');
 const StatusCodes = require('../facades/response');
 const MessageTypes = require('../responses/types');
 const Exceptions = require('../exceptions/Handler');
-const mongoose = require('mongoose');
+const _ = require('lodash');
 const {
   error,
   info

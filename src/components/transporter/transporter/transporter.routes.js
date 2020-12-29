@@ -6,6 +6,7 @@ const {
   joiTransporterGetDetails,
   joiTransporterPatch,
   joiIdInParams,
+  joiDistributorChangeStatus, // is Distributor changed status
   joiTransporterElementPatch,
 } = require('./transporter.validators');
 
@@ -18,19 +19,18 @@ const {
 
 function transporter() {
   return (open, closed) => {
-    // add the transporter in the packing stage
+
+    // post
     closed.route('/').post(
       [joiTransporter], // joi validation
       // verifyAppToken,
-      // isValidSalesOrder,
       ctrl.post // controller function 
     );
 
-
+ // get all 
     closed.route('/').get(
       [joiTransporterList], // joi validation
       // verifyAppToken,
-      // isValidSalesOrder,
       ctrl.getList // controller function 
     );
 
@@ -50,7 +50,7 @@ function transporter() {
      );
     // get minified list
     closed.route('/minified/list').get(
-      // [joiCustomersList], // joi validation
+      [joiTransporterList], // joi validation
       // verifyUserToken, // verify user token
       ctrl.getMinifiedList // get controller 
     );
@@ -58,25 +58,17 @@ function transporter() {
     //
     closed.route('/:transporterId').patch(
       [joiTransporterPatch], // joi validation
-      // setupDataForGoFrugalApi, // setup data for gofrugal
-      //isValidTransporter, // check whether its a valid update 
+      checkWhetherItsAValidTransporterUpdate,
       ctrl.patchTransporter // get controller 
     );
 
        // activate or deactive transporter
        closed.route('/:transporterId/status/:type').patch(
-        // [joiDistributorChangeStatus], // joi validation
+        [joiDistributorChangeStatus], // joi validation
         // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
         ctrl.patchTransporterStatus // get controller 
       );
 
-    // //
-    // closed.route('/:transporterId').delete(
-    //    [joiIdInParams], // joi validation
-    //   // setupDataForGoFrugalApi, // setup data for gofrugal
-    //   isValidTransporter, // get the data from go frugal 
-    //   ctrl.deleteTransporter // get controller 
-    // );
   };
 
 }

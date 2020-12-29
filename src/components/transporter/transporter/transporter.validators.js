@@ -86,6 +86,12 @@ const schemas = {
         search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
     }),
 
+    // joi Transporter 
+    joiDistributorChangeStatus: Joi.object().keys({
+        transporterId: Joi.string().trim().label('Transporter Id').required(),
+        type: Joi.string().trim().valid(['activate', 'deactivate']).label('Type').required()
+    }),
+
 
 
     // joi Transporter patch 
@@ -329,6 +335,27 @@ module.exports = {
 
         // validating the schema 
         schema.validate({ params: req.params, body: req.body }, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
+
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
+
+    // joi Transporter change status
+    joiDistributorChangeStatus: (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.joiDistributorChangeStatus;
+        let option = options.basic;
+
+        // validating the schema 
+        schema.validate(req.params, option).then(() => {
             next();
             // if error occured
         }).catch((err) => {

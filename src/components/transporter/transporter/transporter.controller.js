@@ -17,7 +17,40 @@ class transporterController extends BaseController {
   }
 
 
+  // Internal Function get rateCategory  details
+  getDetails = (transporterId) => {
+    try {
+      info('Get Transporer details !');
 
+      // get details 
+      return Model.findOne({
+        _id: mongoose.Types.ObjectId(transporterId),
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in Transporter DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+    }
+  }
   // create a new entry
   post = async (req, res) => {
     try {
@@ -25,10 +58,11 @@ class transporterController extends BaseController {
       //let TransporterMasterResult;
       info('Creating Transporter !');
 
-      // inserting data into the db 
+     // inserting data into the db 
       let isInserted = await Model.create({
         ...req.body
       });
+
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
@@ -58,15 +92,6 @@ class transporterController extends BaseController {
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
 
-      // project data 
-      // let dataToProject = {
-      //   firstName: 1,
-      //   lastName: 1,
-      //   employeeId: 1,
-      //   status: 1,
-      //   reportingTo: 1
-      // }
-
       // get the list of asm in the allocated city
       let searchObject = {
         'isDeleted': 0,
@@ -89,6 +114,12 @@ class transporterController extends BaseController {
             }
           }]
         };
+
+      // get the total rate category
+      let totalTransporter = await Model.countDocuments({
+        ...searchObject
+      });
+
 
       // get the Transporter list 
       let transporterList = await Model.aggregate([{
@@ -118,7 +149,7 @@ class transporterController extends BaseController {
         pageMeta: {
           skip: parseInt(skip),
           pageSize: pageSize,
-          // total: totalAsms
+          total: totalTransporter
         }
       }, this.messageTypes.transporterFetched);
 
@@ -145,9 +176,7 @@ class transporterController extends BaseController {
 
       let fieldsToProject = {
         '_id': 1,
-      //  '$ vehicleDetails.name' : 1
-
-       'vehicleDetails': '$vehicleDetails.name',
+        'vehicleDetails': '$vehicleDetails.name',
       }
 
 
@@ -208,45 +237,6 @@ class transporterController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
 
-  }
-
-
-  // Internal function check id is valid 
-  isValidId = async (transporterId) => {
-    try {
-      info('Checking whether the Warehouse Id exists or not !');
-
-      // creating a search object 
-      let searchObject = {
-        '_id': mongoose.Types.ObjectId(transporterId),
-        'isDeleted': 0,
-      };
-
-      // creating the data inside the database 
-      return Model
-        .findOne({
-          ...searchObject
-        })
-        .lean()
-        .then((res) => {
-          if (res && !_.isEmpty(res))
-            return {
-              success: true,
-              data: res
-            };
-          else return {
-            success: false
-          }
-        });
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
-      }
-    }
   }
 
   // get details 
@@ -334,40 +324,40 @@ class transporterController extends BaseController {
   }
 
 
-     // patch Transporter status
-     patchTransporterStatus = async (req, res) => {
-      try {
-        info('Transporter STATUS CHANGE !');
-  
-        // type id 
-        let type = req.params.type,
-          transporterId = req.params.transporterId;
-        // creating data to insert
-        let dataToUpdate = {
-          $set: {
-            status: type == 'activate' ? 1 : 0
-          }
-        };
-  
-        // inserting data into the db 
-        let isUpdated = await Model.findOneAndUpdate({
-          _id: mongoose.Types.ObjectId(transporterId)
-        }, dataToUpdate, {
-          new: true,
-          upsert: false,
-          lean: true
-        });
-  
-        // check if inserted 
-        if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.transporterActivatedSuccessfully : this.messageTypes.transporterDeactivatedSuccessfully);
-        else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotUpdated);
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-      }
+  // patch Transporter status
+  patchTransporterStatus = async (req, res) => {
+    try {
+      info('Transporter STATUS CHANGE !');
+
+      // type id 
+      let type = req.params.type,
+        transporterId = req.params.transporterId;
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          status: type == 'activate' ? 1 : 0
+        }
+      };
+
+      // inserting data into the db 
+      let isUpdated = await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(transporterId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      });
+
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.transporterActivatedSuccessfully : this.messageTypes.transporterDeactivatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotUpdated);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
+  }
 
 }
 // exporting the modules 
