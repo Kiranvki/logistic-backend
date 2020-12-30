@@ -129,6 +129,40 @@ class ratecategoryTransporterMappingCtrl extends BaseController {
       }
     }
   }
+
+
+  // get valid and active Vehicle id from transporter id
+  getValidAndActiveVehicleIdFromTransporterId = async (transporterId) => {
+    try {
+      info(`Get valid Vehicle IDs from transporter id ${transporterId}`);
+
+      // creating the data inside the database 
+      return Model
+        .find({
+          'transporterId': mongoose.Types.ObjectId(transporterId),
+          'isDeleted': 0
+        })
+        .then((res) => {
+          if (res)
+            return {
+              success: true,
+              data: res.map((data) => data.vehicleId)
+            };
+          else return {
+            success: false
+          }
+        });
+
+      // catch any internal server error 
+    } catch (err) {
+      console.error(err);
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
 }
 
 // exporting the modules 

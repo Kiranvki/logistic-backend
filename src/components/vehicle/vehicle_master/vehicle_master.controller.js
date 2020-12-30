@@ -267,10 +267,17 @@ class vehicleController extends BaseController {
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
         searchKey = req.query.search || '',
         sortBy = req.query.sortBy || 'createdAt',
-        sortingArray = {};
+        sortingArray = {},
+        transporterId = req.params.transporterId;
+      console.log('transporterId', transporterId);
 
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
+
+      //getting all the vehicleId which belongs to the requested transporter
+
+      let vehicleTransporterMappedData = await rateTransporterVehicleMappingCtrl.getValidAndActiveVehicleIdFromTransporterId(transporterId);
+      console.log('vehicleTransporterMappedData.data', vehicleTransporterMappedData.data);
 
       // project data 
       let dataToProject = {
@@ -281,7 +288,10 @@ class vehicleController extends BaseController {
       // get the list of asm in the allocated city
       let searchObject = {
         'isDeleted': 0,
-        'status': 1
+        'status': 1,
+        '_id': {
+          $in: vehicleTransporterMappedData.data
+        }
       };
 
       // creating a match object

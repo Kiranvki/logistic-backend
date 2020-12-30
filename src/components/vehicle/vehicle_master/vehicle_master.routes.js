@@ -32,7 +32,7 @@ function vehicle() {
     );
 
     // get minified list
-    closed.route('/minified/list').get(
+    closed.route('/minified/list/:transporterId').get(
       [joiVehicleList], // joi validation
       //verifyUserToken, // verify user token
       ctrl.getListMinified // get controller 
