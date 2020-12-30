@@ -25,14 +25,14 @@ function userRoutes() {
   return (open, closed, appOpen, appClosed) => {
 
     // mark attendance
-    closed.route('/vehicle/attendance/check-in/:vehicleId').get(
+    closed.route('/attendance/check-in/:vehicleId').get(
       // verifyUserToken, // verify user token
       isAlreadyCheckedIn, // check whether the user is already checked in 
       ctrl.checkInVehicle, // controller function
     )
 
     // mark checkout attendance 
-    closed.route('/vehicle/attendance/check-out/:vehicleId').get(
+    closed.route('/attendance/check-out/:vehicleId').get(
       //  verifyAppToken, // verify user token
       //   isValidPickerBoyId, // validate salesman Id
       // isUserCheckedIn, // check whether the user is already checked in 
@@ -40,7 +40,7 @@ function userRoutes() {
     )
 
     //  get vehicle attendance per month
-    closed.route('/vehicle/attendance/month/:month/year/:year').get(
+    closed.route('/attendance/month/:month/year/:year').get(
       [joiUserAttendanceMonth], // joi validation for user attendance 
       //  verifyAppToken, // verify app token
       //  isValidPickerBoyId, // validate salesman Id

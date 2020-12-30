@@ -65,7 +65,7 @@ class userController extends BaseController {
 
       // inserting the new user into the db
       let isInserted = await Model.findOneAndUpdate({
-        vehicleId: mongoose.Types.ObjectId(pickerBoyId),
+        vehicleId: mongoose.Types.ObjectId(vehicleId),
         dateOfAttendance: {
           '$gte': startOfTheDay,
           '$lte': endOfTheDay
