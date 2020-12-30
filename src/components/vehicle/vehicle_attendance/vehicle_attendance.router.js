@@ -8,7 +8,7 @@ const {
 
 // custom hooks 
 const {
-  // isUserCheckedIn, // is user checked in 
+  isVehicleCheckedIn, // is vehicle checked in
   // isValidPickerBoyId, // check whether the salesman id is valid or not
   isAlreadyCheckedIn, // check whether the vehicle already check In
   // getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
@@ -27,7 +27,7 @@ function userRoutes() {
     // mark attendance
     closed.route('/attendance/check-in/:vehicleId').get(
       // verifyUserToken, // verify user token
-      isAlreadyCheckedIn, // check whether the user is already checked in 
+      isAlreadyCheckedIn, // check whether the vehicle is already checked in 
       ctrl.checkInVehicle, // controller function
     )
 
@@ -35,8 +35,8 @@ function userRoutes() {
     closed.route('/attendance/check-out/:vehicleId').get(
       //  verifyAppToken, // verify user token
       //   isValidPickerBoyId, // validate salesman Id
-      // isUserCheckedIn, // check whether the user is already checked in 
-      ctrl.checkOutUser, // controller function
+      isVehicleCheckedIn, // check whether the vehicle is already checked in 
+      ctrl.checkOutVehicle, // controller function
     )
 
     //  get vehicle attendance per month

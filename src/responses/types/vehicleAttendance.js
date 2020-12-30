@@ -1,7 +1,7 @@
 module.exports = {
   attendanceMarkedSuccessfully: 'Vehicle Checked In !',
   attendanceNotMarkedSuccessfully: 'Attendance Not Marked Successfully, Please try again after sometime !',
-  salesmanNotCheckedIn: 'Vehicle Still Not Checked In !',
+  vehicleNotCheckedIn: 'Vehicle Still Not Checked In !',
   invalidVehicleId: 'Invalid Vehicle Id !',
   vehicleCheckedOut: 'Vehicle Checked Out Successfully !',
   vehicleCheckedNotOut: 'Server Error! Please try after sometime !',

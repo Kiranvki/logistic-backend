@@ -33,10 +33,6 @@ class userController extends BaseController {
           s: 0,
           millisecond: 0
         }).toDate(); // today date 
-      /***
-       * let todayTimeInHour = moment().format('HH'); // getting the current hour
-       * let todayTimeInMins = moment().format('mm'); // getting the current min
-       */
 
       let checkInTimeInHour = parseInt(req.body.checkInTimeInHour); // getting the check in hour
       let checkInTimeInMins = parseInt(req.body.checkInTimeInMins); // getting the check in min
@@ -117,21 +113,32 @@ class userController extends BaseController {
     }
   }
 
-  // check out User
-  checkOutUser = async (req, res) => {
+  // check out Vehicle
+  checkOutVehicle = async (req, res) => {
     try {
-      info('Checking Out User !');
+      info('Checking Out Vehicle !');
 
-      let user = req.user, // user 
-        todaysDate = new Date(); // todays date
+      let vehicleId = req.params.vehicleId, // Vehicle Id
+        checkOutDate = moment(req.body.checkOutDate, 'DD-MM-YYYY').set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+      // let user = req.user, // user 
+      //   todaysDate = new Date(); // todays date
 
-      let todayTimeInHour = moment().format('HH'); // getting the current hour 
-      let todayTimeInMins = moment().format('mm'); // getting the current min
-      let timeOfTheDayInMins = parseInt(todayTimeInHour) * 60 + parseInt(todayTimeInMins); // getting the time in mins 
+      let checkOutTimeInHour = parseInt(req.body.checkOutTimeInHour); // getting the check out hour
+      let checkOutTimeInMins = parseInt(req.body.checkOutTimeInMins); // getting the check out min
+
+
+      // let todayTimeInHour = moment().format('HH'); // getting the current hour 
+      // let todayTimeInMins = moment().format('mm'); // getting the current min
+      let timeOfTheDayInMins = parseInt(checkOutTimeInHour) * 60 + parseInt(checkOutTimeInMins); // getting the time in mins 
 
       // inserting the new user into the db
       let updateObj = {
-        'attendanceLog.$[attendanceLog].checkOutDate': todaysDate,
+        'attendanceLog.$[attendanceLog].checkOutDate': checkOutDate,
         'attendanceLog.$[attendanceLog].checkOutTimeInMins': parseInt(timeOfTheDayInMins),
         'attendanceLog.$[attendanceLog].isCheckedOut': 1,
         'attendanceLog.$[attendanceLog].totalWorkingInMins': parseInt(timeOfTheDayInMins) - parseInt(req.body.checkInTimeInMins)
@@ -140,7 +147,7 @@ class userController extends BaseController {
       // update the data 
       let isUpdated = await Model.update({
         _id: req.body.attendanceId,
-        userId: user
+        vehicleId: vehicleId
       }, {
         $set: {
           ...updateObj
@@ -179,8 +186,8 @@ class userController extends BaseController {
         });
 
         // success response 
-        return this.success(req, res, this.status.HTTP_OK, dataToSend, this.messageTypes.userCheckedOut);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userCheckedNotOut);
+        return this.success(req, res, this.status.HTTP_OK, dataToSend, this.messageTypes.vehicleCheckedOut);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleCheckedNotOut);
 
       // catch any runtime error 
     } catch (err) {
