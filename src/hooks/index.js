@@ -14,4 +14,5 @@ module.exports = {
   isValidVehicle: require('./isValidVehicle'), // check whether the Valid Vehicle id
   checkWhetherItsAValidRateCategoryUpdate: require('./checkWhetherItsAValidRateCategoryUpdate'), // checkWhetherItsAValidRateCategoryUpdate
   isValidRateCategory: require('./isValidRateCategory'),// check whether the RateCategory id valid or not
+  isAlreadyCheckedIn: require('./isAlreadyCheckedIn'), // check whether the vehicle already check In
 }

@@ -15,26 +15,33 @@ class userController extends BaseController {
   // constructor 
   constructor() {
     super();
-    this.messageTypes = this.messageTypes.appUserAttendance;
+    this.messageTypes = this.messageTypes.vehicleAttendance;
   }
 
-  // checkIn User
-  checkInUser = async (req, res) => {
+  // checkIn Vehicle
+  checkInVehicle = async (req, res) => {
     try {
-      info('Checking In User !');
+      info('Checking In Vehicle !');
 
-      let user = req.user, // user 
-        pickerBoyId = user._id, // salesman Id
+      let
+        // user = req.user, // Vehicle 
+        driverName = req.body.driverName,
+        vehicleId = req.params.vehicleId, // Vehicle Id
         todaysDate = moment().set({
           h: 0,
           m: 0,
           s: 0,
           millisecond: 0
         }).toDate(); // today date 
+      /***
+       * let todayTimeInHour = moment().format('HH'); // getting the current hour
+       * let todayTimeInMins = moment().format('mm'); // getting the current min
+       */
 
-      let todayTimeInHour = moment().format('HH'); // getting the current hour 
-      let todayTimeInMins = moment().format('mm'); // getting the current min
-      let timeOfTheDayInMins = parseInt(todayTimeInHour) * 60 + parseInt(todayTimeInMins); // getting the time in mins 
+      let checkInTimeInHour = parseInt(req.body.checkInTimeInHour); // getting the check in hour
+      let checkInTimeInMins = parseInt(req.body.checkInTimeInMins); // getting the check in min
+
+      let timeOfTheDayInMins = parseInt(checkInTimeInHour) * 60 + parseInt(checkInTimeInMins); // getting the time in mins 
 
       let attendanceLog = [{
         checkInDate: new Date(),
@@ -58,7 +65,7 @@ class userController extends BaseController {
 
       // inserting the new user into the db
       let isInserted = await Model.findOneAndUpdate({
-        userId: mongoose.Types.ObjectId(pickerBoyId),
+        vehicleId: mongoose.Types.ObjectId(pickerBoyId),
         dateOfAttendance: {
           '$gte': startOfTheDay,
           '$lte': endOfTheDay
@@ -67,7 +74,8 @@ class userController extends BaseController {
         $set: {
           dateOfAttendance: todaysDate,
           status: 1,
-          isDeleted: 0
+          isDeleted: 0,
+          driverName: driverName
         },
         $push: {
           attendanceLog: attendanceLog
@@ -182,14 +190,14 @@ class userController extends BaseController {
   }
 
   // get details
-  getDetails = async (salesmanId, startDate, endDate) => {
+  getDetails = async (vehicleId, startDate, endDate) => {
     try {
       info('Get Details !');
 
-      // get the attendance of the salesman 
+      // get the attendance of the vehicle 
       return Model.aggregate([{
         $match: {
-          'userId': mongoose.Types.ObjectId(salesmanId),
+          'vehicleId': mongoose.Types.ObjectId(vehicleId),
           'dateOfAttendance': {
             $gte: startDate,
             $lte: endDate
@@ -197,7 +205,7 @@ class userController extends BaseController {
         }
       }, {
         '$project': {
-          'userId': 1,
+          'vehicleId': 1,
           'dateOfAttendance': 1,
           'attendanceLog': {
             $filter: {

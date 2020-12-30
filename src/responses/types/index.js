@@ -9,5 +9,6 @@ module.exports = {
   transporterMaster: require('./transporter'), // transporter 
   rateCategory: require('./rateCategory'), // rate category
   vehicle: require('./vehicle'), // vehicle message
-  invoice: require('./invoice') // invoice
+  invoice: require('./invoice'), // invoice
+  vehicleAttendance: require('./vehicleAttendance'), //vehicleAttendance
 };
