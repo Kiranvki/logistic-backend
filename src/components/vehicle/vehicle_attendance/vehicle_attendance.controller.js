@@ -264,12 +264,13 @@ class userController extends BaseController {
   }
 
   // get the attendance for the given month
-  getUserAttendanceForAMonth = async (req, res) => {
+  getVehicleAttendanceForAMonth = async (req, res) => {
     try {
-      info('get the user attendance for a month !');
+      info('get the vehicle attendance for a month !');
 
-      let user = req.user, // user 
-        salesmanId = user._id, // salesman Id
+      let
+        //user = req.user, // user 
+        vehicleId = req.params.vehicleId, // vehicle Id
         attendanceSheet = [], // attendance sheet 
         endDateOfTheMonth = req.body.endDateOfTheMonth, // end date of the month
         startDateOfTheMonth = req.body.startDateOfTheMonth; //  start date of the month
@@ -280,7 +281,7 @@ class userController extends BaseController {
       // get the attendance for each salesman 
       let attendanceForTheMonth = await Model.aggregate([{
         $match: {
-          'userId': mongoose.Types.ObjectId(salesmanId),
+          'vehicleId': mongoose.Types.ObjectId(vehicleId),
           'dateOfAttendance': {
             '$gt': startDateOfTheMonth,
             '$lte': endDateOfTheMonth
@@ -294,7 +295,8 @@ class userController extends BaseController {
           'date': { $dateToString: { format: "%d", date: "$dateOfAttendance", timezone: "+05:30" } },
           'attendanceLog': 1,
           'status': 1,
-          'isDeleted': 1
+          'isDeleted': 1,
+          'driverName': 1
         }
       }]).allowDiskUse(true);
 
@@ -338,8 +340,8 @@ class userController extends BaseController {
       // check user attendance sheet
       if (attendanceSheet && attendanceSheet.length) {
         // success response 
-        return this.success(req, res, this.status.HTTP_OK, attendanceSheet, this.messageTypes.userAttendanceFetchedSuccessfully);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userAttendanceFetchError);
+        return this.success(req, res, this.status.HTTP_OK, attendanceSheet, this.messageTypes.vehicleAttendanceFetchedSuccessfully);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleAttendanceFetchError);
 
       // catch any runtime error 
     } catch (err) {

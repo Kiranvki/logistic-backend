@@ -12,7 +12,7 @@ const {
   // isValidPickerBoyId, // check whether the salesman id is valid or not
   isAlreadyCheckedIn, // check whether the vehicle already check In
   // getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
-  // generateMonthDaysAndOtherMetaData, // generate month days and other meta data 
+  generateMonthDaysAndOtherMetaData, // generate month days and other meta data 
 } = require('../../../hooks')
 
 // auth 
@@ -40,14 +40,13 @@ function userRoutes() {
     )
 
     //  get vehicle attendance per month
-    closed.route('/attendance/month/:month/year/:year').get(
+    closed.route('/attendance/month/:month/year/:year/:vehicleId').get(
       [joiUserAttendanceMonth], // joi validation for user attendance 
       //  verifyAppToken, // verify app token
       //  isValidPickerBoyId, // validate salesman Id
-      // generateMonthDaysAndOtherMetaData, // generate month days and other metadata
-      ctrl.getUserAttendanceForAMonth, // controller function
+      generateMonthDaysAndOtherMetaData, // generate month days and other metadata
+      ctrl.getVehicleAttendanceForAMonth, // controller function
     )
-
 
     // get auto checkout 
     open.route('/vehicle/attendance/auto/check-out').get(
