@@ -350,189 +350,8 @@ class userController extends BaseController {
     }
   }
 
-  // check whether the salesman checked in 
-  isSalesmanCheckedIn = async (salesmanId, startDate, endDate) => {
-    try {
-      info('Get Details !');
 
-      // get the attendance of the salesman 
-      return Model.aggregate([{
-        $match: {
-          'userId': mongoose.Types.ObjectId(salesmanId),
-          'dateOfAttendance': {
-            $gte: startDate,
-            $lte: endDate
-          },
-          'status': 1,
-          'isDeleted': 0
-        }
-      }, {
-        '$project': {
-          'userId': 1,
-          'dateOfAttendance': 1,
-          'attendanceLog': {
-            $filter: {
-              input: "$attendanceLog",
-              as: "attendance",
-              cond: {
-                $and: [{
-                  $eq: ["$$attendance.isCheckedOut", 0]
-                }, {
-                  $eq: [
-                    "$$attendance.status", 1
-                  ]
-                }]
-              }
-            }
-          },
-        }
-      }, {
-        '$match': {
-          'attendanceLog': {
-            $exists: true
-          }
-        }
-      }]).allowDiskUse(true)
-        .then((res) => {
-          if (res && !_.isEmpty(res)) {
-            res = res[res.length - 1];
-            if (Array.isArray(res.attendanceLog) && res.attendanceLog.length)
-              return {
-                success: true,
-                data: res
-              };
-            else return {
-              success: false
-            };
-          } else return {
-            success: false
-          }
-        })
-        .catch((err) => {
-          return {
-            success: false,
-            error: err
-          }
-        });
 
-      // catch any internal error 
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
-      }
-    }
-  }
-
-  // get the attendance detail for the day 
-  getAttendanceDetailsForADay = async (pickerBoyId, startDate, endDate) => {
-    try {
-      info('Get Details !');
-
-      // get the attendance of the picker boy
-      return Model.aggregate([{
-        $match: {
-          'userId': mongoose.Types.ObjectId(pickerBoyId),
-          'dateOfAttendance': {
-            $gte: startDate,
-            $lte: endDate
-          }
-        }
-      }, {
-        '$project': {
-          'userId': 1,
-          'dateOfAttendance': 1,
-          'attendanceLog': 1,
-        }
-      }]).allowDiskUse()
-        .then((res) => {
-          if (res && res.length) return {
-            success: true,
-            data: res[0]
-          }
-          else return {
-            success: false
-          }
-        })
-        .catch((err) => {
-          return {
-            success: false,
-            error: err
-          }
-        });
-
-      // catch any internal error 
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
-      }
-    }
-  }
-
-  // get the attendance
-  getAttendanceDetailsForADayForReport = async (salesmanId, startDate, endDate) => {
-    try {
-      info('Get Details !');
-
-      // get the attendance of the salesman 
-      return Model.aggregate([{
-        $match: {
-          'userId': mongoose.Types.ObjectId(salesmanId),
-          'dateOfAttendance': {
-            $gte: startDate,
-            $lte: endDate
-          }
-        }
-      }, {
-        $project: {
-          'dateOfAttendance': { $dateToString: { format: "%d-%m-%Y", date: "$dateOfAttendance", timezone: "+05:30" } },
-          'date': { $dateToString: { format: "%d", date: "$dateOfAttendance", timezone: "+05:30" } },
-          'attendanceLog': 1,
-          'status': 1,
-          'isDeleted': 1
-        }
-      }]).allowDiskUse()
-        .then((res) => {
-          if (res && res.length) {
-            let attendanceLogArray = [];
-            res = res[0];
-            // pushing the attendance log 
-            for (let j = 0; j < res.attendanceLog.length; j++) {
-              attendanceLogArray.push({
-                checkInTime: moment.utc(moment.duration(res.attendanceLog[j].checkInTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm"),
-                checkOutTimeIn: res.attendanceLog[j].checkOutTimeInMins ? moment.utc(moment.duration(res.attendanceLog[j].checkOutTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm") : 'N/A',
-                totalTimeTaken: res.attendanceLog[j].totalWorkingInMins || 0,
-              })
-            }
-
-            return {
-              success: true,
-              data: attendanceLogArray
-            }
-          }
-          else return {
-            success: false
-          }
-        })
-        .catch((err) => {
-          return {
-            success: false,
-            error: err
-          }
-        });
-
-      // catch any internal error 
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
-      }
-    }
-  }
 
   // get all the users who are not checked out
   getAllNonCheckedOutUsers = async () => {
@@ -677,6 +496,66 @@ class userController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+
+  // checkIn Vehicle
+  getAllCheckInVehicleIds = async () => {
+    try {
+      info('Getting all check-in Vehicle Id!');
+
+      let startOfTheDay = moment().set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // getting the end of the day 
+      let endOfTheDay = moment().set({
+        h: 24,
+        m: 24,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      return Model.find({
+        'status': 1,
+        'isDeleted': 0,
+        'dateOfAttendance': {
+          '$gte': startOfTheDay,
+          '$lte': endOfTheDay
+        },
+      })
+        .lean()
+        .then((res) => {
+          if (res && res.length) {
+            return {
+              success: true,
+              data: res.map((data) => data.vehicleId)
+            }
+          } else {
+            error('Error Searching Data in Vehicle attendance DB!');
+            return {
+              success: false
+            }
+          }
+        }).catch(err => {
+          error(err);
+          return {
+            success: false,
+            error: err
+          }
+        });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+      }
+    }
+  }
+
 }
 
 // exporting the modules 

@@ -17,4 +17,5 @@ module.exports = {
   isAlreadyCheckedIn: require('./isAlreadyCheckedIn'), // check whether the vehicle already check In
   isVehicleCheckedIn: require('./isVehicleCheckedIn'), // is vehicle checked in
   generateMonthDaysAndOtherMetaData: require('./generateMonthDaysAndOtherMetaData'),// generate month days and other meta data 
+  getAllCheckInVehicleDetails: require('./getAllCheckInVehicleDetails'), // get all the check in vehicle details
 }

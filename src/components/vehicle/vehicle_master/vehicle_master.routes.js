@@ -12,6 +12,7 @@ const {
   isValidVehicle, // check whether the Vehicle id valid or not
   isValidTransporter, // check whether the Transporter id valid or not
   checkWhetherItsAValidVehicleUpdate, // check whether the its a valid Vehicle update
+  getAllCheckInVehicleDetails, //get all the check in vehicles
 } = require('../../../hooks');
 
 function vehicle() {
@@ -29,6 +30,14 @@ function vehicle() {
       [joiVehicleList], // joi validation
       //verifyUserToken, // verify user token
       ctrl.getVehicleList // get controller 
+    );
+
+    // get all vehicle list which are yet to check-in
+    closed.route('/all-vehicle').get(
+      [joiVehicleList], // joi validation
+      //verifyUserToken, // verify user token
+      getAllCheckInVehicleDetails,
+      ctrl.getAllVehicleListWhichAreNotCheckIn // get controller 
     );
 
     // get minified list

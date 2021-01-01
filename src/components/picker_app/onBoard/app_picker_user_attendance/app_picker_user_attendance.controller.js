@@ -333,80 +333,7 @@ class userController extends BaseController {
     }
   }
 
-  // check whether the salesman checked in 
-  isSalesmanCheckedIn = async (salesmanId, startDate, endDate) => {
-    try {
-      info('Get Details !');
 
-      // get the attendance of the salesman 
-      return Model.aggregate([{
-        $match: {
-          'userId': mongoose.Types.ObjectId(salesmanId),
-          'dateOfAttendance': {
-            $gte: startDate,
-            $lte: endDate
-          },
-          'status': 1,
-          'isDeleted': 0
-        }
-      }, {
-        '$project': {
-          'userId': 1,
-          'dateOfAttendance': 1,
-          'attendanceLog': {
-            $filter: {
-              input: "$attendanceLog",
-              as: "attendance",
-              cond: {
-                $and: [{
-                  $eq: ["$$attendance.isCheckedOut", 0]
-                }, {
-                  $eq: [
-                    "$$attendance.status", 1
-                  ]
-                }]
-              }
-            }
-          },
-        }
-      }, {
-        '$match': {
-          'attendanceLog': {
-            $exists: true
-          }
-        }
-      }]).allowDiskUse(true)
-        .then((res) => {
-          if (res && !_.isEmpty(res)) {
-            res = res[res.length - 1];
-            if (Array.isArray(res.attendanceLog) && res.attendanceLog.length)
-              return {
-                success: true,
-                data: res
-              };
-            else return {
-              success: false
-            };
-          } else return {
-            success: false
-          }
-        })
-        .catch((err) => {
-          return {
-            success: false,
-            error: err
-          }
-        });
-
-      // catch any internal error 
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
-      }
-    }
-  }
 
   // get the attendance detail for the day 
   getAttendanceDetailsForADay = async (pickerBoyId, startDate, endDate) => {
@@ -455,67 +382,7 @@ class userController extends BaseController {
     }
   }
 
-  // get the attendance
-  getAttendanceDetailsForADayForReport = async (salesmanId, startDate, endDate) => {
-    try {
-      info('Get Details !');
 
-      // get the attendance of the salesman 
-      return Model.aggregate([{
-        $match: {
-          'userId': mongoose.Types.ObjectId(salesmanId),
-          'dateOfAttendance': {
-            $gte: startDate,
-            $lte: endDate
-          }
-        }
-      }, {
-        $project: {
-          'dateOfAttendance': { $dateToString: { format: "%d-%m-%Y", date: "$dateOfAttendance", timezone: "+05:30" } },
-          'date': { $dateToString: { format: "%d", date: "$dateOfAttendance", timezone: "+05:30" } },
-          'attendanceLog': 1,
-          'status': 1,
-          'isDeleted': 1
-        }
-      }]).allowDiskUse()
-        .then((res) => {
-          if (res && res.length) {
-            let attendanceLogArray = [];
-            res = res[0];
-            // pushing the attendance log 
-            for (let j = 0; j < res.attendanceLog.length; j++) {
-              attendanceLogArray.push({
-                checkInTime: moment.utc(moment.duration(res.attendanceLog[j].checkInTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm"),
-                checkOutTimeIn: res.attendanceLog[j].checkOutTimeInMins ? moment.utc(moment.duration(res.attendanceLog[j].checkOutTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm") : 'N/A',
-                totalTimeTaken: res.attendanceLog[j].totalWorkingInMins || 0,
-              })
-            }
-
-            return {
-              success: true,
-              data: attendanceLogArray
-            }
-          }
-          else return {
-            success: false
-          }
-        })
-        .catch((err) => {
-          return {
-            success: false,
-            error: err
-          }
-        });
-
-      // catch any internal error 
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
-      }
-    }
-  }
 
   // get all the users who are not checked out
   getAllNonCheckedOutUsers = async () => {

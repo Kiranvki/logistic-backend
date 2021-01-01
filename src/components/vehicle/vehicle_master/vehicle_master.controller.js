@@ -259,6 +259,169 @@ class vehicleController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+
+  // get all Vehicle list which are not check in
+  getAllVehicleListWhichAreNotCheckIn = async (req, res) => {
+    try {
+      info('Get the Vehicle List !');
+
+      // get the query params
+      let alreadyCheckInVehicleIds = req.body.alreadyCheckInVehicleIds || [],
+        page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        sortingArray = {};
+
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // get the list of asm in the allocated city
+      let searchObject = {
+        'isDeleted': 0,
+        '_id': {
+          '$nin': alreadyCheckInVehicleIds
+        }
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'regNumber': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'vehicleModel': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+
+      // // get the total rate category
+      let totalVehicle = await Model.countDocuments({
+        ...searchObject
+      });
+
+
+      // get the Vehicle list 
+      let vehicleList = await Model.aggregate([{
+        '$match': {
+          ...searchObject
+        }
+      }, {
+        '$sort': sortingArray
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': pageSize
+      },
+      {
+        $lookup: {
+          from: 'ratecategorytransportervehiclemappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$vehicleId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                '_id': 1,
+                'status': 1,
+                'isDeleted': 1,
+                'vehicleId': 1,
+                'transporterId': 1,
+                'rateCategoryId': 1
+              }
+            },
+            {
+              $lookup: {
+                from: 'transporters',
+                localField: "transporterId",
+                foreignField: "_id",
+                as: 'transporter'
+              }
+            },
+            {
+              $unwind: {
+                path: '$transporter',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'ratecategorymodels',
+                localField: "rateCategoryId",
+                foreignField: "_id",
+                as: 'rateCategory'
+              }
+            },
+            {
+              $unwind: {
+                path: '$rateCategory',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+          ],
+          as: 'transporterRateCategoryDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$transporterRateCategoryDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          '_id': 1,
+          'regNumber': 1,
+          'vehicleType': 1,
+          'vehicleModel': 1,
+          'height': 1,
+          'length': 1,
+          'breadth': 1,
+          'tonnage': 1,
+          'status': 1,
+          // 'rateCategoryId': '$transporterRateCategoryDetails.rateCategory._id',
+          // 'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
+          'rateCategoryDetails': '$transporterRateCategoryDetails.rateCategory',
+
+          'transporterId': '$transporterRateCategoryDetails.transporter._id',
+          'transporterName': '$transporterRateCategoryDetails.transporter.vehicleDetails.name',
+        }
+      },
+      ]).allowDiskUse(true);
+
+      // success 
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: vehicleList,
+        pageMeta: {
+          skip: parseInt(skip),
+          pageSize: pageSize,
+          total: totalVehicle
+        }
+      }
+        // this.messageTypes.transporterFetched
+      );
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
   // get the minified list 
   getListMinified = async (req, res) => {
     try {
