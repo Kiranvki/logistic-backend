@@ -36,8 +36,16 @@ function vehicle() {
     closed.route('/all-vehicle').get(
       [joiVehicleList], // joi validation
       //verifyUserToken, // verify user token
-      getAllCheckInVehicleDetails,
+      getAllCheckInVehicleDetails, //get all the check in vehicles
       ctrl.getAllVehicleListWhichAreNotCheckIn // get controller 
+    );
+
+    // get all vehicle list which are waiting for trip
+    closed.route('/waiting-vehicle').get(
+      [joiVehicleList], // joi validation
+      //verifyUserToken, // verify user token
+      getAllCheckInVehicleDetails, //get all the check in vehicles
+      ctrl.getAllWaitingVehicleForTrip // get controller 
     );
 
     // get minified list
