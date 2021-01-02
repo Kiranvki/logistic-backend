@@ -48,9 +48,10 @@ process.on('uncaughtException', (err, origin) => {
 
 
 let server;
+let sslServer;
 if (NODE_ENV == 'staging') {
 
-  const sslServer = https.createServer({
+  sslServer = https.createServer({
     key: fs.readFileSync('/etc/letsencrypt/live/dev.dms.waycool.in/privkey.pem'),
     cert: fs.readFileSync('/etc/letsencrypt/live/dev.dms.waycool.in/fullchain.pem')
   }, app);
