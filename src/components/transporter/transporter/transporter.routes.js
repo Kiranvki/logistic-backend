@@ -27,7 +27,7 @@ function transporter() {
       ctrl.post // controller function 
     );
 
- // get all 
+    // get all 
     closed.route('/').get(
       [joiTransporterList], // joi validation
       // verifyAppToken,
@@ -41,13 +41,13 @@ function transporter() {
       ctrl.getTransporter // controller function 
     );
 
-       //
-       closed.route('/:transporterId').delete(
-        [joiIdInParams], // joi validation
-       // setupDataForGoFrugalApi, // setup data for gofrugal
-       isValidTransporter, // get the data from go frugal 
-       ctrl.deleteTransporter // get controller 
-     );
+    //delete
+    closed.route('/:transporterId').delete(
+      [joiIdInParams], // joi validation
+      isValidTransporter, // get the data from go frugal 
+      ctrl.deleteTransporter // get controller 
+    );
+
     // get minified list
     closed.route('/minified/list').get(
       [joiTransporterList], // joi validation
@@ -55,19 +55,19 @@ function transporter() {
       ctrl.getMinifiedList // get controller 
     );
 
-    //
+    //patch
     closed.route('/:transporterId').patch(
       [joiTransporterPatch], // joi validation
       checkWhetherItsAValidTransporterUpdate,
       ctrl.patchTransporter // get controller 
     );
 
-       // activate or deactive transporter
-       closed.route('/:transporterId/status/:type').patch(
-        [joiDistributorChangeStatus], // joi validation
-        // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
-        ctrl.patchTransporterStatus // get controller 
-      );
+    // activate or deactive transporter
+    closed.route('/:transporterId/status/:type').patch(
+      [joiDistributorChangeStatus], // joi validation
+      // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
+      ctrl.patchTransporterStatus // get controller 
+    );
 
   };
 

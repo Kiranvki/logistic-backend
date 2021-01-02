@@ -34,26 +34,26 @@ class PickerBoyController extends BaseController {
       info('Create a new Picker Boy !');
 
       // get the firstname
-      req.body.firstName = req.body.isWaycoolEmp == false ? req.body.firstName.replace(
-        /\w\S*/g,
-        function (txt) {
-          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-        }) : req.body.userData.firstName.replace(
-          /\w\S*/g,
-          function (txt) {
-            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-          });
+      // req.body.firstName = req.body.isWaycoolEmp == false ? req.body.firstName.replace(
+      //   /\w\S*/g,
+      //   function (txt) {
+      //     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      //   }) : req.body.userData.firstName.replace(
+      //     /\w\S*/g,
+      //     function (txt) {
+      //       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      //     });
 
-      // sentence case the last name
-      req.body.lastName = req.body.isWaycoolEmp == false ? req.body.lastName.replace(
-        /\w\S*/g,
-        function (txt) {
-          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-        }) : req.body.userData.lastName.replace(
-          /\w\S*/g,
-          function (txt) {
-            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-          });
+      // // sentence case the last name
+      // req.body.lastName = req.body.isWaycoolEmp == false ? req.body.lastName.replace(
+      //   /\w\S*/g,
+      //   function (txt) {
+      //     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      //   }) : req.body.userData.lastName.replace(
+      //     /\w\S*/g,
+      //     function (txt) {
+      //       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+      //     });
 
       // getting the full name 
       let fullName = `${req.body.firstName} ${req.body.lastName}`;
@@ -65,14 +65,14 @@ class PickerBoyController extends BaseController {
         'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
         'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
         'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
-        'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
+        //'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
         'contactMobile': req.body.contactMobile,
         'email': req.body.email,
         'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
         'fullName': fullName,
-        'createdById': req.user._id,
-        'createdBy': req.user.email || 'admin',
-        'warehouseId': mongoose.Types.ObjectId(req.user.warehouseId) || null,
+        //'createdById': req.user._id,
+        //'createdBy': req.user.email || 'admin',
+        //'warehouseId': mongoose.Types.ObjectId(req.user.warehouseId) || null,
         'cityId': req.body.cityId,
       }
 
@@ -109,6 +109,34 @@ class PickerBoyController extends BaseController {
       } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesmanNotCreated);
 
       // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+  
+  get = async (req,res) => {
+
+    try {
+      info('Employee GET DETAILS !');
+      // get the brand id
+      let employeeId = req.query.employeeId;
+     console.log("employee", req.query.employeeId);
+      // inserting data into the db
+      // let transporter = await Model.findOne({
+      let employee = await Model.findById({
+
+        _id: mongoose.Types.ObjectId(employeeId)
+
+      }).lean();
+      // check if inserted
+      if (employee && !_.isEmpty(employee)) return this.success(req, res, this.status.HTTP_OK, employee);
+
+      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+
+      // catch any runtime error
     } catch (err) {
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));

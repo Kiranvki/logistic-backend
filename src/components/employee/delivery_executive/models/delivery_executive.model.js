@@ -3,7 +3,7 @@ const autopopulate = require('mongoose-autopopulate');
 const Schema = mongoose.Schema;
 
 // schema
-const securityGuard = new Schema({ 
+const deliveryExecutive = new Schema({ 
     employeeId: {
         type: String
       },
@@ -42,10 +42,10 @@ const securityGuard = new Schema({
         type: String,
         required: true
       },
-      fullName: {
-        type: String,
-        required: true
-      },
+    //   fullName: {
+    //     type: String,
+    //     required: true
+    //   },
       contactMobile: {
         type: Number
       },
@@ -67,6 +67,24 @@ const securityGuard = new Schema({
       dateOfJoining: {
         type: Date
       },
+      dateOfBirth: {
+        type: Date
+      },
+    
+      profilePic: {
+        type: mongoose.Schema.Types.ObjectId,
+        default: null
+      },
+      createdBy: {
+        type: String
+      },
+      createdById: {
+        type: mongoose.Schema.Types.ObjectId,
+      },
+      cityId: {
+        type: 'String',
+        enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
+      },
       reportingTo: {
         id: {
           type: String
@@ -77,8 +95,8 @@ const securityGuard = new Schema({
         emailId: {
           type: String
         }
-    },
-    status: {
+      },
+      status: {
         type: Number,
         default: 1
       },
@@ -91,8 +109,8 @@ const securityGuard = new Schema({
     });
 
     // creating indexes
-    securityGuard.index({
+    deliveryExecutive.index({
     'employeeId': 1
   });
 // exporting the entire module
-module.exports = mongoose.model('securityGuard', securityGuard);
+module.exports = mongoose.model('deliveryExecutive', deliveryExecutive);

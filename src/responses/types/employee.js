@@ -41,6 +41,8 @@ module.exports = {
   salesmanNotUpdatedSuccessfully: 'Salesman Not Updated!',
   salesmanImapactSuccessful: 'Salesman Getting Effected Fetched Successful!',
   salesmanImapactNotSuccessful: 'Salesman Getting Effected Not Fetched!',
+  employeeCreated : "Employee Successfully Created !",
+  employeeNotCreated :"Employee Not Created Successfully !",
   invalidSalesmanIds: (salesmanIds) => {
     return `Invalid Salesman Id Found ${salesmanIds}`
   },
