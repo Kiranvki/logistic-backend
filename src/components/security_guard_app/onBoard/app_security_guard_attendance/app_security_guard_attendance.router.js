@@ -1,10 +1,10 @@
 // user controller 
-const ctrl = require('./app_picker_user_attendance.controller');
+const ctrl = require('./app_security_guard_attendance.controller');
 
 // custom joi validation
 const {
   joiUserAttendanceMonth, // joi fetch user attendance per month
-} = require('./app_picker_user_attendance.validators');
+} = require('./app_security_guard_attendance.validators');
 
 // custom hooks 
 const {

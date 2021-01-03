@@ -1,11 +1,11 @@
 // user controller 
-const ctrl = require('./app_picker_user_session.controller');
+const ctrl = require('./app_security_guard_user_session.controller');
 
 // custom joi validation
 const {
   joiLoginVerify, // joi verify login
   joiOtpLogInValidate, // joi otp validation
-} = require('./app_picker_user_session.validators');
+} = require('./app_security_guard_user_session.validators');
 
 // custom hooks 
 const {

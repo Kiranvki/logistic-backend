@@ -1,6 +1,6 @@
 // controller forget password 
 const BaseController = require('../../../baseController');
-const Model = require('./models/app_picker_user_attendance.model');
+const Model = require('./models/app_security_guard_attendance.model');
 const camelCase = require('camelcase');
 const mongoose = require('mongoose');
 const {
