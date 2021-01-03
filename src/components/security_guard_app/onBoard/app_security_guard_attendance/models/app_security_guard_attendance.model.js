@@ -4,7 +4,7 @@ require('mongoose-type-email');
 const Schema = mongoose.Schema;
 
 // schema
-const appUserAttendance = new Schema({
+const securityAppUserAttendance = new Schema({
   userId: {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
@@ -60,14 +60,14 @@ const appUserAttendance = new Schema({
 });
 
 // creating indexes
-appUserAttendance.index({
+securityAppUserAttendance.index({
   'userId': 1,
   'dateOfAttendance': 1,
   'status': 1
 });
 
 // autopopulate 
-appUserAttendance.plugin(autopopulate);
+securityAppUserAttendance.plugin(autopopulate);
 
 // exporting the entire module
-module.exports = mongoose.model('appUserAttendance', appUserAttendance);
+module.exports = mongoose.model('securityAppUserAttendance', securityAppUserAttendance);

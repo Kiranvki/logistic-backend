@@ -22,9 +22,12 @@ require('./src/config/db');
 
 /* Router setup */
 
-// onboard
-const onBoardOpenRouter = express.Router(); // Open routes
-const onBoardApiRouter = express.Router(); // Protected routes
+// onboard picker boy
+const onBoardPickerOpenRouter = express.Router(); // Open routes 
+const onBoardPickerApiRouter = express.Router(); // Protected routes
+
+const onBoardSecurityOpenRouter = express.Router(); // Open routes 
+const onBoardSecurityApiRouter = express.Router(); // Protected routes
 
 // employee
 const employeeOpenRouter = express.Router(); // Open routes
@@ -55,8 +58,18 @@ const vehicleAPIRouter = express.Router(); // Protected routes
 glob('./src/components/picker_app/onBoard/*', null, (err, items) => {
   items.forEach(component => {
     if (require(component).routes) require(component).routes(
-      onBoardOpenRouter,
-      onBoardApiRouter,
+      onBoardPickerOpenRouter,
+      onBoardPickerApiRouter,
+    );
+  });
+});
+
+/* Fetch router files and apply them to our routers */
+glob('./src/components/security_guard_app/onBoard/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      onBoardSecurityOpenRouter,
+      onBoardSecurityApiRouter,
     );
   });
 });
@@ -126,9 +139,13 @@ glob('./src/components/vehicle/*', null, (err, items) => {
 
 
 
-// Admin Panel Routes
-app.use('/v1/picker', onBoardOpenRouter);
-app.use('/api/v1/picker', onBoardApiRouter);
+// Picker Boy Routes
+app.use('/v1/picker', onBoardPickerOpenRouter);
+app.use('/api/v1/picker', onBoardPickerApiRouter);
+
+// Security Guard Routes
+app.use('/v1/security', onBoardSecurityOpenRouter);
+app.use('/api/v1/security', onBoardSecurityApiRouter);
 
 // Employee Routes
 app.use('/v1/employee', employeeOpenRouter);

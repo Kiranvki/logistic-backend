@@ -3,11 +3,11 @@ const autopopulate = require('mongoose-autopopulate');
 const Schema = mongoose.Schema;
 
 // schema
-const appPickerUserSession = new Schema({
-  'pickerBoyId': {
+const appSecurityGuardUserSession = new Schema({
+  'securityGuardId': {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'pickerBoy',
+    ref: 'securityGuard',
     autopopulate: {
       select: ['fullName', 'employeeId']
     }
@@ -85,13 +85,13 @@ const appPickerUserSession = new Schema({
 });
 
 // creating indexes
-appPickerUserSession.index({
+appSecurityGuardUserSession.index({
   'pickerBoyId': 1,
   'loginLocation': 1
 });
 
 // updating the plugin 
-appPickerUserSession.plugin(autopopulate);
+appSecurityGuardUserSession.plugin(autopopulate);
 
 // exporting the entire module
-module.exports = mongoose.model('appPickerUserSession', appPickerUserSession);
+module.exports = mongoose.model('appSecurityGuardUserSession', appSecurityGuardUserSession);

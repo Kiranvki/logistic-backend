@@ -15,7 +15,7 @@ const {
   sendTheOtpToTheDevice, // send the otp to the device either via email or sms 
   generateTokenForAppUsers, // generate token for app users 
   //checkWhetherAValidPickerCred, // check whether the salesman is valid or not 
-  checkWhetherAValidPickerCrediantial // check whether the salesman is valid or not 
+  checkWhetherAValidSecurityGuardCrediantial // check whether the security guard is valid or not 
 } = require('../../../../hooks/app');
 
 // auth 
@@ -28,7 +28,7 @@ function userRoutes() {
     // login 
     open.route('/user/login-request/:type/otp').post(
       [joiOtpLogInValidate], // joi validation
-      checkWhetherAValidPickerCrediantial, // check for valid picker cred
+      checkWhetherAValidSecurityGuardCrediantial, // check for valid security guard cred
       generateOtp, // generate OTP
       sendTheOtpToTheDevice, // send OTP to the user device
       ctrl.loginRequest // controller function 

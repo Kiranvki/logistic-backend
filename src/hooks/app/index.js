@@ -1,6 +1,7 @@
 module.exports = {
   // On boarding hooks 
   checkWhetherAValidPickerCrediantial: require('./checkWhetherAValidPickerCrediantial'),
+  checkWhetherAValidSecurityGuardCrediantial: require('./checkWhetherAValidSecurityGuardCrediantial'),
   generateOtp: require('./generateOtp'),
   sendTheOtpToTheDevice: require('./sendTheOtpToTheDevice'),
   isValidPickerBoyId: require('./isValidPickerBoyId'),
@@ -17,4 +18,5 @@ module.exports = {
   isAlreadyAddedInPickingState: require('./isAlreadyAddedInPickingState'), // check whether the salesOrderId is already added into the picker state
   checkWhetherItsAValidItemUpdate: require('./checkWhetherItsAValidItemUpdate'), // check whether the valid item update
   checkWhetherItsAValidPickerUpdate: require('./checkWhetherItsAValidPickerUpdate'),  // check whether its a valid update
+  isValidSecurityGuardId: require('./isValidSecurityGuardId'),
 }

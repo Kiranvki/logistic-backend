@@ -67,7 +67,7 @@ class pickerUserSessionController extends BaseController {
 
         // updating the last login details 
         let pickerBoy = await Model.findOneAndUpdate({
-          'pickerBoyId': mongoose.Types.ObjectId(req.body.pickerBoyDetails._id),
+          'securityGuardId': mongoose.Types.ObjectId(req.body.securityGuardDetails._id),
           'status': 1,
           'isDeleted': 0
         }, {
@@ -81,12 +81,12 @@ class pickerUserSessionController extends BaseController {
 
         // is logged in 
         return this.success(req, res, this.status.HTTP_OK, {
-          pickerBoyId: req.body.pickerBoyDetails._id,
-          pickerBoyDetails: {
-            name: req.body.pickerBoyDetails.fullName,
-            cityId: req.body.pickerBoyDetails.cityId,
-            employeeId: req.body.pickerBoyDetails.employeeId,
-            profilePic: req.body.pickerBoyDetails.profilePic,
+          pickerBoyId: req.body.securityGuardDetails._id,
+          securityGuardDetails: {
+            name: req.body.securityGuardDetails.fullName,
+            cityId: req.body.securityGuardDetails.cityId,
+            employeeId: req.body.securityGuardDetails.employeeId,
+            profilePic: req.body.securityGuardDetails.profilePic,
           }
         }, this.messageTypes.otpRegeneratedSuccessfully);
       } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToGenerateOtpRightNow);
