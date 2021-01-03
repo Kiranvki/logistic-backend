@@ -10,10 +10,10 @@ const {
 // custom hooks 
 const {
   generateOtp, // generate OTP 
-  isValidPickerBoyId, // check whether the salesman id is valid or not 
+  isValidSecurityGuardId, // check whether the security guard id is valid or not 
   checkOtpIsValidOrNot, // check whether the otp is valid or not
   sendTheOtpToTheDevice, // send the otp to the device either via email or sms 
-  generateTokenForAppUsers, // generate token for app users 
+  generateTokenForSecurityAppUsers, // generate token for security app users 
   //checkWhetherAValidPickerCred, // check whether the salesman is valid or not 
   checkWhetherAValidSecurityGuardCrediantial // check whether the security guard is valid or not 
 } = require('../../../../hooks/app');
@@ -34,12 +34,12 @@ function userRoutes() {
       ctrl.loginRequest // controller function 
     );
 
-    // forget password
-    open.route('/user/:pickerBoyId/login-verify/otp').post(
+    // verify otp
+    open.route('/user/:securityGuardId/login-verify/otp').post(
       [joiLoginVerify], // joi validation
-      isValidPickerBoyId, // check whether the picker id is valid or not
+      isValidSecurityGuardId, // check whether the security guard id is valid or not
       checkOtpIsValidOrNot, // check whether the OTP is valid or not
-      generateTokenForAppUsers, // generate JWT token for app users
+      generateTokenForSecurityAppUsers, // generate JWT token for app users
       ctrl.loginVerify // controller function
     );
   };

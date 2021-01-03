@@ -24,21 +24,21 @@ module.exports = async (req, res, next) => {
     if (objectId.isValid(securityGuardId)) {
 
       // check whether the email id is unique or not 
-      let isValidPickerBoy = await securityGuardCtrl.getDetails(securityGuardId)
+      let isValidSecurityGuard = await securityGuardCtrl.getDetails(securityGuardId)
 
       // if email is unique
-      if (isValidPickerBoy.success) {
-        info('Valid Picker Boy')
+      if (isValidSecurityGuard.success) {
+        info('Valid Security Guard')
 
         // check whether user session data is created 
-        let userSession = await pickerBoySessionCtrl.getUserSession(securityGuardId);
+        let userSession = await securityGuardSessionCtrl.getUserSession(securityGuardId);
 
         // user session check 
         if (userSession.success) {
 
           // injecting into request body
           req.body.userSession = userSession.data;
-          req.body.isValidPickerBoy = isValidPickerBoy.data;
+          req.body.isValidSecurityGuard = isValidSecurityGuard.data;
 
           // move on
           return next();

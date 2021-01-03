@@ -19,4 +19,5 @@ module.exports = {
   checkWhetherItsAValidItemUpdate: require('./checkWhetherItsAValidItemUpdate'), // check whether the valid item update
   checkWhetherItsAValidPickerUpdate: require('./checkWhetherItsAValidPickerUpdate'),  // check whether its a valid update
   isValidSecurityGuardId: require('./isValidSecurityGuardId'),
+  generateTokenForSecurityAppUsers: require('./generateTokenForSecurityAppUsers'),
 }

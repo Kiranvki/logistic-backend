@@ -62,6 +62,45 @@ class securityController extends BaseController {
     }
   }
 
+  // get details of security guard
+  getDetails = async (securityGuardId) => {
+    try {
+      info('Get Security details !');
+      // find the security guard
+      // get details 
+      return Model.aggregate([{
+        $match: {
+          '_id': mongoose.Types.ObjectId(securityGuardId),
+          'status': 1,
+          'isDeleted': 0
+        }
+      }
+      ]).allowDiskUse(true).then((res) => {
+        if (res && res.length) {
+          return {
+            success: true,
+            data: res[res.length - 1]
+          }
+        } else {
+          error('Error Searching Data in security Guard DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+    }
+  }
+
   // Internal Function to check whether the Security Guard exist or not
   isExist = async (empId, isWaycoolEmployer) => {
     try {

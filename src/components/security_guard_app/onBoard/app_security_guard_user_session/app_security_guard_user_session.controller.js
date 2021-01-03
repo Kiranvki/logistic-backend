@@ -17,6 +17,48 @@ class pickerUserSessionController extends BaseController {
     this.messageTypes = this.messageTypes.appUserOnBoard;
   }
 
+  // Internal Function to get user session data
+  getUserSession = async (securityGuardId) => {
+    try {
+      console.log('hello');
+
+      info('Getting Security User Session Data !');
+
+      // get the asm list 
+      return Model.find({
+        securityGuardId: mongoose.Types.ObjectId(securityGuardId),
+        status: 1,
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && res.length) {
+          return {
+            success: true,
+            data: res[res.length - 1]
+          }
+        } else {
+          error('Error Searching Data in Security Guard Session DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
   // do something 
   create = async (req, res) => {
     try {
@@ -97,45 +139,6 @@ class pickerUserSessionController extends BaseController {
     }
   }
 
-  // Internal Function to get user session data
-  getUserSession = async (pickerBoyId) => {
-    try {
-      info('Getting User Session Data !');
-
-      // get the asm list 
-      return Model.find({
-        pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
-        status: 1,
-        isDeleted: 0
-      }).lean().then((res) => {
-        if (res && res.length) {
-          return {
-            success: true,
-            data: res[res.length - 1]
-          }
-        } else {
-          error('Error Searching Data in Picker Boy DB!');
-          return {
-            success: false
-          }
-        }
-      }).catch(err => {
-        error(err);
-        return {
-          success: false,
-          error: err
-        }
-      });
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
-      }
-    }
-  }
 
   // login verify
   loginVerify = async (req, res) => {
@@ -143,8 +146,8 @@ class pickerUserSessionController extends BaseController {
       info('Login Verify Token !');
 
       // getting the picker boy id
-      let pickerBoyId = req.params.pickerBoyId,
-        pickerBoyDetails = req.body.isValidPickerBoy;
+      let securityGuardId = req.params.securityGuardId,
+        securityGuardDetails = req.body.isValidSecurityGuard;
 
       // login object 
       let loginDetailsObject = {
@@ -155,7 +158,7 @@ class pickerUserSessionController extends BaseController {
 
       // updating the last login details 
       let isUpdated = await Model.findOneAndUpdate({
-        'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
+        'securityGuardId': mongoose.Types.ObjectId(securityGuardId),
       }, {
         $set: {
           'otpSend.$[otpSend].status': 1, // OTP is now verified
@@ -178,11 +181,11 @@ class pickerUserSessionController extends BaseController {
           sessionKey: req.body.token,
           expiryInMin: req.body.expiryTimeInMin,
           userDetails: {
-            _id: pickerBoyDetails._id,
-            name: pickerBoyDetails.fullName,
-            profilePic: pickerBoyDetails.profilePic,
-            employeeId: pickerBoyDetails.employeeId,
-            city: pickerBoyDetails.cityId
+            _id: securityGuardDetails._id,
+            name: securityGuardDetails.fullName,
+            profilePic: securityGuardDetails.profilePic,
+            employeeId: securityGuardDetails.employeeId,
+            city: securityGuardDetails.cityId
           }
         }, this.messageTypes.userLoggedInSuccessfully);
 

@@ -16,7 +16,7 @@ module.exports = async (req, res, next) => {
 
     let otp = req.body.otp, // user otp 
       userSession = req.body.userSession, // user session 
-      salesmanDetails = req.body.isValidPickerBoy, // salesman details 
+      //  salesmanDetails = req.body.isValidPickerBoy, // salesman details 
       todaysDate = moment();
 
     // get otp stored 
