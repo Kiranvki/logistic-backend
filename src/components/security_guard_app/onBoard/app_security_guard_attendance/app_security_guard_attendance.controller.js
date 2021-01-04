@@ -21,10 +21,10 @@ class userController extends BaseController {
   // checkIn User
   checkInUser = async (req, res) => {
     try {
-      info('Checking In User !');
+      info('Checking In Security Guard User !');
 
       let user = req.user, // user 
-        pickerBoyId = user._id, // salesman Id
+        securityGuardId = user._id, // security guard Id
         todaysDate = moment().set({
           h: 0,
           m: 0,
@@ -58,7 +58,7 @@ class userController extends BaseController {
 
       // inserting the new user into the db
       let isInserted = await Model.findOneAndUpdate({
-        userId: mongoose.Types.ObjectId(pickerBoyId),
+        userId: mongoose.Types.ObjectId(securityGuardId),
         dateOfAttendance: {
           '$gte': startOfTheDay,
           '$lte': endOfTheDay
@@ -182,14 +182,14 @@ class userController extends BaseController {
   }
 
   // get details
-  getDetails = async (salesmanId, startDate, endDate) => {
+  getDetails = async (securityGuardId, startDate, endDate) => {
     try {
-      info('Get Details !');
+      info('Get Security Guard Attendance Details !');
 
       // get the attendance of the salesman 
       return Model.aggregate([{
         $match: {
-          'userId': mongoose.Types.ObjectId(salesmanId),
+          'userId': mongoose.Types.ObjectId(securityGuardId),
           'dateOfAttendance': {
             $gte: startDate,
             $lte: endDate

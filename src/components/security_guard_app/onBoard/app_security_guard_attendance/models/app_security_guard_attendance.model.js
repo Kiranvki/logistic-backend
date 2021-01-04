@@ -8,7 +8,7 @@ const securityAppUserAttendance = new Schema({
   userId: {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'pickerBoy',
+    ref: 'securityguards',
     autopopulate: {
       select: ['employerName', 'fullName', 'employeeId']
     }

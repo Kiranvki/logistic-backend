@@ -198,17 +198,17 @@ class pickerUserSessionController extends BaseController {
   }
 
   // get valid user token 
-  getUserToken = async (pickerBoyId) => {
+  getUserToken = async (securityGuardId) => {
     try {
-      info('Get the session key for the given salesman id !');
+      info('Get the session key for the given Security Guard id !');
 
       // checking day object 
-      if (pickerBoyId) {
+      if (securityGuardId) {
 
         // creating the data inside the database 
         return Model
           .findOne({
-            'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId)
+            'securityGuardId': mongoose.Types.ObjectId(securityGuardId)
           })
           // .select('sessionKey')
           .select({
