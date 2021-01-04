@@ -20,8 +20,6 @@ class pickerUserSessionController extends BaseController {
   // Internal Function to get user session data
   getUserSession = async (securityGuardId) => {
     try {
-      console.log('hello');
-
       info('Getting Security User Session Data !');
 
       // get the asm list 

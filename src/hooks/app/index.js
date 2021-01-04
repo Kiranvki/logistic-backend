@@ -21,4 +21,5 @@ module.exports = {
   isValidSecurityGuardId: require('./isValidSecurityGuardId'),
   generateTokenForSecurityAppUsers: require('./generateTokenForSecurityAppUsers'),
   isSecurityGuardAlreadyCheckedIn: require('./isSecurityGuardAlreadyCheckedIn'), // check whether the security guard already check in or not
+  isSecurityGuardUserCheckedIn: require('./isSecurityGuardUserCheckedIn'),
 }

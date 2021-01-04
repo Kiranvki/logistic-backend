@@ -112,7 +112,7 @@ class userController extends BaseController {
   // check out User
   checkOutUser = async (req, res) => {
     try {
-      info('Checking Out User !');
+      info('Checking Out Security Guard User !');
 
       let user = req.user, // user 
         todaysDate = new Date(); // todays date

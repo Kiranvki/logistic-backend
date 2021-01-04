@@ -8,7 +8,7 @@ const {
 
 // custom hooks 
 const {
-  isUserCheckedIn, // is user checked in 
+  isSecurityGuardUserCheckedIn, // is user checked in 
   isValidSecurityGuardId, // check whether the security guard id is valid or not 
   isSecurityGuardAlreadyCheckedIn, // check whether the user already check In
   getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
@@ -31,15 +31,15 @@ function userRoutes() {
       isSecurityGuardAlreadyCheckedIn, // check whether the user is already checked in 
       ctrl.checkInUser, // controller function
     )
+
+    // mark checkout attendance 
+    closed.route('/user/attendance/check-out').get(
+      verifySecurityAppToken, // verify app token
+      isValidSecurityGuardId, // validate salesman Id
+      isSecurityGuardUserCheckedIn, // check whether the user is already checked in 
+      ctrl.checkOutUser, // controller function
+    )
     /*
-       // mark checkout attendance 
-       closed.route('/user/attendance/check-out').get(
-         verifyAppToken, // verify app token
-         isValidPickerBoyId, // validate salesman Id
-         isUserCheckedIn, // check whether the user is already checked in 
-         ctrl.checkOutUser, // controller function
-       )
-   
        //  get user attendance per month
        closed.route('/user/attendance/month/:month/year/:year').get(
          [joiUserAttendanceMonth], // joi validation for user attendance 
