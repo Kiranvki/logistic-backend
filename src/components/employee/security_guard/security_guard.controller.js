@@ -167,13 +167,50 @@ class securityController extends BaseController {
     }
   };
 
-  // get details
-  getEmployeer = async (req, res) => {
+//   // get details
+//   getEmployeer = async (req, res) => {
 
-      try {
-        info('Employee GET DETAILS !');
-        // get the brand id
-        let employeeId = req.query.employeeId;
+//       try {
+//         info('Employee GET DETAILS !');
+//         // get the brand id
+//         let employeeId = req.query.employeeId;
+//         let empType = req.query.employeeType;
+
+//         if (empType == "deliveryExecutive") {
+//             let deliveryResponse = await deliveryCtrl.get(req, res)
+//             return;
+//           } else if (empType == "pickerBoy") {
+//             let pickerboyResponse = await pickerBoyCtrl.get(req, res);
+//             return;
+//           }
+//         // inserting data into the db
+//         // let transporter = await Model.findOne({
+//         let employee = await Model.findById({
+
+//           _id: mongoose.Types.ObjectId(employeeId)
+
+//         }).lean();
+//         // check if inserted
+//         if (employee && !_.isEmpty(employee)) return this.success(req, res, this.status.HTTP_OK, employee);
+
+//         else return this.errors(req, res, this.status.HTTP_CONFLICT);
+
+//         // catch any runtime error
+//       } catch (err) {
+//         error(err);
+//         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+//       }
+//     }
+
+
+  //delete Employee
+ 
+  getEmployeer = async (req, res) => {
+    try {
+      info('Roles GET DETAILS !');
+
+
+      let employeeId = req.query.employeeId;
         let empType = req.query.employeeType;
 
         if (empType == "deliveryExecutive") {
@@ -183,48 +220,81 @@ class securityController extends BaseController {
             let pickerboyResponse = await pickerBoyCtrl.get(req, res);
             return;
           }
-        // inserting data into the db
-        // let transporter = await Model.findOne({
-        let employee = await Model.findById({
+      // inserting data into the db 
+      let asmData = await Model.findOne({
+        _id: mongoose.Types.ObjectId(req.query.employeeId),
+        isDeleted: 0
+      }).lean();
 
-          _id: mongoose.Types.ObjectId(employeeId)
+      // check if inserted 
+      if (asmData && !_.isEmpty(asmData)) return this.success(req, res, this.status.HTTP_OK, asmData);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT);
 
-        }).lean();
-        // check if inserted
-        if (employee && !_.isEmpty(employee)) return this.success(req, res, this.status.HTTP_OK, employee);
-
-        else return this.errors(req, res, this.status.HTTP_CONFLICT);
-
-        // catch any runtime error
-      } catch (err) {
-        error(err);
-        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-      }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
+  }
 
+ 
+//   deleteEmployee = async (req, res) => {
+//     try {
+//       info("Employee Delete!");
+//       let employeeId = req.query.employeeId;
+//       let empType = req.query.employeeType;
 
-  //delete Employee
-  deleteEmployee = async (req, res) => {
+//       if (empType == "deliveryExecutive") {
+//           let deliveryResponse = await deliveryCtrl.get(req, res)
+//           return;
+//         } else if (empType == "pickerBoy") {
+//           let pickerboyResponse = await pickerBoyCtrl.delete(req, res);
+//           return;
+//         }
+//       // inserting the new user into the db
+
+//      // let employeeId = req.query.employeeId || '';
+
+//       // creating data to update
+//       let dataToUpdate = {
+//         $set: {
+//           status: 0,
+//           isDeleted: 1
+//         }
+//       };
+
+//       // inserting data into the db 
+//       let isUpdated = await Model.findOneAndUpdate({
+//         _id: mongoose.Types.ObjectId(employeeId)
+//       }, dataToUpdate, {
+//         new: true,
+//         upsert: false,
+//         lean: true
+//       })
+
+//       // check if inserted 
+//       if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});
+//       else return this.errors(req, res, this.status.HTTP_CONFLICT);
+
+//       // catch any runtime error 
+//     } catch (err) {
+//       error(err);
+//       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+//     }
+
+//   }
+  
+deleteEmployee = async (req, res) => {
     try {
-      info("Employee Delete!");
-      let employeeId = req.query.employeeId;
-      let empType = req.query.employeeType;
+      info('Role Delete !');
 
-      if (empType == "deliveryExecutive") {
-          let deliveryResponse = await deliveryCtrl.get(req, res)
-          return;
-        } else if (empType == "pickerBoy") {
-          let pickerboyResponse = await pickerBoyCtrl.delete(req, res);
-          return;
-        }
-      // inserting the new user into the db
+      // asm id  
+      let employeeId = req.params.employeeId;
 
-     // let employeeId = req.query.employeeId || '';
-
-      // creating data to update
+      // creating data to insert
       let dataToUpdate = {
         $set: {
-          status: 0,
+          // status: 0,
           isDeleted: 1
         }
       };
@@ -237,6 +307,13 @@ class securityController extends BaseController {
         upsert: false,
         lean: true
       })
+      // .then(async (res) => {
+
+      // if (req.body.asmSalesmanMappingIds && Array.isArray(req.body.asmSalesmanMappingIds) && req.body.asmSalesmanMappingIds.length)
+      //   return AsmSalesmanCtrl.disableWithIdsArray(req.body.asmSalesmanMappingIds).then((isMappingDeleted) => { if (isMappingDeleted.success) return true; else return false });
+      // else 
+      //   return true
+      // });
 
       // check if inserted 
       if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});
@@ -247,15 +324,26 @@ class securityController extends BaseController {
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
-
   }
-  
+
+
 
     // // // patch the request 
     patchEmployee = async (req, res) => {
         try {
     
           info('Employee CHANGE ! !');
+
+                let employeeId = req.query.employeeId;
+                let empType = req.query.employeeType;
+          
+                if (empType == "deliveryExecutive") {
+                    let deliveryResponse = await deliveryCtrl.updateDeliveryExecutiveDetails(req, res)
+                    return;
+                  } else if (empType == "pickerBoy") {
+                    let pickerboyResponse = await pickerBoyCtrl.updatePickerBoyDetails(req, res);
+                    return;
+                  }
           // creating data to insert
           let dataToUpdate = {
             $set: {
@@ -265,7 +353,7 @@ class securityController extends BaseController {
     
           // inserting data into the db 
           let isUpdated = await Model.findOneAndUpdate({
-            _id: mongoose.Types.ObjectId(req.params.employeeId)
+            _id: mongoose.Types.ObjectId(req.query.employeeId)
           }, dataToUpdate, {
             new: true,
             upsert: false,

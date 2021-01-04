@@ -19,6 +19,14 @@ function securityRoutes(){
         ctrl.getEmployeer // controller function 
       );
 
+    
+    // closed.route('/:employeeId').get(
+    //     //[joiTransporterGetDetails], // joi validation
+    //     // verifyAppToken,
+    //     //isValidTransporter,
+    //     ctrl.getEmployeer // controller function 
+    //   );
+
       closed.route('/getEmployee').delete(
         //[joiTransporterGetDetails], // joi validation
         // verifyAppToken,
@@ -26,7 +34,21 @@ function securityRoutes(){
         ctrl.deleteEmployee // controller function 
       );
 
-      closed.route('/:employeeId').patch(
+    // closed.route('/:employeeId').delete(
+    //     //[joiTransporterGetDetails], // joi validation
+    //     // verifyAppToken,
+    //     //isValidTransporter,
+    //     ctrl.deleteEmployee // controller function 
+    //   );
+
+    //   closed.route('/:employeeId').patch(
+    //     //[joiTransporterGetDetails], // joi validation
+    //     // verifyAppToken,
+    //     //isValidTransporter,
+    //     ctrl.patchEmployee // controller function 
+    //   );
+
+    closed.route('/getEmployee').patch(
         //[joiTransporterGetDetails], // joi validation
         // verifyAppToken,
         //isValidTransporter,

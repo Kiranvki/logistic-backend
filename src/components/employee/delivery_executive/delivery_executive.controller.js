@@ -132,6 +132,40 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   }
 
+
+      // // // patch the request 
+      updateDeliveryExecutiveDetails = async (req, res) => {
+        try {
+    
+          info('Employee CHANGE ! !');
+
+          // creating data to insert
+          let dataToUpdate = {
+            $set: {
+              ...req.body,
+            }
+          };
+    
+          // inserting data into the db 
+          let isUpdated = await Model.findOneAndUpdate({
+            _id: mongoose.Types.ObjectId(req.query.employeeId)
+          }, dataToUpdate, {
+            new: true,
+            upsert: false,
+            lean: true
+          });
+    
+          // check if inserted 
+          if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated);
+          else return this.errors(req, res, this.status.HTTP_CONFLICT);
+    
+          // catch any runtime error 
+        } catch (err) {
+          error(err);
+          this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+        }
+      }
+
    //delete Employee
    deleteEmployee = async (req, res) => {
     try {
