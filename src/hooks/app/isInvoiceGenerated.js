@@ -36,8 +36,8 @@ module.exports = async (req, res, next) => {
 
                 let invoicePickerSO = await invoicePickerSalesOrderMappingCtrl.getInvoiceDetails(pickerBoySalesOrderMappingId)
                 if (invoicePickerSO.success) {
-
-                    return Response.success(req, res, StatusCodes.HTTP_OK, invoicePickerSO.data, MessageTypes.invoice.invoicesDetailsFetched)
+                    let invoiceData = invoicePickerSO.data[0].invoiceDetails[0];
+                    return Response.success(req, res, StatusCodes.HTTP_OK, invoiceData, MessageTypes.invoice.invoicesDetailsFetched)
 
                 }
 

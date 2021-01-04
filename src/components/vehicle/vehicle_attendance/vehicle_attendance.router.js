@@ -25,14 +25,14 @@ function userRoutes() {
   return (open, closed, appOpen, appClosed) => {
 
     // mark attendance
-    closed.route('/attendance/check-in/:vehicleId').get(
+    closed.route('/attendance/check-in/:vehicleId').post(
       // verifyUserToken, // verify user token
       isAlreadyCheckedIn, // check whether the vehicle is already checked in 
       ctrl.checkInVehicle, // controller function
     )
 
     // mark checkout attendance 
-    closed.route('/attendance/check-out/:vehicleId').get(
+    closed.route('/attendance/check-out/:vehicleId').post(
       //  verifyAppToken, // verify user token
       //   isValidPickerBoyId, // validate salesman Id
       isVehicleCheckedIn, // check whether the vehicle is already checked in 

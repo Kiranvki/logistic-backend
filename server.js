@@ -11,9 +11,13 @@ require('dotenv').config();
 
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length || 1;
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3003;
+const NODE_ENV = process.env.NODE_ENV || development;
 const app = require('./app');
 const chalk = require('chalk');
+const securePort = process.env.securePort || 5003;
+const https = require('https')
+const fs = require('fs')
 const {
   log,
   info,
@@ -44,6 +48,20 @@ process.on('uncaughtException', (err, origin) => {
 
 
 let server;
+let sslServer;
+if (NODE_ENV == 'staging') {
+
+  sslServer = https.createServer({
+    key: fs.readFileSync('/etc/letsencrypt/live/dev.dms.waycool.in/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/dev.dms.waycool.in/fullchain.pem')
+  }, app);
+
+
+  console.log('securePort', securePort);
+  sslServer.listen(securePort, () => {
+    console.log(chalk.blue(` Secure Server [ ✓ ] Running on port : ' + ${securePort}`))
+  });
+}
 
 // checking the environment of the node 
 server = app.listen(port, () => {
