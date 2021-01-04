@@ -54,6 +54,51 @@ const schemas = {
         ).min(1).max(20),
     }),
 
+    //Rate Category patch
+    joiRateCategoryPatch: Joi.object().keys({
+        params: {
+            rateCategoryId: Joi.string().trim().label('Rate Category Id')
+        },
+        body: Joi.object({
+            rateCategoryDetails: Joi.object().keys({
+                rateCategoryName: Joi.string().trim().label('Rate Category Name').optional(),
+                rateCategoryType: Joi.string().trim().label('Rate Category Type').optional(),
+                fixedRentalAmount: Joi.number().label('Fixed Rental Amount').optional(),
+                includedAmount: Joi.number().label('Included Amount').optional(),
+                includedDistance: Joi.number().label('Included Distance').optional(),
+                additionalAmount: Joi.number().label('Additional Amount').optional(),
+            }).min(1),
+        })
+    }),
+
+    //joi rate category add vehicle patch
+    joiRateCategoryAddVehiclePatch: Joi.object().keys({
+        params: {
+            rateCategoryId: Joi.string().trim().label('Rate Category Id')
+        },
+        body: Joi.object({
+            transporterId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
+                language: {
+                    string: {
+                        regex: {
+                            base: 'should be a valid mongoose Id.'
+                        }
+                    }
+                }
+            }).required(), // keeping it optional for now,will have to make it required
+
+            vehicleId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Vehicle Id').required().options({
+                language: {
+                    string: {
+                        regex: {
+                            base: 'should be a valid mongoose Id.'
+                        }
+                    }
+                }
+            }).required()
+        })
+    }),
+
     // get Rate Category list
     joiRateCategoryList: Joi.object().keys({
         page: Joi.number().integer().min(1).label('Page').required(),
@@ -95,6 +140,11 @@ const schemas = {
         rateCategoryId: Joi.string().trim().label('rateCategory Id').required(),
     }),
 
+    // joi delete ratecategory vehicle transporter mapping
+    joiDeleterateCategoryVehicleTransporterMapping: Joi.object().keys({
+        rateCategoryVehicleTransporterMappingId: Joi.string().trim().label('RateCategory Vehicle Transporter Mapping Id').required(),
+    }),
+
 }
 
 // joi options
@@ -118,6 +168,7 @@ const options = {
 };
 
 module.exports = {
+    //joi rate category create
     joiRateCategoryCreate: (req, res, next) => {
         // getting the schemas 
         let schema = schemas.joiRateCategoryCreate;
@@ -125,6 +176,48 @@ module.exports = {
 
         // validating the schema 
         schema.validate(req.body, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
+
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
+
+    //joi rate category patch
+    joiRateCategoryPatch: (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.joiRateCategoryPatch;
+        let option = options.basic;
+
+        // validating the schema 
+        schema.validate({ params: req.params, body: req.body }, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
+
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
+
+    //joi rate category patch
+    joiRateCategoryAddVehiclePatch: (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.joiRateCategoryAddVehiclePatch;
+        let option = options.basic;
+
+        // validating the schema 
+        schema.validate({ params: req.params, body: req.body }, option).then(() => {
             next();
             // if error occured
         }).catch((err) => {
@@ -222,7 +315,25 @@ module.exports = {
         });
     },
 
+    // check whether id in params
+    joiDeleterateCategoryVehicleTransporterMapping: (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.joiDeleterateCategoryVehicleTransporterMapping;
+        let option = options.basic;
 
+        // validating the schema 
+        schema.validate(req.params, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
 
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
 
 }
