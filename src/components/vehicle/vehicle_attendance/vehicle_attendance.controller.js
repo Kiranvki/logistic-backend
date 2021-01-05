@@ -40,8 +40,10 @@ class userController extends BaseController {
       let timeOfTheDayInMins = parseInt(checkInTimeInHour) * 60 + parseInt(checkInTimeInMins); // getting the time in mins 
 
       let attendanceLog = [{
-        checkInDate: new Date(),
-        checkInTimeInMins: parseInt(timeOfTheDayInMins)
+        checkInDate: todaysDate,
+        checkInTimeInMins: parseInt(timeOfTheDayInMins),
+        driverName: driverName,
+        createdDate: new Date()
       }];
 
       let startOfTheDay = moment().set({
@@ -71,7 +73,7 @@ class userController extends BaseController {
           dateOfAttendance: todaysDate,
           status: 1,
           isDeleted: 0,
-          driverName: driverName
+
         },
         $push: {
           attendanceLog: attendanceLog
@@ -315,9 +317,15 @@ class userController extends BaseController {
           // pushing the attendance log 
           for (let j = 0; j < isAttended.attendanceLog.length; j++) {
             attendanceLogArray.push({
-              checkInTime: moment.utc(moment.duration(isAttended.attendanceLog[j].checkInTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm"),
-              checkOutTimeIn: isAttended.attendanceLog[j].checkOutTimeInMins ? moment.utc(moment.duration(isAttended.attendanceLog[j].checkOutTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm") : 'N/A',
-              totalTimeTaken: isAttended.attendanceLog[j].totalWorkingInMins
+              // checkInTime: moment.utc(moment.duration(isAttended.attendanceLog[j].checkInTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm"),
+              // checkOutTimeIn: isAttended.attendanceLog[j].checkOutTimeInMins ? moment.utc(moment.duration(isAttended.attendanceLog[j].checkOutTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm") : 'N/A',
+              // totalTimeTaken: isAttended.attendanceLog[j].totalWorkingInMins
+              checkInTime: moment.utc(moment.duration(isAttended.attendanceLog[j].checkInTimeInMins, "minutes").asMilliseconds()).format("HH:mm"),
+              checkOutTimeIn: isAttended.attendanceLog[j].checkOutTimeInMins ? moment.utc(moment.duration(isAttended.attendanceLog[j].checkOutTimeInMins, "minutes").asMilliseconds()).format("HH:mm") : 'N/A',
+              totalTimeTaken: isAttended.attendanceLog[j].totalWorkingInMins,
+              driverName: isAttended.attendanceLog[j].driverName ? isAttended.attendanceLog[j].driverName : 'N/A',
+              checkInDate: moment.utc(isAttended.attendanceLog[j].checkInDate).utcOffset("+05:30").format('DD-MM-YYYY'),
+              checkOutDate: isAttended.attendanceLog[j].checkOutDate ? moment.utc(isAttended.attendanceLog[j].checkOutDate).utcOffset("+05:30").format('DD-MM-YYYY') : 'N/A'
             })
           }
 

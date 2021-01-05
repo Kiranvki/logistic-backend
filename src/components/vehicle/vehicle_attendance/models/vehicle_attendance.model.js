@@ -17,10 +17,7 @@ const vehicleAttendance = new Schema({
     type: Date,
     require: true
   },
-  driverName: {
-    type: String,
-    require: true
-  },
+
   attendanceLog: [{
     checkInDate: {
       type: Date,
@@ -44,6 +41,14 @@ const vehicleAttendance = new Schema({
       type: Number,
       default: 0,
       enum: [0, 1]
+    },
+    createdDate: {
+      type: Date,
+      required: true,
+    },
+    driverName: {
+      type: String,
+      require: true
     },
     status: {
       type: Number,
