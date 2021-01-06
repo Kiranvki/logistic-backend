@@ -5,19 +5,28 @@ const ctrl = require('./security_guard.controller');
 function securityRoutes(){
     return (open, closed) => {
     // post
-    closed.route('/employee').post(
+    closed.route('/employee/:employeeType').post(
        // [joiSecurityGuardCreate], // joi validation
         //verifyUserToken,      // verify user token
         ctrl.post              // controller function 
       );
 
 
-      closed.route('/getEmployee').get(
+      // closed.route('/getEmployee').get(
+      //   //[joiTransporterGetDetails], // joi validation
+      //   // verifyAppToken,
+      //   //isValidTransporter,
+      //   ctrl.getEmployeer // controller function 
+      // );
+      
+
+      closed.route('/getEmployee/:employeeId/:employeeType').get(
         //[joiTransporterGetDetails], // joi validation
         // verifyAppToken,
         //isValidTransporter,
         ctrl.getEmployeer // controller function 
       );
+
 
     
     // closed.route('/:employeeId').get(
@@ -48,7 +57,7 @@ function securityRoutes(){
     //     ctrl.patchEmployee // controller function 
     //   );
 
-    closed.route('/getEmployee').patch(
+    closed.route('/getEmployee/:employeeId/:employeeType').patch(
         //[joiTransporterGetDetails], // joi validation
         // verifyAppToken,
         //isValidTransporter,

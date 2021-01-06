@@ -110,7 +110,7 @@ class deliveryExecutiveCtrl extends BaseController {
     try {
       info("Employee GET DETAILS !");
       // get the brand id
-      let employeeId = req.query.employeeId;
+      let employeeId = req.params.employeeId;
       // inserting data into the db
       // let transporter = await Model.findOne({
       // let employee = await Model.findById({
@@ -120,7 +120,7 @@ class deliveryExecutiveCtrl extends BaseController {
       // }).lean();
 
       let employee = await Model.findOne({
-        _id: mongoose.Types.ObjectId(req.query.employeeId),
+        _id: mongoose.Types.ObjectId(req.params.employeeId),
         isDeleted: 0,
       }).lean();
       console.log("Emplloyy", employee);
@@ -156,7 +156,7 @@ class deliveryExecutiveCtrl extends BaseController {
       // inserting data into the db
       let isUpdated = await Model.findOneAndUpdate(
         {
-          _id: mongoose.Types.ObjectId(req.query.employeeId),
+          _id: mongoose.Types.ObjectId(req.params.employeeId),
         },
         dataToUpdate,
         {
@@ -189,7 +189,7 @@ class deliveryExecutiveCtrl extends BaseController {
       info("Employee Delete!");
       //let employeeId = req.query.employeeId;
       // inserting the new user into the db
-       let employeeId = req.query.employeeId || "";
+       let employeeId = req.params.employeeId || "";
 
       // creating data to update
       let dataToUpdate = {

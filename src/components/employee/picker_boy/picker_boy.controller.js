@@ -120,7 +120,7 @@ class PickerBoyController extends BaseController {
     try {
       info("Employee GET DETAILS !");
       // get the brand id
-      let employeeId = req.query.employeeId;
+      let employeeId = req.params.employeeId;
       // inserting data into the db
       // let transporter = await Model.findOne({
       // let employee = await Model.findById({
@@ -130,7 +130,7 @@ class PickerBoyController extends BaseController {
       // }).lean();
 
       let employee = await Model.findOne({
-        _id: mongoose.Types.ObjectId(req.query.employeeId),
+        _id: mongoose.Types.ObjectId(req.params.employeeId),
         isDeleted: 0,
       }).lean();
       console.log("Emplloyy", employee);
