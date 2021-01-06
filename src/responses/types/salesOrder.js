@@ -9,6 +9,7 @@ module.exports = {
     salesOrderDetailsNotFetched: 'SalesOrder Details not Fetched !.',
     salesOrderIdInvalidEitherDeletedOrDeactivated: 'sales Order Id is either deleted or deactivated !',
     invalidSalesOrderId: 'The Sales Order id is Invalid !',
+    invalidPickerBoySalesOrderId: 'The Picker Boy Sales Order id is Invalid !',
     salesOrderNotAddedInPackingStage: 'Unable to add Sales Order in packing step !',
     salesOrderAddedInPackingStage: ' Sales Order added in packing step Successfully !',
     itemAddedInsalesOrderAfterScan: 'Item added in SalesOrder Details after scan Successfully !.',
@@ -25,9 +26,11 @@ module.exports = {
     pickerBoySalesOrderIdInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id is either deleted or deactivated !',
     pickerBoyDetailsUpdated: 'PickerBoy Details Updated Successfully  !',
     pickerBoyDetailsNotUpdated: 'Error! Updating PickerBoy details !',
-
     // pending sales order details
     pendingSalesOrderFetchedSuccessfully: 'Pending SalesOrder Details Fetched Successfully !',
     unableToFetchedPendingSalesOrder: 'Unable to fetch Pending SalesOrder Details!',
+    //pickerboy salesorder mapping id or item code is invalid
+    pickerBoySalesOrderIdOrItemCodeInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id or Item Code is either deleted or deactivated !',
+
 
 };
