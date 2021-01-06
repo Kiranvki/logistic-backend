@@ -76,13 +76,13 @@ module.exports = async (req, res, next) => {
                 // invalid Brand
             } else {
                 error('INVALID Item Details!');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.brand.brandIdInvalidEitherDeletedOrDeactivated);
+                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.pickerBoySalesOrderIdOrItemCodeInvalidEitherDeletedOrDeactivated);
             }
 
             // pickerSO mapping id is invalid 
         } else {
             error('The PickerBoy SalesOrder Mapping ID is Invalid !');
-            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidAsmId);
+            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.invalidPickerBoySalesOrderId);
         }
 
         // catch any runtime error 
