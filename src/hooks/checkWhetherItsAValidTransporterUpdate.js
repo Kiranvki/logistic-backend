@@ -21,21 +21,21 @@ module.exports = async (req, res, next) => {
         let objectId = mongoose.Types.ObjectId;
 
         // get the email id   
-        let transporterName = req.body.vehicleDetails.name || '', // transporterName  
-        transportercontactNo = req.body.vehicleDetails.contactNo || '', // transportercontactNo  
-        transporterAltContactNo = req.body.vehicleDetails.altContactNo || '', //transporterAltContactNo
-        transporterEmail = req.body.vehicleDetails.email, // transporterEmail  
-        transporterAltEmail = req.body.vehicleDetails.altEmail, // includedDistance   
-        transporterStreetNo = req.body.locationDetails.streetNo, //streetNo
-        transporterAddress = req.body.locationDetails.address,// address
-        transporterCity = req.body.locationDetails.city, //city
-        transporterCountry = req.body.locationDetails.country, //country
-        transporterPostalCode = req.body.locationDetails.postalCode, //postalCode
-        transporterContactPersonName = req.body.contactPersonName, //contactPersonName
-        transporterContactNumber = req.body.contactPersonalDetails.contactNumber, //contactNumber
-        transporterAltContactNumber = req.body.contactPersonalDetails.altContactNumber, //altContactNumber
-        transporterEmailID = req.body.contactPersonalDetails.emailID, //emailID
-        transporterAltEmailID = req.body.contactPersonalDetails.altEmailID, //altEmailID
+        let name = req.body.vehicleDetails.name || '', // name  
+        contactNo = req.body.vehicleDetails.contactNo || '', // transportercontactNo  
+        altContactNo = req.body.vehicleDetails.altContactNo || '', //transporterAltContactNo
+        email = req.body.vehicleDetails.email, // transporterEmail  
+        altEmail = req.body.vehicleDetails.altEmail, // includedDistance   
+        streetNo = req.body.locationDetails.streetNo, //streetNo
+        address = req.body.locationDetails.address,// address
+        city = req.body.locationDetails.city, //city
+        country = req.body.locationDetails.country, //country
+        postalCode = req.body.locationDetails.postalCode, //postalCode
+        contactPersonName = req.body.contactPersonName, //contactPersonName
+        contactNumber = req.body.contactPersonalDetails.contactNumber, //contactNumber
+        altContactNumber = req.body.contactPersonalDetails.altContactNumber, //altContactNumber
+        emailID = req.body.contactPersonalDetails.emailID, //emailID
+        altEmailID = req.body.contactPersonalDetails.altEmailID, //altEmailID
 
 
             /*
@@ -67,36 +67,36 @@ module.exports = async (req, res, next) => {
                 info('VALID Transporter!');
 
                 // check whether the field values are changed or not 
-                if (transporterName && transporterName == gettransporterDetails.data.transporterName) isNotChanged.push('transporterName');
-                else if (transporterName) toChangeObject = { ...toChangeObject, 'transporterName': transporterName }
-                if (transportercontactNo && transportercontactNo == gettransporterDetails.data.transportercontactNo) isNotChanged.push('transportercontactNo')
-                else if (transportercontactNo) toChangeObject = { ...toChangeObject, 'transportercontactNo': transportercontactNo }
-                if (transporterAltContactNo && transporterAltContactNo == gettransporterDetails.data.transporterAltContactNo) isNotChanged.push('transporterAltContactNo')
-                else if (transporterAltContactNo) toChangeObject = { ...toChangeObject, 'transporterAltContactNo': transporterAltContactNo }
-                if (transporterEmail && transporterEmail == gettransporterDetails.data.transporterEmail) isNotChanged.push('transporterEmail');
-                else if (transporterEmail) toChangeObject = { ...toChangeObject, 'transporterEmail': transporterEmail }
-                if (transporterAltEmail && transporterAltEmail == gettransporterDetails.data.transporterAltEmail) isNotChanged.push('transporterAltEmail')
-                else if (transporterAltEmail) toChangeObject = { ...toChangeObject, 'transporterAltEmail': transporterAltEmail }
-                if (transporterStreetNo && transporterStreetNo == gettransporterDetails.data.transporterStreetNo) isNotChanged.push('transporterStreetNo')
-                else if (transporterStreetNo) toChangeObject = { ...toChangeObject, 'transporterStreetNo': transporterStreetNo }
-                if (transporterAddress && transporterAddress == gettransporterDetails.data.transporterAddress) isNotChanged.push('transporterAddress')
-                else if (transporterAddress) toChangeObject = { ...toChangeObject, 'transporterAddress': transporterAddress }
-                if (transporterCity && transporterCity == gettransporterDetails.data.transporterCity) isNotChanged.push('transporterCity')
-                else if (transporterCity) toChangeObject = { ...toChangeObject, 'transporterCity': transporterCity }
-                if (transporterCountry && transporterCountry == gettransporterDetails.data.transporterCountry) isNotChanged.push('transporterCountry')
-                else if (transporterCountry) toChangeObject = { ...toChangeObject, 'transporterCountry': transporterCountry }
-                if (transporterPostalCode && transporterPostalCode == gettransporterDetails.data.transporterPostalCode) isNotChanged.push('transporterPostalCode')
-                else if (transporterPostalCode) toChangeObject = { ...toChangeObject, 'transporterPostalCode': transporterPostalCode }
-                if (transporterContactPersonName && transporterContactPersonName == gettransporterDetails.data.transporterContactPersonName) isNotChanged.push('transporterContactPersonName')
-                else if (transporterContactPersonName) toChangeObject = { ...toChangeObject, 'transporterContactPersonName': transporterContactPersonName }
-                if (transporterContactNumber && transporterContactNumber == gettransporterDetails.data.transporterContactNumber) isNotChanged.push('transporterContactNumber')
-                else if (transporterContactNumber) toChangeObject = { ...toChangeObject, 'transporterContactNumber': transporterContactNumber }
-                if (transporterAltContactNumber && transporterAltContactNumber == gettransporterDetails.data.transporterAltContactNumber) isNotChanged.push('transporterAltContactNumber')
-                else if (transporterAltContactNumber) toChangeObject = { ...toChangeObject, 'transporterAltContactNumber': transporterAltContactNumber }
-                if (transporterEmailID && transporterEmailID == gettransporterDetails.data.transporterEmailID) isNotChanged.push('transporterEmailID')
-                else if (transporterEmailID) toChangeObject = { ...toChangeObject, 'transporterEmailID': transporterEmailID }
-                if (transporterAltEmailID && transporterAltEmailID == gettransporterDetails.data.transporterAltEmailID) isNotChanged.push('transporterAltEmailID')
-                else if (transporterAltEmailID) toChangeObject = { ...toChangeObject, 'transporterAltEmailID': transporterAltEmailID }
+                if (name && name == gettransporterDetails.data.vehicleDetails.name) isNotChanged.push('name');
+                else if (name) toChangeObject = { ...toChangeObject, 'name': name }
+                if (contactNo && contactNo == gettransporterDetails.data.vehicleDetails.contactNo) isNotChanged.push('contactNo')
+                else if (contactNo) toChangeObject = { ...toChangeObject, 'contactNo': contactNo }
+                if (altContactNo && altContactNo == gettransporterDetails.data.vehicleDetails.altContactNo) isNotChanged.push('altContactNo')
+                else if (altContactNo) toChangeObject = { ...toChangeObject, 'altContactNo': altContactNo }
+                if (email && email == gettransporterDetails.data.vehicleDetails.email) isNotChanged.push('email');
+                else if (email) toChangeObject = { ...toChangeObject, 'email': email }
+                if (altEmail && altEmail == gettransporterDetails.data.vehicleDetails.altEmail) isNotChanged.push('altEmail')
+                else if (altEmail) toChangeObject = { ...toChangeObject, 'altEmail': altEmail }
+                if (streetNo && streetNo == gettransporterDetails.data.locationDetails.streetNo) isNotChanged.push('streetNo')
+                else if (streetNo) toChangeObject = { ...toChangeObject, 'streetNo': streetNo }
+                if (address && address == gettransporterDetails.data.locationDetails.address) isNotChanged.push('address')
+                else if (address) toChangeObject = { ...toChangeObject, 'address': address }
+                if (city && city == gettransporterDetails.data.locationDetails.city) isNotChanged.push('city')
+                else if (city) toChangeObject = { ...toChangeObject, 'city': city }
+                if (country && country == gettransporterDetails.data.locationDetails.country) isNotChanged.push('country')
+                else if (country) toChangeObject = { ...toChangeObject, 'country': country }
+                if (postalCode && postalCode == gettransporterDetails.data.locationDetails.postalCode) isNotChanged.push('postalCode')
+                else if (postalCode) toChangeObject = { ...toChangeObject, 'postalCode': postalCode }
+                if (contactPersonName && contactPersonName == gettransporterDetails.data.contactPersonalDetails.contactPersonName) isNotChanged.push('contactPersonName')
+                else if (contactPersonName) toChangeObject = { ...toChangeObject, 'contactPersonName': contactPersonName }
+                if (contactNumber && contactNumber == gettransporterDetails.data.contactPersonalDetails.contactNumber) isNotChanged.push('contactNumber')
+                else if (contactNumber) toChangeObject = { ...toChangeObject, 'contactNumber': contactNumber }
+                if (altContactNumber && altContactNumber == gettransporterDetails.data.contactPersonalDetails.altContactNumber) isNotChanged.push('altContactNumber')
+                else if (altContactNumber) toChangeObject = { ...toChangeObject, 'altContactNumber': altContactNumber }
+                if (emailID && emailID == gettransporterDetails.data.contactPersonalDetails.emailID) isNotChanged.push('emailID')
+                else if (emailID) toChangeObject = { ...toChangeObject, 'emailID': emailID }
+                if (altEmailID && altEmailID == gettransporterDetails.data.contactPersonalDetails.altEmailID) isNotChanged.push('altEmailID')
+                else if (altEmailID) toChangeObject = { ...toChangeObject, 'altEmailID': altEmailID }
 
                 /*
                  if (streetNo && streetNo == getBrandDetails.data.streetNo) isNotChanged.push('streetNo');
@@ -126,6 +126,9 @@ module.exports = async (req, res, next) => {
                 // including it to request body 
                 req.body.toChangeObject = toChangeObject;
                 req.body.isNotChanged = isNotChanged;
+                req.body.vehicleDetailsFromDb = gettransporterDetails.data.vehicleDetails;
+                req.body.vehicleDetailsFromDb = gettransporterDetails.data.locationDetails;
+                req.body.vehicleDetailsFromDb = gettransporterDetails.data.contactPersonalDetails;
 
                 // if there is nothing to change
                 if (isNotChanged.length)

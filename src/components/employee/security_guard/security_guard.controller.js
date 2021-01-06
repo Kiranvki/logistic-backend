@@ -141,10 +141,10 @@ class securityController extends BaseController {
   };
 
   post = async (req, res) => {
-    if (req.body.position == "deliveryExecutive") {
+    if (req.params.employeeType == "deliveryExecutive") {
       let deliveryResponse = await deliveryCtrl.create(req, res);
       return;
-    } else if (req.body.position == "pickerBoy") {
+    } else if (req.params.employeeType == "pickerBoy") {
       let pickerboyResponse = await pickerBoyCtrl.post(req, res);
       return;
     }
