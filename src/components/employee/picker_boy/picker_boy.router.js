@@ -46,10 +46,10 @@ function userRoutes() {
 
     //creating a new picker-boy
     closed.route('/picker-boy').post(
-      // [joiPickerBoyCreate], // joi validation
-      // verifyUserToken, // verify user token
-      // isValidAgencyId, // check whether the agency id is valid or not
-      // getDetailsFromZoho, // get details from zoho
+      [joiPickerBoyCreate], // joi validation
+       verifyUserToken, // verify user token
+       isValidAgencyId, // check whether the agency id is valid or not
+       getDetailsFromZoho, // get details from zoho
       ctrl.post // controller function
     );
 

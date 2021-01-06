@@ -27,7 +27,7 @@ function securityRoutes(){
     //     ctrl.getEmployeer // controller function 
     //   );
 
-      closed.route('/getEmployee').delete(
+      closed.route('/employeeType').delete(
         //[joiTransporterGetDetails], // joi validation
         // verifyAppToken,
         //isValidTransporter,

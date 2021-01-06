@@ -310,11 +310,20 @@ class securityController extends BaseController {
       }
       // inserting data into the db
       // let transporter = await Model.findOne({
-      let employee = await Model.findById({
+    //   let employee = await Model.findById({
 
-        _id: mongoose.Types.ObjectId(employeeId)
+    //     _id: mongoose.Types.ObjectId(employeeId)
 
-      }).lean();
+    //   }).lean();
+
+         // inserting data into the db 
+         let employee = await Model.findOne({
+            
+            _id: mongoose.Types.ObjectId(req.query.employeeId),
+            isDeleted: 0
+          }).lean();
+
+          console.log("Emmm",employee);
       // check if inserted
       if (employee && !_.isEmpty(employee)) return this.success(req, res, this.status.HTTP_OK, employee);
 
@@ -356,10 +365,10 @@ class securityController extends BaseController {
       let empType = req.query.employeeType;
 
       if (empType == "deliveryExecutive") {
-        let deliveryResponse = await deliveryCtrl.get(req, res)
+        let deliveryResponse = await deliveryCtrl.deleteEmployee(req, res)
         return;
       } else if (empType == "pickerBoy") {
-        let pickerboyResponse = await pickerBoyCtrl.delete(req, res);
+        let pickerboyResponse = await pickerBoyCtrl.deleteEmployee(req, res);
         return;
       }
       // inserting the new user into the db
@@ -375,13 +384,16 @@ class securityController extends BaseController {
       };
 
       // inserting data into the db 
-      let isUpdated = await Model.findOneAndUpdate({
+    //   let isUpdated = await Model.findOneAndUpdate({
+        let isUpdated = await Model.updateOne({
         _id: mongoose.Types.ObjectId(employeeId)
-      }, dataToUpdate, {
+      },
+     dataToUpdate, {
         new: true,
         upsert: false,
         lean: true
-      })
+     }
+      )
       // .then(async (res) => {
 
       // if (req.body.asmSalesmanMappingIds && Array.isArray(req.body.asmSalesmanMappingIds) && req.body.asmSalesmanMappingIds.length)

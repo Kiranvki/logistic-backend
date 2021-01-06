@@ -97,7 +97,7 @@ const schemas = {
     // joi Transporter patch 
     joiTransporterPatch: Joi.object().keys({
         params: {
-            transporterid: Joi.string().trim().label('Cost Element Id')
+            transporterid: Joi.string().trim().label('Transporter Id')
         },
         body: Joi.object({
             vehicleDetails: {
@@ -109,7 +109,7 @@ const schemas = {
                             }
                         }
                     }
-                }).required(),
+                }).optional(),
                 contactNo: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').required({
                     language: {
                         string: {
@@ -118,7 +118,7 @@ const schemas = {
                             }
                         }
                     }
-                }).required(),
+                }).optional(),
                 altContactNo: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Alternative Contact Number').options({
                     language: {
                         string: {
@@ -128,15 +128,15 @@ const schemas = {
                         }
                     }
                 }).optional().allow(''),
-                email: Joi.string().email().trim().label('Email').required().max(256),
-                altEmail: Joi.string().email().trim().label('Alternative Email').optional().allow(''),
+                email: Joi.string().email().trim().label('Email').optional().max(256),
+                altEmail: Joi.string().email().trim().label('Alternative Email').optional(),
             },
             locationDetails: {
-                streetNo: Joi.string().trim().label('Street no').required(),
-                address: Joi.string().trim().label('Address').required(),
-                city: Joi.string().trim().label('City').required(),
-                country: Joi.string().trim().label('Country').required(),
-                postalCode: Joi.number().min(0).max(999999).label('Pincode').required(),
+                streetNo: Joi.string().trim().label('Street no').optional(),
+                address: Joi.string().trim().label('Address').optional(),
+                city: Joi.string().trim().label('City').optional(),
+                country: Joi.string().trim().label('Country').optional(),
+                postalCode: Joi.number().min(0).max(999999).label('Pincode').optional(),
             },
             contactPersonalDetails: {
                 contactPersonName: Joi.string().trim().label('Contact Person Name').regex(/^[a-z ,.'-]+$/i).options({
@@ -147,8 +147,8 @@ const schemas = {
                             }
                         }
                     }
-                }).required(),
-                contactNumber: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').required({
+                }).optional(),
+                contactNumber: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').optional({
                     language: {
                         string: {
                             regex: {
@@ -156,7 +156,7 @@ const schemas = {
                             }
                         }
                     }
-                }).required(),
+                }).optional(),
                 altContactNumber: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Alternative Contact Number').options({
                     language: {
                         string: {
@@ -166,7 +166,7 @@ const schemas = {
                         }
                     }
                 }).optional().allow(''),
-                emailID: Joi.string().email().trim().label('Email').required().max(256),
+                emailID: Joi.string().email().trim().label('Email').optional().max(256),
                 altEmailID: Joi.string().email().trim().label('Alternative Email').optional().allow(''),
             }
 
