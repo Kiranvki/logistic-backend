@@ -58,7 +58,7 @@ class transporterController extends BaseController {
       //let TransporterMasterResult;
       info('Creating Transporter !');
 
-     // inserting data into the db 
+      // inserting data into the db 
       let isInserted = await Model.create({
         ...req.body
       });
@@ -132,16 +132,75 @@ class transporterController extends BaseController {
         $skip: skip
       }, {
         $limit: pageSize
-        // },
-        // {
-        //   $project: {
-
-        //     'name': 1,
-        //     'isDeleted': 1
-        //   }
       },
-      ])
-      //.allowDiskUse(true);
+      {
+        $lookup: {
+          from: 'ratecategorytransportervehiclemappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$transporterId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                '_id': 1,
+                'status': 1,
+                'isDeleted': 1,
+                'vehicleId': 1,
+                'transporterId': 1,
+                'rateCategoryId': 1
+              }
+            },
+            {
+              $lookup: {
+                from: 'vehiclemasters',
+                localField: "vehicleId",
+                foreignField: "_id",
+                as: 'vehicle'
+              }
+            },
+            {
+              $unwind: {
+                path: '$vehicle',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'ratecategorymodels',
+                localField: "rateCategoryId",
+                foreignField: "_id",
+                as: 'rateCategory'
+              }
+            },
+            {
+              $unwind: {
+                path: '$rateCategory',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+          ],
+          as: 'vehicleRateCategoryDetails'
+        }
+      },
+      {
+        $project: {
+          '_id': 1,
+          'status': 1,
+          'vehicleDetails': 1,
+          'locationDetails': 1,
+          'contactPersonalDetails': 1,
+          'vehicleRateCategoryDetails': '$vehicleRateCategoryDetails'
+        }
+      },
+      ]).allowDiskUse(true);
 
       // success 
       return this.success(req, res, this.status.HTTP_OK, {
@@ -240,39 +299,39 @@ class transporterController extends BaseController {
   }
 
   // get details 
-  getTransporter = async (req, res) => {
+  // getTransporter = async (req, res) => {
 
+  //   try {
+  //     info('Transporter GET DETAILS !');
+  //     // get the brand id 
+  //     let transporterId = req.params.transporterId;
+  //     // inserting data into the db 
+  //     // let transporter = await Model.findOne({
+  //     let transporter = await Model.findById({
+
+  //       _id: mongoose.Types.ObjectId(transporterId)
+  //     }).lean();
+
+  //     // check if inserted 
+  //     if (transporter && !_.isEmpty(transporter)) return this.success(req, res, this.status.HTTP_OK, transporter, this.messageTypes.transporterFetched);
+  //     else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotFetched);
+
+  //     // catch any runtime error 
+  //   } catch (err) {
+  //     error(err);
+  //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  //   }
+  // }
+
+
+  getTransporter = async (req, res) => {
     try {
       info('Transporter GET DETAILS !');
-      // get the brand id 
-      let transporterId = req.params.transporterId;
-      // inserting data into the db 
-      // let transporter = await Model.findOne({
-      let transporter = await Model.findById({
 
-        _id: mongoose.Types.ObjectId(transporterId)
-      }).lean();
-
-      // check if inserted 
-      if (transporter && !_.isEmpty(transporter)) return this.success(req, res, this.status.HTTP_OK, transporter, this.messageTypes.transporterFetched);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotFetched);
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
-
-
-  getTransporter = async (req, res) => {
-    try {
-      info('Vehicle GET DETAILS !');
-
-      // get the brand id 
+      // get the transporter id
       let transporterId = req.params.transporterId;
 
-      let vehicleData = await Model.aggregate([{
+      let transporterData = await Model.aggregate([{
         '$match': {
           '_id': mongoose.Types.ObjectId(transporterId),
         }
@@ -304,18 +363,18 @@ class transporterController extends BaseController {
             },
             {
               $lookup: {
-                from: "vehiclemasters",
+                from: 'vehiclemasters',
                 localField: "vehicleId",
                 foreignField: "_id",
-                as: "vehicle",
-              },
+                as: 'vehicle'
+              }
             },
-            // {
-            //   $unwind: {
-            //     path: '$vehicle',
-            //     preserveNullAndEmptyArrays: true
-            //   }
-            // },
+            {
+              $unwind: {
+                path: '$vehicle',
+                preserveNullAndEmptyArrays: true
+              }
+            },
             {
               $lookup: {
                 from: 'ratecategorymodels',
@@ -324,38 +383,30 @@ class transporterController extends BaseController {
                 as: 'rateCategory'
               }
             },
-            // {
-            //   $unwind: {
-            //     path: '$rateCategory',
-            //     preserveNullAndEmptyArrays: true
-            //   }
-            // },
+            {
+              $unwind: {
+                path: '$rateCategory',
+                preserveNullAndEmptyArrays: true
+              }
+            },
           ],
-          as: 'transporterRateCategoryDetails'
-        }
-      },
-      {
-        $unwind: {
-          path: '$transporterRateCategoryDetails',
-          preserveNullAndEmptyArrays: true
+          as: 'vehicleRateCategoryDetails'
         }
       },
       {
         $project: {
           '_id': 1,
           'status': 1,
-          vehicleDetails:1,
-          'rateCategoryDetails': '$transporterRateCategoryDetails.rateCategory',
-           'vehicleId': '$transporterRateCategoryDetails.vehicle._id',
-           "vehicleType": "$transporterRateCategoryDetails.vehicle.vehicleType",
-           "vehicleModel":"$transporterRateCategoryDetails.vehicle.vehicleModel",
-           "tonnage":"$transporterRateCategoryDetails.vehicle.tonnage",
+          'vehicleDetails': 1,
+          'locationDetails': 1,
+          'contactPersonalDetails': 1,
+          'vehicleRateCategoryDetails': '$vehicleRateCategoryDetails'
         }
       },
       ]).allowDiskUse(true);
 
       // check if data is present
-      if (vehicleData && !_.isEmpty(vehicleData)) return this.success(req, res, this.status.HTTP_OK, vehicleData, this.messageTypes.transporterFetched);
+      if (transporterData && !_.isEmpty(transporterData)) return this.success(req, res, this.status.HTTP_OK, transporterData, this.messageTypes.transporterFetched);
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotFetched);
 
       // catch any runtime error 
