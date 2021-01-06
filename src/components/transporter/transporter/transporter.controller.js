@@ -265,112 +265,105 @@ class transporterController extends BaseController {
   }
 
 
-  // getTransporter = async (req, res) => {
-  //   try {
-  //     info('Vehicle GET DETAILS !');
+  getTransporter = async (req, res) => {
+    try {
+      info('Vehicle GET DETAILS !');
 
-  //     // get the brand id 
-  //     let vehicleId = req.params.transporterId;
+      // get the brand id 
+      let transporterId = req.params.transporterId;
 
-  //     let vehicleData = await Model.aggregate([{
-  //       '$match': {
-  //         '_id': mongoose.Types.ObjectId(transporterId),
-  //       }
-  //     },
-  //     {
-  //       $lookup: {
-  //         from: 'ratecategorytransportervehiclemappings',
-  //         let: {
-  //           'id': '$_id'
-  //         },
-  //         pipeline: [
-  //           {
-  //             $match: {
-  //               // 'status': 1,
-  //               'isDeleted': 0,
-  //               '$expr': {
-  //                 '$eq': ['$transporterId', '$$id']
-  //               }
-  //             }
-  //           }, {
-  //             $project: {
-  //               '_id': 1,
-  //               'status': 1,
-  //               'isDeleted': 1,
-  //               'vehicleId': 1,
-  //               //'transporterId': 1,
-  //               'rateCategoryId': 1
-  //             }
-  //           },
-  //           // {
-  //           //   $lookup: {
-  //           //     from: 'transporters',
-  //           //     localField: "transporterId",
-  //           //     foreignField: "_id",
-  //           //     as: 'transporter'
-  //           //   }
-  //           // },
-  //           // {
-  //           //   $unwind: {
-  //           //     path: '$transporter',
-  //           //     preserveNullAndEmptyArrays: true
-  //           //   }
-  //           // },
-  //           {
-  //             $lookup: {
-  //               from: 'ratecategorymodels',
-  //               localField: "rateCategoryId",
-  //               foreignField: "_id",
-  //               as: 'rateCategory'
-  //             }
-  //           },
-  //           {
-  //             $unwind: {
-  //               path: '$rateCategory',
-  //               preserveNullAndEmptyArrays: true
-  //             }
-  //           },
-  //         ],
-  //         as: 'transporterRateCategoryDetails'
-  //       }
-  //     },
-  //     {
-  //       $unwind: {
-  //         path: '$transporterRateCategoryDetails',
-  //         preserveNullAndEmptyArrays: true
-  //       }
-  //     },
-  //     {
-  //       $project: {
-  //         '_id': 1,
-  //         // 'regNumber': 1,
-  //         // 'vehicleType': 1,
-  //         // 'vehicleModel': 1,
-  //         // 'height': 1,
-  //         // 'length': 1,
-  //         // 'breadth': 1,
-  //         // 'tonnage': 1,
-  //         'status': 1,
-  //         // 'rateCategoryId': '$transporterRateCategoryDetails.rateCategory._id',
-  //         // 'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
-  //         'rateCategoryDetails': '$transporterRateCategoryDetails.rateCategory',
+      let vehicleData = await Model.aggregate([{
+        '$match': {
+          '_id': mongoose.Types.ObjectId(transporterId),
+        }
+      },
+      {
+        $lookup: {
+          from: 'ratecategorytransportervehiclemappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$transporterId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                '_id': 1,
+                'status': 1,
+                'isDeleted': 1,
+                'vehicleId': 1,
+                'transporterId': 1,
+                'rateCategoryId': 1
+              }
+            },
+            {
+              $lookup: {
+                from: "vehiclemasters",
+                localField: "vehicleId",
+                foreignField: "_id",
+                as: "vehicle",
+              },
+            },
+            // {
+            //   $unwind: {
+            //     path: '$vehicle',
+            //     preserveNullAndEmptyArrays: true
+            //   }
+            // },
+            {
+              $lookup: {
+                from: 'ratecategorymodels',
+                localField: "rateCategoryId",
+                foreignField: "_id",
+                as: 'rateCategory'
+              }
+            },
+            // {
+            //   $unwind: {
+            //     path: '$rateCategory',
+            //     preserveNullAndEmptyArrays: true
+            //   }
+            // },
+          ],
+          as: 'transporterRateCategoryDetails'
+        }
+      },
+      {
+        $unwind: {
+          path: '$transporterRateCategoryDetails',
+          preserveNullAndEmptyArrays: true
+        }
+      },
+      {
+        $project: {
+          '_id': 1,
+          'status': 1,
+          vehicleDetails:1,
+          'rateCategoryDetails': '$transporterRateCategoryDetails.rateCategory',
+           'vehicleId': '$transporterRateCategoryDetails.vehicle._id',
+           "vehicleType": "$transporterRateCategoryDetails.vehicle.vehicleType",
+           "vehicleModel":"$transporterRateCategoryDetails.vehicle.vehicleModel",
+           "tonnage":"$transporterRateCategoryDetails.vehicle.tonnage",
+        }
+      },
+      ]).allowDiskUse(true);
 
-  //         // 'transporterId': '$transporterRateCategoryDetails.transporter._id',
-  //         // 'transporterName': '$transporterRateCategoryDetails.transporter.vehicleDetails.name',
-  //       }
-  //     },
-  //     ]).allowDiskUse(true);
+      // check if data is present
+      if (vehicleData && !_.isEmpty(vehicleData)) return this.success(req, res, this.status.HTTP_OK, vehicleData, this.messageTypes.transporterFetched);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotFetched);
 
-  //     // check if data is present
-  //     if (vehicleData && !_.isEmpty(vehicleData)) return this.success(req, res, this.status.HTTP_OK, vehicleData, this.messageTypes.vehicleDetailsFetched);
-  //     else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotFetched);
-
-  //     // catch any runtime error 
-  //   } catch (err) {
-  //     error(err);
-  //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-  //   }
-  // }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
 
   // // patch the request 
   patchTransporter = async (req, res) => {
