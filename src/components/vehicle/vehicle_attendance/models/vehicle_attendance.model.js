@@ -70,7 +70,7 @@ const vehicleAttendance = new Schema({
 
 // creating indexes
 vehicleAttendance.index({
-  'userId': 1,
+  'vehicleId': 1,
   'dateOfAttendance': 1,
   'status': 1
 });
