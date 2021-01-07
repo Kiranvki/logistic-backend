@@ -100,7 +100,7 @@ const schemas = {
             transporterid: Joi.string().trim().label('Transporter Id')
         },
         body: Joi.object({
-            vehicleDetails: {
+            vehicleDetails: Joi.object().keys({
                 name: Joi.string().trim().label('name').regex(/^[a-z ,.'-]+$/i).options({
                     language: {
                         string: {
@@ -130,15 +130,15 @@ const schemas = {
                 }).optional().allow(''),
                 email: Joi.string().email().trim().label('Email').optional().max(256),
                 altEmail: Joi.string().email().trim().label('Alternative Email').optional(),
-            },
-            locationDetails: {
+            }),
+            locationDetails: Joi.object().keys({
                 streetNo: Joi.string().trim().label('Street no').optional(),
                 address: Joi.string().trim().label('Address').optional(),
                 city: Joi.string().trim().label('City').optional(),
                 country: Joi.string().trim().label('Country').optional(),
                 postalCode: Joi.number().min(0).max(999999).label('Pincode').optional(),
-            },
-            contactPersonalDetails: {
+            }),
+            contactPersonalDetails: Joi.object().keys({
                 contactPersonName: Joi.string().trim().label('Contact Person Name').regex(/^[a-z ,.'-]+$/i).options({
                     language: {
                         string: {
@@ -168,7 +168,7 @@ const schemas = {
                 }).optional().allow(''),
                 emailID: Joi.string().email().trim().label('Email').optional().max(256),
                 altEmailID: Joi.string().email().trim().label('Alternative Email').optional().allow(''),
-            }
+            }),
 
         }).min(1)
     }),

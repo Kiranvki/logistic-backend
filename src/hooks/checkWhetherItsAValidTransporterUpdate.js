@@ -22,36 +22,20 @@ module.exports = async (req, res, next) => {
 
         // get the email id   
         let name = req.body.vehicleDetails.name || '', // name  
-        contactNo = req.body.vehicleDetails.contactNo || '', // transportercontactNo  
-        altContactNo = req.body.vehicleDetails.altContactNo || '', //transporterAltContactNo
-        email = req.body.vehicleDetails.email, // transporterEmail  
-        altEmail = req.body.vehicleDetails.altEmail, // includedDistance   
-        streetNo = req.body.locationDetails.streetNo, //streetNo
-        address = req.body.locationDetails.address,// address
-        city = req.body.locationDetails.city, //city
-        country = req.body.locationDetails.country, //country
-        postalCode = req.body.locationDetails.postalCode, //postalCode
-        contactPersonName = req.body.contactPersonName, //contactPersonName
-        contactNumber = req.body.contactPersonalDetails.contactNumber, //contactNumber
-        altContactNumber = req.body.contactPersonalDetails.altContactNumber, //altContactNumber
-        emailID = req.body.contactPersonalDetails.emailID, //emailID
-        altEmailID = req.body.contactPersonalDetails.altEmailID, //altEmailID
-
-
-            /*
-            streetNo = req.body.streetNo, // brandName  
-            address = req.body.address, // email  
-            city = req.body.city,
-            country = req.body.country, // brandName  
-            postalCode = req.body.postalCode, // email  
-            gstNo = req.body.gstNo,
-            targetSetting = req.body.targetSetting, // email  
-            targetStartDate = req.body.targetStartDate,
-            targetEndDate = req.body.targetEndDate, // brandName  
-            itemDetails = req.body.itemDetails, // email  
-            latitude = req.body.latitude,
-            longitude = req.body.longitude, // brandName  
-*/
+            contactNo = req.body.vehicleDetails.contactNo || '', // transportercontactNo  
+            altContactNo = req.body.vehicleDetails.altContactNo || '', //transporterAltContactNo
+            email = req.body.vehicleDetails.email, // transporterEmail  
+            altEmail = req.body.vehicleDetails.altEmail, // includedDistance   
+            streetNo = req.body.locationDetails.streetNo, //streetNo
+            address = req.body.locationDetails.address,// address
+            city = req.body.locationDetails.city, //city
+            country = req.body.locationDetails.country, //country
+            postalCode = req.body.locationDetails.postalCode, //postalCode
+            contactPersonName = req.body.contactPersonName, //contactPersonName
+            contactNumber = req.body.contactPersonalDetails.contactNumber, //contactNumber
+            altContactNumber = req.body.contactPersonalDetails.altContactNumber, //altContactNumber
+            emailID = req.body.contactPersonalDetails.emailID, //emailID
+            altEmailID = req.body.contactPersonalDetails.altEmailID, //altEmailID
 
             transporterId = req.params.transporterId,
 
@@ -59,10 +43,10 @@ module.exports = async (req, res, next) => {
             toChangeObject = []; // 
 
         if (objectId.isValid(transporterId)) {
-            // check whether the document type already exist or not 
+            // check whether the transporter details already exist or not 
             let gettransporterDetails = await transporterCtrl.getDetails(transporterId);
 
-            // if asm details fetched successfully
+            // if transporter details fetched successfully
             if (gettransporterDetails.success) {
                 info('VALID Transporter!');
 
@@ -98,47 +82,23 @@ module.exports = async (req, res, next) => {
                 if (altEmailID && altEmailID == gettransporterDetails.data.contactPersonalDetails.altEmailID) isNotChanged.push('altEmailID')
                 else if (altEmailID) toChangeObject = { ...toChangeObject, 'altEmailID': altEmailID }
 
-                /*
-                 if (streetNo && streetNo == getBrandDetails.data.streetNo) isNotChanged.push('streetNo');
-                 else if (streetNo) toChangeObject = { ...toChangeObject, 'streetNo': streetNo }
-                 if (address && address == getBrandDetails.data.address) isNotChanged.push('address')
-                 else if (address) toChangeObject = { ...toChangeObject, 'address': address }
-                 if (city && city == getBrandDetails.data.city) isNotChanged.push('city')
-                 else if (city) toChangeObject = { ...toChangeObject, 'city': city }
-                 if (country && country == getBrandDetails.data.country) isNotChanged.push('country');
-                 else if (country) toChangeObject = { ...toChangeObject, 'country': country }
-                 if (postalCode && postalCode == getBrandDetails.data.postalCode) isNotChanged.push('postalCode')
-                 else if (postalCode) toChangeObject = { ...toChangeObject, 'postalCode': postalCode }
-                
-                 if (targetSetting && targetSetting == getBrandDetails.data.targetSetting) isNotChanged.push('targetSetting')
-                 else if (targetSetting) toChangeObject = { ...toChangeObject, 'targetSetting': targetSetting }
-                 if (targetStartDate && targetStartDate == getBrandDetails.data.targetStartDate) isNotChanged.push('targetStartDate')
-                 else if (targetStartDate) toChangeObject = { ...toChangeObject, 'targetStartDate': targetStartDate }
-                 if (targetEndDate && targetEndDate == getBrandDetails.data.targetEndDate) isNotChanged.push('targetEndDate');
-                 else if (targetEndDate) toChangeObject = { ...toChangeObject, 'targetEndDate': targetEndDate }
-                 if (itemDetails && itemDetails == getBrandDetails.data.itemDetails) isNotChanged.push('itemDetails')
-                 else if (itemDetails) toChangeObject = { ...toChangeObject, 'itemDetails': itemDetails }
-                 if (latitude && latitude == getBrandDetails.data.latitude) isNotChanged.push('latitude')
-                 else if (latitude) toChangeObject = { ...toChangeObject, 'latitude': latitude }
-                 if (longitude && longitude == getBrandDetails.data.longitude) isNotChanged.push('longitude')
-                 else if (longitude) toChangeObject = { ...toChangeObject, 'longitude': longitude }
-                */
+
                 // including it to request body 
                 req.body.toChangeObject = toChangeObject;
                 req.body.isNotChanged = isNotChanged;
                 req.body.vehicleDetailsFromDb = gettransporterDetails.data.vehicleDetails;
-                req.body.vehicleDetailsFromDb = gettransporterDetails.data.locationDetails;
-                req.body.vehicleDetailsFromDb = gettransporterDetails.data.contactPersonalDetails;
+                req.body.locationDetailsFromDb = gettransporterDetails.data.locationDetails;
+                req.body.contactPersonalDetailsFromDb = gettransporterDetails.data.contactPersonalDetails;
 
                 // if there is nothing to change
                 if (isNotChanged.length)
-                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,MessageTypes.transporterMaster.dataIsNotChanged)
+                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.transporterMaster.dataIsNotChanged)
                 else next(); // move on
 
                 // invalid Transporter
             } else {
                 error('INVALID Transporter!');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,MessageTypes.transporterMaster.transporterId);
+                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.transporterMaster.transporterId);
             }
 
             // Transporter id is invalid 

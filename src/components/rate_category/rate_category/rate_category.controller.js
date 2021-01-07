@@ -462,7 +462,7 @@ class rateCategoryController extends BaseController {
       let rateCategoryDetails = {},
         toChangeObject = req.body.toChangeObject || '',
         rateCategoryDataFromDb = req.body.rateCategoryDataFromDb || '';
-      info('Rate Category CHANGE !');
+      info('Rate Category Patch !');
       // creating data to insert
 
       rateCategoryDetails = {
@@ -473,7 +473,6 @@ class rateCategoryController extends BaseController {
         'includedDistance': toChangeObject.includedDistance ? toChangeObject.includedDistance : rateCategoryDataFromDb.includedDistance,
         'additionalAmount': toChangeObject.additionalAmount ? toChangeObject.additionalAmount : rateCategoryDataFromDb.additionalAmount
       }
-      console.log('rateCategoryDetails', rateCategoryDetails);
 
       let dataToUpdate = {
         $set: {
@@ -489,7 +488,6 @@ class rateCategoryController extends BaseController {
         upsert: false,
         lean: true
       });
-      console.log('isUpdated', isUpdated);
 
       // check if inserted 
       if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.rateCategoryUpdatedSuccessfully);

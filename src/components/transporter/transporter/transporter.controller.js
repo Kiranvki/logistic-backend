@@ -450,12 +450,46 @@ class transporterController extends BaseController {
   // // patch the request 
   patchTransporter = async (req, res) => {
     try {
+      info('Transporter Patch Controller !');
 
-      info('Transporter CHANGE ! !');
+      let vehicleDetails = {},
+        locationDetails = {},
+        contactPersonalDetails = {},
+        toChangeObject = req.body.toChangeObject || '',
+        vehicleDetailsFromDb = req.body.vehicleDetailsFromDb || '',
+        locationDetailsFromDb = req.body.locationDetailsFromDb || '',
+        contactPersonalDetailsFromDb = req.body.contactPersonalDetailsFromDb || '';
+
       // creating data to insert
+      vehicleDetails = {
+        'name': toChangeObject.name ? toChangeObject.name : vehicleDetailsFromDb.rateCategoryName,
+        'contactNo': toChangeObject.contactNo ? toChangeObject.contactNo : vehicleDetailsFromDb.contactNo,
+        'altContactNo': toChangeObject.altContactNo ? toChangeObject.altContactNo : vehicleDetailsFromDb.altContactNo,
+        'email': toChangeObject.email ? toChangeObject.email : vehicleDetailsFromDb.email,
+        'altEmail': toChangeObject.altEmail ? toChangeObject.altEmail : vehicleDetailsFromDb.altEmail,
+      }
+
+      locationDetails = {
+        'streetNo': toChangeObject.streetNo ? toChangeObject.streetNo : locationDetailsFromDb.rateCategoryName,
+        'address': toChangeObject.address ? toChangeObject.address : locationDetailsFromDb.address,
+        'city': toChangeObject.city ? toChangeObject.city : locationDetailsFromDb.city,
+        'country': toChangeObject.country ? toChangeObject.country : locationDetailsFromDb.country,
+        'postalCode': toChangeObject.postalCode ? toChangeObject.postalCode : locationDetailsFromDb.postalCode,
+      }
+
+      contactPersonalDetails = {
+        'contactPersonName': toChangeObject.contactPersonName ? toChangeObject.contactPersonName : contactPersonalDetailsFromDb.contactPersonName,
+        'contactNumber': toChangeObject.contactNumber ? toChangeObject.contactNumber : contactPersonalDetailsFromDb.contactNumber,
+        'altContactNumber': toChangeObject.altContactNumber ? toChangeObject.altContactNumber : contactPersonalDetailsFromDb.altContactNumber,
+        'emailID': toChangeObject.emailID ? toChangeObject.emailID : contactPersonalDetailsFromDb.emailID,
+        'altEmailID': toChangeObject.altEmailID ? toChangeObject.altEmailID : contactPersonalDetailsFromDb.altEmailID,
+      }
+
       let dataToUpdate = {
         $set: {
-          ...req.body,
+          'vehicleDetails': vehicleDetails,
+          'locationDetails': locationDetails,
+          'contactPersonalDetails': contactPersonalDetails,
         }
       };
 
