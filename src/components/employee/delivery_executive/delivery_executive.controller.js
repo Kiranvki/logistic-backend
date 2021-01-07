@@ -11,100 +11,64 @@ class deliveryExecutiveCtrl extends BaseController {
   // constructor
   constructor() {
     super();
-    this.messageTypes = this.messageTypes.deliveryExecutive;
+    this.messageTypes = this.messageTypes.employee;
   }
 
   // internal create function
-
   create = async (req, res) => {
     try {
-      info("Creating Delivery Executive !");
-      //let fullName = `${req.body.firstName} ${req.body.lastName}`;
+      info('Create a new Picker Boy !');
+
+      // getting the full name 
+      let fullName = `${req.body.firstName} ${req.body.lastName}`;
 
       // creating data to insert
       let dataToInsert = {
         ...req.body.userData,
-        firstName: req.body.firstName
-          ? req.body.firstName
-          : req.body.userData.firstName,
-        lastName: req.body.lastName
-          ? req.body.lastName
-          : req.body.userData.lastName,
-        isWaycoolEmp: req.body.isWaycoolEmp == true ? 1 : 0,
-        employerName:
-          req.body.isWaycoolEmp == true
-            ? "Waycool Foods & Products Private Limited"
-            : req.body.agencyName,
-        //'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
-        contactMobile: req.body.contactMobile,
-        email: req.body.email,
-        gender:
-          req.body.isWaycoolEmp == true
-            ? req.body.userData.gender.toLowerCase()
-            : req.body.gender.toLowerCase(),
-        // fullName: fullName,
-        // 'createdById': req.user._id,
-        // 'createdBy': req.user.email || 'admin',
-        // 'warehouseId': mongoose.Types.ObjectId(req.user.warehouseId) || null,
-        cityId: req.body.cityId,
-      };
+        'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
+        'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
+        'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
+        'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
+        'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
+        'contactMobile': req.body.contactMobile,
+        'email': req.body.email,
+        'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
+        'fullName': fullName,
+        'cityId': req.body.cityId,
+      }
 
-      // checking if profile pic is present
+      // checking if profile pic is present 
       if (req.body.profilePic)
         dataToInsert = {
           ...dataToInsert,
-          profilePic: req.body.profilePic,
-        };
+          'profilePic': req.body.profilePic
+        }
 
       // if its not a waycool emp
       if (req.body.isWaycoolEmp == false)
         dataToInsert = {
           ...dataToInsert,
-          employeeId: req.body.empId,
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          photo: req.body.profilePic,
-          //   'reportingTo': {
-          //     'id': req.body.asmSalesmanMappingObject.asmId || '',
-          //     'name': req.body.asmSalesmanMappingObject.name || '',
-          //     'emailId': req.body.asmSalesmanMappingObject.emailId || ''
-          //   }
-        };
+          'employeeId': req.body.empId,
+          'firstName': req.body.firstName,
+          'lastName': req.body.lastName,
+          'photo': req.body.profilePic,
+        }
 
-      let isInserted = await Model.create(req.body)
+      // inserting data into the db 
+      let isInserted = await Model.create(dataToInsert);
 
-        .then((res) => {
-          return {
-            success: true,
-            data: res,
-
-            //return this.success(req, res, this.status.HTTP_OK, isInserted);
-          };
-        })
-        .catch((err) => {
-          console.error(err);
-          return {
-            success: false,
-            error: err,
-          };
-        });
-
-      // check if inserted
+      // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-        return this.success(req, res, this.status.HTTP_OK, isInserted);
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT);
+        // returning success
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.deliveryExecutiveCreated)
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotCreated);
 
-      // catch any runtime error
+      // catch any runtime error 
     } catch (err) {
       error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
-  };
+  }
 
   get = async (req, res) => {
     try {
@@ -126,8 +90,8 @@ class deliveryExecutiveCtrl extends BaseController {
       console.log("Emplloyy", employee);
       // check if inserted
       if (employee && !_.isEmpty(employee))
-        return this.success(req, res, this.status.HTTP_OK, employee);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+        return this.success(req, res, this.status.HTTP_OK, employee, this.messageTypes.deliveryExecutiveFetchedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotFound);
 
       // catch any runtime error
     } catch (err) {
@@ -168,8 +132,8 @@ class deliveryExecutiveCtrl extends BaseController {
 
       // check if inserted
       if (isUpdated && !_.isEmpty(isUpdated))
-        return this.success(req, res, this.status.HTTP_OK, isUpdated);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+        return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.deliveryExecutiveUpdatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdatedSuccessfully);
 
       // catch any runtime error
     } catch (err) {
@@ -210,17 +174,10 @@ class deliveryExecutiveCtrl extends BaseController {
         lean: true
      }
       )
-      // .then(async (res) => {
-
-      // if (req.body.asmSalesmanMappingIds && Array.isArray(req.body.asmSalesmanMappingIds) && req.body.asmSalesmanMappingIds.length)
-      //   return AsmSalesmanCtrl.disableWithIdsArray(req.body.asmSalesmanMappingIds).then((isMappingDeleted) => { if (isMappingDeleted.success) return true; else return false });
-      // else 
-      //   return true
-      // });
 
       // check if inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.deliveryExecutiveDeletedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotDeletedSuccessfully);
 
       // catch any runtime error 
     } catch (err) {

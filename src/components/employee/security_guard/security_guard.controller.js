@@ -145,7 +145,7 @@ class securityController extends BaseController {
       let deliveryResponse = await deliveryCtrl.create(req, res);
       return;
     } else if (req.params.employeeType == "pickerBoy") {
-      let pickerboyResponse = await pickerBoyCtrl.post(req, res);
+      let pickerboyResponse = await pickerBoyCtrl.create(req, res);
       return;
     }
 
@@ -153,113 +153,56 @@ class securityController extends BaseController {
       info("Create a new Security Guard !");
 
       // get the firstname
-      // req.body.firstName = req.body.isWaycoolEmp == false ? req.body.firstName.replace(
-      //   /\w\S*/g,
-      //   function (txt) {
-      //     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      //   }) : req.body.userData.firstName.replace(
-      //     /\w\S*/g,
-      //     function (txt) {
-      //       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      //     });
+         // getting the full name 
+         let fullName = `${req.body.firstName} ${req.body.lastName}`;
 
-      // // sentence case the last name
-      // req.body.lastName = req.body.isWaycoolEmp == false ? req.body.lastName.replace(
-      //   /\w\S*/g,
-      //   function (txt) {
-      //     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      //   }) : req.body.userData.lastName.replace(
-      //     /\w\S*/g,
-      //     function (txt) {
-      //       return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-      //     });
-
-      // getting the full name
-      let fullName = `${req.body.firstName} ${req.body.lastName}`;
-
-      // creating data to insert
-      let dataToInsert = {
-        ...req.body.userData,
-        firstName: req.body.firstName
-          ? req.body.firstName
-          : req.body.userData.firstName,
-        lastName: req.body.lastName
-          ? req.body.lastName
-          : req.body.userData.lastName,
-        isWaycoolEmp: req.body.isWaycoolEmp == true ? 1 : 0,
-        employerName:
-          req.body.isWaycoolEmp == true
-            ? "Waycool Foods & Products Private Limited"
-            : req.body.agencyName,
-        //'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
-        contactMobile: req.body.contactMobile,
-        email: req.body.email,
-        gender:
-          req.body.isWaycoolEmp == true
-            ? req.body.userData.gender.toLowerCase()
-            : req.body.gender.toLowerCase(),
-        fullName: fullName,
-        //'createdById': req.user._id,
-        //'createdBy': req.user.email || 'admin',
-        //'warehouseId': mongoose.Types.ObjectId(req.user.warehouseId) || null,
-        cityId: req.body.cityId,
-      };
-
-      // checking if profile pic is present
-      if (req.body.profilePic)
-        dataToInsert = {
-          ...dataToInsert,
-          profilePic: req.body.profilePic,
-        };
-
-      // if its not a waycool emp
-      if (req.body.isWaycoolEmp == false)
-        dataToInsert = {
-          ...dataToInsert,
-          employeeId: req.body.empId,
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-          photo: req.body.profilePic,
-          //   reportingTo: {
-          //     id: req.body.asmSalesmanMappingObject.asmId || "",
-          //     name: req.body.asmSalesmanMappingObject.name || "",
-          //     emailId: req.body.asmSalesmanMappingObject.emailId || "",
-          //   },
-        };
-
-      // inserting data into the db
-      let isInserted = await Model.create(dataToInsert);
-
-      // check if inserted
-      if (isInserted && !_.isEmpty(isInserted)) {
-        info("Salesman Successfully Created !");
-        // returning success
-        return this.success(
-          req,
-          res,
-          this.status.HTTP_OK,
-          isInserted,
-          this.messageTypes.employeeCreated
-        );
-      } else
-        return this.errors(
-          req,
-          res,
-          this.status.HTTP_CONFLICT,
-          this.messageTypes.employeeNotCreated
-        );
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
-    }
-  };
+         // creating data to insert
+         let dataToInsert = {
+           ...req.body.userData,
+           'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
+           'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
+           'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
+           'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
+           'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
+           'contactMobile': req.body.contactMobile,
+           'email': req.body.email,
+           'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
+           'fullName': fullName,
+           'cityId': req.body.cityId,
+         }
+   
+         // checking if profile pic is present 
+         if (req.body.profilePic)
+           dataToInsert = {
+             ...dataToInsert,
+             'profilePic': req.body.profilePic
+           }
+   
+         // if its not a waycool emp
+         if (req.body.isWaycoolEmp == false)
+           dataToInsert = {
+             ...dataToInsert,
+             'employeeId': req.body.empId,
+             'firstName': req.body.firstName,
+             'lastName': req.body.lastName,
+             'photo': req.body.profilePic,
+           }
+   
+         // inserting data into the db 
+         let isInserted = await Model.create(dataToInsert);
+   
+         // check if inserted 
+         if (isInserted && !_.isEmpty(isInserted)) {
+           // returning success
+           return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.securityGuardCreated)
+         } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotCreated);
+        
+         // catch any runtime error 
+       } catch (err) {
+         error(err);
+         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+       }
+     }
 
   //   // get details
   //   getEmployeer = async (req, res) => {
@@ -299,15 +242,12 @@ class securityController extends BaseController {
   //delete Employee
 
   getEmployeer = async (req, res) => {
-    // try {
-    //   info('Roles GET DETAILS !');
 
     try {
       info("Employee GET DETAILS !");
       // get the brand id
       let employeeId = req.params.employeeId;
       let empType = req.params.employeeType;
-      console.log("sadsa", req.params);
 
       if (empType == "deliveryExecutive") {
         let deliveryResponse = await deliveryCtrl.get(req, res);
@@ -315,22 +255,21 @@ class securityController extends BaseController {
       } else if (empType == "pickerBoy") {
         let pickerboyResponse = await pickerBoyCtrl.get(req, res);
         return;
-      } else if (empTypee == "securityGuard") {
+      } else if (empType == "securityGuard") {
         // inserting data into the db
         let employee = await Model.findOne({
           _id: mongoose.Types.ObjectId(req.params.employeeId),
           isDeleted: 0,
         }).lean();
 
-        console.log("Emmm", employee);
         // check if inserted
         if (employee && !_.isEmpty(employee))
-          return this.success(req, res, this.status.HTTP_OK, employee);
-        else return this.errors(req, res, this.status.HTTP_CONFLICT);
+          return this.success(req, res, this.status.HTTP_OK, employee,this.messageTypes.securityGuardFetchedSuccessfully);
+        else return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardNotFound);
 
         // catch any runtime error
       } else {
-        return this.errors(req, res, this.status.HTTP_CONFLICT);
+        return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardNotFound);
       }
     } catch (err) {
       error(err);
@@ -402,22 +341,15 @@ class securityController extends BaseController {
           lean: true,
         }
       );
-      // .then(async (res) => {
-
-      // if (req.body.asmSalesmanMappingIds && Array.isArray(req.body.asmSalesmanMappingIds) && req.body.asmSalesmanMappingIds.length)
-      //   return AsmSalesmanCtrl.disableWithIdsArray(req.body.asmSalesmanMappingIds).then((isMappingDeleted) => { if (isMappingDeleted.success) return true; else return false });
-      // else
-      //   return true
-      // });
 
       // check if inserted
       if (isUpdated && !_.isEmpty(isUpdated))
-        return this.success(req, res, this.status.HTTP_OK, {});
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+        return this.success(req, res, this.status.HTTP_OK, {},this.messageTypes.securityGuardDeletedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardNotDeletedSuccessfully);
 
       // catch any runtime error
     } else {
-      return this.errors(req, res, this.status.HTTP_CONFLICT);
+      return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardNotDeletedSuccessfully);
     }
   }catch (err) {
       error(err);
@@ -430,7 +362,7 @@ class securityController extends BaseController {
     }
   };
 
-  // // // patch the request
+ // patch the request
   patchEmployee = async (req, res) => {
     try {
       info("Employee CHANGE ! !");
@@ -473,12 +405,12 @@ class securityController extends BaseController {
 
       // check if inserted
       if (isUpdated && !_.isEmpty(isUpdated))
-        return this.success(req, res, this.status.HTTP_OK, isUpdated);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+        return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.securityGuardUpdatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdatedSuccessfully);
 
       // catch any runtime error
     }else {
-      return this.errors(req, res, this.status.HTTP_CONFLICT);
+      return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdatedSuccessfully);
     }
    }
     catch (err) {

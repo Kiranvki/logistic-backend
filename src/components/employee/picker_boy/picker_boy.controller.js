@@ -115,6 +115,61 @@ class PickerBoyController extends BaseController {
     }
   }
 
+  create = async (req, res) => {
+    try {
+      info('Create a new Picker Boy !');
+
+      // getting the full name 
+      let fullName = `${req.body.firstName} ${req.body.lastName}`;
+
+      // creating data to insert
+      let dataToInsert = {
+        ...req.body.userData,
+        'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
+        'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
+        'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
+        'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
+        'contactMobile': req.body.contactMobile,
+        'email': req.body.email,
+        'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
+        'fullName': fullName,
+        'cityId': req.body.cityId,
+      }
+
+      // checking if profile pic is present 
+      if (req.body.profilePic)
+        dataToInsert = {
+          ...dataToInsert,
+          'profilePic': req.body.profilePic
+        }
+
+      // if its not a waycool emp
+      if (req.body.isWaycoolEmp == false)
+        dataToInsert = {
+          ...dataToInsert,
+          'employeeId': req.body.empId,
+          'firstName': req.body.firstName,
+          'lastName': req.body.lastName,
+          'photo': req.body.profilePic,
+        }
+
+      // inserting data into the db 
+      let isInserted = await Model.create(dataToInsert);
+
+      // check if inserted 
+      if (isInserted && !_.isEmpty(isInserted)) {
+        info('Salesman Successfully Created !');
+        // returning success
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesmanCreated)
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesmanNotCreated);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
 
   get = async (req, res) => {
     try {
@@ -155,7 +210,7 @@ class PickerBoyController extends BaseController {
   getList = async (req, res) => {
     try {
       info('Get picker boy List !');
-      let page = req.query.page || 1,
+      let page = req.params.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
         searchKey = req.query.search || '',
         sortBy = req.query.sortBy || 'createdAt',

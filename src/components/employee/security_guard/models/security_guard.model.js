@@ -6,20 +6,6 @@ const Schema = mongoose.Schema;
 // schema
 const securityGuard = new Schema({
 
-//   locationId: {
-//     type: Number,
-//   },
-//   warehouseId: {
-//     required: true,
-//     type: mongoose.Schema.Types.ObjectId,
-//   },
-//   agencyId: {
-//     type: mongoose.Schema.Types.ObjectId,
-//     ref: 'agencies',
-//     autopopulate: {
-//       select: 'nameToDisplay'
-//     }
-//   },
   employeeId: {
     type: String
   },
