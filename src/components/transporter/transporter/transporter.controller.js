@@ -197,7 +197,22 @@ class transporterController extends BaseController {
           'vehicleDetails': 1,
           'locationDetails': 1,
           'contactPersonalDetails': 1,
-          'vehicleRateCategoryDetails': '$vehicleRateCategoryDetails'
+          'vehicleRateCategoryDetails': {
+            $filter: {
+              input: "$vehicleRateCategoryDetails",
+              as: "vehicleRateCategory",
+              cond: {
+                $and: [{
+                  $eq: ["$$vehicleRateCategory.vehicle.isDeleted", 0]
+
+                },
+                {
+                  $eq: ["$$vehicleRateCategory.rateCategory.isDeleted", 0]
+
+                }]
+              }
+            }
+          },
         }
       },
       ]).allowDiskUse(true);
@@ -400,7 +415,23 @@ class transporterController extends BaseController {
           'vehicleDetails': 1,
           'locationDetails': 1,
           'contactPersonalDetails': 1,
-          'vehicleRateCategoryDetails': '$vehicleRateCategoryDetails'
+          'vehicleRateCategoryDetails': {
+            $filter: {
+              input: "$vehicleRateCategoryDetails",
+              as: "vehicleRateCategory",
+              cond: {
+                $and: [{
+                  $eq: ["$$vehicleRateCategory.vehicle.isDeleted", 0]
+
+                },
+                {
+                  $eq: ["$$vehicleRateCategory.rateCategory.isDeleted", 0]
+
+                }]
+              }
+            }
+          },
+
         }
       },
       ]).allowDiskUse(true);
