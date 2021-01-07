@@ -239,6 +239,90 @@ class securityController extends BaseController {
   //       }
   //     }
 
+
+    // get transporter list 
+    getList = async (req, res) => {
+      try {
+        info('Get the Transporter List !');
+  
+        // get the query params
+        let page = req.query.page || 1,
+          pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+          searchKey = req.query.search || '',
+          sortBy = req.query.sortBy || 'createdAt',
+          sortingArray = {};
+  
+        sortingArray[sortBy] = -1;
+        let skip = parseInt(page - 1) * pageSize;
+  
+        // get the list of asm in the allocated city
+        let searchObject = {
+          'isDeleted': 0,
+  
+        };
+  
+        // creating a match object
+        if (searchKey !== '')
+          searchObject = {
+            ...searchObject,
+            '$or': [{
+              'employeeId': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'employerName': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }]
+          };
+  
+        // get the total rate category
+        let totalTransporter = await Model.countDocuments({
+          ...searchObject
+        });
+  
+  
+        // get the Transporter list 
+        let transporterList = await Model.aggregate([{
+          $match: {
+            ...searchObject
+          }
+        }, {
+          $sort: sortingArray
+        }, {
+          $skip: skip
+        }, {
+          $limit: pageSize
+          // },
+          // {
+          //   $project: {
+  
+          //     'name': 1,
+          //     'isDeleted': 1
+          //   }
+        },
+        ])
+        //.allowDiskUse(true);
+  
+        // success 
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: transporterList,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalTransporter
+          }
+        }, );
+  
+        // catch any runtime error 
+      } catch (err) {
+        error(err);
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      }
+    }
+
   //delete Employee
 
   getEmployeer = async (req, res) => {

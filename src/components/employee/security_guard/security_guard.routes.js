@@ -24,6 +24,12 @@ function securityRoutes(){
         ctrl.getEmployeer // controller function 
       );
 
+      closed.route('/list/securityguard').get(
+        // [joiTransporterList], // joi validation
+         // verifyAppToken,
+         ctrl.getList // controller function 
+       );
+
       closed.route('/getEmployee/:employeeId/:employeeType').delete(
         //[joiTransporterGetDetails], // joi validation
         // verifyAppToken,

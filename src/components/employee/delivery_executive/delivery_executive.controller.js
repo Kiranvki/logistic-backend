@@ -17,7 +17,7 @@ class deliveryExecutiveCtrl extends BaseController {
   // internal create function
   create = async (req, res) => {
     try {
-      info('Create a new Picker Boy !');
+      info('Create a new Delivery Executive !');
 
       // getting the full name 
       let fullName = `${req.body.firstName} ${req.body.lastName}`;
@@ -70,6 +70,8 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   }
 
+
+
   get = async (req, res) => {
     try {
       info("Employee GET DETAILS !");
@@ -104,6 +106,86 @@ class deliveryExecutiveCtrl extends BaseController {
       );
     }
   };
+
+
+
+  // get  Delivery Executive list 
+  getList = async (req, res) => {
+    try {
+      info('Get the Delivery Executive !');
+
+      // get the query params
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        sortingArray = {};
+
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // get the list of asm in the allocated city
+      let searchObject = {
+        'isDeleted': 0,
+
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'employeeId': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'employerName': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+
+      // get the total delivery executive
+      let totalDeliveryExecutive = await Model.countDocuments({
+        ...searchObject
+      });
+
+
+      // get the Transporter list 
+      let deliveryExecutiveList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      ])
+
+      // success 
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: deliveryExecutiveList,
+        pageMeta: {
+          skip: parseInt(skip),
+          pageSize: pageSize,
+          total: totalDeliveryExecutive
+        }
+      }, );
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+  
 
   // // // patch the request
   updateDeliveryExecutiveDetails = async (req, res) => {
