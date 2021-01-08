@@ -141,13 +141,13 @@ class securityController extends BaseController {
   };
 
   post = async (req, res) => {
-    if (req.params.employeeType == "deliveryExecutive") {
+    if (req.body.position == "deliveryexecutive") {
       let deliveryResponse = await deliveryCtrl.create(req, res);
       return;
-    } else if (req.params.employeeType == "pickerBoy") {
+    } else if (req.body.position == "pickerboy") {
       let pickerboyResponse = await pickerBoyCtrl.create(req, res);
       return;
-    }
+    } else if(req.body.position == "securityguard") {
 
     try {
       info("Create a new Security Guard !");
@@ -163,12 +163,13 @@ class securityController extends BaseController {
            'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
            'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
            'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
-           'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
+          //  'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
            'contactMobile': req.body.contactMobile,
+           'altContactNo':req.body.altContactNo,
            'email': req.body.email,
-           'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
+           //'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
            'fullName': fullName,
-           'cityId': req.body.cityId,
+           //'cityId': req.body.cityId,
          }
    
          // checking if profile pic is present 
@@ -202,48 +203,14 @@ class securityController extends BaseController {
          error(err);
          this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
        }
-     }
-
-  //   // get details
-  //   getEmployeer = async (req, res) => {
-
-  //       try {
-  //         info('Employee GET DETAILS !');
-  //         // get the brand id
-  //         let employeeId = req.query.employeeId;
-  //         let empType = req.query.employeeType;
-
-  //         if (empType == "deliveryExecutive") {
-  //             let deliveryResponse = await deliveryCtrl.get(req, res)
-  //             return;
-  //           } else if (empType == "pickerBoy") {
-  //             let pickerboyResponse = await pickerBoyCtrl.get(req, res);
-  //             return;
-  //           }
-  //         // inserting data into the db
-  //         // let transporter = await Model.findOne({
-  //         let employee = await Model.findById({
-
-  //           _id: mongoose.Types.ObjectId(employeeId)
-
-  //         }).lean();
-  //         // check if inserted
-  //         if (employee && !_.isEmpty(employee)) return this.success(req, res, this.status.HTTP_OK, employee);
-
-  //         else return this.errors(req, res, this.status.HTTP_CONFLICT);
-
-  //         // catch any runtime error
-  //       } catch (err) {
-  //         error(err);
-  //         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-  //       }
-  //     }
+      }
+    }
 
 
-    // get transporter list 
+    // get security guard list 
     getList = async (req, res) => {
       try {
-        info('Get the Transporter List !');
+        info('Get the security guard List !');
   
         // get the query params
         let page = req.query.page || 1,
@@ -295,17 +262,9 @@ class securityController extends BaseController {
           $skip: skip
         }, {
           $limit: pageSize
-          // },
-          // {
-          //   $project: {
-  
-          //     'name': 1,
-          //     'isDeleted': 1
-          //   }
         },
         ])
-        //.allowDiskUse(true);
-  
+       
         // success 
         return this.success(req, res, this.status.HTTP_OK, {
           results: transporterList,
@@ -333,13 +292,13 @@ class securityController extends BaseController {
       let employeeId = req.params.employeeId;
       let empType = req.params.employeeType;
 
-      if (empType == "deliveryExecutive") {
+      if (empType == "deliveryexecutive") {
         let deliveryResponse = await deliveryCtrl.get(req, res);
         return;
-      } else if (empType == "pickerBoy") {
+      } else if (empType == "pickerboy") {
         let pickerboyResponse = await pickerBoyCtrl.get(req, res);
         return;
-      } else if (empType == "securityGuard") {
+      } else if (empType == "securityguard") {
         // inserting data into the db
         let employee = await Model.findOne({
           _id: mongoose.Types.ObjectId(req.params.employeeId),
@@ -366,40 +325,20 @@ class securityController extends BaseController {
     }
   };
 
-  //       // inserting data into the db
-  //       let isUpdated = await Model.findOneAndUpdate({
-  //         _id: mongoose.Types.ObjectId(employeeId)
-  //       }, dataToUpdate, {
-  //         new: true,
-  //         upsert: false,
-  //         lean: true
-  //       })
-
-  //       // check if inserted
-  //       if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});
-  //       else return this.errors(req, res, this.status.HTTP_CONFLICT);
-
-  //       // catch any runtime error
-  //     } catch (err) {
-  //       error(err);
-  //       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-  //     }
-
-  //   }
-
+  
   deleteEmployee = async (req, res) => {
     try {
       info("Employee Delete!");
       let employeeId = req.params.employeeId;
-      let empType = req.params.employeeType;
+      let employeeType = req.params.employeeType;
 
-      if (empType == "deliveryExecutive") {
+      if (employeeType == "deliveryexecutive") {
         let deliveryResponse = await deliveryCtrl.deleteEmployee(req, res);
         return;
-      } else if (empType == "pickerBoy") {
+      } else if (employeeType == "pickerboy") {
         let pickerboyResponse = await pickerBoyCtrl.deleteEmployee(req, res);
         return;
-      } else if(employeeType == "securityGuard"){
+      } else if(employeeType == "securityguard"){
       // inserting the new user into the db
 
       // let employeeId = req.query.employeeId || '';
@@ -429,11 +368,11 @@ class securityController extends BaseController {
       // check if inserted
       if (isUpdated && !_.isEmpty(isUpdated))
         return this.success(req, res, this.status.HTTP_OK, {},this.messageTypes.securityGuardDeletedSuccessfully);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardNotDeletedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardeNotDeletedSuccessfully);
 
       // catch any runtime error
     } else {
-      return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardNotDeletedSuccessfully);
+      return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardeNotDeletedSuccessfully);
     }
   }catch (err) {
       error(err);
@@ -452,21 +391,22 @@ class securityController extends BaseController {
       info("Employee CHANGE ! !");
 
       let employeeId = req.params.employeeId;
-      let empType = req.params.employeeType;
+      let employeeType = req.params.employeeType;
 
-      if (empType == "deliveryExecutive") {
+      if (employeeType == "deliveryexecutive") {
         let deliveryResponse = await deliveryCtrl.updateDeliveryExecutiveDetails(
           req,
           res
         );
         return;
-      } else if (empType == "pickerBoy") {
+      } else if (employeeType == "pickerboy") {
         let pickerboyResponse = await pickerBoyCtrl.updatePickerBoyDetails(
           req,
           res
         );
         return;
-      }else if(empType == "securityGuard"){
+      }else if(employeeType == "securityguard"){
+
       // creating data to insert
       let dataToUpdate = {
         $set: {
@@ -488,9 +428,10 @@ class securityController extends BaseController {
       );
 
       // check if inserted
-      if (isUpdated && !_.isEmpty(isUpdated))
+      if (isUpdated && !_.isEmpty(isUpdated)){
+      info('Security Guard Successfully updated !');
         return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.securityGuardUpdatedSuccessfully);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdatedSuccessfully);
+      }else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdatedSuccessfully);
 
       // catch any runtime error
     }else {
