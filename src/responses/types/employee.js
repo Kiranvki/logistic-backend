@@ -55,8 +55,8 @@ module.exports = {
   securityGuardNotCreated : "Security Guard Not Created Successfully !",
   securityGuardFetchedSuccessfully : "Security Guard Fetched Successfully !",
   securityGuardNotFound :"Security Guard Not Fetched !",
-  securityGuardDeletedSuccessfully:"Security GuardSuccessfully !",
-  securityGuardeNotDeletedSuccessfully: "Security Guard Deleted!",
+  securityGuardDeletedSuccessfully:"Security Guard Deleted Successfully !",
+  securityGuardeNotDeletedSuccessfully: "Security Guard Not Deleted!",
   securityGuardUpdatedSuccessfully : "Security Guard Updated Successfully!",
   securityGuardNotUpdatedSuccessfully : "Security Guard Not Updated !",
   invalidSalesmanIds: (salesmanIds) => {

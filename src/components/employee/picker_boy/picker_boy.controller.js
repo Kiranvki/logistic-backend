@@ -117,7 +117,7 @@ class PickerBoyController extends BaseController {
 
   create = async (req, res) => {
     try {
-      info('Create a new Picker Boy !');
+      info('Create a  Picker Boy !');
 
       // getting the full name 
       let fullName = `${req.body.firstName} ${req.body.lastName}`;
@@ -158,7 +158,7 @@ class PickerBoyController extends BaseController {
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-        info('Salesman Successfully Created !');
+        info('PickerBoy Successfully Created !');
         // returning success
         return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesmanCreated)
       } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesmanNotCreated);

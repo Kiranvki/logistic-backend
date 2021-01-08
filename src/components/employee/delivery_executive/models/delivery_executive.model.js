@@ -12,8 +12,8 @@ const deliveryExecutive = new Schema({
         default: 'Waycool Foods & Products Private Limited'
       },
       isWaycoolEmp: {
-        type: Number,
-        default: 1
+        type: 'Boolean',
+        default: false
       },
       email: {
         type: String,

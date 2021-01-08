@@ -26,9 +26,14 @@ const pickerBoy = new Schema({
     type: String,
     default: 'Waycool Foods & Products Private Limited'
   },
+  // isWaycoolEmp: {
+  //   type: Number,
+  //   default: 1
+  // },
+
   isWaycoolEmp: {
-    type: Number,
-    default: 1
+    type: 'Boolean',
+    default: false
   },
   email: {
     type: String,
