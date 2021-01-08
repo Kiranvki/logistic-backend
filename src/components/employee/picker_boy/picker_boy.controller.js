@@ -115,6 +115,7 @@ class PickerBoyController extends BaseController {
     }
   }
 
+  //create picker boy
   create = async (req, res) => {
     try {
       info('Create a  Picker Boy !');
@@ -130,10 +131,10 @@ class PickerBoyController extends BaseController {
         'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
         'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
         'contactMobile': req.body.contactMobile,
+        'altContactNo':req.body.altContactNo,
         'email': req.body.email,
-        'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
+        'reportingManager' : req.body.reportingManager,
         'fullName': fullName,
-        'cityId': req.body.cityId,
       }
 
       // checking if profile pic is present 
@@ -160,8 +161,8 @@ class PickerBoyController extends BaseController {
       if (isInserted && !_.isEmpty(isInserted)) {
         info('PickerBoy Successfully Created !');
         // returning success
-        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesmanCreated)
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesmanNotCreated);
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.pickerBoyCreated)
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerBoyNotCreated);
 
       // catch any runtime error 
     } catch (err) {
@@ -170,10 +171,10 @@ class PickerBoyController extends BaseController {
     }
   }
 
-
+//get all picker boy details
    getPickerBoy = async (req, res) => {
     try {
-      info('Get the Delivery Executive !');
+      info('Get the PickerBoy Details !');
 
       // get the query params
       let page = req.query.page || 1,
@@ -236,7 +237,7 @@ class PickerBoyController extends BaseController {
           pageSize: pageSize,
           total: totalPickerBoy
         }
-      }, );
+      },  this.messageTypes.pickerBoyListFetchedSuccessfully);
 
       // catch any runtime error 
     } catch (err) {
@@ -245,7 +246,7 @@ class PickerBoyController extends BaseController {
     }
   }
 
-
+//get single picker boy
   get = async (req, res) => {
     try {
       info("Employee GET DETAILS !");
@@ -596,13 +597,48 @@ class PickerBoyController extends BaseController {
   }
 
 
-  
+  // patch Pickerboy status
+  patchPickerboyStatus = async (req, res) => {
+    try {
+      info('Pickerboy STATUS CHANGE !');
+
+      // type id 
+      let type = req.params.type,
+      pickerboyId = req.params.pickerboyId;
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          status: type == 'activate' ? 1 : 0
+        }
+      };
+
+      // inserting data into the db 
+      let isUpdated = await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(pickerboyId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      });
+
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.pickerboyActivatedSuccessfully : this.messageTypes.pickerboyDeactivatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerboyNotUpdated);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  // Delete Picker Boy Details
   deleteEmployee = async (req, res) => {
     try {
       info("Employee Delete!");
       //let employeeId = req.query.employeeId;
       // inserting the new user into the db
-       let employeeId = req.query.employeeId || "";
+       let employeeId = req.params.employeeId || "";
 
       // creating data to update
       let dataToUpdate = {
@@ -632,8 +668,8 @@ class PickerBoyController extends BaseController {
       // });
 
       // check if inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {});
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {},this.messageTypes.pickerBoyDeletedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.pickerBoyNotDeletedSuccessfully);
 
       // catch any runtime error 
     } catch (err) {

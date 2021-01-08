@@ -15,6 +15,9 @@ const deliveryExecutive = new Schema({
         type: 'Boolean',
         default: false
       },
+      reportingManager: {
+        type: String,
+      },
       email: {
         type: String,
         required: true
@@ -48,6 +51,9 @@ const deliveryExecutive = new Schema({
       },
       contactMobile: {
         type: Number
+      },
+      altContactNo: {
+        type: Number,
       },
       photo: {
         type: String

@@ -17,8 +17,7 @@ const securityGuard = new Schema(
       default: false,
     },
     reportingManager: {
-      type: mongoose.Schema.Types.ObjectId,
-      default: null
+      type: String,
     },
     email: {
       type: String,

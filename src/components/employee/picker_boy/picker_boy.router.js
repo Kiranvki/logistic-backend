@@ -62,6 +62,14 @@ function userRoutes() {
       // verifyAppToken,
       ctrl.getPickerBoy // controller function
     );
+
+    // activate or deactive picker boy
+    closed.route('/:pickerboyId/status/:type').patch(
+      //[joiDistributorChangeStatus], // joi validation
+      // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
+      ctrl.patchPickerboyStatus // get controller 
+    );
+    
   };
 }
 

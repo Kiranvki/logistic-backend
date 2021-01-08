@@ -26,6 +26,9 @@ const pickerBoy = new Schema({
     type: String,
     default: 'Waycool Foods & Products Private Limited'
   },
+  reportingManager: {
+    type: String,
+  },
   // isWaycoolEmp: {
   //   type: Number,
   //   default: 1
@@ -69,7 +72,10 @@ const pickerBoy = new Schema({
   contactMobile: {
     type: Number
   },
-  photo: {
+  altContactNo: {
+    type: Number
+},
+ photo: {
     type: String
   },
   role: {

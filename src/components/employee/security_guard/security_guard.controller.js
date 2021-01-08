@@ -163,13 +163,11 @@ class securityController extends BaseController {
            'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
            'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
            'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
-          //  'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
+           'reportingManager' : req.body.reportingManager,
            'contactMobile': req.body.contactMobile,
            'altContactNo':req.body.altContactNo,
            'email': req.body.email,
-           //'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
            'fullName': fullName,
-           //'cityId': req.body.cityId,
          }
    
          // checking if profile pic is present 
@@ -194,6 +192,16 @@ class securityController extends BaseController {
    
          // check if inserted 
          if (isInserted && !_.isEmpty(isInserted)) {
+          info('Security Guard Successfully Created !');
+
+          let isUpdatedInRecServer = await postSecurityGuardOther(dataToSend);
+
+               // if rec server responded with success
+               if (isUpdatedInRecServer.success) {
+                await Model.findByIdAndUpdate(isInserted._id, {
+                  recServerEmpId: mongoose.Types.ObjectId(isUpdatedInRecServer.data._id)
+                })
+              }
            // returning success
            return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.securityGuardCreated)
          } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotCreated);
@@ -225,7 +233,7 @@ class securityController extends BaseController {
         // get the list of asm in the allocated city
         let searchObject = {
           'isDeleted': 0,
-  
+          //'status': 1
         };
   
         // creating a match object
@@ -273,7 +281,7 @@ class securityController extends BaseController {
             pageSize: pageSize,
             total: totalTransporter
           }
-        }, );
+        }, this.messageTypes.securityGuardFetchedSuccessfully );
   
         // catch any runtime error 
       } catch (err) {
@@ -282,8 +290,42 @@ class securityController extends BaseController {
       }
     }
 
-  //delete Employee
+     // patch seurity guard status
+     patchSecurityGuardStatus = async (req, res) => {
+    try {
+      info('Seurity Guard STATUS CHANGE !');
 
+      // type id 
+      let type = req.params.type,
+      securityguardId = req.params.securityguardId;
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          status: type == 'activate' ? 1 : 0
+        }
+      };
+
+      // inserting data into the db 
+      let isUpdated = await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(securityguardId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      });
+console.log("cxzcxz",isUpdated);
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.securityguardActivatedSuccessfully : this.messageTypes.securityguardDeactivatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdatedSuccessfully);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  //get Employee
   getEmployeer = async (req, res) => {
 
     try {
