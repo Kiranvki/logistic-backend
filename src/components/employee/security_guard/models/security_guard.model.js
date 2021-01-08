@@ -16,6 +16,10 @@ const securityGuard = new Schema(
       type: "Boolean",
       default: false,
     },
+    reportingManager: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null
+    },
     email: {
       type: String,
       required: true,
@@ -85,17 +89,17 @@ const securityGuard = new Schema(
     createdById: {
       type: mongoose.Schema.Types.ObjectId,
     },
-    cityId: {
-      type: "String",
-      enum: [
-        "coimbatore",
-        "hyderabad",
-        "padappai",
-        "gummidipoondi",
-        "chennai",
-        "bangalore",
-      ],
-    },
+    // cityId: {
+    //   type: "String",
+    //   enum: [
+    //     "coimbatore",
+    //     "hyderabad",
+    //     "padappai",
+    //     "gummidipoondi",
+    //     "chennai",
+    //     "bangalore",
+    //   ],
+    // },
     reportingTo: {
       id: {
         type: String,

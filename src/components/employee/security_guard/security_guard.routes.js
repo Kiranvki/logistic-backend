@@ -6,6 +6,11 @@ const {
   joiSecurityGuard, // create a new SecurityGuard
 } = require('./security_guard.validators');
 
+// hooks 
+const {
+  getDetailsFromZoho, // get details from zoho
+}  = require('../../../hooks');
+
 
 //exporting the security guard routes
 function securityRoutes(){
@@ -14,6 +19,7 @@ function securityRoutes(){
     closed.route('/').post(
         [joiSecurityGuard], // joi validation
         //verifyUserToken,      // verify user token
+        getDetailsFromZoho, // get details from zoho
         ctrl.post              // controller function 
       );
 
