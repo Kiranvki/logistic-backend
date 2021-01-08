@@ -10,14 +10,14 @@ const securityGuard = new Schema(
     },
     employerName: {
       type: String,
-      default: "Waycool Foods & Products Private Limited",
+      default: 'Waycool Foods & Products Private Limited',
     },
     isWaycoolEmp: {
-      type: "Boolean",
+      type: 'Boolean',
       default: false,
     },
     reportingManager: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       default: null
     },
     email: {
@@ -88,28 +88,6 @@ const securityGuard = new Schema(
     },
     createdById: {
       type: mongoose.Schema.Types.ObjectId,
-    },
-    // cityId: {
-    //   type: "String",
-    //   enum: [
-    //     "coimbatore",
-    //     "hyderabad",
-    //     "padappai",
-    //     "gummidipoondi",
-    //     "chennai",
-    //     "bangalore",
-    //   ],
-    // },
-    reportingTo: {
-      id: {
-        type: String,
-      },
-      name: {
-        type: String,
-      },
-      emailId: {
-        type: String,
-      },
     },
     status: {
       type: Number,

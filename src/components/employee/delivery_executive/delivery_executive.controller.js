@@ -15,58 +15,32 @@ class deliveryExecutiveCtrl extends BaseController {
   }
 
   // internal create function
-  create = async (req, res) => {
+  create = async (dataToInsert) => {
     try {
       info('Create a new Delivery Executive !');
 
-      // getting the full name 
-      let fullName = `${req.body.firstName} ${req.body.lastName}`;
-
-      // creating data to insert
-      let dataToInsert = {
-        ...req.body.userData,
-        'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
-        'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
-        'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
-        'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
-        'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
-        'contactMobile': req.body.contactMobile,
-        'email': req.body.email,
-        'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
-        'fullName': fullName,
-        'cityId': req.body.cityId,
-      }
-
-      // checking if profile pic is present 
-      if (req.body.profilePic)
-        dataToInsert = {
-          ...dataToInsert,
-          'profilePic': req.body.profilePic
-        }
-
-      // if its not a waycool emp
-      if (req.body.isWaycoolEmp == false)
-        dataToInsert = {
-          ...dataToInsert,
-          'employeeId': req.body.empId,
-          'firstName': req.body.firstName,
-          'lastName': req.body.lastName,
-          'photo': req.body.profilePic,
-        }
-
       // inserting data into the db 
-      let isInserted = await Model.create(dataToInsert);
-
-      // check if inserted 
-      if (isInserted && !_.isEmpty(isInserted)) {
-        // returning success
-        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.deliveryExecutiveCreated)
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotCreated);
+      return Model.create(dataToInsert)
+        .lean()
+        .then((res) => {
+          // check if inserted 
+          if (res && !_.isEmpty(res))
+            return {
+              success: true,
+              data: res
+            };
+          else return {
+            success: false,
+          }
+        });
 
       // catch any runtime error 
     } catch (err) {
       error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      return {
+        success: false,
+        error: err
+      }
     }
   }
 
@@ -175,7 +149,7 @@ class deliveryExecutiveCtrl extends BaseController {
           pageSize: pageSize,
           total: totalDeliveryExecutive
         }
-      }, );
+      });
 
       // catch any runtime error 
     } catch (err) {
@@ -185,7 +159,7 @@ class deliveryExecutiveCtrl extends BaseController {
   }
 
 
-  
+
 
   // // // patch the request
   updateDeliveryExecutiveDetails = async (req, res) => {
@@ -235,7 +209,7 @@ class deliveryExecutiveCtrl extends BaseController {
       info("Employee Delete!");
       //let employeeId = req.query.employeeId;
       // inserting the new user into the db
-       let employeeId = req.params.employeeId || "";
+      let employeeId = req.params.employeeId || "";
 
       // creating data to update
       let dataToUpdate = {
@@ -246,15 +220,15 @@ class deliveryExecutiveCtrl extends BaseController {
       };
 
       // inserting data into the db 
-    //   let isUpdated = await Model.findOneAndUpdate({
-        let isUpdated = await Model.updateOne({
+      //   let isUpdated = await Model.findOneAndUpdate({
+      let isUpdated = await Model.updateOne({
         _id: mongoose.Types.ObjectId(employeeId)
       },
-     dataToUpdate, {
+        dataToUpdate, {
         new: true,
         upsert: false,
         lean: true
-     }
+      }
       )
 
       // check if inserted 
