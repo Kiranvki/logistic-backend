@@ -21,7 +21,7 @@ function userRoutes() {
   return (open, closed) => {
 
     // create
-    closed.route('/').post(
+    closed.route('/security-agency').post(
       [joiCreate], // joi validation
       verifyUserToken, // jwt authentication
       isAgencyExists, // check whether the agency exist  
@@ -29,7 +29,7 @@ function userRoutes() {
     );
 
     // get agencies list 
-    closed.route('/list').get(
+    closed.route('/security-agency/list').get(
       [joiGetList], // joi validation
       verifyUserToken, // jwt authentication
       ctrl.getList // controller function

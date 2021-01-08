@@ -33,6 +33,10 @@ const onBoardSecurityApiRouter = express.Router(); // Protected routes
 const employeeOpenRouter = express.Router(); // Open routes
 const employeeApiRouter = express.Router(); // Protected routes
 
+// agency 
+const agencyOpenRouter = express.Router(); // Open routes
+const agencyApiRouter = express.Router(); // Protected routes
+
 // sales order
 const salesOrderOpenRouter = express.Router(); // Open routes
 const salesOrderApiRouter = express.Router(); // Protected routes
@@ -48,7 +52,6 @@ const transporterMasterAPIRouter = express.Router(); // Protected routes
 //Rate Category
 const rateCategoryRouter = express.Router(); // Open routes
 const rateCategoryAPIRouter = express.Router(); // Protected routes
-
 
 //Vehicle
 const vehicleRouter = express.Router(); // Open routes
@@ -91,6 +94,16 @@ glob('./src/components/employee/*', null, (err, items) => {
     if (require(component).routes) require(component).routes(
       employeeOpenRouter,
       employeeApiRouter,
+    );
+  });
+});
+
+/* Fetch router files and apply them to our routers */
+glob('./src/components/agency/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      agencyOpenRouter,
+      agencyApiRouter,
     );
   });
 });
@@ -150,6 +163,10 @@ app.use('/api/v1/security', onBoardSecurityApiRouter);
 // Employee Routes
 app.use('/v1/employee', employeeOpenRouter);
 app.use('/api/v1/employee', employeeApiRouter);
+
+// agency Routes
+app.use('/v1/agency', agencyOpenRouter);
+app.use('/api/v1/agency', agencyApiRouter);
 
 // SalesOrder Routes
 app.use('/v1/salesorder', salesOrderOpenRouter);

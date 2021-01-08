@@ -18,5 +18,7 @@ module.exports = {
   isVehicleCheckedIn: require('./isVehicleCheckedIn'), // is vehicle checked in
   generateMonthDaysAndOtherMetaData: require('./generateMonthDaysAndOtherMetaData'),// generate month days and other meta data 
   getAllCheckInVehicleDetails: require('./getAllCheckInVehicleDetails'), // get all the check in vehicle details
-  getDetailsFromZoho :require('./getDetailsFromZoho')
+  getDetailsFromZoho: require('./getDetailsFromZoho'),
+  isAgencyExists: require('./isAgencyExists'), // check whether the agency exists or not 
+
 }
