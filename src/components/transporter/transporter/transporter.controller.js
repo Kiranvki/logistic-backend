@@ -462,7 +462,7 @@ class transporterController extends BaseController {
 
       // creating data to insert
       vehicleDetails = {
-        'name': toChangeObject.name ? toChangeObject.name : vehicleDetailsFromDb.rateCategoryName,
+        'name': toChangeObject.name ? toChangeObject.name : vehicleDetailsFromDb.name,
         'contactNo': toChangeObject.contactNo ? toChangeObject.contactNo : vehicleDetailsFromDb.contactNo,
         'altContactNo': toChangeObject.altContactNo ? toChangeObject.altContactNo : vehicleDetailsFromDb.altContactNo,
         'email': toChangeObject.email ? toChangeObject.email : vehicleDetailsFromDb.email,
@@ -470,7 +470,7 @@ class transporterController extends BaseController {
       }
 
       locationDetails = {
-        'streetNo': toChangeObject.streetNo ? toChangeObject.streetNo : locationDetailsFromDb.rateCategoryName,
+        'streetNo': toChangeObject.streetNo ? toChangeObject.streetNo : locationDetailsFromDb.streetNo,
         'address': toChangeObject.address ? toChangeObject.address : locationDetailsFromDb.address,
         'city': toChangeObject.city ? toChangeObject.city : locationDetailsFromDb.city,
         'country': toChangeObject.country ? toChangeObject.country : locationDetailsFromDb.country,

@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const transporter = new Schema({
 
     vehicleDetails: {
-       name: {
+        name: {
             type: String
         },
         contactNo: {
