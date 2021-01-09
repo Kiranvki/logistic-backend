@@ -58,7 +58,7 @@ class userController extends BaseController {
       let isCreated = await Model.create({
         name: req.body.camelCase,
         nameToDisplay: req.body.name,
-        cityId: req.user.region[0]
+        cityId: req.user.region
       })
 
       // is inserted 
@@ -82,7 +82,7 @@ class userController extends BaseController {
         searchKey = req.query.search || '',
         sortBy = req.query.sortBy || 'createdAt',
         sortingArray = {},
-        cityId = req.user.region[0] || 'chennai';
+        cityId = req.user.region || 'chennai';
 
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;

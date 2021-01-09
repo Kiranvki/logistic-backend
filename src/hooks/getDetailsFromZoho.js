@@ -15,7 +15,7 @@ const {
 // exporting the hooks 
 module.exports = async (req, res, next) => {
   try {
-    info('Get the user details from  !');
+    info('Get the user details from Zoho !');
 
     // get the email id 
     let empId = req.body.empId || req.query.empId,
@@ -52,11 +52,11 @@ module.exports = async (req, res, next) => {
           employeeType: zohoData.Employee_type,
           locationName: zohoData.LocationName,
           dateOfJoining: new Date(moment(zohoData.Dateofjoining, 'DD-MMM-YYYY').format('MM-DD-YYYY')),
-          reportingTo: {
-            id: zohoData['Reporting_To.ID'],
-            name: zohoData.Reporting_To,
-            emailId: zohoData['Reporting_To.MailID'],
-          }
+          // reportingTo: {
+          //   id: zohoData['Reporting_To.ID'],
+          //   name: zohoData.Reporting_To,
+          //   emailId: zohoData['Reporting_To.MailID'],
+          // }
         };
 
         // user data 

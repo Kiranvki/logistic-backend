@@ -6,56 +6,43 @@ const {
   joiSecurityGuard, // create a new SecurityGuard
 } = require('./security_guard.validators');
 
-// hooks 
-const {
-  getDetailsFromZoho, // get details from zoho
-}  = require('../../../hooks');
-
 
 //exporting the security guard routes
 function securityRoutes(){
     return (open, closed) => {
     // post
-    closed.route('/').post(
+    closed.route('/:employeeType').post(
         [joiSecurityGuard], // joi validation
         //verifyUserToken,      // verify user token
-        getDetailsFromZoho, // get details from zoho
         ctrl.post              // controller function 
       );
 
-      closed.route('/getemployee/:employeeId/:employeeType').get(
+      closed.route('/getEmployee/:employeeId/:employeeType').get(
         //[joiTransporterGetDetails], // joi validation
         // verifyAppToken,
         //isValidTransporter,
         ctrl.getEmployeer // controller function 
       );
 
-      closed.route('/list/securityguard').get(
+      closed.route('/').get(
         // [joiTransporterList], // joi validation
          // verifyAppToken,
          ctrl.getList // controller function 
        );
 
-      closed.route('/getemployee/:employeeId/:employeeType').delete(
+      closed.route('/getEmployee/:employeeId/:employeeType').delete(
         //[joiTransporterGetDetails], // joi validation
         // verifyAppToken,
         //isValidTransporter,
         ctrl.deleteEmployee // controller function 
       );
 
-    closed.route('/getemployee/:employeeId/:employeeType').patch(
+    closed.route('/getEmployee/:employeeId/:employeeType').patch(
         //[joiTransporterGetDetails], // joi validation
         // verifyAppToken,
         //isValidTransporter,
         ctrl.patchEmployee // controller function 
       );
-
-       // activate or deactive Security Guard
-    closed.route('/:securityguardId/status/:type').patch(
-      //[joiDistributorChangeStatus], // joi validation
-      // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
-      ctrl.patchSecurityGuardStatus // get controller 
-    );
 }
 }
 module.exports = securityRoutes();

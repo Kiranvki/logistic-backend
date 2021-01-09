@@ -17,7 +17,7 @@ class deliveryExecutiveCtrl extends BaseController {
   // internal create function
   create = async (req, res) => {
     try {
-      info('Create a new Delivery Executive !');
+      info('Create a new Picker Boy !');
 
       // getting the full name 
       let fullName = `${req.body.firstName} ${req.body.lastName}`;
@@ -29,11 +29,12 @@ class deliveryExecutiveCtrl extends BaseController {
         'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
         'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
         'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
-        'reportingManager' : req.body.reportingManager,
+        'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
         'contactMobile': req.body.contactMobile,
-        'altContactNo':req.body.altContactNo,
         'email': req.body.email,
+        'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
         'fullName': fullName,
+        'cityId': req.body.cityId,
       }
 
       // checking if profile pic is present 
@@ -68,8 +69,6 @@ class deliveryExecutiveCtrl extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
-
-
 
   get = async (req, res) => {
     try {
@@ -108,10 +107,10 @@ class deliveryExecutiveCtrl extends BaseController {
 
 
 
-  // get  Delivery Executive list 
+  // get transporter list 
   getList = async (req, res) => {
     try {
-      info('Get the Delivery Executive !');
+      info('Get the Transporter List !');
 
       // get the query params
       let page = req.query.page || 1,
@@ -146,14 +145,14 @@ class deliveryExecutiveCtrl extends BaseController {
           }]
         };
 
-      // get the total delivery executive
-      let totalDeliveryExecutive = await Model.countDocuments({
+      // get the total rate category
+      let totalTransporter = await Model.countDocuments({
         ...searchObject
       });
 
 
       // get the Transporter list 
-      let deliveryExecutiveList = await Model.aggregate([{
+      let transporterList = await Model.aggregate([{
         $match: {
           ...searchObject
         }
@@ -163,16 +162,24 @@ class deliveryExecutiveCtrl extends BaseController {
         $skip: skip
       }, {
         $limit: pageSize
+        // },
+        // {
+        //   $project: {
+
+        //     'name': 1,
+        //     'isDeleted': 1
+        //   }
       },
       ])
+      //.allowDiskUse(true);
 
       // success 
       return this.success(req, res, this.status.HTTP_OK, {
-        results: deliveryExecutiveList,
+        results: transporterList,
         pageMeta: {
           skip: parseInt(skip),
           pageSize: pageSize,
-          total: totalDeliveryExecutive
+          total: totalTransporter
         }
       }, );
 
@@ -181,9 +188,12 @@ class deliveryExecutiveCtrl extends BaseController {
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
-  } 
+  }
 
-// patch the request
+
+  
+
+  // // // patch the request
   updateDeliveryExecutiveDetails = async (req, res) => {
     try {
       info("Employee CHANGE ! !");
@@ -225,41 +235,6 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   };
 
-     // patch seurity guard status
-     patchDeliveryExecutiveStatus = async (req, res) => {
-      try {
-        info('Delivery Executive STATUS CHANGE !');
-  
-        // type id 
-        let type = req.params.type,
-        deliveryexecutiveId = req.params.deliveryexecutiveId;
-        // creating data to insert
-        let dataToUpdate = {
-          $set: {
-            status: type == 'activate' ? 1 : 0
-          }
-        };
-  
-        // inserting data into the db 
-        let isUpdated = await Model.findOneAndUpdate({
-          _id: mongoose.Types.ObjectId(deliveryexecutiveId)
-        }, dataToUpdate, {
-          new: true,
-          upsert: false,
-          lean: true
-        });
-  console.log("cxzcxz",isUpdated);
-        // check if inserted 
-        if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.deliveryExecutiveActivatedSuccessfully : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully);
-        else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdatedSuccessfully);
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-      }
-    }
-  
   //delete Employee
   deleteEmployee = async (req, res) => {
     try {

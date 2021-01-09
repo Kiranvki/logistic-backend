@@ -11,4 +11,5 @@ module.exports = {
   vehicle: require('./vehicle'), // vehicle message
   invoice: require('./invoice'), // invoice
   vehicleAttendance: require('./vehicleAttendance'), //vehicleAttendance
+  agencies: require('./agencies'), // agencies 
 };

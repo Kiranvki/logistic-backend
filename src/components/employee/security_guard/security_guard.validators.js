@@ -11,6 +11,7 @@ const schemas = {
     joiSecurityGuard: Joi.object().keys({
         employeeId: Joi.string().trim().label('Employee id').optional().allow('').max(12),
         isWaycoolEmp: Joi.boolean().label('Is Waycool Employee').required(),
+        cityId: Joi.string().trim().lowercase().label('cityId').required().valid(['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']),
         profilePic: Joi.string().trim().label('Profile Pic').optional().allow('').regex(/^[a-fA-F0-9]{24}$/).options({
           language: {
             string: {
@@ -38,25 +39,7 @@ const schemas = {
             }
           }
         }).required(),
-        reportingManager: Joi.string().trim().label('reporting manager').regex(/^[a-z ,.'-]+$/i).options({
-          language: {
-            string: {
-              regex: {
-                base: 'should be a valid Reporting Manager'
-              }
-            }
-          }
-        }).optional().allow(''),
         contactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').options({
-          language: {
-            string: {
-              regex: {
-                base: 'should be a valid Phone Number'
-              }
-            }
-          }
-        }).required(),
-        altContactNo: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').options({
           language: {
             string: {
               regex: {
@@ -66,6 +49,7 @@ const schemas = {
           }
         }).optional().allow(''),
         email: Joi.string().email().trim().label('email').required().max(256),
+        gender: Joi.string().trim().lowercase().valid(['male', 'female', 'transgender']).optional().allow('')
       }),
 }
 
