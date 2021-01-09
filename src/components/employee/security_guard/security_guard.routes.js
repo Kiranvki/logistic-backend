@@ -11,6 +11,11 @@ const {
   getDetailsFromZoho, // get details from zoho
 } = require('../../../hooks');
 
+// auth 
+const {
+  verifyUserToken
+} = require('../../../hooks/Auth');
+
 
 //exporting the security guard routes
 function securityRoutes() {
@@ -18,7 +23,7 @@ function securityRoutes() {
     // post
     closed.route('/').post(
       [joiEmployeCreate], // joi validation
-      //verifyUserToken,      // verify user token
+      verifyUserToken,      // verify user token
       getDetailsFromZoho, // get details from zoho
       ctrl.post              // controller function 
     );

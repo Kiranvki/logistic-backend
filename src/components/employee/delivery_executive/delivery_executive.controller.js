@@ -21,7 +21,6 @@ class deliveryExecutiveCtrl extends BaseController {
 
       // inserting data into the db 
       return Model.create(dataToInsert)
-        .lean()
         .then((res) => {
           // check if inserted 
           if (res && !_.isEmpty(res))

@@ -54,7 +54,7 @@ const schemas = {
       }
     }).optional().allow(''),
     email: Joi.string().email().trim().label('email').required().max(256),
-    reportingManagerId: Joi.string().trim().label('first name').regex(/^[a-z ,.'-]+$/i).options({
+    managerName: Joi.string().trim().label('Manager Name').regex(/^[a-z ,.'-]+$/i).options({
       language: {
         string: {
           regex: {
@@ -62,7 +62,7 @@ const schemas = {
           }
         }
       }
-    }).required(),
+    }).optional(),
   }),
 }
 
