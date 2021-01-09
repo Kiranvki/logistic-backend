@@ -9,6 +9,7 @@ module.exports = {
 
   zohoServerError: 'Zoho Server Error, Data Not Found!.',
   userDetailsFetched: 'User Details Fetched Successfully from Zoho !.',
+  userDetailsNotFetched: 'Unable to fetched the User Details from Zoho !.',
   asmCreated: 'Area Sales Manager Created Successfully !',
   asmNotCreated: 'Unable to Create Area Sales Manager !',
   asmAlreadyCreated: 'Area Sales Manager already created !',

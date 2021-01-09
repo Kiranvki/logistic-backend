@@ -10,8 +10,14 @@ const Response = require('../../../responses/response');
 const schemas = {
   // check for valid user 
   joiCreate: Joi.object().keys({
-    name: Joi.string().trim().label('name').required().min(1).max(256),
+    params: {
+      designation: Joi.string().trim().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive']).label('Designation').required()
+    },
+    body: Joi.object({
+      name: Joi.string().trim().label('name').required().min(1).max(256),
+    })
   }),
+
 
   // get list
   joiGetList: Joi.object().keys({
@@ -48,7 +54,10 @@ module.exports = {
     let option = options.basic;
 
     // validating the schema 
-    schema.validate(req.body, option).then(() => {
+    schema.validate({
+      params: req.params,
+      body: req.body
+    }, option).then(() => {
       next();
       // if error occured
     }).catch((err) => {

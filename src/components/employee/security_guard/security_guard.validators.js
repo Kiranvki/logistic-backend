@@ -8,6 +8,13 @@ const Response = require('../../../responses/response');
 
 // add joi schema 
 const schemas = {
+
+  // get zoho details
+  joiGetZohoDetails: Joi.object().keys({
+    empId: Joi.string().trim().label('empId').required(),
+  }),
+
+  // create a new emloyee
   joiEmployeCreate: Joi.object().keys({
     position: Joi.string().trim().label('Employee id').required().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive']),
     empId: Joi.string().trim().label('Employee id').optional().allow('').max(12),
@@ -91,7 +98,7 @@ module.exports = {
 
 
 
-  // create a new salesman
+  // create a new emloyee
   joiEmployeCreate: (req, res, next) => {
     // getting the schemas 
     let schema = schemas.joiEmployeCreate;
@@ -120,5 +127,27 @@ module.exports = {
       Response.joierrors(req, res, err);
     });
   },
+
+  // get zoho details
+  joiGetZohoDetails: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiGetZohoDetails;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate(req.query, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
 
 }
