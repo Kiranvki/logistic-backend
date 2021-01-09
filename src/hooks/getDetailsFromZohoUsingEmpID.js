@@ -52,7 +52,11 @@ module.exports = async (req, res, next) => {
           employeeType: zohoData.Employee_type,
           locationName: zohoData.LocationName,
           dateOfJoining: new Date(moment(zohoData.Dateofjoining, 'DD-MMM-YYYY').format('MM-DD-YYYY')),
-
+          reportingTo: {
+            id: zohoData['Reporting_To.ID'],
+            name: zohoData.Reporting_To,
+            emailId: zohoData['Reporting_To.MailID'],
+          }
         };
 
         // user data 
