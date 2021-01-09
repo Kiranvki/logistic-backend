@@ -119,8 +119,19 @@ class PickerBoyController extends BaseController {
     try {
       info('Create a new Picker Boy !');
 
-      // getting the full name 
-      let fullName = `${req.body.firstName} ${req.body.lastName}`;
+      // inserting data into the db 
+      return Model.create(dataToInsert)
+        .then((res) => {
+          // check if inserted 
+          if (res && !_.isEmpty(res))
+            return {
+              success: true,
+              data: res
+            };
+          else return {
+            success: false,
+          }
+        });
 
       // creating data to insert
       let dataToInsert = {

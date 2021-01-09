@@ -37,20 +37,19 @@ const schemas = {
                 base: 'should be a valid last Name'
               }
             }
+          } 
+    }).optional().allow(''),
+    email: Joi.string().email().trim().label('email').required().max(256),
+    managerName: Joi.string().trim().label('Manager Name').regex(/^[a-z ,.'-]+$/i).options({
+      language: {
+        string: {
+          regex: {
+            base: 'should be a valid Manager Name'
           }
-        }).required(),
-        contactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').options({
-          language: {
-            string: {
-              regex: {
-                base: 'should be a valid Phone Number'
-              }
-            }
-          }
-        }).optional().allow(''),
-        email: Joi.string().email().trim().label('email').required().max(256),
-        gender: Joi.string().trim().lowercase().valid(['male', 'female', 'transgender']).optional().allow('')
-      }),
+        }
+      }
+    }).optional(),
+  }),
 }
 
 

@@ -55,13 +55,18 @@ class deliveryExecutiveCtrl extends BaseController {
         }
 
       // inserting data into the db 
-      let isInserted = await Model.create(dataToInsert);
-
-      // check if inserted 
-      if (isInserted && !_.isEmpty(isInserted)) {
-        // returning success
-        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.deliveryExecutiveCreated)
-      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotCreated);
+      return Model.create(dataToInsert)
+        .then((res) => {
+          // check if inserted 
+          if (res && !_.isEmpty(res))
+            return {
+              success: true,
+              data: res
+            };
+          else return {
+            success: false,
+          }
+        });
 
       // catch any runtime error 
     } catch (err) {
