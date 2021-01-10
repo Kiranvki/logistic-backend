@@ -24,7 +24,7 @@ const schemas = {
     params: {
       designation: Joi.string().trim().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive']).label('Designation').required()
     },
-    body: Joi.object({
+    query: Joi.object({
       page: Joi.number().integer().min(1).label('Page').required(),
       search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
     })

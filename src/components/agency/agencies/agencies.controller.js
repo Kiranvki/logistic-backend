@@ -170,8 +170,6 @@ class userController extends BaseController {
       //if the designation is either pickerboy or delivery executive 
       else {
         let agencyListForPickerAndDeliveryResponse = await getAgencyListForDeliveryAnPickerBoy(cityId, page, searchKey);
-
-        console.log('agencyListForPickerAndDeliveryResponse.data', agencyListForPickerAndDeliveryResponse.data);
         if (agencyListForPickerAndDeliveryResponse.success) {
           //   success
           return this.success(req, res, this.status.HTTP_OK, {
@@ -189,7 +187,6 @@ class userController extends BaseController {
 
         }
       }
-
 
       // catch any runtime error 
     } catch (err) {
