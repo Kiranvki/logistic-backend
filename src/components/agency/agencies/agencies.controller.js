@@ -10,8 +10,8 @@ const {
 } = require('../../../utils').logging;
 const _ = require('lodash');
 const {
-  getAgencyListForDeliveryAnPickerBoy,
   createNewAgencyForPickerAndDeliveryExecutive, //create a new agency for the delivery and pickerboy
+  getAgencyListForDeliveryAnPickerBoy, // getting the agency list for pickerboy and delivery executive
 } = require('../../../inter_service_api/dms_dashboard_v1/v1');
 
 // getting the model 
@@ -104,65 +104,92 @@ class userController extends BaseController {
 
       // get the query params
       let page = req.query.page || 1,
-        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 10; }),
         searchKey = req.query.search || '',
         sortBy = req.query.sortBy || 'createdAt',
         sortingArray = {},
-        cityId = req.user.region || 'chennai';
-
+        cityId = req.user.region || 'chennai',
+        designation = req.params.designation;
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
 
-      // get the list of asm in the allocated city
-      let searchObject = {
-        'isDeleted': 0,
-        'cityId': cityId
-      };
+      //checking the designation
+      if (designation && designation == 'securityGuard') {
 
-      // creating a match object
-      if (searchKey !== '')
-        searchObject = {
-          ...searchObject,
-          '$or': [{
-            'name': {
-              $regex: searchKey,
-              $options: 'is'
-            }
-          }, {
-            'nameToDisplay': {
-              $regex: searchKey,
-              $options: 'is'
-            }
-          }]
+        // get the list of asm in the allocated city
+        let searchObject = {
+          'isDeleted': 0,
+          'cityId': cityId
         };
 
-      // get the total customer
-      let totalAgencies = await Model.countDocuments({
-        ...searchObject
-      });
+        // creating a match object
+        if (searchKey !== '')
+          searchObject = {
+            ...searchObject,
+            '$or': [{
+              'name': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'nameToDisplay': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }]
+          };
 
-      // get the asms list
-      let agencyList = await Model.aggregate([{
-        $match: {
+        // get the total customer
+        let totalAgencies = await Model.countDocuments({
           ...searchObject
-        }
-      }, {
-        $sort: sortingArray
-      }, {
-        $skip: skip
-      }, {
-        $limit: pageSize
-      }]).allowDiskUse(true);
+        });
 
-      // success 
-      return this.success(req, res, this.status.HTTP_OK, {
-        results: agencyList,
-        pageMeta: {
-          skip: parseInt(skip),
-          pageSize: pageSize,
-          total: totalAgencies
+        // get the asms list
+        let agencyList = await Model.aggregate([{
+          $match: {
+            ...searchObject
+          }
+        }, {
+          $sort: sortingArray
+        }, {
+          $skip: skip
+        }, {
+          $limit: pageSize
+        }]).allowDiskUse(true);
+
+        // success 
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: agencyList,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalAgencies
+          }
+        }, this.messageTypes.agencyListedSuccessfully);
+      }
+      //if the designation is either pickerboy or delivery executive 
+      else {
+        let agencyListForPickerAndDeliveryResponse = await getAgencyListForDeliveryAnPickerBoy(cityId, page, searchKey);
+
+        console.log('agencyListForPickerAndDeliveryResponse.data', agencyListForPickerAndDeliveryResponse.data);
+        if (agencyListForPickerAndDeliveryResponse.success) {
+          //   success
+          return this.success(req, res, this.status.HTTP_OK, {
+            results: agencyListForPickerAndDeliveryResponse.data.results,
+            pageMeta: {
+              skip: parseInt(skip),
+              pageSize: agencyListForPickerAndDeliveryResponse.data.pageMeta.pageSize,
+              total: agencyListForPickerAndDeliveryResponse.data.pageMeta.total
+            }
+          }, this.messageTypes.agencyListedSuccessfully);
+        } else {
+
+          error('Error getting agency for Delivery or PickerBoy')
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchAgency);
+
         }
-      }, this.messageTypes.agencyListedSuccessfully);
+      }
+
 
       // catch any runtime error 
     } catch (err) {
