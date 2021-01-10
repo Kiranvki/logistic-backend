@@ -200,7 +200,6 @@ class securityController extends BaseController {
         'createdBy': req.user.email || 'admin',
         'managerName': req.body.managerName ? req.body.managerName : null
       }
-      console.log('dataToInsert', dataToInsert);
 
       // if its not a waycool emp
       if (req.body.isWaycoolEmp == false)
