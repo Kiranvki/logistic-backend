@@ -8,27 +8,33 @@ const {
 } = require('../../../utils').logging;
 
 // exporting the hooks 
-module.exports = async (cityId) => {
+module.exports = async (agencyName, cityId) => {
   try {
-    info(`Hitting the DMS V1 server to get the Delivery Executive details!`);
+    info(`Hitting the DMS V1 server to create a new agency for the delivery and pickerboy!`);
+    console.log('agencyName', agencyName);
+    console.log('cityId', cityId);
 
     // getting the data from the env
     let dmsV1BaseUrl = process.env.dmsV1BaseUrl;
-    let dmsGetAgencyList = process.env.dmsGetAgencyListPartOne + cityId + process.env.dmsGetAgencyListPartTwo;
+    let createNewAgencyForPickerAndDelivery = process.env.createNewAgencyForPickerAndDelivery + cityId;
 
-    let url = dmsV1BaseUrl + dmsGetCustomerDetails; // DMS url
+    let url = dmsV1BaseUrl + createNewAgencyForPickerAndDelivery; // DMS url
+    console.log('url', url);
 
     // check whether the document type already exist or not 
-    return request.get(url)
+    return request.post(url)
       .timeout({
         response: 5000, // Wait 10 seconds for the server to start sending,
         deadline: 5000, // but allow 1 minute for the file to finish loading.
       })
+      .send({ 'name': agencyName })
       .retry(1)
       .then((res) => {
         // checking whether the user is authentic
         if (res.status === 200) {
-          info('Data Fetched Successfully !');
+          console.log('res', res);
+
+          info('Agency Created Successfully !');
           return {
             success: true,
             data: res.body.data,

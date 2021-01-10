@@ -10,7 +10,8 @@ const {
 } = require('../../../utils').logging;
 const _ = require('lodash');
 const {
-  getAgencyListForDeliveryAnPickerBoy
+  getAgencyListForDeliveryAnPickerBoy,
+  createNewAgencyForPickerAndDeliveryExecutive, //create a new agency for the delivery and pickerboy
 } = require('../../../inter_service_api/dms_dashboard_v1/v1');
 
 // getting the model 
@@ -58,15 +59,37 @@ class userController extends BaseController {
     try {
       info('Generating a new auth token !');
 
-      let isCreated = await Model.create({
-        name: req.body.camelCase,
-        nameToDisplay: req.body.name,
-        cityId: req.user.region
-      })
+      let name = req.body.name || '',// get the agency id 
+        camelCaseName = req.body.camelCase,
+        designation = req.params.designation || '',
+        cityId = req.user.region || '';
 
-      // is inserted 
-      return this.success(req, res, this.status.HTTP_OK, isCreated, this.messageTypes.create);
 
+      //checking whether the designation name is securityGuard
+      if (designation && designation == 'securityGuard') {
+        let isCreated = await Model.create({
+          name: camelCaseName,
+          nameToDisplay: name,
+          cityId: req.user.region
+        })
+
+        // is inserted 
+        return this.success(req, res, this.status.HTTP_OK, isCreated, this.messageTypes.create);
+
+        //condition if the designation is pickerBoy or deliveryExecutive
+      } else {
+
+        //calling the micro service from dms v1
+        let createNewAgencyResponse = await createNewAgencyForPickerAndDeliveryExecutive(name, cityId);
+        if (createNewAgencyResponse.success) {
+          info('New Agency for Delivery or PickerBoy created !'); // route doesnt exist 
+          return this.success(req, res, this.status.HTTP_OK, createNewAgencyResponse.data, this.messageTypes.create)
+        } else {
+          error('Error creating agency for Delivery or PickerBoy')
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToCreateAgency);
+
+        }
+      }
       // catch any runtime error 
     } catch (err) {
       error(err);
