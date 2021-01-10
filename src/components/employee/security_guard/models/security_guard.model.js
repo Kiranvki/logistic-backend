@@ -16,7 +16,12 @@ const securityGuard = new Schema(
       type: 'Boolean',
       default: false,
     },
-    reportingManager: {
+    agencyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'agencies',
+
+    },
+    managerName: {
       type: String,
       default: null
     },

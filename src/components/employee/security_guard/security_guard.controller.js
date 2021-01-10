@@ -191,14 +191,16 @@ class securityController extends BaseController {
         'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
         'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
         'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
-        'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId || '',
+        'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
         'contactMobile': req.body.contactMobile,
         'altContactNo': req.body.altContactNo,
         'email': req.body.email,
         'fullName': fullName,
         'createdById': req.user._id || '',
         'createdBy': req.user.email || 'admin',
+        'managerName': req.body.managerName ? req.body.managerName : null
       }
+      console.log('dataToInsert', dataToInsert);
 
       // if its not a waycool emp
       if (req.body.isWaycoolEmp == false)
@@ -210,7 +212,7 @@ class securityController extends BaseController {
         }
 
       //checking condition for delivery executive
-      if (req.body.position == "deliveryExecutive") {
+      if (req.body.designation == "deliveryExecutive") {
         let deliveryResponse = await deliveryCtrl.create(dataToInsert);
 
         if (deliveryResponse.success) {
@@ -223,7 +225,7 @@ class securityController extends BaseController {
       }
 
       //checking condition for picker boy
-      if (req.body.position == "pickerBoy") {
+      if (req.body.designation == "pickerBoy") {
         let pickerboyResponse = await pickerBoyCtrl.create(dataToInsert);
 
         if (pickerboyResponse.success) {
@@ -236,7 +238,7 @@ class securityController extends BaseController {
       }
 
       //checking condition for security guard
-      if (req.body.position == "securityGuard") {
+      if (req.body.designation == "securityGuard") {
 
         info("Create a new Security Guard !");
 

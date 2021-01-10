@@ -14,10 +14,7 @@ const pickerBoy = new Schema({
   },
   agencyId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'agencies',
-    autopopulate: {
-      select: 'nameToDisplay'
-    }
+
   },
   employeeId: {
     type: String
@@ -26,15 +23,11 @@ const pickerBoy = new Schema({
     type: String,
     default: 'Waycool Foods & Products Private Limited'
   },
-  // isWaycoolEmp: {
-  //   type: Number,
-  //   default: 1
-  // },
-
   isWaycoolEmp: {
-    type: 'Boolean',
-    default: false
+    type: Number,
+    default: 1
   },
+
   email: {
     type: String,
     required: true
@@ -65,6 +58,10 @@ const pickerBoy = new Schema({
   fullName: {
     type: String,
     required: true
+  },
+  managerName: {
+    type: String,
+    default: null
   },
   contactMobile: {
     type: Number

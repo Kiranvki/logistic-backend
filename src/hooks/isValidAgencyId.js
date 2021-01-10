@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
       designation = req.body.designation,
       cityId = req.user.region;
     if (agencyId) {
-      //checking if the position is securityguard 
+      //checking if the designation is securityguard
       if (designation && designation == 'securityGuard') {
         // check whether the name is unique or not 
         let isValid = await agencyCtrl.isValid(agencyId);
@@ -41,7 +41,7 @@ module.exports = async (req, res, next) => {
           error('Agency ID Not Found !'); // route doesnt exist 
           return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.agencies.agencyNameIsInvalid);
         }
-        //checking if the position is pickerboy or deliveryexecutive
+        //checking if the designation is pickerboy or deliveryexecutive
       } else {
 
         let checkAgencyIdResponse = await checkWhetherAgencyIdCorrectOrNotForPickerBoyAndDelivery(cityId, agencyId);
