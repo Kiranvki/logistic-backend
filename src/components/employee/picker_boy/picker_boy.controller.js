@@ -575,7 +575,7 @@ class PickerBoyController extends BaseController {
       info("Employee Delete!");
       //let employeeId = req.query.employeeId;
       // inserting the new user into the db
-      let employeeId = req.query.employeeId || "";
+      let employeeId = req.params.employeeId || "";
 
       // creating data to update
       let dataToUpdate = {
