@@ -160,16 +160,11 @@ class securityController extends BaseController {
   post = async (req, res) => {
     try {
       // get the firstname
-      req.body.fullName = req.body.isWaycoolEmp == false ? req.body.fullName.replace(
+      req.body.fullName = req.body.fullName.replace(
         /\w\S*/g,
         function (txt) {
           return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-        }) : req.body.userData.fullName.replace(
-          /\w\S*/g,
-          function (txt) {
-            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-          });
-
+        })
 
       // creating data to insert
       let dataToInsert = {

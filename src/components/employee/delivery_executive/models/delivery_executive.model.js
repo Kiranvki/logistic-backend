@@ -51,7 +51,7 @@ const deliveryExecutive = new Schema({
   },
   altEmail: {
     type: String,
-    required: false
+
   },
   email: {
     type: String,

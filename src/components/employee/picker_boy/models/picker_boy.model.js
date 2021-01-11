@@ -64,7 +64,7 @@ const pickerBoy = new Schema({
   },
   altEmail: {
     type: String,
-    required: false
+
   },
   photo: {
     type: String

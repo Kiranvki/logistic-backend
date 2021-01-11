@@ -58,7 +58,7 @@ const securityGuard = new Schema(
     },
     altEmail: {
       type: String,
-      required: false
+
     },
     photo: {
       type: String,

@@ -62,7 +62,7 @@ const schemas = {
       }
     }).optional().allow(''),
     email: Joi.string().email().trim().label('email').required().max(256),
-    altEmail: Joi.string().email().trim().label('alt Email').optional().max(256),
+    altEmail: Joi.string().email().trim().label('alt Email').optional().max(256).allow(''),
     managerName: Joi.string().trim().label('Manager Name').regex(/^[a-z ,.'-]+$/i).options({
       language: {
         string: {
