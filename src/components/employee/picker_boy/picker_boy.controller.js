@@ -115,9 +115,9 @@ class PickerBoyController extends BaseController {
     }
   }
 
-  create = async (dataToInsert) => {
+  create = async (req, res) => {
     try {
-      info('Create a  Picker Boy !');
+      info('Create a new Picker Boy !');
 
       // inserting data into the db 
       return Model.create(dataToInsert)
@@ -133,83 +133,46 @@ class PickerBoyController extends BaseController {
           }
         });
 
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      return {
-        success: false,
-        error: err
+      // creating data to insert
+      let dataToInsert = {
+        ...req.body.userData,
+        'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
+        'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
+        'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
+        'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
+        'contactMobile': req.body.contactMobile,
+        'email': req.body.email,
+        'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
+        'fullName': fullName,
+        'cityId': req.body.cityId,
       }
-    }
-  }
 
-
-  getPickerBoy = async (req, res) => {
-    try {
-      info('Get the Delivery Executive !');
-
-      // get the query params
-      let page = req.query.page || 1,
-        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey = req.query.search || '',
-        sortBy = req.query.sortBy || 'createdAt',
-        sortingArray = {};
-
-      sortingArray[sortBy] = -1;
-      let skip = parseInt(page - 1) * pageSize;
-
-      // get the list of asm in the allocated city
-      let searchObject = {
-        'isDeleted': 0,
-
-      };
-
-      // creating a match object
-      if (searchKey !== '')
-        searchObject = {
-          ...searchObject,
-          '$or': [{
-            'employeeId': {
-              $regex: searchKey,
-              $options: 'is'
-            }
-          }, {
-            'employerName': {
-              $regex: searchKey,
-              $options: 'is'
-            }
-          }]
-        };
-
-      // get the total rate category
-      let totalPickerBoy = await Model.countDocuments({
-        ...searchObject
-      });
-
-
-      // get the Picker Boy list 
-      let pickerBoyList = await Model.aggregate([{
-        $match: {
-          ...searchObject
+      // checking if profile pic is present 
+      if (req.body.profilePic)
+        dataToInsert = {
+          ...dataToInsert,
+          'profilePic': req.body.profilePic
         }
-      }, {
-        $sort: sortingArray
-      }, {
-        $skip: skip
-      }, {
-        $limit: pageSize
-      },
-      ])
 
-      // success 
-      return this.success(req, res, this.status.HTTP_OK, {
-        results: pickerBoyList,
-        pageMeta: {
-          skip: parseInt(skip),
-          pageSize: pageSize,
-          total: totalPickerBoy
+      // if its not a waycool emp
+      if (req.body.isWaycoolEmp == false)
+        dataToInsert = {
+          ...dataToInsert,
+          'employeeId': req.body.empId,
+          'firstName': req.body.firstName,
+          'lastName': req.body.lastName,
+          'photo': req.body.profilePic,
         }
-      });
+
+      // inserting data into the db 
+      let isInserted = await Model.create(dataToInsert);
+
+      // check if inserted 
+      if (isInserted && !_.isEmpty(isInserted)) {
+        info('Salesman Successfully Created !');
+        // returning success
+        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.salesmanCreated)
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesmanNotCreated);
 
       // catch any runtime error 
     } catch (err) {
@@ -433,38 +396,38 @@ class PickerBoyController extends BaseController {
     }
   }
 
-  // // // patch the request 
-  updatePickerBoyDetails = async (req, res) => {
-    try {
+      // // // patch the request 
+      updatePickerBoyDetails = async (req, res) => {
+        try {
+    
+          info('Employee CHANGE ! !');
 
-      info('Employee CHANGE ! !');
-
-      // creating data to insert
-      let dataToUpdate = {
-        $set: {
-          ...req.body,
+          // creating data to insert
+          let dataToUpdate = {
+            $set: {
+              ...req.body,
+            }
+          };
+    
+          // inserting data into the db 
+          let isUpdated = await Model.findOneAndUpdate({
+            _id: mongoose.Types.ObjectId(req.query.employeeId)
+          }, dataToUpdate, {
+            new: true,
+            upsert: false,
+            lean: true
+          });
+    
+          // check if inserted 
+          if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated);
+          else return this.errors(req, res, this.status.HTTP_CONFLICT);
+    
+          // catch any runtime error 
+        } catch (err) {
+          error(err);
+          this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
         }
-      };
-
-      // inserting data into the db 
-      let isUpdated = await Model.findOneAndUpdate({
-        _id: mongoose.Types.ObjectId(req.query.employeeId)
-      }, dataToUpdate, {
-        new: true,
-        upsert: false,
-        lean: true
-      });
-
-      // check if inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT);
-
-      // catch any runtime error 
-    } catch (err) {
-      error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    }
-  }
+      }
 
   // get pickerBoyData details
   getPickerBoyDetails = async (req, res) => {
@@ -567,13 +530,21 @@ class PickerBoyController extends BaseController {
   }
 
 
+<<<<<<< HEAD
 //delete employee
+=======
+  
+>>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
   deleteEmployee = async (req, res) => {
     try {
       info("Employee Delete!");
       //let employeeId = req.query.employeeId;
       // inserting the new user into the db
+<<<<<<< HEAD
       let employeeId = req.params.employeeId || "";
+=======
+       let employeeId = req.query.employeeId || "";
+>>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
 
       // creating data to update
       let dataToUpdate = {
@@ -584,15 +555,15 @@ class PickerBoyController extends BaseController {
       };
 
       // inserting data into the db 
-      //   let isUpdated = await Model.findOneAndUpdate({
-      let isUpdated = await Model.updateOne({
+    //   let isUpdated = await Model.findOneAndUpdate({
+        let isUpdated = await Model.updateOne({
         _id: mongoose.Types.ObjectId(employeeId)
       },
-        dataToUpdate, {
+     dataToUpdate, {
         new: true,
         upsert: false,
         lean: true
-      }
+     }
       )
       // .then(async (res) => {
 

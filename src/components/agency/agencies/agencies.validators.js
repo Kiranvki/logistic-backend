@@ -21,8 +21,13 @@ const schemas = {
 
   // get list
   joiGetList: Joi.object().keys({
-    page: Joi.number().integer().min(1).label('Page').required(),
-    search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
+    params: {
+      designation: Joi.string().trim().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive']).label('Designation').required()
+    },
+    query: Joi.object({
+      page: Joi.number().integer().min(1).label('Page').required(),
+      search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
+    })
   }),
 };
 
@@ -78,7 +83,10 @@ module.exports = {
     let option = options.basic;
 
     // validating the schema 
-    schema.validate(req.query, option).then(() => {
+    schema.validate({
+      params: req.params,
+      query: req.query
+    }, option).then(() => {
       next();
       // if error occured
     }).catch((err) => {

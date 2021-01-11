@@ -8,23 +8,23 @@ const {
 } = require('../../../utils').logging;
 
 // exporting the hooks 
-module.exports = async (cityId, page, search) => {
+module.exports = async (agencyName, cityId) => {
   try {
-    let pageNo = page || 1,
-      search = search || '';
-    info(`Hitting the DMS V1 server to get the Delivery Executive agency list details!`);
+    info(`Hitting the DMS V1 server to check the agency name already exist for deliver and pickerboy!`);
 
     // getting the data from the env
     let dmsV1BaseUrl = process.env.dmsV1BaseUrl;
-    let dmsGetAgencyList = process.env.dmsGetAgencyListPartOne + cityId + process.env.dmsGetAgencyListPartTwo + pageNo + process.env.dmsGetAgencyListPartThree + search;
-    let url = dmsV1BaseUrl + dmsGetAgencyList; // DMS url
+    let dmsCheckAgencyNameAlreadyExist = process.env.dmsCheckAgencyNameAlreadyExist + cityId;
+
+    let url = dmsV1BaseUrl + dmsCheckAgencyNameAlreadyExist; // DMS url
 
     // check whether the document type already exist or not 
-    return request.get(url)
+    return request.post(url)
       .timeout({
         response: 5000, // Wait 10 seconds for the server to start sending,
         deadline: 5000, // but allow 1 minute for the file to finish loading.
       })
+      .send({ 'name': agencyName })
       .retry(1)
       .then((res) => {
         // checking whether the user is authentic

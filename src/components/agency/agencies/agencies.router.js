@@ -21,7 +21,6 @@ function userRoutes() {
   return (open, closed) => {
 
     //common agency list api for all employee
-    // create agency list for security
     closed.route('/:designation').post(
       [joiCreate], // joi validation
       verifyUserToken, // jwt authentication

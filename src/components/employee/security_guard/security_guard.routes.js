@@ -3,14 +3,19 @@ const ctrl = require('./security_guard.controller');
 
 // custom joi validation
 const {
+<<<<<<< HEAD
+  joiSecurityGuard, // create a new SecurityGuard
+=======
   joiEmployeCreate, // create a new employee
   joiGetZohoDetails,  //getting the details from zoho
+>>>>>>> 9f659712bd7e3552c361802c485e1c211ce7692b
 } = require('./security_guard.validators');
 
 // hooks 
 const {
   getDetailsFromZoho, // get details from zoho
-  getDetailsFromZohoUsingEmpID // get details from zoho using empid
+  getDetailsFromZohoUsingEmpID, // get details from zoho using empid
+  isValidAgencyId, // checking whether the agency is valida or not
 } = require('../../../hooks');
 
 // auth 
@@ -20,12 +25,13 @@ const {
 
 
 //exporting the security guard routes
-function securityRoutes() {
-  return (open, closed) => {
+function securityRoutes(){
+    return (open, closed) => {
     // post
     closed.route('/').post(
       [joiEmployeCreate], // joi validation
       verifyUserToken,      // verify user token
+      isValidAgencyId, // checking whether the agency is valida or not
       getDetailsFromZoho, // get details from zoho
       ctrl.post              // controller function 
     );
