@@ -56,7 +56,7 @@ class PickerBoyController extends BaseController {
           });
 
       // getting the full name 
-      let fullName = `${req.body.firstName} ${req.body.lastName}`;
+      //  let fullName = `${req.body.firstName} ${req.body.lastName}`;
 
       // creating data to insert
       let dataToInsert = {
@@ -69,7 +69,7 @@ class PickerBoyController extends BaseController {
         'contactMobile': req.body.contactMobile,
         'email': req.body.email,
         'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
-        'fullName': fullName,
+        //  'fullName': fullName,
         'createdById': req.user._id,
         'createdBy': req.user.email || 'admin',
         'warehouseId': mongoose.Types.ObjectId(req.user.warehouseId) || null,

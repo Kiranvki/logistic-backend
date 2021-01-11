@@ -179,17 +179,10 @@ class securityController extends BaseController {
         'altEmail': req.body.altEmail,
         'createdById': req.user._id || '',
         'createdBy': req.user.email || 'admin',
-        'managerName': req.body.managerName ? req.body.managerName : null
+        'managerName': req.body.managerName ? req.body.managerName : null,
+        'employeeId': req.body.empId,
       }
 
-      // if its not a waycool emp
-      if (req.body.isWaycoolEmp == false)
-        dataToInsert = {
-          ...dataToInsert,
-          'employeeId': req.body.empId,
-          'firstName': req.body.firstName,
-          'lastName': req.body.lastName,
-        }
 
       //checking condition for delivery executive
       if (req.body.designation == "deliveryExecutive") {
