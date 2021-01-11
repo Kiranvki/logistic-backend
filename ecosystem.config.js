@@ -40,7 +40,7 @@ module.exports = {
       'dmsGetAgencyListPartTwo': '&page=',
       'dmsGetAgencyListPartThree': '&search=',
       'dmsCheckAgencyNameAlreadyExist': '/v1/agency/search-by-name?city=',
-      'createNewAgencyForPickerAndDelivery': '/v1/agency?city =',
+      'createNewAgencyForPickerAndDelivery': '/v1/agency?city=',
       'dmsCheckAgencyIdPartOne': '/v1/agency/',
       'dmsCheckAgencyIdPartTwo': '?city=',
 
