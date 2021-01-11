@@ -36,6 +36,13 @@ module.exports = {
       'apiToAutoCheckout': '/v1/picker/user/attendance/auto/check-out',
       'baseUrl': 'http://localhost',
       'port': '3003',
+      'dmsGetAgencyListPartOne': '=/v1/agency/?city=',
+      'dmsGetAgencyListPartTwo': '&page=',
+      'dmsGetAgencyListPartThree': '&search=',
+      'dmsCheckAgencyNameAlreadyExist': '/v1/agency/search-by-name?city=',
+      'createNewAgencyForPickerAndDelivery': '/v1/agency?city =',
+      'dmsCheckAgencyIdPartOne': '/v1/agency/',
+      'dmsCheckAgencyIdPartTwo': '?city=',
 
     },
     env_staging: {
@@ -71,6 +78,13 @@ module.exports = {
       'apiToAutoCheckout': '/v1/picker/user/attendance/auto/check-out',
       'baseUrl': 'http://localhost',
       'port': '3003',
+      'dmsGetAgencyListPartOne': '=/v1/agency/?city=',
+      'dmsGetAgencyListPartTwo': '&page=',
+      'dmsGetAgencyListPartThree': '&search=',
+      'dmsCheckAgencyNameAlreadyExist': '/v1/agency/search-by-name?city=',
+      'createNewAgencyForPickerAndDelivery': '/v1/agency?city =',
+      'dmsCheckAgencyIdPartOne': '/v1/agency/',
+      'dmsCheckAgencyIdPartTwo': '?city=',
     },
     env_production: {
       'watch': false,
@@ -105,6 +119,13 @@ module.exports = {
       'apiToAutoCheckout': '/v1/picker/user/attendance/auto/check-out',
       'baseUrl': 'http://localhost',
       'port': '3003',
+      'dmsGetAgencyListPartOne': '=/v1/agency/?city=',
+      'dmsGetAgencyListPartTwo': '&page=',
+      'dmsGetAgencyListPartThree': '&search=',
+      'dmsCheckAgencyNameAlreadyExist': '/v1/agency/search-by-name?city=',
+      'createNewAgencyForPickerAndDelivery': '/v1/agency?city =',
+      'dmsCheckAgencyIdPartOne': '/v1/agency/',
+      'dmsCheckAgencyIdPartTwo': '?city=',
     }
   }]
 };
