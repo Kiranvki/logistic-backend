@@ -157,12 +157,111 @@ class securityController extends BaseController {
   };
 
   post = async (req, res) => {
+<<<<<<< HEAD
     if (req.params.employeeType == "deliveryExecutive") {
       let deliveryResponse = await deliveryCtrl.create(req, res);
       return;
     } else if (req.params.employeeType == "pickerBoy") {
       let pickerboyResponse = await pickerBoyCtrl.create(req, res);
       return;
+=======
+    try {
+      // get the firstname
+      req.body.firstName = req.body.isWaycoolEmp == false ? req.body.firstName.replace(
+        /\w\S*/g,
+        function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        }) : req.body.userData.firstName.replace(
+          /\w\S*/g,
+          function (txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+          });
+
+      // sentence case the last name
+      req.body.lastName = req.body.isWaycoolEmp == false ? req.body.lastName.replace(
+        /\w\S*/g,
+        function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        }) : req.body.userData.lastName.replace(
+          /\w\S*/g,
+          function (txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+          });
+
+      // getting the full name 
+      let fullName = `${req.body.firstName} ${req.body.lastName}`;
+
+      // creating data to insert
+      let dataToInsert = {
+        ...req.body.userData,
+        'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
+        'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
+        'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
+        'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
+        'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
+        'contactMobile': req.body.contactMobile,
+        'altContactNo': req.body.altContactNo,
+        'email': req.body.email,
+        'fullName': fullName,
+        'createdById': req.user._id || '',
+        'createdBy': req.user.email || 'admin',
+        'managerName': req.body.managerName ? req.body.managerName : null
+      }
+
+      // if its not a waycool emp
+      if (req.body.isWaycoolEmp == false)
+        dataToInsert = {
+          ...dataToInsert,
+          'employeeId': req.body.empId,
+          'firstName': req.body.firstName,
+          'lastName': req.body.lastName,
+        }
+
+      //checking condition for delivery executive
+      if (req.body.designation == "deliveryExecutive") {
+        let deliveryResponse = await deliveryCtrl.create(dataToInsert);
+
+        if (deliveryResponse.success) {
+          return this.success(req, res, this.status.HTTP_OK, deliveryResponse.data, this.messageTypes.deliveryExecutiveCreated)
+        }
+        else {
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotCreated);
+        }
+
+      }
+
+      //checking condition for picker boy
+      if (req.body.designation == "pickerBoy") {
+        let pickerboyResponse = await pickerBoyCtrl.create(dataToInsert);
+
+        if (pickerboyResponse.success) {
+          //success
+          return this.success(req, res, this.status.HTTP_OK, pickerboyResponse.data, this.messageTypes.pickerBoyCreated)
+        }
+        else {
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerBoyNotCreated);
+        }
+      }
+
+      //checking condition for security guard
+      if (req.body.designation == "securityGuard") {
+
+        info("Create a new Security Guard !");
+
+        // inserting data into the db 
+        let isInserted = await Model.create(dataToInsert);
+
+        // check if inserted 
+        if (isInserted && !_.isEmpty(isInserted)) {
+          // returning success
+          return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.securityGuardCreated)
+        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotCreated);
+      }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+>>>>>>> 7a7c8bc53e42f71f8eef6aa34745a5fe0bc57c03
     }
 
     try {

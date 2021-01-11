@@ -10,13 +10,13 @@ const {
 
 // getting the model 
 class transporterRateMappingCtrl extends BaseController {
-    // constructor 
-    constructor() {
-      super();
-      this.messageTypes = this.messageTypes.transporterMaster;
-    }
+  // constructor 
+  constructor() {
+    super();
+    this.messageTypes = this.messageTypes.transporterMaster;
+  }
 
-    
+
   // create a new entry
   post = async (req, res) => {
     try {
@@ -41,8 +41,8 @@ class transporterRateMappingCtrl extends BaseController {
     }
   }
 
-   // get transporter list 
-   getList = async (req, res) => {
+  // get transporter list 
+  getList = async (req, res) => {
     try {
       info('Get the Roles List !');
 
@@ -101,13 +101,13 @@ class transporterRateMappingCtrl extends BaseController {
         $skip: skip
       }, {
         $limit: pageSize
-      // },
-      // {
-      //   $project: {
+        // },
+        // {
+        //   $project: {
 
-      //     'name': 1,
-      //     'isDeleted': 1
-      //   }
+        //     'name': 1,
+        //     'isDeleted': 1
+        //   }
       }
       ])
       //.allowDiskUse(true);

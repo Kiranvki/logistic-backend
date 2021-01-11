@@ -8,16 +8,15 @@ const {
 } = require('../../../utils').logging;
 
 // exporting the hooks 
-module.exports = async (cityId, page, search) => {
+module.exports = async (cityId, agencyId) => {
   try {
-    let pageNo = page || 1,
-      search = search || '';
-    info(`Hitting the DMS V1 server to get the Delivery Executive agency list details!`);
+
+    info(`Hitting the DMS V1 server to verify the agencyId is correct or not!`);
 
     // getting the data from the env
     let dmsV1BaseUrl = process.env.dmsV1BaseUrl;
-    let dmsGetAgencyList = process.env.dmsGetAgencyListPartOne + cityId + process.env.dmsGetAgencyListPartTwo + pageNo + process.env.dmsGetAgencyListPartThree + search;
-    let url = dmsV1BaseUrl + dmsGetAgencyList; // DMS url
+    let dmsCheckAgencyId = process.env.dmsCheckAgencyIdPartOne + agencyId + process.env.dmsCheckAgencyIdPartTwo + cityId;
+    let url = dmsV1BaseUrl + dmsCheckAgencyId; // DMS url
 
     // check whether the document type already exist or not 
     return request.get(url)

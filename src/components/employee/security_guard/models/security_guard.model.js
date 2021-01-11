@@ -4,7 +4,90 @@ const autopopulate = require('mongoose-autopopulate');
 const Schema = mongoose.Schema;
 
 // schema
+<<<<<<< HEAD
 const securityGuard = new Schema({
+=======
+const securityGuard = new Schema(
+  {
+    employeeId: {
+      type: String,
+    },
+    employerName: {
+      type: String,
+      default: 'Waycool Foods & Products Private Limited',
+    },
+    isWaycoolEmp: {
+      type: 'Boolean',
+      default: false,
+    },
+    agencyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'agencies',
+
+    },
+    managerName: {
+      type: String,
+      default: null
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    gender: {
+      type: String,
+    },
+    aadharNumber: {
+      type: String,
+    },
+    designation: {
+      type: String,
+    },
+    pan: {
+      type: String,
+    },
+    zohoId: {
+      type: String,
+    },
+    firstName: {
+      type: String,
+      required: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+    },
+    fullName: {
+      type: String,
+      required: true,
+    },
+    contactMobile: {
+      type: Number,
+    },
+    altContactNo: {
+      type: Number,
+    },
+    photo: {
+      type: String,
+    },
+    role: {
+      type: String,
+    },
+    employeeStatus: {
+      type: String,
+    },
+    employeeType: {
+      type: String,
+    },
+    locationName: {
+      type: String,
+    },
+    dateOfJoining: {
+      type: Date,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
+>>>>>>> 7a7c8bc53e42f71f8eef6aa34745a5fe0bc57c03
 
   employeeId: {
     type: String

@@ -28,7 +28,7 @@ const schemas = {
 
   // create a new emloyee
   joiEmployeCreate: Joi.object().keys({
-    position: Joi.string().trim().label('Employee id').required().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive']),
+    designation: Joi.string().trim().label('designation').required().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive']),
     empId: Joi.string().trim().label('Employee id').optional().allow('').max(12),
     isWaycoolEmp: Joi.boolean().label('Is Waycool Employee').required(),
     agencyId: Joi.string().trim().label('Agency Id').when('isWaycoolEmp', {

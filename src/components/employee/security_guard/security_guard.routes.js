@@ -14,7 +14,8 @@ const {
 // hooks 
 const {
   getDetailsFromZoho, // get details from zoho
-  getDetailsFromZohoUsingEmpID // get details from zoho using empid
+  getDetailsFromZohoUsingEmpID, // get details from zoho using empid
+  isValidAgencyId, // checking whether the agency is valida or not
 } = require('../../../hooks');
 
 // auth 
@@ -30,6 +31,7 @@ function securityRoutes(){
     closed.route('/').post(
       [joiEmployeCreate], // joi validation
       verifyUserToken,      // verify user token
+      isValidAgencyId, // checking whether the agency is valida or not
       getDetailsFromZoho, // get details from zoho
       ctrl.post              // controller function 
     );
