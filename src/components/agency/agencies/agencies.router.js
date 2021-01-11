@@ -20,6 +20,22 @@ const {
 function userRoutes() {
   return (open, closed) => {
 
+    //common agency list api for all employee
+    // create agency list for security
+    closed.route('/:designation').post(
+      [joiCreate], // joi validation
+      verifyUserToken, // jwt authentication
+      isAgencyExists, // check whether the agency exist  
+      ctrl.create // controller function
+    );
+
+    // get agencies list for security guard
+    closed.route('/list/:designation').get(
+      [joiGetList], // joi validation
+      verifyUserToken, // jwt authentication
+      ctrl.getList // controller function
+    );
+
     // create agency list for security
     closed.route('/security-agency').post(
       [joiCreate], // joi validation

@@ -8,6 +8,7 @@ const Response = require('../../../responses/response');
 
 // add joi schema 
 const schemas = {
+<<<<<<< HEAD
     joiSecurityGuard: Joi.object().keys({
         employeeId: Joi.string().trim().label('Employee id').optional().allow('').max(12),
         isWaycoolEmp: Joi.boolean().label('Is Waycool Employee').required(),
@@ -18,6 +19,27 @@ const schemas = {
               regex: {
                 base: 'should be a valid mongoose Id'
               }
+=======
+
+  // get zoho details
+  joiGetZohoDetails: Joi.object().keys({
+    empId: Joi.string().trim().label('empId').required(),
+  }),
+
+  // create a new emloyee
+  joiEmployeCreate: Joi.object().keys({
+    position: Joi.string().trim().label('Employee id').required().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive']),
+    empId: Joi.string().trim().label('Employee id').optional().allow('').max(12),
+    isWaycoolEmp: Joi.boolean().label('Is Waycool Employee').required(),
+    agencyId: Joi.string().trim().label('Agency Id').when('isWaycoolEmp', {
+      is: true,
+      then: Joi.optional().allow(''),
+      otherwise: Joi.string().regex(/^[a-fA-F0-9]{24}$/).required().options({
+        language: {
+          string: {
+            regex: {
+              base: 'should be a valid mongoose Id'
+>>>>>>> 9f659712bd7e3552c361802c485e1c211ce7692b
             }
           }
         }),
@@ -75,6 +97,14 @@ const options = {
 
   module.exports = {
 
+<<<<<<< HEAD
+=======
+  // create a new emloyee
+  joiEmployeCreate: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiEmployeCreate;
+    let option = options.basic;
+>>>>>>> 9f659712bd7e3552c361802c485e1c211ce7692b
 
 
     // create a new salesman
@@ -107,4 +137,35 @@ const options = {
       });
     },
 
+<<<<<<< HEAD
   }
+=======
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+  // get zoho details
+  joiGetZohoDetails: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiGetZohoDetails;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate(req.query, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+
+}
+>>>>>>> 9f659712bd7e3552c361802c485e1c211ce7692b

@@ -66,6 +66,22 @@ class securityController extends BaseController {
     }
   };
 
+  // sending the zoho details
+  getZohoDetails = async (req, res) => {
+    try {
+      info("Zoho Employee Details!");
+
+      if (req.body.userData && !_.isEmpty(req.body.userData)) {
+        return this.success(req, res, this.status.HTTP_OK, req.body.userData, this.messageTypes.userDetailsFetched)
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userDetailsNotFetched);
+    }
+    catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  };
+
   // get details of security guard
   getDetails = async (securityGuardId) => {
     try {

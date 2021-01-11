@@ -20,5 +20,5 @@ module.exports = {
   getAllCheckInVehicleDetails: require('./getAllCheckInVehicleDetails'), // get all the check in vehicle details
   getDetailsFromZoho: require('./getDetailsFromZoho'),
   isAgencyExists: require('./isAgencyExists'), // check whether the agency exists or not 
-
+  getDetailsFromZohoUsingEmpID: require('./getDetailsFromZohoUsingEmpID'), // get the details from zoho  
 }
