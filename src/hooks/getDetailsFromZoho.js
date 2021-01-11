@@ -67,7 +67,9 @@ module.exports = async (req, res, next) => {
           info('User Details Found !');
           next();
         } else return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.zohoServerError);
-      } else return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.zohoServerError);
+      } else
+        next();
+      //return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.zohoServerError);
     } else next();
 
     // catch any runtime error 
