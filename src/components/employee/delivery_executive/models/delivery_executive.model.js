@@ -23,10 +23,7 @@ const deliveryExecutive = new Schema({
     type: String,
     default: null
   },
-  email: {
-    type: String,
-    required: true
-  },
+
   gender: {
     type: String,
   },
@@ -42,14 +39,6 @@ const deliveryExecutive = new Schema({
   zohoId: {
     type: String
   },
-  firstName: {
-    type: String,
-    required: true
-  },
-  lastName: {
-    type: String,
-    required: true
-  },
   fullName: {
     type: String,
     required: true
@@ -57,6 +46,18 @@ const deliveryExecutive = new Schema({
   contactMobile: {
     type: Number
   },
+  altContactMobile: {
+    type: Number
+  },
+  altEmail: {
+    type: String,
+    required: false
+  },
+  email: {
+    type: String,
+    required: true
+  },
+
   photo: {
     type: String
   },

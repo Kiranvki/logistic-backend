@@ -47,14 +47,7 @@ const pickerBoy = new Schema({
   zohoId: {
     type: String
   },
-  firstName: {
-    type: String,
-    required: true
-  },
-  lastName: {
-    type: String,
-    required: true
-  },
+
   fullName: {
     type: String,
     required: true
@@ -65,6 +58,13 @@ const pickerBoy = new Schema({
   },
   contactMobile: {
     type: Number
+  },
+  altContactMobile: {
+    type: Number
+  },
+  altEmail: {
+    type: String,
+    required: false
   },
   photo: {
     type: String

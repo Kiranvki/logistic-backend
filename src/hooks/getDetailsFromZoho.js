@@ -43,8 +43,7 @@ module.exports = async (req, res, next) => {
           zohoId: zohoData.Zoho_ID,
           designation: zohoData.Designation,
           pan: zohoData.PAN,
-          firstName: zohoData.FirstName,
-          lastName: zohoData.LastName,
+          fullName: `${zohoData.FirstName} ${zohoData.FirstName}`,
           contactMobile: zohoData.Mobile,
           photo: zohoData.Photo_downloadUrl,
           role: zohoData.Role,
@@ -52,6 +51,8 @@ module.exports = async (req, res, next) => {
           employeeType: zohoData.Employee_type,
           locationName: zohoData.LocationName,
           dateOfJoining: new Date(moment(zohoData.Dateofjoining, 'DD-MMM-YYYY').format('MM-DD-YYYY')),
+          // firstName: zohoData.FirstName,
+          // lastName: zohoData.FirstName,
           // reportingTo: {
           //   id: zohoData['Reporting_To.ID'],
           //   name: zohoData.Reporting_To,

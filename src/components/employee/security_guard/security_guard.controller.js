@@ -160,42 +160,28 @@ class securityController extends BaseController {
   post = async (req, res) => {
     try {
       // get the firstname
-      req.body.firstName = req.body.isWaycoolEmp == false ? req.body.firstName.replace(
+      req.body.fullName = req.body.isWaycoolEmp == false ? req.body.fullName.replace(
         /\w\S*/g,
         function (txt) {
           return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-        }) : req.body.userData.firstName.replace(
+        }) : req.body.userData.fullName.replace(
           /\w\S*/g,
           function (txt) {
             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
           });
 
-      // sentence case the last name
-      req.body.lastName = req.body.isWaycoolEmp == false ? req.body.lastName.replace(
-        /\w\S*/g,
-        function (txt) {
-          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-        }) : req.body.userData.lastName.replace(
-          /\w\S*/g,
-          function (txt) {
-            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-          });
-
-      // getting the full name 
-      let fullName = `${req.body.firstName} ${req.body.lastName}`;
 
       // creating data to insert
       let dataToInsert = {
         ...req.body.userData,
-        'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
-        'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
+        'fullName': req.body.fullName ? req.body.fullName : req.body.userData.fullName,
         'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
         'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
         'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
         'contactMobile': req.body.contactMobile,
-        'altContactNo': req.body.altContactNo,
+        'altContactMobile': req.body.altContactMobile,
         'email': req.body.email,
-        'fullName': fullName,
+        'altEmail': req.body.altEmail,
         'createdById': req.user._id || '',
         'createdBy': req.user.email || 'admin',
         'managerName': req.body.managerName ? req.body.managerName : null

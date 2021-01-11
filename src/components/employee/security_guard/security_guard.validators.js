@@ -32,26 +32,27 @@ const schemas = {
         }
       })
     }),
-    firstName: Joi.string().trim().label('first name').regex(/^[a-z ,.'-]+$/i).options({
+    fullName: Joi.string().trim().label('Employee Name').regex(/^[a-z ,.'-]+$/i).options({
       language: {
         string: {
           regex: {
-            base: 'should be a valid first Name'
+            base: 'should be a valid  Name'
           }
         }
       }
     }).required(),
 
-    lastName: Joi.string().trim().label('last name').regex(/^[a-z ,.'-]+$/i).options({
+
+    contactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').options({
       language: {
         string: {
           regex: {
-            base: 'should be a valid last Name'
+            base: 'should be a valid Phone Number'
           }
         }
       }
-    }).required(),
-    contactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').options({
+    }).required().allow(''),
+    altContactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Alt Contact Number').options({
       language: {
         string: {
           regex: {
@@ -61,6 +62,7 @@ const schemas = {
       }
     }).optional().allow(''),
     email: Joi.string().email().trim().label('email').required().max(256),
+    altEmail: Joi.string().email().trim().label('alt Email').optional().max(256),
     managerName: Joi.string().trim().label('Manager Name').regex(/^[a-z ,.'-]+$/i).options({
       language: {
         string: {
@@ -112,6 +114,14 @@ module.exports = {
     if (contactArray.length > 1) {
       req.body.contactMobile = contactArray[1];
     } else req.body.contactMobile = contactArray[0];
+
+    req.body.altContactMobile = req.body.altContactMobile.replace(/\s/g, '-')
+
+    let altContactArray = req.body.altContactMobile.split('-');
+
+    if (altContactArray.length > 1) {
+      req.body.altContactMobile = altContactArray[1];
+    } else req.body.altContactMobile = altContactArray[0];
 
     // validating the schema 
     schema.validate(req.body, option).then(() => {
