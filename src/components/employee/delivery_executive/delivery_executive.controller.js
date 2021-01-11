@@ -43,26 +43,16 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   }
 
-
-
+// Get single list
   get = async (req, res) => {
     try {
       info("Employee GET DETAILS !");
       // get the brand id
       let employeeId = req.params.employeeId;
-      // inserting data into the db
-      // let transporter = await Model.findOne({
-      // let employee = await Model.findById({
-
-      //   _id: mongoose.Types.ObjectId(employeeId)
-
-      // }).lean();
-
       let employee = await Model.findOne({
         _id: mongoose.Types.ObjectId(req.params.employeeId),
         isDeleted: 0,
       }).lean();
-      console.log("Emplloyy", employee);
       // check if inserted
       if (employee && !_.isEmpty(employee))
         return this.success(req, res, this.status.HTTP_OK, employee, this.messageTypes.deliveryExecutiveFetchedSuccessfully);
@@ -79,8 +69,6 @@ class deliveryExecutiveCtrl extends BaseController {
       );
     }
   };
-
-
 
   // get  Delivery Executive list 
   getList = async (req, res) => {
@@ -100,7 +88,6 @@ class deliveryExecutiveCtrl extends BaseController {
       // get the list of asm in the allocated city
       let searchObject = {
         'isDeleted': 0,
-
       };
 
       // creating a match object
@@ -157,10 +144,7 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   }
 
-
-
-
-  // // // patch the request
+  // patch the request
   updateDeliveryExecutiveDetails = async (req, res) => {
     try {
       info("Employee CHANGE ! !");
@@ -240,6 +224,78 @@ class deliveryExecutiveCtrl extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+
+     // patch Delivery Executive status
+    //  patchDeliveryExecutiveStatus = async (req, res) => {
+    //   try {
+    //     info('Delivery Executive STATUS CHANGE !');
+  
+    //     // type id 
+    //     let type = req.params.type,
+    //     deliveryexecutiveId = req.params.deliveryexecutiveId;
+    //     // creating data to insert
+    //     let dataToUpdate = {
+    //       $set: {
+    //         status: type == 'activate' ? 1 : 0
+    //       }
+    //     };
+  
+    //     // inserting data into the db 
+    //     let isUpdated = await Model.findOneAndUpdate({
+    //       _id: mongoose.Types.ObjectId(deliveryexecutiveId)
+    //     }, dataToUpdate, {
+    //       new: true,
+    //       upsert: false,
+    //       lean: true
+    //     });
+    //     // check if inserted 
+    //     if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.deliveryExecutiveActivatedSuccessfully : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully);
+    //     else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdatedSuccessfully);
+  
+    //     // catch any runtime error 
+    //   } catch (err) {
+    //     error(err);
+    //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    //   }
+    // }
+
+    // patchDeliveryExecutiveStatus = async (req, res) => {
+    //   try {
+    //     info('Transporter STATUS CHANGE !');
+  
+    //     // type id 
+    //     let type = req.params.type,
+    //     deliveryId = req.params.deliveryId;
+    //    // getemployee = req.params.employeeType
+    //     //if (employeeType == "deliveryexecutive") {
+    //     // creating data to insert
+    //     let dataToUpdate = {
+    //       $set: {
+    //         status: type == 'activate' ? 1 : 0
+    //       }
+    //     };
+  
+    //     // inserting data into the db 
+    //     let isUpdated = await Model.findOneAndUpdate({
+    //       _id: mongoose.Types.ObjectId(deliveryId)
+    //     }, dataToUpdate, {
+    //       new: true,
+    //       upsert: false,
+    //       lean: true
+    //     });
+  
+    //     // check if inserted 
+    //        if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.deliveryExecutiveActivatedSuccessfully : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully);
+    //     else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdatedSuccessfully);
+  
+    //     // catch any runtime error 
+    //   //}
+    //  } catch (err) {
+    //     error(err);
+    //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    //   }
+    // }
 }
 
 // exporting the modules

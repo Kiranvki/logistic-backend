@@ -13,7 +13,12 @@ function deliveryExecutive() {
     ctrl.getList // controller function 
   );
 
- 
+    //  // activate or deactive security guard
+    //  closed.route('/:deliveryId/status/:type').patch(
+    //   //[joiDistributorChangeStatus], // joi validation
+    //   // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
+    //   ctrl.patchDeliveryExecutiveStatus // get controller 
+    // );
 
     }
 }

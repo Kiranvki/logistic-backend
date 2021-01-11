@@ -65,6 +65,13 @@ function securityRoutes() {
       ctrl.getZohoDetails              // controller function 
     );
 
+       // activate or deactive Security Guard
+       closed.route('/:securityguardId/status/:type').patch(
+        //[joiDistributorChangeStatus], // joi validation
+        // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
+        ctrl.patchSecurityGuardStatus // get controller 
+      );
+
   }
 }
 module.exports = securityRoutes();

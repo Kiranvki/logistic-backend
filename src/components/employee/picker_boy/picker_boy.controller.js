@@ -489,8 +489,6 @@ class PickerBoyController extends BaseController {
     }
   }
 
-
-
   // getting the picker boy details using other fields 
   getDetailsUsingField = async (fieldValue) => {
     try {
@@ -569,13 +567,13 @@ class PickerBoyController extends BaseController {
   }
 
 
-
+//delete employee
   deleteEmployee = async (req, res) => {
     try {
       info("Employee Delete!");
       //let employeeId = req.query.employeeId;
       // inserting the new user into the db
-      let employeeId = req.query.employeeId || "";
+      let employeeId = req.params.employeeId || "";
 
       // creating data to update
       let dataToUpdate = {
@@ -615,7 +613,38 @@ class PickerBoyController extends BaseController {
     }
   }
 
+ // patch Pickerboy status
+  // patchPickerboyStatus = async (req, res) => {
+  //   try {
+  //     info('Pickerboy STATUS CHANGE !');
+  //     let type = req.params.type,
+  //     pickerboyId = req.params.pickerboyId;
+  //     // creating data to insert
+  //     let dataToUpdate = {
+  //       $set: {
+  //         status: type == 'activate' ? 1 : 0
+  //       }
+  //     };
 
+  //     // inserting data into the db 
+  //     let isUpdated = await Model.findOneAndUpdate({
+  //       _id: mongoose.Types.ObjectId(pickerboyId)
+  //     }, dataToUpdate, {
+  //       new: true,
+  //       upsert: false,
+  //       lean: true
+  //     });
+
+  //     // check if inserted 
+  //     if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.pickerboyActivatedSuccessfully : this.messageTypes.pickerboyDeactivatedSuccessfully);
+  //     else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerboyNotUpdated);
+
+  //     // catch any runtime error 
+  //   } catch (err) {
+  //     error(err);
+  //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  //   }
+  // }
 
 }
 
