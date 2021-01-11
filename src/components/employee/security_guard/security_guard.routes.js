@@ -21,8 +21,8 @@ const {
 
 
 //exporting the security guard routes
-function securityRoutes(){
-    return (open, closed) => {
+function securityRoutes() {
+  return (open, closed) => {
     // post
     closed.route('/').post(
       [joiEmployeCreate], // joi validation
@@ -66,13 +66,6 @@ function securityRoutes(){
       getDetailsFromZohoUsingEmpID, // get details from zoho using empid
       ctrl.getZohoDetails              // controller function 
     );
-
-       // activate or deactive Security Guard
-       closed.route('/:securityguardId/status/:type').patch(
-        //[joiDistributorChangeStatus], // joi validation
-        // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
-        ctrl.patchSecurityGuardStatus // get controller 
-      );
 
   }
 }

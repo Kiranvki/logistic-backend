@@ -15,44 +15,9 @@ class deliveryExecutiveCtrl extends BaseController {
   }
 
   // internal create function
-  create = async (req, res) => {
+  create = async (dataToInsert) => {
     try {
-      info('Create a new Picker Boy !');
-
-      // getting the full name 
-      let fullName = `${req.body.firstName} ${req.body.lastName}`;
-
-      // creating data to insert
-      let dataToInsert = {
-        ...req.body.userData,
-        'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
-        'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
-        'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
-        'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
-        'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
-        'contactMobile': req.body.contactMobile,
-        'email': req.body.email,
-        'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
-        'fullName': fullName,
-        'cityId': req.body.cityId,
-      }
-
-      // checking if profile pic is present 
-      if (req.body.profilePic)
-        dataToInsert = {
-          ...dataToInsert,
-          'profilePic': req.body.profilePic
-        }
-
-      // if its not a waycool emp
-      if (req.body.isWaycoolEmp == false)
-        dataToInsert = {
-          ...dataToInsert,
-          'employeeId': req.body.empId,
-          'firstName': req.body.firstName,
-          'lastName': req.body.lastName,
-          'photo': req.body.profilePic,
-        }
+      info('Create a new Delivery Executive !');
 
       // inserting data into the db 
       return Model.create(dataToInsert)
@@ -71,19 +36,33 @@ class deliveryExecutiveCtrl extends BaseController {
       // catch any runtime error 
     } catch (err) {
       error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      return {
+        success: false,
+        error: err
+      }
     }
   }
+
+
 
   get = async (req, res) => {
     try {
       info("Employee GET DETAILS !");
       // get the brand id
       let employeeId = req.params.employeeId;
+      // inserting data into the db
+      // let transporter = await Model.findOne({
+      // let employee = await Model.findById({
+
+      //   _id: mongoose.Types.ObjectId(employeeId)
+
+      // }).lean();
+
       let employee = await Model.findOne({
         _id: mongoose.Types.ObjectId(req.params.employeeId),
         isDeleted: 0,
       }).lean();
+      console.log("Emplloyy", employee);
       // check if inserted
       if (employee && !_.isEmpty(employee))
         return this.success(req, res, this.status.HTTP_OK, employee, this.messageTypes.deliveryExecutiveFetchedSuccessfully);
@@ -101,10 +80,12 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   };
 
-  // get transporter list 
+
+
+  // get  Delivery Executive list 
   getList = async (req, res) => {
     try {
-      info('Get the Transporter List !');
+      info('Get the Delivery Executive !');
 
       // get the query params
       let page = req.query.page || 1,
@@ -119,6 +100,7 @@ class deliveryExecutiveCtrl extends BaseController {
       // get the list of asm in the allocated city
       let searchObject = {
         'isDeleted': 0,
+
       };
 
       // creating a match object
@@ -138,14 +120,14 @@ class deliveryExecutiveCtrl extends BaseController {
           }]
         };
 
-      // get the total rate category
-      let totalTransporter = await Model.countDocuments({
+      // get the total delivery executive
+      let totalDeliveryExecutive = await Model.countDocuments({
         ...searchObject
       });
 
 
       // get the Transporter list 
-      let transporterList = await Model.aggregate([{
+      let deliveryExecutiveList = await Model.aggregate([{
         $match: {
           ...searchObject
         }
@@ -155,26 +137,18 @@ class deliveryExecutiveCtrl extends BaseController {
         $skip: skip
       }, {
         $limit: pageSize
-        // },
-        // {
-        //   $project: {
-
-        //     'name': 1,
-        //     'isDeleted': 1
-        //   }
       },
       ])
-      //.allowDiskUse(true);
 
       // success 
       return this.success(req, res, this.status.HTTP_OK, {
-        results: transporterList,
+        results: deliveryExecutiveList,
         pageMeta: {
           skip: parseInt(skip),
           pageSize: pageSize,
-          total: totalTransporter
+          total: totalDeliveryExecutive
         }
-      }, );
+      });
 
       // catch any runtime error 
     } catch (err) {
@@ -182,6 +156,8 @@ class deliveryExecutiveCtrl extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+
 
 
   // // // patch the request
@@ -232,7 +208,7 @@ class deliveryExecutiveCtrl extends BaseController {
       info("Employee Delete!");
       //let employeeId = req.query.employeeId;
       // inserting the new user into the db
-       let employeeId = req.params.employeeId || "";
+      let employeeId = req.params.employeeId || "";
 
       // creating data to update
       let dataToUpdate = {
@@ -243,15 +219,15 @@ class deliveryExecutiveCtrl extends BaseController {
       };
 
       // inserting data into the db 
-    //   let isUpdated = await Model.findOneAndUpdate({
-        let isUpdated = await Model.updateOne({
+      //   let isUpdated = await Model.findOneAndUpdate({
+      let isUpdated = await Model.updateOne({
         _id: mongoose.Types.ObjectId(employeeId)
       },
-     dataToUpdate, {
+        dataToUpdate, {
         new: true,
         upsert: false,
         lean: true
-     }
+      }
       )
 
       // check if inserted 
@@ -264,78 +240,6 @@ class deliveryExecutiveCtrl extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
-
-
-     // patch Delivery Executive status
-    //  patchDeliveryExecutiveStatus = async (req, res) => {
-    //   try {
-    //     info('Delivery Executive STATUS CHANGE !');
-  
-    //     // type id 
-    //     let type = req.params.type,
-    //     deliveryexecutiveId = req.params.deliveryexecutiveId;
-    //     // creating data to insert
-    //     let dataToUpdate = {
-    //       $set: {
-    //         status: type == 'activate' ? 1 : 0
-    //       }
-    //     };
-  
-    //     // inserting data into the db 
-    //     let isUpdated = await Model.findOneAndUpdate({
-    //       _id: mongoose.Types.ObjectId(deliveryexecutiveId)
-    //     }, dataToUpdate, {
-    //       new: true,
-    //       upsert: false,
-    //       lean: true
-    //     });
-    //     // check if inserted 
-    //     if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.deliveryExecutiveActivatedSuccessfully : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully);
-    //     else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdatedSuccessfully);
-  
-    //     // catch any runtime error 
-    //   } catch (err) {
-    //     error(err);
-    //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    //   }
-    // }
-
-    // patchDeliveryExecutiveStatus = async (req, res) => {
-    //   try {
-    //     info('Transporter STATUS CHANGE !');
-  
-    //     // type id 
-    //     let type = req.params.type,
-    //     deliveryId = req.params.deliveryId;
-    //    // getemployee = req.params.employeeType
-    //     //if (employeeType == "deliveryexecutive") {
-    //     // creating data to insert
-    //     let dataToUpdate = {
-    //       $set: {
-    //         status: type == 'activate' ? 1 : 0
-    //       }
-    //     };
-  
-    //     // inserting data into the db 
-    //     let isUpdated = await Model.findOneAndUpdate({
-    //       _id: mongoose.Types.ObjectId(deliveryId)
-    //     }, dataToUpdate, {
-    //       new: true,
-    //       upsert: false,
-    //       lean: true
-    //     });
-  
-    //     // check if inserted 
-    //        if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.deliveryExecutiveActivatedSuccessfully : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully);
-    //     else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdatedSuccessfully);
-  
-    //     // catch any runtime error 
-    //   //}
-    //  } catch (err) {
-    //     error(err);
-    //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-    //   }
-    // }
 }
 
 // exporting the modules

@@ -3,7 +3,6 @@ const autopopulate = require('mongoose-autopopulate');
 const Schema = mongoose.Schema;
 
 // schema
-
 const deliveryExecutive = new Schema({
   employeeId: {
     type: String
