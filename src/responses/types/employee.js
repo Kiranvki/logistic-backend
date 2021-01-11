@@ -50,7 +50,6 @@ module.exports = {
   deliveryExecutiveNotFound :"Delivery Executive Not Fetched !",
   deliveryExecutiveDeletedSuccessfully:"Delivery Executive Successfully !",
   deliveryExecutiveNotDeletedSuccessfully: "Delivery Executive Deleted!",
-<<<<<<< HEAD
   deliveryExecutiveUpdatedSuccessfully: "Delivery Executive Updated Successfully!",
   deliveryExecutiveNotUpdatedSuccessfully: "Delivery Executive Not Updated !",
   deliveryExecutiveActivatedSuccessfully : "Delivery Executive Activated Successfully !",
@@ -68,7 +67,6 @@ module.exports = {
   pickerboyActivatedSuccessfully : "Pickerboy Activated Successfully !",
   pickerboyDeactivatedSuccessfully : "Pickerboy Deactivated Successfully !",
   pickerboyNotUpdated : "pickerboy Not Updated Successfully !",
-=======
   deliveryExecutiveUpdatedSuccessfully : "Delivery Executive Updated Successfully!",
   deliveryExecutiveNotUpdatedSuccessfully : "Delivery Executive Not Updated !",
   securityGuardCreated: "Security Guard Successfully Created !",
@@ -79,7 +77,6 @@ module.exports = {
   securityGuardeNotDeletedSuccessfully: "Security Guard Deleted!",
   securityGuardUpdatedSuccessfully : "Security Guard Updated Successfully!",
   securityGuardNotUpdatedSuccessfully : "Security Guard Not Updated !",
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
   invalidSalesmanIds: (salesmanIds) => {
     return `Invalid Salesman Id Found ${salesmanIds}`
   },

@@ -3,12 +3,8 @@ const ctrl = require('./security_guard.controller');
 
 // custom joi validation
 const {
-<<<<<<< HEAD
-  joiSecurityGuard, // create a new SecurityGuard
-=======
   joiEmployeCreate, // create a new employee
   joiGetZohoDetails,  //getting the details from zoho
->>>>>>> 9f659712bd7e3552c361802c485e1c211ce7692b
 } = require('./security_guard.validators');
 
 // hooks 

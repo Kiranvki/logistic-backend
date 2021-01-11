@@ -3,118 +3,7 @@ const autopopulate = require('mongoose-autopopulate');
 const Schema = mongoose.Schema;
 
 // schema
-<<<<<<< HEAD
-const deliveryExecutive = new Schema({ 
-    employeeId: {
-        type: String
-      },
-      employerName: {
-        type: String,
-        default: 'Waycool Foods & Products Private Limited'
-      },
-      isWaycoolEmp: {
-        type: 'Boolean',
-        default: false
-      },
-      reportingManager: {
-        type: String,
-      },
-      email: {
-        type: String,
-        required: true
-      },
-      gender: {
-        type: String,
-      },
-      aadharNumber: {
-        type: String,
-      },
-      designation: {
-        type: String
-      },
-      pan: {
-        type: String
-      },
-      zohoId: {
-        type: String
-      },
-      firstName: {
-        type: String,
-        required: true
-      },
-      lastName: {
-        type: String,
-        required: true
-      },
-      fullName: {
-        type: String,
-        required: true
-      },
-      contactMobile: {
-        type: Number
-      },
-      altContactNo: {
-        type: Number,
-      },
-      photo: {
-        type: String
-      },
-      role: {
-        type: String
-      },
-      employeeStatus: {
-        type: String
-      },
-      employeeType: {
-        type: String
-      },
-      locationName: {
-        type: String
-      },
-      dateOfJoining: {
-        type: Date
-      },
-      dateOfBirth: {
-        type: Date
-      },
-    
-      profilePic: {
-        type: mongoose.Schema.Types.ObjectId,
-        default: null
-      },
-      createdBy: {
-        type: String
-      },
-      createdById: {
-        type: mongoose.Schema.Types.ObjectId,
-      },
-      cityId: {
-        type: 'String',
-        enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
-      },
-      reportingTo: {
-        id: {
-          type: String
-        },
-        name: {
-          type: String
-        },
-        emailId: {
-          type: String
-        }
-      },
-      status: {
-        type: Number,
-        default: 1
-      },
-      isDeleted: {
-        type: Number,
-        default: 0
-      }
-    }, {
-      timestamps: true
-    });
-=======
+
 const deliveryExecutive = new Schema({
   employeeId: {
     type: String
@@ -130,7 +19,6 @@ const deliveryExecutive = new Schema({
   agencyId: {
     type: mongoose.Schema.Types.ObjectId,
   },
->>>>>>> 7a7c8bc53e42f71f8eef6aa34745a5fe0bc57c03
 
   managerName: {
     type: String,

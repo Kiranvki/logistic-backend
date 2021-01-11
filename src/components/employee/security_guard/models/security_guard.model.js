@@ -4,9 +4,7 @@ const autopopulate = require('mongoose-autopopulate');
 const Schema = mongoose.Schema;
 
 // schema
-<<<<<<< HEAD
-const securityGuard = new Schema({
-=======
+
 const securityGuard = new Schema(
   {
     employeeId: {
@@ -87,7 +85,6 @@ const securityGuard = new Schema(
     dateOfBirth: {
       type: Date,
     },
->>>>>>> 7a7c8bc53e42f71f8eef6aa34745a5fe0bc57c03
 
   employeeId: {
     type: String

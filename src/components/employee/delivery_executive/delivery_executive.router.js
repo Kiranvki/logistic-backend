@@ -13,7 +13,6 @@ function deliveryExecutive() {
     ctrl.getList // controller function 
   );
 
-<<<<<<< HEAD
     //  // activate or deactive security guard
     //  closed.route('/:deliveryId/status/:type').patch(
     //   //[joiDistributorChangeStatus], // joi validation
@@ -21,8 +20,6 @@ function deliveryExecutive() {
     //   ctrl.patchDeliveryExecutiveStatus // get controller 
     // );
 
-=======
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
     }
 }
 

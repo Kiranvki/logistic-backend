@@ -75,10 +75,6 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   }
 
-<<<<<<< HEAD
-// Get single list
-=======
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
   get = async (req, res) => {
     try {
       info("Employee GET DETAILS !");
@@ -105,13 +101,7 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   };
 
-<<<<<<< HEAD
-  // get  Delivery Executive list 
-=======
-
-
   // get transporter list 
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
   getList = async (req, res) => {
     try {
       info('Get the Transporter List !');
@@ -193,14 +183,8 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   }
 
-<<<<<<< HEAD
-  // patch the request
-=======
-
-  
 
   // // // patch the request
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
   updateDeliveryExecutiveDetails = async (req, res) => {
     try {
       info("Employee CHANGE ! !");

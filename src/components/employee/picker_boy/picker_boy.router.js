@@ -60,13 +60,12 @@ function userRoutes() {
       ctrl.getList // controller function
     );
 
-<<<<<<< HEAD
     // get all
-    closed.route("/list/pickerboy").get(
-      // [joiTransporterList], // joi validation
-      // verifyAppToken,
-      ctrl.getPickerBoy // controller function
-    );
+    // closed.route("/list/pickerboy").get(
+    //   // [joiTransporterList], // joi validation
+    //   // verifyAppToken,
+    //   ctrl.getPickerBoy // controller function
+    // );
 
         // activate or deactive picker boy
         // closed.route('/:pickerboyId/status/:type').patch(
@@ -74,9 +73,7 @@ function userRoutes() {
         //   // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
         //   ctrl.patchPickerboyStatus // get controller 
         // );
-=======
 
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
   };
 }
 

@@ -530,21 +530,13 @@ class PickerBoyController extends BaseController {
   }
 
 
-<<<<<<< HEAD
-//delete employee
-=======
   
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
   deleteEmployee = async (req, res) => {
     try {
       info("Employee Delete!");
       //let employeeId = req.query.employeeId;
       // inserting the new user into the db
-<<<<<<< HEAD
-      let employeeId = req.params.employeeId || "";
-=======
-       let employeeId = req.query.employeeId || "";
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
+       let employeeId = req.params.employeeId || "";
 
       // creating data to update
       let dataToUpdate = {

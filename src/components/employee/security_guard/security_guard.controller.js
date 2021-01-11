@@ -171,65 +171,34 @@ class securityController extends BaseController {
     }
   };
 
+  //employee create
   post = async (req, res) => {
-<<<<<<< HEAD
-    if (req.params.employeeType == "deliveryExecutive") {
-      let deliveryResponse = await deliveryCtrl.create(req, res);
-      return;
-    } else if (req.params.employeeType == "pickerBoy") {
-      let pickerboyResponse = await pickerBoyCtrl.create(req, res);
-      return;
-=======
     try {
       // get the firstname
-      req.body.firstName =
-        req.body.isWaycoolEmp == false
-          ? req.body.firstName.replace(/\w\S*/g, function (txt) {
-              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            })
-          : req.body.userData.firstName.replace(/\w\S*/g, function (txt) {
-              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            });
-
+      req.body.firstName = req.body.isWaycoolEmp == false ? req.body.firstName.replace(
+        /\w\S*/g,
+        function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        }) : req.body.userData.firstName.replace(
+          /\w\S*/g,
+          function (txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+          });
       // sentence case the last name
-      req.body.lastName =
-        req.body.isWaycoolEmp == false
-          ? req.body.lastName.replace(/\w\S*/g, function (txt) {
-              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            })
-          : req.body.userData.lastName.replace(/\w\S*/g, function (txt) {
-              return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-            });
-
-      // getting the full name
+      req.body.lastName = req.body.isWaycoolEmp == false ? req.body.lastName.replace(
+        /\w\S*/g,
+        function (txt) {
+          return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+        }) : req.body.userData.lastName.replace(
+          /\w\S*/g,
+          function (txt) {
+            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+          });
+      // getting the full name 
       let fullName = `${req.body.firstName} ${req.body.lastName}`;
-
       // creating data to insert
       let dataToInsert = {
         ...req.body.userData,
-<<<<<<< HEAD
-        firstName: req.body.firstName
-          ? req.body.firstName
-          : req.body.userData.firstName,
-        lastName: req.body.lastName
-          ? req.body.lastName
-          : req.body.userData.lastName,
-        isWaycoolEmp: req.body.isWaycoolEmp == true ? 1 : 0,
-        reportingManager: req.body.reportingManager,
-        employerName:
-          req.body.isWaycoolEmp == true
-            ? "Waycool Foods & Products Private Limited"
-            : req.body.agencyName,
-        agencyId:
-          req.body.isWaycoolEmp == true ? null : req.body.agencyId || "",
-        contactMobile: req.body.contactMobile,
-        altContactNo: req.body.altContactNo,
-        email: req.body.email,
-        fullName: fullName,
-        createdById: req.user._id || "",
-        createdBy: req.user.email || "admin",
-      };
-=======
         'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
         'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
         'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
@@ -243,251 +212,365 @@ class securityController extends BaseController {
         'createdBy': req.user.email || 'admin',
         'managerName': req.body.managerName ? req.body.managerName : null
       }
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
-
       // if its not a waycool emp
       if (req.body.isWaycoolEmp == false)
         dataToInsert = {
           ...dataToInsert,
-          employeeId: req.body.empId,
-          firstName: req.body.firstName,
-          lastName: req.body.lastName,
-        };
-
+          'employeeId': req.body.empId,
+          'firstName': req.body.firstName,
+          'lastName': req.body.lastName,
+        }
       //checking condition for delivery executive
       if (req.body.designation == "deliveryExecutive") {
         let deliveryResponse = await deliveryCtrl.create(dataToInsert);
-
         if (deliveryResponse.success) {
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            deliveryResponse.data,
-            this.messageTypes.deliveryExecutiveCreated
-          );
-        } else {
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.deliveryExecutiveNotCreated
-          );
+          return this.success(req, res, this.status.HTTP_OK, deliveryResponse.data, this.messageTypes.deliveryExecutiveCreated)
+        }
+        else {
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotCreated);
         }
       }
-
       //checking condition for picker boy
       if (req.body.designation == "pickerBoy") {
         let pickerboyResponse = await pickerBoyCtrl.create(dataToInsert);
-
         if (pickerboyResponse.success) {
           //success
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            pickerboyResponse.data,
-            this.messageTypes.pickerBoyCreated
-          );
-        } else {
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.pickerBoyNotCreated
-          );
+          return this.success(req, res, this.status.HTTP_OK, pickerboyResponse.data, this.messageTypes.pickerBoyCreated)
+        }
+        else {
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerBoyNotCreated);
         }
       }
-
       //checking condition for security guard
-<<<<<<< HEAD
-      if (req.body.position == "securityGuard") {
-=======
       if (req.body.designation == "securityGuard") {
-
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
         info("Create a new Security Guard !");
-
-        // inserting data into the db
+        // inserting data into the db 
         let isInserted = await Model.create(dataToInsert);
-
-        // check if inserted
+        // check if inserted 
         if (isInserted && !_.isEmpty(isInserted)) {
           // returning success
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            isInserted,
-            this.messageTypes.securityGuardCreated
-          );
-        } else
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.securityGuardNotCreated
-          );
+          return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.securityGuardCreated)
+        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotCreated);
       }
-      // catch any runtime error
+      // catch any runtime error 
     } catch (err) {
       error(err);
-<<<<<<< HEAD
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
-    }
-  };
-
-  // get security guard list
-  getList = async (req, res) => {
-    try {
-      info("Get the security guard List !");
-
-      // get the query params
-      let page = req.query.page || 1,
-        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
-          if (res.success) return res.data;
-          else return 60;
-        }),
-        searchKey = req.query.search || "",
-        sortBy = req.query.sortBy || "createdAt",
-        sortingArray = {};
-
-      sortingArray[sortBy] = -1;
-      let skip = parseInt(page - 1) * pageSize;
-
-      // get the list of asm in the allocated city
-      let searchObject = {
-        isDeleted: 0,
-      };
-
-      // creating a match object
-      if (searchKey !== "")
-        searchObject = {
-          ...searchObject,
-          $or: [
-            {
-              employeeId: {
-                $regex: searchKey,
-                $options: "is",
-              },
-            },
-            {
-              employerName: {
-                $regex: searchKey,
-                $options: "is",
-              },
-            },
-          ],
-        };
-
-      // get the total rate category
-      let totalTransporter = await Model.countDocuments({
-        ...searchObject,
-      });
-
-      // get the Transporter list
-      let transporterList = await Model.aggregate([
-        {
-          $match: {
-            ...searchObject,
-          },
-        },
-        {
-          $sort: sortingArray,
-        },
-        {
-          $skip: skip,
-        },
-        {
-          $limit: pageSize,
-        },
-      ]);
-
-      // success
-      return this.success(req, res, this.status.HTTP_OK, {
-        results: transporterList,
-        pageMeta: {
-          skip: parseInt(skip),
-          pageSize: pageSize,
-          total: totalTransporter,
-        },
-      });
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
-    }
-  };
-=======
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
->>>>>>> 7a7c8bc53e42f71f8eef6aa34745a5fe0bc57c03
     }
+  }
 
-    try {
-      info("Create a new Security Guard !");
 
-      // get the firstname
-         // getting the full name 
-         let fullName = `${req.body.firstName} ${req.body.lastName}`;
+  // post = async (req, res) => {
 
-         // creating data to insert
-         let dataToInsert = {
-           ...req.body.userData,
-           'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
-           'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
-           'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
-           'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
-           'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
-           'contactMobile': req.body.contactMobile,
-           'email': req.body.email,
-           'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
-           'fullName': fullName,
-           'cityId': req.body.cityId,
-         }
+  //   if (req.params.employeeType == "deliveryExecutive") {
+  //     let deliveryResponse = await deliveryCtrl.create(req, res);
+  //     return;
+  //   } else if (req.params.employeeType == "pickerBoy") {
+  //     let pickerboyResponse = await pickerBoyCtrl.create(req, res);
+  //     return;
+
+  //   try {
+  //     // get the firstname
+  //     req.body.firstName =
+  //       req.body.isWaycoolEmp == false
+  //         ? req.body.firstName.replace(/\w\S*/g, function (txt) {
+  //             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  //           })
+  //         : req.body.userData.firstName.replace(/\w\S*/g, function (txt) {
+  //             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  //           });
+
+  //     // sentence case the last name
+  //     req.body.lastName =
+  //       req.body.isWaycoolEmp == false
+  //         ? req.body.lastName.replace(/\w\S*/g, function (txt) {
+  //             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  //           })
+  //         : req.body.userData.lastName.replace(/\w\S*/g, function (txt) {
+  //             return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  //           });
+
+  //     // getting the full name
+  //     let fullName = `${req.body.firstName} ${req.body.lastName}`;
+
+  //     // creating data to insert
+  //     let dataToInsert = {
+  //       ...req.body.userData,
+  //       firstName: req.body.firstName
+  //         ? req.body.firstName
+  //         : req.body.userData.firstName,
+  //       lastName: req.body.lastName
+  //         ? req.body.lastName
+  //         : req.body.userData.lastName,
+  //       isWaycoolEmp: req.body.isWaycoolEmp == true ? 1 : 0,
+  //       reportingManager: req.body.reportingManager,
+  //       employerName:
+  //         req.body.isWaycoolEmp == true
+  //           ? "Waycool Foods & Products Private Limited"
+  //           : req.body.agencyName,
+  //       agencyId:
+  //         req.body.isWaycoolEmp == true ? null : req.body.agencyId || "",
+  //       contactMobile: req.body.contactMobile,
+  //       altContactNo: req.body.altContactNo,
+  //       email: req.body.email,
+  //       fullName: fullName,
+  //       createdById: req.user._id || "",
+  //       createdBy: req.user.email || "admin",
+  //     };
+  //       'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
+  //       'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
+  //       'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
+  //       'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
+  //       'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
+  //       'contactMobile': req.body.contactMobile,
+  //       'altContactNo': req.body.altContactNo,
+  //       'email': req.body.email,
+  //       'fullName': fullName,
+  //       'createdById': req.user._id || '',
+  //       'createdBy': req.user.email || 'admin',
+  //       'managerName': req.body.managerName ? req.body.managerName : null
+  //     }
+
+  //     // if its not a waycool emp
+  //     if (req.body.isWaycoolEmp == false)
+  //       dataToInsert = {
+  //         ...dataToInsert,
+  //         employeeId: req.body.empId,
+  //         firstName: req.body.firstName,
+  //         lastName: req.body.lastName,
+  //       };
+
+  //     //checking condition for delivery executive
+  //     if (req.body.designation == "deliveryExecutive") {
+  //       let deliveryResponse = await deliveryCtrl.create(dataToInsert);
+
+  //       if (deliveryResponse.success) {
+  //         return this.success(
+  //           req,
+  //           res,
+  //           this.status.HTTP_OK,
+  //           deliveryResponse.data,
+  //           this.messageTypes.deliveryExecutiveCreated
+  //         );
+  //       } else {
+  //         return this.errors(
+  //           req,
+  //           res,
+  //           this.status.HTTP_CONFLICT,
+  //           this.messageTypes.deliveryExecutiveNotCreated
+  //         );
+  //       }
+  //     }
+
+  //     //checking condition for picker boy
+  //     if (req.body.designation == "pickerBoy") {
+  //       let pickerboyResponse = await pickerBoyCtrl.create(dataToInsert);
+
+  //       if (pickerboyResponse.success) {
+  //         //success
+  //         return this.success(
+  //           req,
+  //           res,
+  //           this.status.HTTP_OK,
+  //           pickerboyResponse.data,
+  //           this.messageTypes.pickerBoyCreated
+  //         );
+  //       } else {
+  //         return this.errors(
+  //           req,
+  //           res,
+  //           this.status.HTTP_CONFLICT,
+  //           this.messageTypes.pickerBoyNotCreated
+  //         );
+  //       }
+  //     }
+
+  //     //checking condition for security guard
+  //     if (req.body.position == "securityGuard") {
+
+  //     if (req.body.designation == "securityGuard") {
+
+
+  //       info("Create a new Security Guard !");
+
+  //       // inserting data into the db
+  //       let isInserted = await Model.create(dataToInsert);
+
+  //       // check if inserted
+  //       if (isInserted && !_.isEmpty(isInserted)) {
+  //         // returning success
+  //         return this.success(
+  //           req,
+  //           res,
+  //           this.status.HTTP_OK,
+  //           isInserted,
+  //           this.messageTypes.securityGuardCreated
+  //         );
+  //       } else
+  //         return this.errors(
+  //           req,
+  //           res,
+  //           this.status.HTTP_CONFLICT,
+  //           this.messageTypes.securityGuardNotCreated
+  //         );
+  //     }
+  //     // catch any runtime error
+  //   } catch (err) {
+  //     error(err);
+  //     this.errors(
+  //       req,
+  //       res,
+  //       this.status.HTTP_INTERNAL_SERVER_ERROR,
+  //       this.exceptions.internalServerErr(req, err)
+  //     );
+  //   }
+  // };
+
+  // // get security guard list
+  // getList = async (req, res) => {
+  //   try {
+  //     info("Get the security guard List !");
+
+  //     // get the query params
+  //     let page = req.query.page || 1,
+  //       pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
+  //         if (res.success) return res.data;
+  //         else return 60;
+  //       }),
+  //       searchKey = req.query.search || "",
+  //       sortBy = req.query.sortBy || "createdAt",
+  //       sortingArray = {};
+
+  //     sortingArray[sortBy] = -1;
+  //     let skip = parseInt(page - 1) * pageSize;
+
+  //     // get the list of asm in the allocated city
+  //     let searchObject = {
+  //       isDeleted: 0,
+  //     };
+
+  //     // creating a match object
+  //     if (searchKey !== "")
+  //       searchObject = {
+  //         ...searchObject,
+  //         $or: [
+  //           {
+  //             employeeId: {
+  //               $regex: searchKey,
+  //               $options: "is",
+  //             },
+  //           },
+  //           {
+  //             employerName: {
+  //               $regex: searchKey,
+  //               $options: "is",
+  //             },
+  //           },
+  //         ],
+  //       };
+
+  //     // get the total rate category
+  //     let totalTransporter = await Model.countDocuments({
+  //       ...searchObject,
+  //     });
+
+  //     // get the Transporter list
+  //     let transporterList = await Model.aggregate([
+  //       {
+  //         $match: {
+  //           ...searchObject,
+  //         },
+  //       },
+  //       {
+  //         $sort: sortingArray,
+  //       },
+  //       {
+  //         $skip: skip,
+  //       },
+  //       {
+  //         $limit: pageSize,
+  //       },
+  //     ]);
+
+  //     // success
+  //     return this.success(req, res, this.status.HTTP_OK, {
+  //       results: transporterList,
+  //       pageMeta: {
+  //         skip: parseInt(skip),
+  //         pageSize: pageSize,
+  //         total: totalTransporter,
+  //       },
+  //     });
+
+  //     // catch any runtime error
+  //   } catch (err) {
+  //     error(err);
+  //     this.errors(
+  //       req,
+  //       res,
+  //       this.status.HTTP_INTERNAL_SERVER_ERROR,
+  //       this.exceptions.internalServerErr(req, err)
+  //     );
+  //   }
+  // };
+  //     //this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+
+  //   }
+
+  //   try {
+  //     info("Create a new Security Guard !");
+
+  //     // get the firstname
+  //        // getting the full name 
+  //        let fullName = `${req.body.firstName} ${req.body.lastName}`;
+
+  //        // creating data to insert
+  //        let dataToInsert = {
+  //          ...req.body.userData,
+  //          'firstName': req.body.firstName ? req.body.firstName : req.body.userData.firstName,
+  //          'lastName': req.body.lastName ? req.body.lastName : req.body.userData.lastName,
+  //          'isWaycoolEmp': req.body.isWaycoolEmp == true ? 1 : 0,
+  //          'employerName': req.body.isWaycoolEmp == true ? 'Waycool Foods & Products Private Limited' : req.body.agencyName,
+  //          'agencyId': req.body.isWaycoolEmp == true ? null : req.body.agencyId,
+  //          'contactMobile': req.body.contactMobile,
+  //          'email': req.body.email,
+  //          'gender': req.body.isWaycoolEmp == true ? (req.body.userData.gender).toLowerCase() : (req.body.gender).toLowerCase(),
+  //          'fullName': fullName,
+  //          'cityId': req.body.cityId,
+  //        }
    
-         // checking if profile pic is present 
-         if (req.body.profilePic)
-           dataToInsert = {
-             ...dataToInsert,
-             'profilePic': req.body.profilePic
-           }
+  //        // checking if profile pic is present 
+  //        if (req.body.profilePic)
+  //          dataToInsert = {
+  //            ...dataToInsert,
+  //            'profilePic': req.body.profilePic
+  //          }
    
-         // if its not a waycool emp
-         if (req.body.isWaycoolEmp == false)
-           dataToInsert = {
-             ...dataToInsert,
-             'employeeId': req.body.empId,
-             'firstName': req.body.firstName,
-             'lastName': req.body.lastName,
-             'photo': req.body.profilePic,
-           }
+  //        // if its not a waycool emp
+  //        if (req.body.isWaycoolEmp == false)
+  //          dataToInsert = {
+  //            ...dataToInsert,
+  //            'employeeId': req.body.empId,
+  //            'firstName': req.body.firstName,
+  //            'lastName': req.body.lastName,
+  //            'photo': req.body.profilePic,
+  //          }
    
-         // inserting data into the db 
-         let isInserted = await Model.create(dataToInsert);
+  //        // inserting data into the db 
+  //        let isInserted = await Model.create(dataToInsert);
    
-         // check if inserted 
-         if (isInserted && !_.isEmpty(isInserted)) {
-           // returning success
-           return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.securityGuardCreated)
-         } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotCreated);
+  //        // check if inserted 
+  //        if (isInserted && !_.isEmpty(isInserted)) {
+  //          // returning success
+  //          return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.securityGuardCreated)
+  //        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotCreated);
         
-         // catch any runtime error 
-       } catch (err) {
-         error(err);
-         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-       }
-     }
+  //        // catch any runtime error 
+  //      } catch (err) {
+  //        error(err);
+  //        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  //      }
+  //    }
 
   //   // get details
   //   getEmployeer = async (req, res) => {
@@ -607,7 +690,6 @@ class securityController extends BaseController {
         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
       }
     }
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
 
   //get Employee
 
@@ -633,38 +715,12 @@ class securityController extends BaseController {
 
         // check if inserted
         if (employee && !_.isEmpty(employee))
-<<<<<<< HEAD
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            employee,
-            this.messageTypes.securityGuardFetchedSuccessfully
-          );
-        else
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.securityGuardNotFound
-          );
-
-        // catch any runtime error
-      } else {
-        return this.errors(
-          req,
-          res,
-          this.status.HTTP_CONFLICT,
-          this.messageTypes.securityGuardNotFound
-        );
-=======
           return this.success(req, res, this.status.HTTP_OK, employee,this.messageTypes.securityGuardFetchedSuccessfully);
         else return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardNotFound);
 
         // catch any runtime error
       } else {
         return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardNotFound);
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
       }
     } catch (err) {
       error(err);
@@ -677,9 +733,6 @@ class securityController extends BaseController {
     }
   };
 
-<<<<<<< HEAD
-  //delete Employee
-=======
   //       // inserting data into the db
   //       let isUpdated = await Model.findOneAndUpdate({
   //         _id: mongoose.Types.ObjectId(employeeId)
@@ -701,7 +754,6 @@ class securityController extends BaseController {
 
   //   }
 
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
   deleteEmployee = async (req, res) => {
     try {
       info("Employee Delete!");
@@ -741,35 +793,6 @@ class securityController extends BaseController {
         }
       );
 
-<<<<<<< HEAD
-        // check if inserted
-        if (isUpdated && !_.isEmpty(isUpdated))
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            {},
-            this.messageTypes.securityGuardDeletedSuccessfully
-          );
-        else
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.securityGuardeNotDeletedSuccessfully
-          );
-
-        // catch any runtime error
-      } else {
-        return this.errors(
-          req,
-          res,
-          this.status.HTTP_CONFLICT,
-          this.messageTypes.securityGuardeNotDeletedSuccessfully
-        );
-      }
-    } catch (err) {
-=======
       // check if inserted
       if (isUpdated && !_.isEmpty(isUpdated))
         return this.success(req, res, this.status.HTTP_OK, {},this.messageTypes.securityGuardDeletedSuccessfully);
@@ -780,7 +803,6 @@ class securityController extends BaseController {
       return this.errors(req, res, this.status.HTTP_CONFLICT,this.messageTypes.securityGuardNotDeletedSuccessfully);
     }
   }catch (err) {
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
       error(err);
       this.errors(
         req,
@@ -811,15 +833,6 @@ class securityController extends BaseController {
           res
         );
         return;
-<<<<<<< HEAD
-      } else if (employeeType == "securityguard") {
-        // creating data to insert
-        let dataToUpdate = {
-          $set: {
-            ...req.body,
-          },
-        };
-=======
       }else if(empType == "securityGuard"){
       // creating data to insert
       let dataToUpdate = {
@@ -827,7 +840,6 @@ class securityController extends BaseController {
           ...req.body,
         },
       };
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
 
       // inserting data into the db
       let isUpdated = await Model.findOneAndUpdate(
@@ -842,36 +854,6 @@ class securityController extends BaseController {
         }
       );
 
-<<<<<<< HEAD
-        // check if inserted
-        if (isUpdated && !_.isEmpty(isUpdated)) {
-          info("Security Guard Successfully updated !");
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            isUpdated,
-            this.messageTypes.securityGuardUpdatedSuccessfully
-          );
-        } else
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.securityGuardNotUpdatedSuccessfully
-          );
-
-        // catch any runtime error
-      } else {
-        return this.errors(
-          req,
-          res,
-          this.status.HTTP_CONFLICT,
-          this.messageTypes.securityGuardNotUpdatedSuccessfully
-        );
-      }
-    } catch (err) {
-=======
       // check if inserted
       if (isUpdated && !_.isEmpty(isUpdated))
         return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.securityGuardUpdatedSuccessfully);
@@ -883,7 +865,6 @@ class securityController extends BaseController {
     }
    }
     catch (err) {
->>>>>>> d21e31f888bc0b9755a0200ca92ceae329af88c6
       error(err);
       this.errors(
         req,

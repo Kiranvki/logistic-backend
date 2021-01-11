@@ -23,7 +23,6 @@ const pickerBoy = new Schema({
     type: String,
     default: 'Waycool Foods & Products Private Limited'
   },
-<<<<<<< HEAD
   reportingManager: {
     type: String,
   },
@@ -32,8 +31,6 @@ const pickerBoy = new Schema({
   //   default: 1
   // },
 
-=======
->>>>>>> 7a7c8bc53e42f71f8eef6aa34745a5fe0bc57c03
   isWaycoolEmp: {
     type: Number,
     default: 1
