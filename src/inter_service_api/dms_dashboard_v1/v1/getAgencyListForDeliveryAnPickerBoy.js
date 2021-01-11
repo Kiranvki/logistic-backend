@@ -18,6 +18,7 @@ module.exports = async (cityId, page, search) => {
     let dmsV1BaseUrl = process.env.dmsV1BaseUrl;
     let dmsGetAgencyList = process.env.dmsGetAgencyListPartOne + cityId + process.env.dmsGetAgencyListPartTwo + pageNo + process.env.dmsGetAgencyListPartThree + search;
     let url = dmsV1BaseUrl + dmsGetAgencyList; // DMS url
+    console.log('url', url);
 
     // check whether the document type already exist or not 
     return request.get(url)
