@@ -240,6 +240,41 @@ class deliveryExecutiveCtrl extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+   // patch Delivery Executive status
+   patchDeliveryExecutiveStatus = async (req, res) => {
+    try {
+      info('Delivery Executive STATUS CHANGE !');
+
+      // type id 
+      let type = req.params.type,
+        employeeId = req.params.employeeId;
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          status: type == 'activate' ? 1 : 0
+        }
+      };
+
+      // inserting data into the db 
+      let isUpdated = await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(employeeId)
+      }, dataToUpdate, {  
+        new: true,
+        upsert: false,
+        lean: true
+      });
+
+      // check if inserted 
+      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.deliveryExecutiveActivatedSuccessfully : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdatedSuccessfully);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
 }
 
 // exporting the modules
