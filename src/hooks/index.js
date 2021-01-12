@@ -21,4 +21,5 @@ module.exports = {
   getDetailsFromZoho: require('./getDetailsFromZoho'),
   isAgencyExists: require('./isAgencyExists'), // check whether the agency exists or not 
   getDetailsFromZohoUsingEmpID: require('./getDetailsFromZohoUsingEmpID'), // get the details from zoho  
+  checkWhetherItsAValidEmployeeUpdate: require('./checkWhetherItsAValidEmployeeUpdate'), //check whether its A Valid Employee Update
 }

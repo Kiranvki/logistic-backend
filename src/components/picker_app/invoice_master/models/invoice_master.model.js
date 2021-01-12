@@ -124,6 +124,7 @@ const invoiceMaster = new Schema({
   },
 
   // SAP fields
+  /*
   'itemDetails': [
     {
       'hsnCode': {
@@ -163,6 +164,7 @@ const invoiceMaster = new Schema({
         type: 'Number',
       },
     }],
+    */
   'invoiceDate': {
     type: 'Date',
   },
