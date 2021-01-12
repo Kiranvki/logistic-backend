@@ -22,4 +22,7 @@ module.exports = {
   generateTokenForSecurityAppUsers: require('./generateTokenForSecurityAppUsers'),
   isSecurityGuardAlreadyCheckedIn: require('./isSecurityGuardAlreadyCheckedIn'), // check whether the security guard already check in or not
   isSecurityGuardUserCheckedIn: require('./isSecurityGuardUserCheckedIn'),
+  isValidDeliveryId : require('./isValidDeliveryExecutiveId'),
+  checkWhetherAValidDeliveryExecutiveCrediantial : require('./checkWhetherAValidDeliveryExecutiveCrediantial'), // check whether the delivery executive already check in or not
+  isDeliveryExecutiveCheckedIn :require('./isDeliveryExecutiveUserCheckedIn')
 }

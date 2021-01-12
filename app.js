@@ -29,6 +29,10 @@ const onBoardPickerApiRouter = express.Router(); // Protected routes
 const onBoardSecurityOpenRouter = express.Router(); // Open routes 
 const onBoardSecurityApiRouter = express.Router(); // Protected routes
 
+// onboard Delivery Executive
+const onBoardDeliveryOpenRouter = express.Router(); // Open routes 
+const onBoardDeliveryApiRouter = express.Router(); // Protected routes
+
 // employee
 const employeeOpenRouter = express.Router(); // Open routes
 const employeeApiRouter = express.Router(); // Protected routes
@@ -73,6 +77,16 @@ glob('./src/components/security_guard_app/onBoard/*', null, (err, items) => {
     if (require(component).routes) require(component).routes(
       onBoardSecurityOpenRouter,
       onBoardSecurityApiRouter,
+    );
+  });
+}); 
+
+/* Fetch router files and apply them to our routers */
+glob('./src/components/delivery_app/onBoard/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      onBoardDeliveryOpenRouter,
+      onBoardDeliveryApiRouter,
     );
   });
 });
@@ -159,6 +173,10 @@ app.use('/api/v1/picker', onBoardPickerApiRouter);
 // Security Guard Routes
 app.use('/v1/security', onBoardSecurityOpenRouter);
 app.use('/api/v1/security', onBoardSecurityApiRouter);
+
+// Delivery Executive Routes
+app.use('/v1/delivery', onBoardDeliveryOpenRouter);
+app.use('/api/v1/delivery', onBoardDeliveryApiRouter);
 
 // Employee Routes
 app.use('/v1/employee', employeeOpenRouter);

@@ -85,7 +85,7 @@ const appDeliveryUserSession = new Schema({
 });
 
 // creating indexes
-appPickerUserSession.index({
+appDeliveryUserSession.index({
   'deliveryExecutive': 1,
   'loginLocation': 1
 });

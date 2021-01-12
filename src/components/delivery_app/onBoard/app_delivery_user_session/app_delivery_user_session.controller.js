@@ -15,13 +15,13 @@ class deliveryUserSessionController extends BaseController {
       this.messageTypes = this.messageTypes.appUserOnBoard;
     }
   // Internal Function to get user session data
-  getUserSession = async (deliveryExecutiveId) => {
+  getUserSession = async (deliveryId) => {
     try {
       info('Getting Security User Session Data !');
 
       // get the asm list 
       return Model.find({
-        deliveryExecutiveId: mongoose.Types.ObjectId(deliveryExecutiveId),
+        deliveryId: mongoose.Types.ObjectId(deliveryId),
         status: 1,
         isDeleted: 0
       }).lean().then((res) => {
@@ -104,7 +104,7 @@ class deliveryUserSessionController extends BaseController {
   
           // updating the last login details 
           let deliveryExecutive = await Model.findOneAndUpdate({
-            'deliveryExecutiveId': mongoose.Types.ObjectId(req.body.securityGuardDetails._id),
+            'deliveryId': mongoose.Types.ObjectId(req.body.deliveryId._id),
             'status': 1,
             'isDeleted': 0
           }, {
@@ -118,7 +118,7 @@ class deliveryUserSessionController extends BaseController {
   
           // is logged in 
           return this.success(req, res, this.status.HTTP_OK, {
-            deliveryExecutiveId: req.body.deliveryExecutiveDetails._id,
+            deliveryId: req.body.deliveryExecutiveDetails._id,
             deliveryExecutiveDetails: {
               name: req.body.deliveryExecutiveDetails.fullName,
               cityId: req.body.deliveryExecutiveDetails.cityId,
@@ -140,8 +140,8 @@ class deliveryUserSessionController extends BaseController {
       info('Login Verify Token !');
 
       // getting the picker boy id
-      let deliveryExecutiveId = req.params.deliveryExecutiveId,
-      deliveryExecutiveDetails = req.body.isValidSecurityGuard;
+      let deliveryId = req.params.deliveryId,
+      deliveryExecutiveDetails = req.body.isValidDeliveryExecutive;
 
       // login object 
       let loginDetailsObject = {
@@ -152,7 +152,7 @@ class deliveryUserSessionController extends BaseController {
 
       // updating the last login details 
       let isUpdated = await Model.findOneAndUpdate({
-        'deliveryExecutiveId': mongoose.Types.ObjectId(deliveryExecutiveId),
+        'deliveryId': mongoose.Types.ObjectId(deliveryId),
       }, {
         $set: {
           'otpSend.$[otpSend].status': 1, // OTP is now verified
@@ -197,12 +197,12 @@ class deliveryUserSessionController extends BaseController {
       info('Get the session key for the given Delivery Executive id !');
 
       // checking day object 
-      if (deliveryExecutiveId) {
+      if (deliveryId) {
 
         // creating the data inside the database 
         return Model
           .findOne({
-            'deliveryExecutiveId': mongoose.Types.ObjectId(deliveryExecutiveId)
+            'deliveryId': mongoose.Types.ObjectId(deliveryId)
           })
           // .select('sessionKey')
           .select({

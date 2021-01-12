@@ -14,6 +14,100 @@ class deliveryExecutiveCtrl extends BaseController {
     this.messageTypes = this.messageTypes.employee;
   }
 
+ // get details of picker
+ getDetails = async (deliveryId) => {
+  try {
+    info('Get delivery details !');
+
+    // find the picker
+    // get details 
+    return Model.aggregate([{
+      $match: {
+        '_id': mongoose.Types.ObjectId(deliveryId),
+        'status': 1,
+        'isDeleted': 0
+      }
+    }
+    ]).allowDiskUse(true).then((res) => {
+      if (res && res.length) {
+        return {
+          success: true,
+          data: res[res.length - 1]
+        }
+      } else {
+        error('Error Searching Data in Delivery executive DB!');
+        return {
+          success: false
+        }
+      }
+    }).catch(err => {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    });
+
+    // catch any runtime error 
+  } catch (err) {
+    error(err);
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  }
+}
+
+
+  // getting the Delivery Executive details using other fields
+  getDetailsDeliveryUsingField = async (fieldValue) => {
+    try {
+      info("Get Delivery Executive details !");
+
+      // find the  Delivery Executive
+      return await Model.aggregate([
+        {
+          $match: {
+            $or: [
+              {
+                email: fieldValue,
+              },
+              {
+                contactMobile: fieldValue,
+              },
+            ],
+            status: 1,
+            isDeleted: 0,
+          },
+        },
+      ])
+        .allowDiskUse(true)
+        .then((res) => {
+          if (res && res.length) {
+            return {
+              success: true,
+              data: res[res.length - 1],
+            };
+          } else {
+            error("Error Searching Data in  Delivery Executive DB!");
+            return {
+              success: false,
+            };
+          }
+        })
+        .catch((err) => {
+          error(err);
+          return {
+            success: false,
+            error: err,
+          };
+        });
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+    }
+  };
+
+
+
   // internal create function
   create = async (dataToInsert) => {
     try {
