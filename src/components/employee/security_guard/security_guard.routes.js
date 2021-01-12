@@ -32,7 +32,7 @@ function securityRoutes() {
       ctrl.post              // controller function 
     );
 
-    closed.route('/getemployee/:employeeId/:employeeType').get(
+    closed.route('/employee/:employeeId/:employeeType').get(
       //[joiTransporterGetDetails], // joi validation
       // verifyAppToken,
       //isValidTransporter,
@@ -45,14 +45,14 @@ function securityRoutes() {
       ctrl.getList // controller function 
     );
 
-    closed.route('/getemployee/:employeeId/:employeeType').delete(
+    closed.route('/employee/:employeeId/:employeeType').delete(
       //[joiTransporterGetDetails], // joi validation
       // verifyAppToken,
       //isValidTransporter,
       ctrl.deleteEmployee // controller function 
     );
 
-    closed.route('/getemployee/:employeeId/:employeeType').patch(
+    closed.route('/employee/:employeeId/:employeeType').patch(
       //[joiTransporterGetDetails], // joi validation
       // verifyAppToken,
       //isValidTransporter,
@@ -67,8 +67,8 @@ function securityRoutes() {
       ctrl.getZohoDetails              // controller function 
     );
 
-     //  // activate or deactive security guard
-     closed.route('/:employeeType/:employeeId/status/:type').patch(
+    //  // activate or deactive security guard
+    closed.route('/:employeeType/:employeeId/status/:type').patch(
       //[joiDistributorChangeStatus], // joi validation
       // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
       ctrl.patchSecurityGuardStatus // get controller 
