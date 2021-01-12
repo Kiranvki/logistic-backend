@@ -568,20 +568,22 @@ class securityController extends BaseController {
       let employeeId = req.params.employeeId;
       let employeeType = req.params.employeeType;
 
-
       if (employeeType == "deliveryexecutive") {
-        let deliveryResponse = await deliveryCtrl.updateDeliveryExecutiveDetails(
-          req,
-          res
-        );
-        return;
+        let deliveryResponse = await deliveryCtrl.updateDeliveryExecutiveDetails(employeeId, req.body.toChangeObject);
+        if (deliveryResponse.success) {
+          return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.deliveryExecutiveUpdatedSuccessfully);
+        } else
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdated);
+
       }
       if (employeeType == "pickerboy") {
-        let pickerboyResponse = await pickerBoyCtrl.updatePickerBoyDetails(
-          req,
-          res
-        );
-        return;
+        let pickerboyResponse = await pickerBoyCtrl.updatePickerBoyDetails(employeeId, req.body.toChangeObject);
+        if (pickerboyResponse.success) {
+          return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.pickerBoyUpdatedSuccessfully);
+        } else
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerBoyNotUpdated);
+
+
       }
       if (employeeType == "securityguard") {
 
@@ -608,38 +610,17 @@ class securityController extends BaseController {
         // check if inserted
         if (isUpdated && !_.isEmpty(isUpdated)) {
           info("Security Guard Successfully updated !");
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            isUpdated,
-            this.messageTypes.securityGuardUpdatedSuccessfully
-          );
+          return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.securityGuardUpdatedSuccessfully);
         } else
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.securityGuardNotUpdatedSuccessfully
-          );
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdated);
 
         // catch any runtime error
       } else {
-        return this.errors(
-          req,
-          res,
-          this.status.HTTP_CONFLICT,
-          this.messageTypes.securityGuardNotUpdatedSuccessfully
-        );
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdatedSuccessfully);
       }
     } catch (err) {
       error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   };
 

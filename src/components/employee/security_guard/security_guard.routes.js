@@ -54,7 +54,7 @@ function securityRoutes() {
       ctrl.deleteEmployee // controller function 
     );
 
-    closed.route('/employee/:employeeId/:employeeType').patch(
+    closed.route('/employee/:employeeId/type/:employeeType').patch(
       [joiEmployePatch], // joi validation
       verifyUserToken,
       checkWhetherItsAValidEmployeeUpdate,
