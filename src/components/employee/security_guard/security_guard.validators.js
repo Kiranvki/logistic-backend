@@ -73,6 +73,56 @@ const schemas = {
       }
     }).optional(),
   }),
+
+  // joi asm patch 
+  joiEmployePatch: Joi.object().keys({
+    params: {
+      employeeId: Joi.string().trim().label('Employee Id'),
+      employeeType: Joi.string().trim().label('Brand Id').required().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive'])
+    },
+    body: Joi.object({
+      fullName: Joi.string().trim().label('Employee Name').regex(/^[a-z ,.'-]+$/i).options({
+        language: {
+          string: {
+            regex: {
+              base: 'should be a valid  Name'
+            }
+          }
+        }
+      }).optional(),
+
+      contactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Contact Number').options({
+        language: {
+          string: {
+            regex: {
+              base: 'should be a valid Phone Number'
+            }
+          }
+        }
+      }).optional().allow(''),
+      altContactMobile: Joi.string().trim().regex(/^[6-9]{1}[0-9]{9}$/).label('Alt Contact Number').options({
+        language: {
+          string: {
+            regex: {
+              base: 'should be a valid Phone Number'
+            }
+          }
+        }
+      }).optional().allow(''),
+      email: Joi.string().email().trim().label('email').optional().max(256),
+      altEmail: Joi.string().email().trim().label('alt Email').optional().max(256).allow(''),
+      managerName: Joi.string().trim().label('Manager Name').regex(/^[a-z ,.'-]+$/i).options({
+        language: {
+          string: {
+            regex: {
+              base: 'should be a valid Manager Name'
+            }
+          }
+        }
+      }).optional(),
+
+    }).min(1)
+  }),
 }
 
 
@@ -125,6 +175,49 @@ module.exports = {
 
     // validating the schema 
     schema.validate(req.body, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+  // joi employee patch
+  joiEmployePatch: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiEmployePatch;
+    let option = options.basic;
+
+    // replacing space with - 
+    if (req.body.contactMobile) {
+      req.body.contactMobile = req.body.contactMobile.replace(/\s/g, '-')
+
+      let contactArray = req.body.contactMobile.split('-');
+
+      if (contactArray.length > 1) {
+        req.body.contactMobile = contactArray[1];
+      } else req.body.contactMobile = contactArray[0];
+    }
+
+    if (altContactMobile) {
+      req.body.altContactMobile = req.body.altContactMobile.replace(/\s/g, '-')
+
+      let altContactArray = req.body.altContactMobile.split('-');
+
+      if (altContactArray.length > 1) {
+        req.body.altContactMobile = altContactArray[1];
+      } else req.body.altContactMobile = altContactArray[0];
+
+    }
+
+    // validating the schema 
+    schema.validate({ params: req.params, body: req.body }, option).then(() => {
       next();
       // if error occured
     }).catch((err) => {

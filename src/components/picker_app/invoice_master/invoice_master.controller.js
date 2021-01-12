@@ -244,7 +244,6 @@ class areaSalesManagerController extends BaseController {
 
       let basketItemData = await pickerBoySalesOrderMappingctrl.viewOrderBasketInternal(pickerBoySalesOrderMappingId);
 
-      console.log('basketItemData', basketItemData);
 
       // basket item data check 
       if (basketItemData.success) {
@@ -290,7 +289,6 @@ class areaSalesManagerController extends BaseController {
           item.taxValueForSingleItem = taxValueForSingleItem;
           item.netValueForSingleItem = netValueForSingleItem;
 
-          console.log('item', item);
 
         }
 

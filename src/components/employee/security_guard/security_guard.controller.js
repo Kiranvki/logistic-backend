@@ -140,6 +140,60 @@ class securityController extends BaseController {
     }
   };
 
+  // get employee details
+  getEmployeeDetails = async (employeeId, employeeType) => {
+    try {
+      info("Get Employee details !");
+
+      // get details
+      if (employeeType && employeeType == 'pickerBoy') {
+        let pickerDetails = await pickerBoyCtrl.getDetails(employeeId);
+        return pickerDetails;
+      }
+      if (employeeType && employeeType == 'deliveryExecutive') {
+        let deliveryDetails = deliveryCtrl.getDetails(employeeId);
+        return deliveryDetails;
+      }
+      if (employeeType && employeeType == 'securityGuard') {
+
+        return Model.aggregate([
+          {
+            $match: {
+              _id: mongoose.Types.ObjectId(securityGuardId),
+              status: 1,
+              isDeleted: 0,
+            },
+          },
+        ])
+          .allowDiskUse(true)
+          .then((res) => {
+            if (res && res.length) {
+              return {
+                success: true,
+                data: res[res.length - 1],
+              };
+            } else {
+              error("Error Searching Data in security Guard DB!");
+              return {
+                success: false,
+              };
+            }
+          })
+          .catch((err) => {
+            error(err);
+            return {
+              success: false,
+              error: err,
+            };
+          });
+      }
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+    }
+  };
+
+
   // Internal Function to check whether the Security Guard exist or not
   isExist = async (empId, isWaycoolEmployer) => {
     try {
@@ -514,23 +568,27 @@ class securityController extends BaseController {
       let employeeId = req.params.employeeId;
       let employeeType = req.params.employeeType;
 
+
       if (employeeType == "deliveryexecutive") {
         let deliveryResponse = await deliveryCtrl.updateDeliveryExecutiveDetails(
           req,
           res
         );
         return;
-      } else if (employeeType == "pickerboy") {
+      }
+      if (employeeType == "pickerboy") {
         let pickerboyResponse = await pickerBoyCtrl.updatePickerBoyDetails(
           req,
           res
         );
         return;
-      } else if (employeeType == "securityguard") {
-        // creating data to insert
+      }
+      if (employeeType == "securityguard") {
+
+        // creating data to update
         let dataToUpdate = {
           $set: {
-            ...req.body,
+            ...req.body.toChangeObject
           },
         };
 
