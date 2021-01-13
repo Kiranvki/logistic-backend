@@ -33,6 +33,13 @@ function securityRoutes() {
       getDetailsFromZoho, // get details from zoho
       ctrl.post              // controller function 
     );
+    //patch api 
+    closed.route('/type/:employeeType/:employeeId').patch(
+      [joiEmployePatch], // joi validation
+      verifyUserToken,
+      checkWhetherItsAValidEmployeeUpdate,
+      ctrl.patchEmployee // controller function 
+    );
 
     closed.route('/employee/:employeeId/:employeeType').get(
       //[joiTransporterGetDetails], // joi validation
@@ -54,12 +61,7 @@ function securityRoutes() {
       ctrl.deleteEmployee // controller function 
     );
 
-    closed.route('/employee/:employeeId/type/:employeeType').patch(
-      [joiEmployePatch], // joi validation
-      verifyUserToken,
-      checkWhetherItsAValidEmployeeUpdate,
-      ctrl.patchEmployee // controller function 
-    );
+
 
     //getting the details from zoho
     closed.route('/').get(
