@@ -23,11 +23,11 @@ module.exports = async (req, res, next) => {
     if (objectId.isValid(deliveryId)) {
 
       // check whether the email id is unique or not 
-      let isValidDeliveryExecutive = await deliveryExecutiveCtrl.getDetails(deliveryId)
+      let isValidDeliveryExecutive = await deliveryExecutiveCtrl.getDeliveryDetails(deliveryId)
 
       // if email is unique
       if (isValidDeliveryExecutive.success) {
-        info('Valid pickerBoy')
+        info('Valid Delivery Executive')
         // injecting the data into the request body
         req.body.isValidDeliveryExecutive = isValidDeliveryExecutive.data;
         // move on

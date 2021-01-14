@@ -86,7 +86,7 @@ const appDeliveryUserSession = new Schema({
 
 // creating indexes
 appDeliveryUserSession.index({
-  'deliveryExecutive': 1,
+  'deliveryId': 1,
   'loginLocation': 1
 });
 

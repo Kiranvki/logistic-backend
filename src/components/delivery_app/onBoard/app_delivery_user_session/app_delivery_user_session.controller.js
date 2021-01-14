@@ -15,9 +15,9 @@ class deliveryUserSessionController extends BaseController {
       this.messageTypes = this.messageTypes.appUserOnBoard;
     }
   // Internal Function to get user session data
-  getUserSession = async (deliveryId) => {
+  getDeliveryUserSession = async (deliveryId) => {
     try {
-      info('Getting Security User Session Data !');
+      info('Getting Delivery User Session Data !');
 
       // get the asm list 
       return Model.find({
@@ -101,13 +101,15 @@ class deliveryUserSessionController extends BaseController {
             'email': req.body.email,
             'mobileNumber': req.body.mobileNumber,
           };
+          console.log("pushObject",pushObject);
   
           // updating the last login details 
-          let deliveryExecutive = await Model.findOneAndUpdate({
-            'deliveryId': mongoose.Types.ObjectId(req.body.deliveryId._id),
-            'status': 1,
-            'isDeleted': 0
-          }, {
+          let deliveryExecutiveDetail = await Model.findOneAndUpdate({
+            deliveryId : mongoose.Types.ObjectId(req.body.deliveryExecutiveDetails._id),
+            status: 1,
+            isDeleted: 0
+          },
+           {
             $push: {
               'otpSend': pushObject
             }
@@ -115,7 +117,7 @@ class deliveryUserSessionController extends BaseController {
             'upsert': true,
             'new': true
           });
-  
+
           // is logged in 
           return this.success(req, res, this.status.HTTP_OK, {
             deliveryId: req.body.deliveryExecutiveDetails._id,
@@ -139,7 +141,7 @@ class deliveryUserSessionController extends BaseController {
     try {
       info('Login Verify Token !');
 
-      // getting the picker boy id
+      // getting the Delivery Executive id
       let deliveryId = req.params.deliveryId,
       deliveryExecutiveDetails = req.body.isValidDeliveryExecutive;
 
@@ -192,7 +194,7 @@ class deliveryUserSessionController extends BaseController {
   }
   
   // get valid user token 
-  getUserToken = async (securityGuardId) => {
+  getUserToken = async (deliveryId) => {
     try {
       info('Get the session key for the given Delivery Executive id !');
 

@@ -24,14 +24,14 @@ module.exports = async (req, res, next) => {
     if (objectId.isValid(deliveryId)) {
 
       // check whether the email id is unique or not 
-      let isValidDeliveryExecutive= await deliveryCtrl.getDetails(deliveryId)
+      let isValidDeliveryExecutive= await deliveryCtrl.getDeliveryDetails(deliveryId)
 
       // if email is unique
       if (isValidDeliveryExecutive.success) {
-        info('Valid Picker Boy')
+        info('Valid Delivery Executive')
 
         // check whether user session data is created 
-        let userSession = await deliveryExecutiveSessionCtrl.getUserSession(deliveryId);
+        let userSession = await deliveryExecutiveSessionCtrl.getDeliveryUserSession(deliveryId);
 
         // user session check 
         if (userSession.success) {
