@@ -249,12 +249,12 @@ class userController extends BaseController {
   }
 
   // get the attendance for the given month
-  getUserAttendanceForAMonth = async (req, res) => {
+  getSecurityUserAttendanceForAMonth = async (req, res) => {
     try {
       info('get the user attendance for a month !');
 
       let user = req.user, // user 
-        salesmanId = user._id, // salesman Id
+        securityGuardId = user._id, // salesman Id
         attendanceSheet = [], // attendance sheet 
         endDateOfTheMonth = req.body.endDateOfTheMonth, // end date of the month
         startDateOfTheMonth = req.body.startDateOfTheMonth; //  start date of the month
@@ -265,7 +265,7 @@ class userController extends BaseController {
       // get the attendance for each salesman 
       let attendanceForTheMonth = await Model.aggregate([{
         $match: {
-          'userId': mongoose.Types.ObjectId(salesmanId),
+          'userId': mongoose.Types.ObjectId(securityGuardId),
           'dateOfAttendance': {
             '$gt': startDateOfTheMonth,
             '$lte': endDateOfTheMonth
@@ -336,14 +336,14 @@ class userController extends BaseController {
 
 
   // get the attendance detail for the day 
-  getAttendanceDetailsForADay = async (pickerBoyId, startDate, endDate) => {
+  getAttendanceDetailsForADay = async (securityGuardId, startDate, endDate) => {
     try {
       info('Get Details !');
 
       // get the attendance of the picker boy
       return Model.aggregate([{
         $match: {
-          'userId': mongoose.Types.ObjectId(pickerBoyId),
+          'userId': mongoose.Types.ObjectId(securityGuardId),
           'dateOfAttendance': {
             $gte: startDate,
             $lte: endDate
@@ -464,11 +464,11 @@ class userController extends BaseController {
   }
 
   // check out User
-  checkOutUserManually = async (pickerBoyId, attendanceId, attendanceLogId, checkInTimeInMins, date, hr, min) => {
+  checkOutUserManually = async (securityGuardId, attendanceId, attendanceLogId, checkInTimeInMins, date, hr, min) => {
     try {
       info('Checking Out User !');
 
-      let user = pickerBoyId, // user 
+      let user = securityGuardId, // user 
         todaysDate = date; // todays date
 
       let timeOfTheDayInMins = parseInt(hr) * 60 + parseInt(min); // getting the time in mins 

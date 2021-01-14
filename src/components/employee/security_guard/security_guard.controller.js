@@ -159,7 +159,7 @@ class securityController extends BaseController {
         return Model.aggregate([
           {
             $match: {
-              _id: mongoose.Types.ObjectId(securityGuardId),
+              _id: mongoose.Types.ObjectId(employeeId),
               status: 1,
               isDeleted: 0,
             },
@@ -568,24 +568,24 @@ class securityController extends BaseController {
       let employeeId = req.params.employeeId;
       let employeeType = req.params.employeeType;
 
-      if (employeeType == "deliveryexecutive") {
+      if (employeeType == "deliveryExecutive") {
         let deliveryResponse = await deliveryCtrl.updateDeliveryExecutiveDetails(employeeId, req.body.toChangeObject);
         if (deliveryResponse.success) {
-          return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.deliveryExecutiveUpdatedSuccessfully);
+          return this.success(req, res, this.status.HTTP_OK, deliveryResponse.data, this.messageTypes.deliveryExecutiveUpdatedSuccessfully);
         } else
           return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdated);
 
       }
-      if (employeeType == "pickerboy") {
+      if (employeeType == "pickerBoy") {
         let pickerboyResponse = await pickerBoyCtrl.updatePickerBoyDetails(employeeId, req.body.toChangeObject);
         if (pickerboyResponse.success) {
-          return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.pickerBoyUpdatedSuccessfully);
+          return this.success(req, res, this.status.HTTP_OK, pickerboyResponse.data, this.messageTypes.pickerBoyUpdatedSuccessfully);
         } else
           return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerBoyNotUpdated);
 
 
       }
-      if (employeeType == "securityguard") {
+      if (employeeType == "securityGuard") {
 
         // creating data to update
         let dataToUpdate = {
@@ -615,8 +615,6 @@ class securityController extends BaseController {
           return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdated);
 
         // catch any runtime error
-      } else {
-        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdatedSuccessfully);
       }
     } catch (err) {
       error(err);

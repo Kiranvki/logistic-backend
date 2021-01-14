@@ -10,6 +10,8 @@ module.exports = {
   isAlreadyCheckedIn: require('./isAlreadyCheckedIn'),
   isUserCheckedIn: require('./isUserCheckedIn'),
   generateMonthDaysAndOtherMetaData: require('./generateMonthDaysAndOtherMetaData'),
+  deliveryGenerateMonthDaysAndOtherMetaData: require('./deliveryGenerateMonthDaysAndOtherMetaData'),
+  securityGenerateMonthDaysAndOtherMetaData :require('./securityGenerateMonthDaysAndOtherMetaData'),
   getAllAppUserWhoAreNotCheckedOut: require('./getAllAppUserWhoAreNotCheckedOut'),
   isValidPickerBoy: require('./isValidPickerBoy'),
   isValidSalesOrder: require('./isValidSalesOrder'),

@@ -205,7 +205,7 @@ module.exports = {
       } else req.body.contactMobile = contactArray[0];
     }
 
-    if (altContactMobile) {
+    if (req.body.altContactMobile) {
       req.body.altContactMobile = req.body.altContactMobile.replace(/\s/g, '-')
 
       let altContactArray = req.body.altContactMobile.split('-');
