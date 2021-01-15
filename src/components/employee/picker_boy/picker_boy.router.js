@@ -50,14 +50,14 @@ function userRoutes() {
     );
 
     // get picker-boy list
-    closed.route("/picker-boy").get(
+    closed.route("/pickerBoy").get(
       [joiPickerBoyList], // joi validation
       verifyUserToken, // verify user token
       ctrl.getList // controller function
     );
 
     // get all
-    closed.route("/list/pickerboy").get(
+    closed.route("/list/pickerBoy").get(
       // [joiTransporterList], // joi validation
       // verifyAppToken,
       ctrl.getPickerBoy // controller function

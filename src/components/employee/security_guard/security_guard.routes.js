@@ -33,6 +33,7 @@ function securityRoutes() {
       getDetailsFromZoho, // get details from zoho
       ctrl.post              // controller function 
     );
+
     //patch api 
     closed.route('/type/:employeeType/:employeeId').patch(
       [joiEmployePatch], // joi validation
@@ -48,7 +49,7 @@ function securityRoutes() {
       ctrl.getEmployeer // controller function 
     );
 
-    closed.route('/list/securityguard').get(
+    closed.route('/list/securityGuard').get(
       // [joiTransporterList], // joi validation
       // verifyUserToken,
       ctrl.getList // controller function 

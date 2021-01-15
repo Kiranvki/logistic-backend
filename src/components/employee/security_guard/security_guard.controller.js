@@ -434,13 +434,13 @@ class securityController extends BaseController {
       let employeeId = req.params.employeeId;
       let empType = req.params.employeeType;
 
-      if (empType == "deliveryexecutive") {
+      if (empType == "deliveryExecutive") {
         let deliveryResponse = await deliveryCtrl.get(req, res);
         return;
-      } else if (empType == "pickerboy") {
+      } else if (empType == "pickerBoy") {
         let pickerboyResponse = await pickerBoyCtrl.get(req, res);
         return;
-      } else if (empType == "securityguard") {
+      } else if (empType == "securityGuard") {
         // inserting data into the db
         let employee = await Model.findOne({
           _id: mongoose.Types.ObjectId(req.params.employeeId),
@@ -490,13 +490,13 @@ class securityController extends BaseController {
       let employeeId = req.params.employeeId;
       let employeeType = req.params.employeeType;
 
-      if (employeeType == "deliveryexecutive") {
+      if (employeeType == "deliveryExecutive") {
         let deliveryResponse = await deliveryCtrl.deleteEmployee(req, res);
         return;
-      } else if (employeeType == "pickerboy") {
+      } else if (employeeType == "pickerBoy") {
         let pickerboyResponse = await pickerBoyCtrl.deleteEmployee(req, res);
         return;
-      } else if (employeeType == "securityguard") {
+      } else if (employeeType == "securityGuard") {
         // inserting the new user into the db
 
         // let employeeId = req.query.employeeId || '';
