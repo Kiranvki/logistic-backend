@@ -118,6 +118,8 @@ class deliveryUserSessionController extends BaseController {
             'new': true
           });
 
+          console.log("deliveryExecutiveDetail",deliveryExecutiveDetail);
+
           // is logged in 
           return this.success(req, res, this.status.HTTP_OK, {
             deliveryId: req.body.deliveryExecutiveDetails._id,

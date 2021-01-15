@@ -190,7 +190,7 @@ const schemas = {
         }).required(),
     }),
 
-    // get asm list 
+    // get Transporter list 
     joiTransporterList: Joi.object().keys({
         page: Joi.number().integer().min(1).label('Page').required(),
         search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),

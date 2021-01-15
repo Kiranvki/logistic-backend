@@ -7,6 +7,7 @@ const {
   joiIdInParams, // check joi id in params
   joiPickerBoyList, // get salesman list
   joiPickerBoyCreate, // create a new salesman
+  joiPickerList // picker list
 } = require("./picker_boy.validators");
 
 // hooks
@@ -58,7 +59,7 @@ function userRoutes() {
 
     // get all
     closed.route("/list/pickerboy").get(
-      // [joiTransporterList], // joi validation
+       [joiPickerList], // joi validation
       // verifyAppToken,
       ctrl.getPickerBoy // controller function
     );

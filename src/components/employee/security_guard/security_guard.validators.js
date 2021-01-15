@@ -123,6 +123,33 @@ const schemas = {
 
     }).min(1)
   }),
+
+  joiEmployeeGetDetails: Joi.object().keys({
+    params: {
+      employeeId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
+        language: {
+            string: {
+                regex: {
+                    base: 'should be a valid mongoose Id.'
+                }
+            }
+        }
+    }).required(),
+      employeeType: Joi.string().trim().label('Employee Type').required().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive'])
+    },
+  }),
+
+  //get Security Guard list
+  joiEmployeeList: Joi.object().keys({
+    page: Joi.number().integer().min(1).label('Page').required(),
+    search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
+}),
+
+// joi employee status
+joiEmployeeChangeStatus: Joi.object().keys({
+  employeeId: Joi.string().trim().label('Employee Id').required(),
+  type: Joi.string().trim().valid(['activate', 'deactivate']).label('Type').required()
+}),
 }
 
 
@@ -147,8 +174,6 @@ const options = {
 
 
 module.exports = {
-
-
 
   // create a new emloyee
   joiEmployeCreate: (req, res, next) => {
@@ -250,6 +275,69 @@ module.exports = {
       // returning the response 
       Response.joierrors(req, res, err);
     });
+  },
+
+  
+    // joi Employee get details 
+    joiEmployeeGetDetails: (req, res, next) => {
+      // getting the schemas 
+      let schema = schemas.joiEmployeeGetDetails;
+      let option = options.basic;
+
+      // validating the schema 
+      schema.validate(req.params, option).then(() => {
+          next();
+          // if error occured
+      }).catch((err) => {
+          let error = [];
+          err.details.forEach(element => {
+              error.push(element.message);
+          });
+
+          // returning the response 
+          Response.joierrors(req, res, err);
+      });
+  },
+
+    // joi Employee list 
+    joiEmployeeList: (req, res, next) => {
+      // getting the schemas 
+      let schema = schemas.joiEmployeeList;
+      let option = options.basic;
+
+      // validating the schema 
+      schema.validate(req.query, option).then(() => {
+          next();
+          // if error occured
+      }).catch((err) => {
+          let error = [];
+          err.details.forEach(element => {
+              error.push(element.message);
+          });
+          // returning the response 
+          Response.joierrors(req, res, err);
+      });
+  },
+
+    // joi Employee change status
+    joiEmployeeChangeStatus: (req, res, next) => {
+      // getting the schemas 
+      let schema = schemas.joiEmployeeChangeStatus;
+      let option = options.basic;
+
+      // validating the schema 
+      schema.validate(req.params, option).then(() => {
+          next();
+          // if error occured
+      }).catch((err) => {
+          let error = [];
+          err.details.forEach(element => {
+              error.push(element.message);
+          });
+
+          // returning the response 
+          Response.joierrors(req, res, err);
+      });
   },
 
 
