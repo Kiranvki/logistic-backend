@@ -29,7 +29,8 @@ const {
 //exporting the security guard routes
 function securityRoutes() {
   return (open, closed) => {
-    // post
+
+    // create employee
     closed.route('/').post(
       [joiEmployeCreate], // joi validation
       verifyUserToken,      // verify user token
@@ -38,30 +39,33 @@ function securityRoutes() {
       ctrl.post              // controller function 
     );
 
-    //patch api 
+    //patch api for all employees
     closed.route('/type/:employeeType/:employeeId').patch(
       [joiEmployePatch], // joi validation
-      verifyUserToken,
+      verifyUserToken,   // verify user token
       checkWhetherItsAValidEmployeeUpdate,
       ctrl.patchEmployee // controller function 
     );
 
-    closed.route('/employee/:employeeId/:employeeType').get(
+    //get single employee details base on the type
+    closed.route('/:employeeId/:employeeType').get(
       [joiEmployeeGetDetails], // joi validation
-      // verifyUserToken,
+      verifyUserToken,         // verify user token
       isValidEmployee,
       ctrl.getEmployeer // controller function 
     );
 
+    //get the security guard list
     closed.route('/list/securityGuard').get(
       // [joiTransporterList], // joi validation
-      // verifyUserToken,
+      verifyUserToken,         // verify user token
       ctrl.getList // controller function 
     );
 
-    closed.route('/employee/:employeeId/:employeeType').delete(
+    //delete the employee based on the type
+    closed.route('/:employeeId/:employeeType').delete(
       [joiEmployeeGetDetails], // joi validation
-      // verifyUserToken,
+      verifyUserToken,        // verify user token
       isValidEmployee,
       ctrl.deleteEmployee // controller function 
     );
@@ -74,12 +78,14 @@ function securityRoutes() {
       ctrl.getZohoDetails              // controller function 
     );
 
-    //  // activate or deactive security guard
+    // activate or deactive security guard
     closed.route('/:employeeType/:employeeId/status/:type').patch(
       [joiEmployeeChangeStatus], // joi validation
+      verifyUserToken,      // verify user token
       // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
       ctrl.patchSecurityGuardStatus // get controller 
     );
+
   }
 }
 module.exports = securityRoutes();
