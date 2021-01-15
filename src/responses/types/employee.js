@@ -46,6 +46,7 @@ module.exports = {
     return `Invalid Salesman Id Found ${salesmanIds}`
   },
   salesmanIdInvalidEitherDeletedOrDeactivated: 'Salesman Id is Invalid or is either deleted !',
+  employeeIdIsInvalidOrDeactivated : 'Employee Id is Invalid or is either deleted !',
   sameEmpIsAlreadyCreatedAsAsm: 'Same Employee is already Created as ASM !',
   sameUserIsAlreadyASalesman: 'Same Employee is already Created as Salesman !',
   pickerboyActivatedSuccessfully: "Pickerboy Activated Successfully !",

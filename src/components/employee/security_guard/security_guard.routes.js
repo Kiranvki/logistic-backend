@@ -6,6 +6,9 @@ const {
   joiEmployeCreate, // create a new employee
   joiGetZohoDetails,  //getting the details from zoho
   joiEmployePatch, // joi employee patch
+  joiEmployeeGetDetails, // joi employee get id
+  joiEmployeeList, // joi security get list
+  joiEmployeeChangeStatus, // employee changed status
 } = require('./security_guard.validators');
 
 // hooks 
@@ -13,6 +16,7 @@ const {
   getDetailsFromZoho, // get details from zoho
   getDetailsFromZohoUsingEmpID, // get details from zoho using empid
   isValidAgencyId, // checking whether the agency is valida or not
+  isValidEmployee, // checking wheather the employee id valid or not
   checkWhetherItsAValidEmployeeUpdate, // check whether its a valid employee update
 } = require('../../../hooks');
 
@@ -43,9 +47,9 @@ function securityRoutes() {
     );
 
     closed.route('/employee/:employeeId/:employeeType').get(
-      //[joiTransporterGetDetails], // joi validation
+      [joiEmployeeGetDetails], // joi validation
       // verifyUserToken,
-      //isValidTransporter,
+      isValidEmployee,
       ctrl.getEmployeer // controller function 
     );
 
@@ -56,13 +60,11 @@ function securityRoutes() {
     );
 
     closed.route('/employee/:employeeId/:employeeType').delete(
-      //[joiTransporterGetDetails], // joi validation
+      [joiEmployeeGetDetails], // joi validation
       // verifyUserToken,
-      //isValidTransporter,
+      isValidEmployee,
       ctrl.deleteEmployee // controller function 
     );
-
-
 
     //getting the details from zoho
     closed.route('/').get(
@@ -74,7 +76,7 @@ function securityRoutes() {
 
     //  // activate or deactive security guard
     closed.route('/:employeeType/:employeeId/status/:type').patch(
-      //[joiDistributorChangeStatus], // joi validation
+      [joiEmployeeChangeStatus], // joi validation
       // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
       ctrl.patchSecurityGuardStatus // get controller 
     );

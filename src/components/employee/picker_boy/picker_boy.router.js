@@ -7,6 +7,7 @@ const {
   joiIdInParams, // check joi id in params
   joiPickerBoyList, // get salesman list
   joiPickerBoyCreate, // create a new salesman
+  joiPickerList // picker list
 } = require("./picker_boy.validators");
 
 // hooks

@@ -27,6 +27,7 @@ module.exports = async (req, res, next) => {
         if (deliveryexecutiveDetails.success) {
             info('Delivery Executive Details Fetched Successfully')
             req.body.deliveryexecutiveDetails = deliveryexecutiveDetails.data;
+            console.log("deliveryexecutiveDetails",req.body.deliveryexecutiveDetails);
             return next();
         } else {
             error('Invalid Delivery Executive !');

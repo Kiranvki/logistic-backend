@@ -13,7 +13,7 @@ const {
     isValidDeliveryId, // check whether the salesman id is valid or not 
     checkOtpIsValidOrNot, // check whether the otp is valid or not
     sendTheOtpToTheDevice, // send the otp to the device either via email or sms 
-    generateTokenForAppUsers, // generate token for app users 
+    generateTokenForDeliveryAppUsers, // generate token for app users 
     //checkWhetherAValidPickerCred, // check whether the salesman is valid or not 
     checkWhetherAValidDeliveryExecutiveCrediantial // check whether the salesman is valid or not 
   } = require('../../../../hooks/app');
@@ -39,7 +39,7 @@ function deliveryRoutes() {
       [joiLoginVerify], // joi validation
       isValidDeliveryId, // check whether the picker id is valid or not
       checkOtpIsValidOrNot, // check whether the OTP is valid or not
-      generateTokenForAppUsers, // generate JWT token for app users
+      generateTokenForDeliveryAppUsers, // generate JWT token for app users
       ctrl.loginVerify // controller function
     );
   };

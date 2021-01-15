@@ -1,4 +1,4 @@
-const transporterCtrl= require('../components/transporter/transporter/transporter.controller')
+const employeeCtrl= require('../components/employee/security_guard/security_guard.controller')
 
 // Responses & others utils 
 const Response = require('../responses/response');
@@ -11,18 +11,15 @@ const {
   info
 } = require('../utils').logging;
 
-
-  
-
 module.exports = async (req, res, next) => {
   try {
     info('Check whether the user email id is unique or not!');
 
-    let transporterId = req.body.transporterId; // get the agency id 
+    let employeeId = req.body.employeeId; // get the agency id 
 
-    if (transporterId) {
+    if (employeeId) {
       // check whether the name is unique or not 
-      let isValid = await transporterCtrl.isValid(transporterId);
+      let isValid = await transporterCtrl.isValid(employeeId);
 
       // if name exists
       if (isValid.success) {
@@ -33,8 +30,8 @@ module.exports = async (req, res, next) => {
         // MOVE ON 
         next();
       } else {
-        error('Transporter ID Not Found !'); // route doesnt exist 
-        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,  MessageTypes.transporterMaster.transporterIdIsInvalidOrDeactivated);
+        error('Employee ID Not Found !'); // route doesnt exist 
+        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,  MessageTypes.employee.employeeIdIsInvalidOrDeactivated);
       }
     } else next();
 

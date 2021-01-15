@@ -101,11 +101,11 @@ class deliveryUserSessionController extends BaseController {
             'email': req.body.email,
             'mobileNumber': req.body.mobileNumber,
           };
-          console.log("pushObject",pushObject);
+          console.log("eeeeeeeeeee",req.body.deliveryexecutiveDetails);
   
           // updating the last login details 
           let deliveryExecutiveDetail = await Model.findOneAndUpdate({
-            deliveryId : mongoose.Types.ObjectId(req.body.deliveryExecutiveDetails._id),
+            deliveryId : mongoose.Types.ObjectId(req.body.deliveryexecutiveDetails._id),
             status: 1,
             isDeleted: 0
           },
@@ -118,14 +118,16 @@ class deliveryUserSessionController extends BaseController {
             'new': true
           });
 
+          console.log("deliveryExecutiveDetail",deliveryExecutiveDetail);
+
           // is logged in 
           return this.success(req, res, this.status.HTTP_OK, {
-            deliveryId: req.body.deliveryExecutiveDetails._id,
-            deliveryExecutiveDetails: {
-              name: req.body.deliveryExecutiveDetails.fullName,
-              cityId: req.body.deliveryExecutiveDetails.cityId,
-              employeeId: req.body.deliveryExecutiveDetails.employeeId,
-              profilePic: req.body.deliveryExecutiveDetails.profilePic,
+            deliveryId: req.body.deliveryexecutiveDetails._id,
+            deliveryexecutiveDetails: {
+              name: req.body.deliveryexecutiveDetails.fullName,
+              cityId: req.body.deliveryexecutiveDetails.cityId,
+              employeeId: req.body.deliveryexecutiveDetails.employeeId,
+              profilePic: req.body.deliveryexecutiveDetails.profilePic,
             }
           }, this.messageTypes.otpRegeneratedSuccessfully);
         } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToGenerateOtpRightNow);
