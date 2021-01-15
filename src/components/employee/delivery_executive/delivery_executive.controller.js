@@ -86,7 +86,7 @@ class deliveryExecutiveCtrl extends BaseController {
               data: res[res.length - 1],
             };
           } else {
-            error("Error Searching Data in  Delivery Executive DB!");
+            error("Error Searching Data in Delivery Executive DB!");
             return {
               success: false,
             };
