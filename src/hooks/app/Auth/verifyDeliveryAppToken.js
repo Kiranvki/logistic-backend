@@ -52,7 +52,7 @@ module.exports = async (req, res, next) => {
       // let isValidUserSession = { // COMMENT FOR PROD
       //   success: true
       // };
-      let isValidUserSession = await userSessionCtrl.getUserToken(data._id); // UNCOMMEMT FOR PROD
+      let isValidUserSession = await userDeliverySessionCtrl.getUserToken(data._id); // UNCOMMEMT FOR PROD
 
       // check session data is available 
       if (isValidUserSession.success && isValidUserSession.data.sessionKey == token) {  // UNCOMMEMT FOR PROD

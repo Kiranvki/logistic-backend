@@ -38,7 +38,7 @@ module.exports = async (req, res, next) => {
     if (objectId.isValid(deliveryId)) {
 
       // check whether the email id is unique or not 
-      let deliveryExecutiveAttendanceDetails = await AttendanceCtrl.getDetails(pickerBoyId, startOfTheDay, endOfTheDay)
+      let deliveryExecutiveAttendanceDetails = await AttendanceCtrl.getDetails(deliveryId, startOfTheDay, endOfTheDay)
 
       // if email is unique
       if (deliveryExecutiveAttendanceDetails.success) {
