@@ -16,7 +16,7 @@ const {
   getDetailsFromZoho, // get details from zoho
   getDetailsFromZohoUsingEmpID, // get details from zoho using empid
   isValidAgencyId, // checking whether the agency is valida or not
-  isValidEmployee, // checking wheather the employee id valid or not
+  isValidEmployeeId, // checking wheather the employee id valid or not
   checkWhetherItsAValidEmployeeUpdate, // check whether its a valid employee update
 } = require('../../../hooks');
 
@@ -51,8 +51,8 @@ function securityRoutes() {
     closed.route('/:employeeId/:employeeType').get(
       [joiEmployeeGetDetails], // joi validation
       verifyUserToken,         // verify user token
-      isValidEmployee,
-      ctrl.getEmployeer // controller function 
+      isValidEmployeeId,   // check whether its a valid employee
+      ctrl.getEmployee // controller function 
     );
 
     //get the security guard list
@@ -66,7 +66,7 @@ function securityRoutes() {
     closed.route('/:employeeId/:employeeType').delete(
       [joiEmployeeGetDetails], // joi validation
       verifyUserToken,        // verify user token
-      isValidEmployee,
+      isValidEmployeeId,
       ctrl.deleteEmployee // controller function 
     );
 

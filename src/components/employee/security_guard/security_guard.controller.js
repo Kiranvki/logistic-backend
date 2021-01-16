@@ -151,7 +151,7 @@ class securityController extends BaseController {
         return pickerDetails;
       }
       if (employeeType && employeeType == 'deliveryExecutive') {
-        let deliveryDetails = deliveryCtrl.getDetails(employeeId);
+        let deliveryDetails = await deliveryCtrl.getDetails(employeeId);
         return deliveryDetails;
       }
       if (employeeType && employeeType == 'securityGuard') {
@@ -160,7 +160,6 @@ class securityController extends BaseController {
           {
             $match: {
               _id: mongoose.Types.ObjectId(employeeId),
-              status: 1,
               isDeleted: 0,
             },
           },
@@ -425,22 +424,21 @@ class securityController extends BaseController {
     }
   };
 
-  //delete Employee
-
-  getEmployeer = async (req, res) => {
+  //get single employee details
+  getEmployee = async (req, res) => {
     try {
-      info("Employee GET DETAILS !");
+      info('Single Employee GET DETAILS !');
       // get the brand id
       let employeeId = req.params.employeeId;
       let empType = req.params.employeeType;
 
-      if (empType == "deliveryExecutive") {
+      if (empType == 'deliveryExecutive') {
         let deliveryResponse = await deliveryCtrl.get(req, res);
         return;
-      } else if (empType == "pickerBoy") {
+      } else if (empType == 'pickerBoy') {
         let pickerboyResponse = await pickerBoyCtrl.get(req, res);
         return;
-      } else if (empType == "securityGuard") {
+      } else if (empType == 'securityGuard') {
         // inserting data into the db
         let employee = await Model.findOne({
           _id: mongoose.Types.ObjectId(req.params.employeeId),

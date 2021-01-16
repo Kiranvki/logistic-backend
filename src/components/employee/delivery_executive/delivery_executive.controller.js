@@ -55,7 +55,47 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   }
 
+  // get details of delivery executive
+  getDetails = async (employeeId) => {
+    try {
+      info('Get delivery executive details !');
 
+      // find the delivery executive and get details
+      return Model.aggregate([{
+        $match: {
+          '_id': mongoose.Types.ObjectId(employeeId),
+          'isDeleted': 0
+        }
+      }
+      ]).allowDiskUse(true).then((res) => {
+        if (res && res.length) {
+          return {
+            success: true,
+            data: res[res.length - 1]
+          }
+        } else {
+          error('Error Searching Data in delivery executive DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
   // getting the Delivery Executive details using other fields
   getDetailsDeliveryUsingField = async (fieldValue) => {
     try {
@@ -156,7 +196,7 @@ class deliveryExecutiveCtrl extends BaseController {
         _id: mongoose.Types.ObjectId(req.params.employeeId),
         isDeleted: 0,
       }).lean();
-      console.log("Emplloyy", employee);
+
       // check if inserted
       if (employee && !_.isEmpty(employee))
         return this.success(req, res, this.status.HTTP_OK, employee, this.messageTypes.deliveryExecutiveFetchedSuccessfully);
@@ -335,8 +375,8 @@ class deliveryExecutiveCtrl extends BaseController {
     }
   }
 
-   // patch Delivery Executive status
-   patchDeliveryExecutiveStatus = async (req, res) => {
+  // patch Delivery Executive status
+  patchDeliveryExecutiveStatus = async (req, res) => {
     try {
       info('Delivery Executive STATUS CHANGE !');
 
@@ -353,7 +393,7 @@ class deliveryExecutiveCtrl extends BaseController {
       // inserting data into the db 
       let isUpdated = await Model.findOneAndUpdate({
         _id: mongoose.Types.ObjectId(employeeId)
-      }, dataToUpdate, {  
+      }, dataToUpdate, {
         new: true,
         upsert: false,
         lean: true

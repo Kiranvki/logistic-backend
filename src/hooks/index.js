@@ -8,7 +8,7 @@ module.exports = {
   isValidPickerBoyId: require('./app/isValidPickerBoyId'),  //check whether the picker id is correct or not
   generateOtp: require('./app/generateOtp'), // generate the OTP
   isValidAgencyId: require('./isValidAgencyId'),//check whether the agencyId is valid or not
-  isValidEmployee : require('./isValidEmployeeId'),
+  isValidEmployeeId: require('./isValidEmployeeId'),
   isValidTransporter: require('./isValidTransporterId'),
   checkWhetherItsAValidTransporterUpdate: require('./checkWhetherItsAValidTransporterUpdate'),
   checkWhetherItsAValidVehicleUpdate: require('./checkWhetherItsAValidVehicleUpdate'), //hook to check Whether Its A Valid Vehicle Update or not

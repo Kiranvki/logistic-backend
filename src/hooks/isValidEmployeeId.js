@@ -1,4 +1,4 @@
-const employeeCtrl= require('../components/employee/security_guard/security_guard.controller')
+const employeeCtrl = require('../components/employee/security_guard/security_guard.controller')
 
 // Responses & others utils 
 const Response = require('../responses/response');
@@ -6,6 +6,7 @@ const StatusCodes = require('../facades/response');
 const MessageTypes = require('../responses/types');
 const Exceptions = require('../exceptions/Handler');
 const _ = require('lodash');
+const mongoose = require('mongoose');
 const {
   error,
   info
@@ -14,26 +15,29 @@ const {
 module.exports = async (req, res, next) => {
   try {
     info('Check whether the user email id is unique or not!');
-
-    let employeeId = req.body.employeeId; // get the agency id 
-
-    if (employeeId) {
+    let objectId = mongoose.Types.ObjectId; // object id
+    let employeeId = req.params.employeeId,  // get the employee Id 
+      employeeType = req.params.employeeType;   // get the employee type
+    if (objectId.isValid(employeeId)) {
       // check whether the name is unique or not 
-      let isValid = await transporterCtrl.isValid(employeeId);
+      let isValid = await employeeCtrl.getEmployeeDetails(employeeId, employeeType);
 
       // if name exists
       if (isValid.success) {
 
-        // injecting into the request body
-        req.body.agencyName = isValid.data.nameToDisplay;
+        // injecting the data into the request body
+        req.body.employeeData = isValid.data;
 
         // MOVE ON 
         next();
       } else {
         error('Employee ID Not Found !'); // route doesnt exist 
-        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,  MessageTypes.employee.employeeIdIsInvalidOrDeactivated);
+        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.employeeIdIsInvalidOrDeactivated);
       }
-    } else next();
+    } else
+      error('Employee ID is Invalid !');
+    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidEmployeeId);
+
 
     // catch any runtime error 
   } catch (e) {

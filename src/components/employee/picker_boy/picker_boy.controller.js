@@ -236,7 +236,7 @@ class PickerBoyController extends BaseController {
         _id: mongoose.Types.ObjectId(req.params.employeeId),
         isDeleted: 0,
       }).lean();
-      console.log("Emplloyy", employee);
+
       // check if inserted
       if (employee && !_.isEmpty(employee))
         return this.success(req, res, this.status.HTTP_OK, employee);
@@ -357,7 +357,6 @@ class PickerBoyController extends BaseController {
       return Model.aggregate([{
         $match: {
           '_id': mongoose.Types.ObjectId(pickerBoyId),
-          'status': 1,
           'isDeleted': 0
         }
       }
