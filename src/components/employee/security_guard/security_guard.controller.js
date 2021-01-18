@@ -158,10 +158,48 @@ class securityController extends BaseController {
         let securityDetails = await Model.aggregate([
           {
             $match: {
-              _id: mongoose.Types.ObjectId(employeeId),
-              isDeleted: 0,
+              '_id': mongoose.Types.ObjectId(employeeId),
+
             },
           },
+          {
+            $lookup: {
+              from: 'securityguardagencies',
+              localField: "agencyId",
+              foreignField: "_id",
+              as: 'agency'
+            }
+
+          },
+          {
+            $unwind: {
+              path: '$agency',
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $project: {
+              "_id": 1,
+              "employerName": 1,
+              "isWaycoolEmp": 1,
+              "managerName": 1,
+              "profilePic": 1,
+              "status": 1,
+              "isDeleted": 1,
+              "firstName": 1,
+              "lastName": 1,
+              "agencyId": 1,
+              "contactMobile": 1,
+              "email": 1,
+              "fullName": 1,
+              "createdById": 1,
+              "createdBy": 1,
+              "employeeId": 1,
+              "altContactMobile": 1,
+              "altEmail": 1,
+              "agencyName": "$agency.nameToDisplay"
+            }
+          }
         ])
           .allowDiskUse(true)
           .then((res) => {
@@ -428,30 +466,35 @@ class securityController extends BaseController {
   //get single employee details
   getEmployee = async (req, res) => {
     try {
-      info('Single Employee GET DETAILS !');
       // get the employee data id
-      let employeeType = req.param.employeeType;
+      let employeeType = req.params.employeeType,
+        employeeData = req.body.employeeData;
+      info(`Single Employee DETAILS for - ${employeeType}`);
 
-      if (req.body.employeeData && !_.isEmpty(req.body.employeeData)) {
+      if (employeeData && !_.isEmpty(employeeData)) {
         if (employeeType == 'deliveryExecutive') {
-          return this.success(req, res, this.status.HTTP_OK, req.body.employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+
+          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+        }
+        else if (employeeType == 'pickerBoy') {
+
+          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
 
         }
-        if (employeeType == 'pickerBoy') {
-          return this.success(req, res, this.status.HTTP_OK, req.body.employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
-
-        }
-        if (employeeType == 'securityGuard') {
-
-          return this.success(req, res, this.status.HTTP_OK, req.body.employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+        else if (employeeType == 'securityGuard') {
+          employeeData = {
+            ...employeeData,
+            'designation': 'Security Guard'
+          }
+          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
 
           // catch any runtime error
         }
 
       }
-      else {
-        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.employeeDetailsNotFound);
-      }
+      // else {
+      //   return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.employeeDetailsNotFound);
+      // }
     } catch (err) {
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
