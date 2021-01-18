@@ -22,8 +22,7 @@ class timeout {
     }
   }
   
-
-    
+   
 // getting the model 
 class securityProfileController extends BaseController {
     // constructor 
@@ -81,6 +80,26 @@ class securityProfileController extends BaseController {
           attendanceDetails: attendanceDetails
         }, this.messageTypes.userDetailsFetchedSuccessfully);
       } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userNotFound);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+    // do something 
+  updateSecurityUserDetails= async (req, res) => {
+    try {
+      info('Security Guard Profile PATCH REQUEST !');
+      let id = req.user._id || '';
+
+      // inserting data into the db 
+      let isUpdated = await securityCtrl.updateDetails(req.body.toChangeObject, id);
+
+      // check if updated 
+      if (isUpdated.success) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.securityGuardUpdatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdated);
 
       // catch any runtime error 
     } catch (err) {

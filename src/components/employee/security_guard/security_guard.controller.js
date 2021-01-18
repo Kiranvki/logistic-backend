@@ -146,60 +146,58 @@ class securityController extends BaseController {
       info(`Get Employee details for ${employeeType}`);
 
       // get details
-      if (employeeType && employeeType == 'pickerBoy') {
+      if (employeeType && employeeType == "pickerBoy") {
         let pickerDetails = await pickerBoyCtrl.getDetails(employeeId);
         return pickerDetails;
       }
-      if (employeeType && employeeType == 'deliveryExecutive') {
+      if (employeeType && employeeType == "deliveryExecutive") {
         let deliveryDetails = await deliveryCtrl.getDetails(employeeId);
         return deliveryDetails;
       }
-      if (employeeType && employeeType == 'securityGuard') {
+      if (employeeType && employeeType == "securityGuard") {
         let securityDetails = await Model.aggregate([
           {
             $match: {
-              '_id': mongoose.Types.ObjectId(employeeId),
-
+              _id: mongoose.Types.ObjectId(employeeId),
             },
           },
           {
             $lookup: {
-              from: 'securityguardagencies',
+              from: "securityguardagencies",
               localField: "agencyId",
               foreignField: "_id",
-              as: 'agency'
-            }
-
+              as: "agency",
+            },
           },
           {
             $unwind: {
-              path: '$agency',
-              preserveNullAndEmptyArrays: true
-            }
+              path: "$agency",
+              preserveNullAndEmptyArrays: true,
+            },
           },
           {
             $project: {
-              "_id": 1,
-              "employerName": 1,
-              "isWaycoolEmp": 1,
-              "managerName": 1,
-              "profilePic": 1,
-              "status": 1,
-              "isDeleted": 1,
-              "firstName": 1,
-              "lastName": 1,
-              "agencyId": 1,
-              "contactMobile": 1,
-              "email": 1,
-              "fullName": 1,
-              "createdById": 1,
-              "createdBy": 1,
-              "employeeId": 1,
-              "altContactMobile": 1,
-              "altEmail": 1,
-              "agencyName": "$agency.nameToDisplay"
-            }
-          }
+              _id: 1,
+              employerName: 1,
+              isWaycoolEmp: 1,
+              managerName: 1,
+              profilePic: 1,
+              status: 1,
+              isDeleted: 1,
+              firstName: 1,
+              lastName: 1,
+              agencyId: 1,
+              contactMobile: 1,
+              email: 1,
+              fullName: 1,
+              createdById: 1,
+              createdBy: 1,
+              employeeId: 1,
+              altContactMobile: 1,
+              altEmail: 1,
+              agencyName: "$agency.nameToDisplay",
+            },
+          },
         ])
           .allowDiskUse(true)
           .then((res) => {
@@ -230,7 +228,6 @@ class securityController extends BaseController {
       error(err);
     }
   };
-
 
   // Internal Function to check whether the Security Guard exist or not
   isExist = async (empId, isWaycoolEmployer) => {
@@ -472,32 +469,49 @@ class securityController extends BaseController {
       info(`Single Employee DETAILS for - ${employeeType}`);
 
       if (employeeData && !_.isEmpty(employeeData)) {
-        if (employeeType == 'deliveryExecutive') {
-
-          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
-        }
-        else if (employeeType == 'pickerBoy') {
-
-          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
-
-        }
-        else if (employeeType == 'securityGuard') {
+        if (employeeType == "deliveryExecutive") {
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            employeeData,
+            this.messageTypes.securityGuardFetchedSuccessfully
+          );
+        } else if (employeeType == "pickerBoy") {
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            employeeData,
+            this.messageTypes.securityGuardFetchedSuccessfully
+          );
+        } else if (employeeType == "securityGuard") {
           employeeData = {
             ...employeeData,
-            'designation': 'Security Guard'
-          }
-          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+            designation: "Security Guard",
+          };
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            employeeData,
+            this.messageTypes.securityGuardFetchedSuccessfully
+          );
 
           // catch any runtime error
         }
-
       }
       // else {
       //   return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.employeeDetailsNotFound);
       // }
     } catch (err) {
       error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
     }
   };
 
@@ -586,28 +600,52 @@ class securityController extends BaseController {
       let employeeType = req.params.employeeType;
 
       if (employeeType == "deliveryExecutive") {
-        let deliveryResponse = await deliveryCtrl.updateDeliveryExecutiveDetails(employeeId, req.body.toChangeObject);
+        let deliveryResponse = await deliveryCtrl.updateDeliveryExecutiveDetails(
+          employeeId,
+          req.body.toChangeObject
+        );
         if (deliveryResponse.success) {
-          return this.success(req, res, this.status.HTTP_OK, deliveryResponse.data, this.messageTypes.deliveryExecutiveUpdatedSuccessfully);
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            deliveryResponse.data,
+            this.messageTypes.deliveryExecutiveUpdatedSuccessfully
+          );
         } else
-          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdated);
-
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.deliveryExecutiveNotUpdated
+          );
       }
       if (employeeType == "pickerBoy") {
-        let pickerboyResponse = await pickerBoyCtrl.updatePickerBoyDetails(employeeId, req.body.toChangeObject);
+        let pickerboyResponse = await pickerBoyCtrl.updatePickerBoyDetails(
+          employeeId,
+          req.body.toChangeObject
+        );
         if (pickerboyResponse.success) {
-          return this.success(req, res, this.status.HTTP_OK, pickerboyResponse.data, this.messageTypes.pickerBoyUpdatedSuccessfully);
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            pickerboyResponse.data,
+            this.messageTypes.pickerBoyUpdatedSuccessfully
+          );
         } else
-          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerBoyNotUpdated);
-
-
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.pickerBoyNotUpdated
+          );
       }
       if (employeeType == "securityGuard") {
-
         // creating data to update
         let dataToUpdate = {
           $set: {
-            ...req.body.toChangeObject
+            ...req.body.toChangeObject,
           },
         };
 
@@ -627,18 +665,33 @@ class securityController extends BaseController {
         // check if inserted
         if (isUpdated && !_.isEmpty(isUpdated)) {
           info("Security Guard Successfully updated !");
-          return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.securityGuardUpdatedSuccessfully);
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            isUpdated,
+            this.messageTypes.securityGuardUpdatedSuccessfully
+          );
         } else
-          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdated);
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.securityGuardNotUpdated
+          );
 
         // catch any runtime error
       }
     } catch (err) {
       error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
     }
   };
-
 
   // patch Security Guard status
   patchSecurityGuardStatus = async (req, res) => {
@@ -651,10 +704,16 @@ class securityController extends BaseController {
       let empType = req.params.employeeType;
 
       if (empType == "deliveryExecutive") {
-        let deliveryResponse = await deliveryCtrl.patchDeliveryExecutiveStatus(req, res);
+        let deliveryResponse = await deliveryCtrl.patchDeliveryExecutiveStatus(
+          req,
+          res
+        );
         return;
       } else if (empType == "pickerBoy") {
-        let pickerboyResponse = await pickerBoyCtrl.patchPickerBoyStatus(req, res);
+        let pickerboyResponse = await pickerBoyCtrl.patchPickerBoyStatus(
+          req,
+          res
+        );
         return;
       } else if (empType == "securityGuard") {
         // creating data to insert
@@ -709,37 +768,93 @@ class securityController extends BaseController {
     }
   };
 
-  
-    // Internal Function get full details 
-    getsecurityFullDetails = async (securityGuardId) => {
-      try {
-        info('Security GET DETAILS !');
-  
-        // get picker boy details
-        let securityData = await Model.aggregate([{
-          $match: {
-            _id: mongoose.Types.ObjectId(securityGuardId)
+  // Internal function to update the details
+  updateDetails = async (dataObject, id) => {
+    try {
+      info("Update Security Guard details Internal Function !");
+
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          ...dataObject,
+        },
+      };
+
+      return Model.findOneAndUpdate(
+        {
+          _id: mongoose.Types.ObjectId(id),
+        },
+        dataToUpdate,
+        {
+          new: true,
+          upsert: false,
+          lean: true,
+        }
+      )
+        .then((res) => {
+          if (res) {
+            return {
+              success: true,
+              data: res,
+            };
+          } else {
+            error("Error Updating Data in Security Guard DB!");
+            return {
+              success: false,
+            };
           }
-        }
-        ]).allowDiskUse(true);
-  
-        // check if inserted 
-        if (securityData && securityData.length) return {
-          success: true,
-          data: securityData[securityData.length - 1]
-        };
-        else return { success: false };
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        return {
-          success: false,
-          error: err
-        }
-      }
+        })
+        .catch((err) => {
+          error(err);
+          return {
+            success: false,
+            error: err,
+          };
+        });
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
     }
-  
+  };
+
+  // Internal Function get full details
+  getsecurityFullDetails = async (securityGuardId) => {
+    try {
+      info("Security GET DETAILS !");
+
+      // get picker boy details
+      let securityData = await Model.aggregate([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(securityGuardId),
+          },
+        },
+      ]).allowDiskUse(true);
+
+      // check if inserted
+      if (securityData && securityData.length)
+        return {
+          success: true,
+          data: securityData[securityData.length - 1],
+        };
+      else return { success: false };
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err,
+      };
+    }
+  };
 }
 // exporting the modules
 module.exports = new securityController();

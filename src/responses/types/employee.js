@@ -12,6 +12,7 @@ module.exports = {
   userDetailsFetched: 'User Details Fetched Successfully from Zoho !.',
   userDetailsNotFetched: 'Unable to fetched the User Details from Zoho !.',
   dataIsNotChanged: 'Following Data is Not Changed - ',
+  idInvalidEitherDeletedOrDeactivated: 'Id Invalid Either Deleted Or Deactivated',
   employeeCreated: 'Employee Successfully Created !',
   employeeNotCreated: 'Employee Not Created Successfully !',
   deliveryExecutiveCreated: 'Delivery Executive Successfully Created !',
@@ -62,5 +63,9 @@ module.exports = {
   pickerBoyNotUpdated: 'Error! Updating Picker Boy!',
   employeeDetailsNotFound: 'Employee Details Not Found !',
   userDetailsFetchedSuccessfully :'User Details Fetched Successfully',
-  userNotFound: "User Details Not Found"
+  userNotFound: "User Details Not Found",
+  deliveryIdInvalidEitherDeletedOrDeactivated : 'Delivery Id Invalid Either Deleted Or Deactivated',
+  invalidDeliveryId : 'Invalid Delivery Id',
+  invalidSecurityId : 'Invalid Security Id',
+  securityIdInvalidEitherDeletedOrDeactivated: 'Security Id Invalid Either Deleted Or Deactivated'
 };

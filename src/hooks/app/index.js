@@ -22,10 +22,12 @@ module.exports = {
   checkWhetherItsAValidPickerUpdate: require('./checkWhetherItsAValidPickerUpdate'),  // check whether its a valid update
   isValidSecurityGuardId: require('./isValidSecurityGuardId'),
   generateTokenForSecurityAppUsers: require('./generateTokenForSecurityAppUsers'),
-  generateTokenForDeliveryAppUsers: require('./generateTokenForDeliveryAppUsers.js'),
+  generateTokenForDeliveryAppUsers: require('./generateTokenForDeliveryAppUsers'),
   isSecurityGuardAlreadyCheckedIn: require('./isSecurityGuardAlreadyCheckedIn'), // check whether the security guard already check in or not
   isSecurityGuardUserCheckedIn: require('./isSecurityGuardUserCheckedIn'),
   isValidDeliveryId : require('./isValidDeliveryExecutiveId'),
   checkWhetherAValidDeliveryExecutiveCrediantial : require('./checkWhetherAValidDeliveryExecutiveCrediantial'), // check whether the delivery executive already check in or not
-  isDeliveryExecutiveCheckedIn :require('./isDeliveryExecutiveUserCheckedIn')
+  isDeliveryExecutiveCheckedIn :require('./isDeliveryExecutiveUserCheckedIn'),
+  checkWhetherItsAValidDeliveryUpdate: require('./checkWhetherItsAValidDeliveryUpdate'),
+  checkWhetherItsAValidSecurityUpdate: require('./checkWhetherItsAValidSecurityUpdate')
 }

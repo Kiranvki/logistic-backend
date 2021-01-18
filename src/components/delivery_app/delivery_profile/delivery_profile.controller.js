@@ -88,6 +88,26 @@ class deliveryProfileController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+  
+  // do something 
+  updateDeliveryUserDetails = async (req, res) => {
+    try {
+      info('Delivery Executive Profile PATCH REQUEST !');
+      let id = req.user._id || '';
+
+      // inserting data into the db 
+      let isUpdated = await deliveryCtrl.updateDetails(req.body.toChangeObject, id);
+
+      // check if updated 
+      if (isUpdated.success) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.deliveryExecutiveUpdatedSuccessfully);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdated);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
 
 }
 
