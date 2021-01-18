@@ -428,57 +428,40 @@ class securityController extends BaseController {
   getEmployee = async (req, res) => {
     try {
       info('Single Employee GET DETAILS !');
-      // get the brand id
-      let employeeId = req.params.employeeId;
-      let empType = req.params.employeeType;
+      // get the employee data id
+      let employeeType = req.param.employeeType;
 
-      if (empType == 'deliveryExecutive') {
-        let deliveryResponse = await deliveryCtrl.get(req, res);
-        return;
-      } else if (empType == 'pickerBoy') {
-        let pickerboyResponse = await pickerBoyCtrl.get(req, res);
-        return;
-      } else if (empType == 'securityGuard') {
-        // inserting data into the db
-        let employee = await Model.findOne({
-          _id: mongoose.Types.ObjectId(req.params.employeeId),
-          isDeleted: 0,
-        }).lean();
+      if (req.body.employeeData && !_.isEmpty(req.body.employeeData)) {
+        if (employeeType == 'deliveryExecutive') {
+          let deliveryResponse = await deliveryCtrl.get(req, res);
+          return;
+        }
+        if (employeeType == 'pickerBoy') {
+          let pickerboyResponse = await pickerBoyCtrl.get(req, res);
+          return;
+        }
+        if (employeeType == 'securityGuard') {
+          // inserting data into the db
+          let employee = await Model.findOne({
+            _id: mongoose.Types.ObjectId(req.params.employeeId),
+            isDeleted: 0,
+          }).lean();
+          // check if inserted
+          if (employee && !_.isEmpty(employee))
+            return this.success(req, res, this.status.HTTP_OK, employee, this.messageTypes.securityGuardFetchedSuccessfully);
+          else
+            return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotFound);
 
-        // check if inserted
-        if (employee && !_.isEmpty(employee))
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            employee,
-            this.messageTypes.securityGuardFetchedSuccessfully
-          );
-        else
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.securityGuardNotFound
-          );
+          // catch any runtime error
+        }
 
-        // catch any runtime error
-      } else {
-        return this.errors(
-          req,
-          res,
-          this.status.HTTP_CONFLICT,
-          this.messageTypes.securityGuardNotFound
-        );
+      }
+      else {
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.employeeDetailsNotFound);
       }
     } catch (err) {
       error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   };
 
