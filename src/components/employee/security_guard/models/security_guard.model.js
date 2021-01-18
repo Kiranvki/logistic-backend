@@ -18,8 +18,10 @@ const securityGuard = new Schema(
     },
     agencyId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'agencies',
-
+      ref: 'securityguardagencies',
+      autopopulate: {
+        select: 'nameToDisplay'
+      }
     },
     managerName: {
       type: String,

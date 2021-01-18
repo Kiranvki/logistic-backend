@@ -158,10 +158,48 @@ class securityController extends BaseController {
         let securityDetails = await Model.aggregate([
           {
             $match: {
-              _id: mongoose.Types.ObjectId(employeeId),
-              isDeleted: 0,
+              '_id': mongoose.Types.ObjectId(employeeId),
+
             },
           },
+          {
+            $lookup: {
+              from: 'securityguardagencies',
+              localField: "agencyId",
+              foreignField: "_id",
+              as: 'agency'
+            }
+
+          },
+          {
+            $unwind: {
+              path: '$agency',
+              preserveNullAndEmptyArrays: true
+            }
+          },
+          {
+            $project: {
+              "_id": 1,
+              "employerName": 1,
+              "isWaycoolEmp": 1,
+              "managerName": 1,
+              "profilePic": 1,
+              "status": 1,
+              "isDeleted": 1,
+              "firstName": 1,
+              "lastName": 1,
+              "agencyId": 1,
+              "contactMobile": 1,
+              "email": 1,
+              "fullName": 1,
+              "createdById": 1,
+              "createdBy": 1,
+              "employeeId": 1,
+              "altContactMobile": 1,
+              "altEmail": 1,
+              "agencyName": "$agency.nameToDisplay"
+            }
+          }
         ])
           .allowDiskUse(true)
           .then((res) => {

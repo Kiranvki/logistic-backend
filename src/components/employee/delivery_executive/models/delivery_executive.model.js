@@ -19,7 +19,6 @@ const deliveryExecutive = new Schema(
     agencyId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'agencies',
-
     },
     managerName: {
       type: String,

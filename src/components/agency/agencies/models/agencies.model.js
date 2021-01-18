@@ -4,7 +4,7 @@ require('mongoose-type-email');
 const Schema = mongoose.Schema;
 
 // schema
-const agencies = new Schema({
+const securityGuardAgencies = new Schema({
   name: {
     type: String,
     required: true
@@ -32,12 +32,12 @@ const agencies = new Schema({
 });
 
 // creating indexes
-agencies.index({
+securityGuardAgencies.index({
   'name': 1,
   'status': 1
 });
 
-agencies.plugin(autopopulate);
+securityGuardAgencies.plugin(autopopulate);
 
 // exporting the entire module
-module.exports = mongoose.model('agencies', agencies);
+module.exports = mongoose.model('securityGuardAgencies', securityGuardAgencies);
