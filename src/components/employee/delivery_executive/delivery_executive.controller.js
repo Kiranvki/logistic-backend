@@ -147,6 +147,36 @@ class deliveryExecutiveCtrl extends BaseController {
   };
 
 
+    // Internal Function get full details 
+    getdeliveryFullDetails = async (deliveryId) => {
+      try {
+        info('Delivery GET DETAILS !');
+  
+        // get picker boy details
+        let deliveryData = await Model.aggregate([{
+          $match: {
+            _id: mongoose.Types.ObjectId(deliveryId)
+          }
+        }
+        ]).allowDiskUse(true);
+  
+        // check if inserted 
+        if (deliveryData && deliveryData.length) return {
+          success: true,
+          data: deliveryData[deliveryData.length - 1]
+        };
+        else return { success: false };
+  
+        // catch any runtime error 
+      } catch (err) {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      }
+    }
+  
 
   // internal create function
   create = async (dataToInsert) => {
