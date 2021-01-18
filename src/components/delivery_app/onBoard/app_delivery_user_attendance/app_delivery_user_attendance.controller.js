@@ -334,7 +334,7 @@ class DeliveryuserController extends BaseController {
         }
       }
 
-        // get the attendance detail for the day 
+ // get the attendance detail for the day 
   getAttendanceDetailsForADay = async (deliveryId, startDate, endDate) => {
     try {
       info('Get Details !');

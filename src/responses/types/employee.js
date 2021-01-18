@@ -61,4 +61,6 @@ module.exports = {
   pickerBoyUpdatedSuccessfully: 'Picker Boy Updated Successfully !',
   pickerBoyNotUpdated: 'Error! Updating Picker Boy!',
   employeeDetailsNotFound: 'Employee Details Not Found !',
+  userDetailsFetchedSuccessfully :'User Details Fetched Successfully',
+  userNotFound: "User Details Not Found"
 };

@@ -49,6 +49,10 @@ const salesOrderApiRouter = express.Router(); // Protected routes
 const appPickerBoyOpenRouter = express.Router(); // Open routes
 const appPickerBoyApiRouter = express.Router(); // Protected routes
 
+// app delivery details 
+const appDeliveryOpenRouter = express.Router(); // Open routes
+const appDeliveryApiRouter = express.Router(); // Protected routes
+
 //Transporter
 const transporterMasterRouter = express.Router(); // Open routes
 const transporterMasterAPIRouter = express.Router(); // Protected routes
@@ -101,6 +105,18 @@ glob('./src/components/picker_app/*', null, (err, items) => {
       );
   });
 });
+
+/* Fetch router files and apply them to our routers */
+glob('./src/components/delivery_app/*', null, (err, items) => {
+  items.forEach(component => {
+    if (component != './src/components/delivery_app/onBoard')
+      if (require(component).routes) require(component).routes(
+        appDeliveryOpenRouter,
+        appDeliveryApiRouter,
+      );
+  });
+});
+
 
 /* Fetch router files and apply them to our routers */
 glob('./src/components/employee/*', null, (err, items) => {
@@ -193,6 +209,10 @@ app.use('/api/v1/salesorder', salesOrderApiRouter);
 // app 
 app.use('/app/v1/picker-app', appPickerBoyOpenRouter);
 app.use('/app/api/v1/picker-app', appPickerBoyApiRouter);
+
+// app 
+app.use('/app/v1/delivery-app', appDeliveryOpenRouter);
+app.use('/app/api/v1/delivery-app', appDeliveryApiRouter);
 
 //Transporter
 app.use('/v1/transporter', transporterMasterRouter);
