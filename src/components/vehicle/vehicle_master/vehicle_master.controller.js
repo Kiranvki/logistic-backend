@@ -72,7 +72,9 @@ class vehicleController extends BaseController {
         'height': req.body.height,
         'length': req.body.length,
         'breadth': req.body.breadth,
-        'tonnage': req.body.tonnage
+        'tonnage': req.body.tonnage,
+        'cityId': req.user.region || 'bangalore',
+        'warehouseId': req.user.warehouseId || null
       }
 
       // inserting data into the db 

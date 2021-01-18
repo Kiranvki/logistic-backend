@@ -55,6 +55,14 @@ function securityRoutes() {
       ctrl.getEmployee // controller function 
     );
 
+    //delete the employee based on the type
+    closed.route('/:employeeId/:employeeType').delete(
+      [joiEmployeeGetDetails], // joi validation
+      verifyUserToken,        // verify user token
+      //   isValidEmployeeId,
+      ctrl.deleteEmployee // controller function 
+    );
+
     //get the security guard list
     closed.route('/securityGuard').get(
       // [joiTransporterList], // joi validation
@@ -62,13 +70,6 @@ function securityRoutes() {
       ctrl.getList // controller function 
     );
 
-    //delete the employee based on the type
-    closed.route('/:employeeId/:employeeType').delete(
-      [joiEmployeeGetDetails], // joi validation
-      verifyUserToken,        // verify user token
-      isValidEmployeeId,
-      ctrl.deleteEmployee // controller function 
-    );
 
     //getting the details from zoho
     closed.route('/').get(

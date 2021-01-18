@@ -15,13 +15,18 @@ const {
   getAllCheckInVehicleDetails, //get all the check in vehicles
 } = require('../../../hooks');
 
+// auth 
+const {
+  verifyUserToken
+} = require('../../../hooks/Auth');
+
 function vehicle() {
   return (open, closed) => {
 
     // post 
     closed.route('/').post(
       [joiVehicleCreate], // joi validation
-      //verifyUserToken, // verify user token
+      verifyUserToken, // verify user token
       ctrl.post // controller function 
     );
 

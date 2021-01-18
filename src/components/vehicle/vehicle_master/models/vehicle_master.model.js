@@ -32,7 +32,14 @@ const vehicleMaster = new Schema({
   'isDeleted': {
     type: Number,
     default: 0
-  }
+  },
+  'cityId': {
+    type: String,
+  },
+  'warehouseId': {
+    //required: true,
+    type: mongoose.Schema.Types.ObjectId,
+  },
 },
   {
     timestamps: true
