@@ -64,7 +64,7 @@ class deliveryExecutiveCtrl extends BaseController {
       return Model.aggregate([{
         $match: {
           '_id': mongoose.Types.ObjectId(employeeId),
-          'isDeleted': 0
+          // 'isDeleted': 0
         }
       }
       ]).allowDiskUse(true).then((res) => {
