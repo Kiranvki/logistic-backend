@@ -49,6 +49,10 @@ const salesOrderApiRouter = express.Router(); // Protected routes
 const appPickerBoyOpenRouter = express.Router(); // Open routes
 const appPickerBoyApiRouter = express.Router(); // Protected routes
 
+// app Security Guard details 
+const appSecurityOpenRouter = express.Router(); // Open routes
+const appSecurityApiRouter = express.Router(); // Protected routes
+
 // app delivery details 
 const appDeliveryOpenRouter = express.Router(); // Open routes
 const appDeliveryApiRouter = express.Router(); // Protected routes
@@ -102,6 +106,18 @@ glob('./src/components/picker_app/*', null, (err, items) => {
       if (require(component).routes) require(component).routes(
         appPickerBoyOpenRouter,
         appPickerBoyApiRouter,
+      );
+  });
+});
+
+
+/* Fetch router files and apply them to our routers */
+glob('./src/components/security_guard_app/*', null, (err, items) => {
+  items.forEach(component => {
+    if (component != './src/components/security_guard_app/onBoard')
+      if (require(component).routes) require(component).routes(
+        appSecurityOpenRouter,
+        appSecurityApiRouter,
       );
   });
 });
@@ -209,6 +225,10 @@ app.use('/api/v1/salesorder', salesOrderApiRouter);
 // app 
 app.use('/app/v1/picker-app', appPickerBoyOpenRouter);
 app.use('/app/api/v1/picker-app', appPickerBoyApiRouter);
+
+// app 
+app.use('/app/v1/security-app', appSecurityOpenRouter);
+app.use('/app/api/v1/security-app', appSecurityApiRouter);
 
 // app 
 app.use('/app/v1/delivery-app', appDeliveryOpenRouter);

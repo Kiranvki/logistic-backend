@@ -665,6 +665,38 @@ class securityController extends BaseController {
       );
     }
   };
+
+  
+    // Internal Function get full details 
+    getsecurityFullDetails = async (securityGuardId) => {
+      try {
+        info('Security GET DETAILS !');
+  
+        // get picker boy details
+        let securityData = await Model.aggregate([{
+          $match: {
+            _id: mongoose.Types.ObjectId(securityGuardId)
+          }
+        }
+        ]).allowDiskUse(true);
+  
+        // check if inserted 
+        if (securityData && securityData.length) return {
+          success: true,
+          data: securityData[securityData.length - 1]
+        };
+        else return { success: false };
+  
+        // catch any runtime error 
+      } catch (err) {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      }
+    }
+  
 }
 // exporting the modules
 module.exports = new securityController();
