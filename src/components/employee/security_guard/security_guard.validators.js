@@ -126,7 +126,7 @@ const schemas = {
 
   joiEmployeeGetDetails: Joi.object().keys({
 
-    employeeId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
+    employeeId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Employee Id').required().options({
       language: {
         string: {
           regex: {

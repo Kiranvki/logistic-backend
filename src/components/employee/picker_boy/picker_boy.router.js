@@ -24,7 +24,11 @@ const {
 
 const { verifyAppToken } = require("../../../hooks/app/Auth");
 
-const { verifyUserToken } = require("../../../hooks/Auth");
+// auth 
+const {
+  verifyUserToken
+} = require('../../../hooks/Auth');
+
 
 // exporting the user routes
 function userRoutes() {
@@ -60,7 +64,7 @@ function userRoutes() {
     // get all
     closed.route("/list/pickerBoy").get(
       // [joiTransporterList], // joi validation
-      // verifyAppToken,
+      verifyUserToken,         // verify user token
       ctrl.getPickerBoy // controller function
     );
   };

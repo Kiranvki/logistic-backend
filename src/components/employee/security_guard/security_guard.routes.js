@@ -56,7 +56,7 @@ function securityRoutes() {
     );
 
     //get the security guard list
-    closed.route('/list/securityGuard').get(
+    closed.route('/securityGuard').get(
       // [joiTransporterList], // joi validation
       verifyUserToken,         // verify user token
       ctrl.getList // controller function 

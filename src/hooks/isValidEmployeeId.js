@@ -14,10 +14,12 @@ const {
 
 module.exports = async (req, res, next) => {
   try {
-    info('Check whether the user email id is unique or not!');
+    info('Check whether the employee Id is valid or not!');
     let objectId = mongoose.Types.ObjectId; // object id
     let employeeId = req.params.employeeId,  // get the employee Id 
       employeeType = req.params.employeeType;   // get the employee type
+    console.log('employeeId', employeeId);
+
     if (objectId.isValid(employeeId)) {
       // check whether the name is unique or not 
       let isValid = await employeeCtrl.getEmployeeDetails(employeeId, employeeType);

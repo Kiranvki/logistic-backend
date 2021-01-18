@@ -5,13 +5,19 @@ const {
   joiDeliveryList // joi delivery Executive list
 } = require('./delivery_executive.validators')
 
+// auth 
+const {
+  verifyUserToken
+} = require('../../../hooks/Auth');
+
+
 // exporting the user routes 
 function deliveryExecutive() {
   return (open, closed) => {
     // get all 
-    closed.route('/list/deliveryExecutive').get(
+    closed.route('/deliveryExecutive').get(
       // [joiTransporterList], // joi validation
-      // verifyAppToken,
+      verifyUserToken,         // verify user token
       ctrl.getList // controller function 
     );
 

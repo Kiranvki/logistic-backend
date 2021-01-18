@@ -143,7 +143,7 @@ class securityController extends BaseController {
   // get employee details
   getEmployeeDetails = async (employeeId, employeeType) => {
     try {
-      info("Get Employee details !");
+      info(`Get Employee details for ${employeeType}`);
 
       // get details
       if (employeeType && employeeType == 'pickerBoy') {
@@ -155,8 +155,7 @@ class securityController extends BaseController {
         return deliveryDetails;
       }
       if (employeeType && employeeType == 'securityGuard') {
-
-        return Model.aggregate([
+        let securityDetails = await Model.aggregate([
           {
             $match: {
               _id: mongoose.Types.ObjectId(employeeId),
@@ -185,6 +184,8 @@ class securityController extends BaseController {
               error: err,
             };
           });
+
+        return securityDetails;
       }
       // catch any runtime error
     } catch (err) {
@@ -433,24 +434,16 @@ class securityController extends BaseController {
 
       if (req.body.employeeData && !_.isEmpty(req.body.employeeData)) {
         if (employeeType == 'deliveryExecutive') {
-          let deliveryResponse = await deliveryCtrl.get(req, res);
-          return;
+          return this.success(req, res, this.status.HTTP_OK, req.body.employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+
         }
         if (employeeType == 'pickerBoy') {
-          let pickerboyResponse = await pickerBoyCtrl.get(req, res);
-          return;
+          return this.success(req, res, this.status.HTTP_OK, req.body.employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+
         }
         if (employeeType == 'securityGuard') {
-          // inserting data into the db
-          let employee = await Model.findOne({
-            _id: mongoose.Types.ObjectId(req.params.employeeId),
-            isDeleted: 0,
-          }).lean();
-          // check if inserted
-          if (employee && !_.isEmpty(employee))
-            return this.success(req, res, this.status.HTTP_OK, employee, this.messageTypes.securityGuardFetchedSuccessfully);
-          else
-            return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotFound);
+
+          return this.success(req, res, this.status.HTTP_OK, req.body.employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
 
           // catch any runtime error
         }

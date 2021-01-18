@@ -60,5 +60,5 @@ module.exports = {
   securityGuardNotUpdated: 'Error! Updating Security Guard!',
   pickerBoyUpdatedSuccessfully: 'Picker Boy Updated Successfully !',
   pickerBoyNotUpdated: 'Error! Updating Picker Boy!',
-  employeeDetailsNotFound: 'Employee Detailse Not Found !',
+  employeeDetailsNotFound: 'Employee Details Not Found !',
 };
