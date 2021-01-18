@@ -8,6 +8,10 @@ const pickerBoyCtrl = require("../picker_boy/picker_boy.controller");
 const _ = require("lodash");
 const { error, info } = require("../../../utils").logging;
 
+const {
+  getAgencyNameFromIdForDeliveryAndPickerBoy, // geting the agency name from ID
+} = require('../../../inter_service_api/dms_dashboard_v1/v1');
+
 //getting the model
 class securityController extends BaseController {
   //constructor
@@ -464,28 +468,46 @@ class securityController extends BaseController {
   getEmployee = async (req, res) => {
     try {
       // get the employee data id
-      let employeeType = req.params.employeeType,
-        employeeData = req.body.employeeData;
+      let employeeType = req.params.employeeType, // employee designation
+        employeeData = req.body.employeeData,     // employee data
+        cityId = req.user.region || '';           // getting the cityId
+
       info(`Single Employee DETAILS for - ${employeeType}`);
 
       if (employeeData && !_.isEmpty(employeeData)) {
-        if (employeeType == "deliveryExecutive") {
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            employeeData,
-            this.messageTypes.securityGuardFetchedSuccessfully
-          );
-        } else if (employeeType == "pickerBoy") {
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            employeeData,
-            this.messageTypes.securityGuardFetchedSuccessfully
-          );
-        } else if (employeeType == "securityGuard") {
+
+        let agencyId = employeeData.agencyId;     //getting the agency Id
+
+        if (employeeType == 'deliveryExecutive') {
+          let agencyData = await getAgencyNameFromIdForDeliveryAndPickerBoy(cityId, agencyId);
+
+          if (agencyData.success) {
+            employeeData = {
+              ...employeeData,
+              'agencyName': agencyData.data.nameToDisplay,
+              'designation': 'Delivery Executive'
+            }
+            return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+
+          }
+          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+        }
+        else if (employeeType == 'pickerBoy') {
+          let agencyData = await getAgencyNameFromIdForDeliveryAndPickerBoy(cityId, agencyId);
+
+          if (agencyData.success) {
+            employeeData = {
+              ...employeeData,
+              'agencyName': agencyData.data.nameToDisplay,
+              'designation': 'Picker Boy'
+            }
+            return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+
+          }
+          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+
+        }
+        else if (employeeType == 'securityGuard') {
           employeeData = {
             ...employeeData,
             designation: "Security Guard",
@@ -501,9 +523,9 @@ class securityController extends BaseController {
           // catch any runtime error
         }
       }
-      // else {
-      //   return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.employeeDetailsNotFound);
-      // }
+      else {
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.employeeDetailsNotFound);
+      }
     } catch (err) {
       error(err);
       this.errors(
@@ -768,93 +790,37 @@ class securityController extends BaseController {
     }
   };
 
-  // Internal function to update the details
-  updateDetails = async (dataObject, id) => {
-    try {
-      info("Update Security Guard details Internal Function !");
 
-      // creating data to insert
-      let dataToUpdate = {
-        $set: {
-          ...dataObject,
-        },
-      };
-
-      return Model.findOneAndUpdate(
-        {
-          _id: mongoose.Types.ObjectId(id),
-        },
-        dataToUpdate,
-        {
-          new: true,
-          upsert: false,
-          lean: true,
-        }
-      )
-        .then((res) => {
-          if (res) {
-            return {
-              success: true,
-              data: res,
-            };
-          } else {
-            error("Error Updating Data in Security Guard DB!");
-            return {
-              success: false,
-            };
-          }
-        })
-        .catch((err) => {
-          error(err);
-          return {
-            success: false,
-            error: err,
-          };
-        });
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
-    }
-  };
-
-  // Internal Function get full details
+  // Internal Function get full details 
   getsecurityFullDetails = async (securityGuardId) => {
     try {
-      info("Security GET DETAILS !");
+      info('Security GET DETAILS !');
 
       // get picker boy details
-      let securityData = await Model.aggregate([
-        {
-          $match: {
-            _id: mongoose.Types.ObjectId(securityGuardId),
-          },
-        },
+      let securityData = await Model.aggregate([{
+        $match: {
+          _id: mongoose.Types.ObjectId(securityGuardId)
+        }
+      }
       ]).allowDiskUse(true);
 
-      // check if inserted
-      if (securityData && securityData.length)
-        return {
-          success: true,
-          data: securityData[securityData.length - 1],
-        };
+      // check if inserted 
+      if (securityData && securityData.length) return {
+        success: true,
+        data: securityData[securityData.length - 1]
+      };
       else return { success: false };
 
-      // catch any runtime error
+      // catch any runtime error 
     } catch (err) {
       error(err);
       return {
         success: false,
-        error: err,
-      };
+        error: err
+      }
     }
-  };
+  }
+
 }
 // exporting the modules
 module.exports = new securityController();
