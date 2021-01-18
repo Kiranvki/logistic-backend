@@ -607,13 +607,13 @@ class securityController extends BaseController {
         employeeId = req.params.employeeId;
       let empType = req.params.employeeType;
 
-      if (empType == "deliveryexecutive") {
+      if (empType == "deliveryExecutive") {
         let deliveryResponse = await deliveryCtrl.patchDeliveryExecutiveStatus(req, res);
         return;
-      } else if (empType == "pickerboy") {
+      } else if (empType == "pickerBoy") {
         let pickerboyResponse = await pickerBoyCtrl.patchPickerBoyStatus(req, res);
         return;
-      } else if (empType == "securityguard") {
+      } else if (empType == "securityGuard") {
         // creating data to insert
         let dataToUpdate = {
           $set: {
