@@ -482,6 +482,10 @@ class securityController extends BaseController {
 
         }
         else if (employeeType == 'securityGuard') {
+          employeeData = {
+            ...employeeData,
+            'designation': 'Security Guard'
+          }
           return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
 
           // catch any runtime error
