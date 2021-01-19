@@ -490,6 +490,10 @@ class securityController extends BaseController {
             return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
 
           }
+          employeeData = {
+            ...employeeData,
+            'designation': 'Delivery Executive'
+          }
           return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
         }
         else if (employeeType == 'pickerBoy') {
@@ -503,6 +507,10 @@ class securityController extends BaseController {
             }
             return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
 
+          }
+          employeeData = {
+            ...employeeData,
+            'designation': 'Picker Boy'
           }
           return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
 
