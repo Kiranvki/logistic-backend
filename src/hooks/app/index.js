@@ -29,5 +29,6 @@ module.exports = {
   checkWhetherAValidDeliveryExecutiveCrediantial : require('./checkWhetherAValidDeliveryExecutiveCrediantial'), // check whether the delivery executive already check in or not
   isDeliveryExecutiveCheckedIn :require('./isDeliveryExecutiveUserCheckedIn'),
   checkWhetherItsAValidDeliveryUpdate: require('./checkWhetherItsAValidDeliveryUpdate'),
-  checkWhetherItsAValidSecurityUpdate: require('./checkWhetherItsAValidSecurityUpdate')
+  checkWhetherItsAValidSecurityUpdate: require('./checkWhetherItsAValidSecurityUpdate'),
+  isDeliveryAlreadyCheckedIn: require('./isDeliveryAlreadyCheckedIn')
 }
