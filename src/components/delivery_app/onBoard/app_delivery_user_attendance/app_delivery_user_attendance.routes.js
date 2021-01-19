@@ -10,7 +10,7 @@ const {
 const {
   isDeliveryExecutiveCheckedIn, // is user checked in
   isValidDeliveryId, // check whether the salesman id is valid or not
-  isAlreadyCheckedIn, // check whether the user already check In
+  isDeliveryAlreadyCheckedIn, // check whether the user already check In
   getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
   deliveryGenerateMonthDaysAndOtherMetaData, // generate month days and other meta data
 } = require("../../../../hooks/app");
@@ -25,7 +25,7 @@ function userDeliveryExecutiveRoutes() {
     closed.route("/user/attendance/check-in").get(
       verifyDeliveryAppToken, // verify app token
       isValidDeliveryId, // validate salesman Id
-      isAlreadyCheckedIn, // check whether the user is already checked in
+      isDeliveryAlreadyCheckedIn, // check whether the user is already checked in
       ctrl.checkInUser // controller function
     );
 
