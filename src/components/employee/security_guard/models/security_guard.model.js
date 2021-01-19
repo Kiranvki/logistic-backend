@@ -18,7 +18,7 @@ const securityGuard = new Schema(
     },
     agencyId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'securityguardagencies',
+      ref: 'securityGuardAgencies',
       autopopulate: {
         select: 'nameToDisplay'
       }
@@ -117,4 +117,4 @@ securityGuard.index({
 });
 
 // exporting the entire module
-module.exports = mongoose.model("securityGuard", securityGuard);
+module.exports = mongoose.model('securityGuard', securityGuard);

@@ -86,7 +86,7 @@ const appSecurityGuardUserSession = new Schema({
 
 // creating indexes
 appSecurityGuardUserSession.index({
-  'pickerBoyId': 1,
+  'securityGuardId': 1,
   'loginLocation': 1
 });
 
