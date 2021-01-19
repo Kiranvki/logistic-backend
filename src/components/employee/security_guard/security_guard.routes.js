@@ -18,6 +18,7 @@ const {
   isValidAgencyId, // checking whether the agency is valida or not
   isValidEmployeeId, // checking wheather the employee id valid or not
   checkWhetherItsAValidEmployeeUpdate, // check whether its a valid employee update
+  isEmployeeAlreadyActiveOrInactive,  // is already active or inactive
 } = require('../../../hooks');
 
 // auth 
@@ -83,7 +84,7 @@ function securityRoutes() {
     closed.route('/:employeeType/:employeeId/status/:type').patch(
       [joiEmployeeChangeStatus], // joi validation
       verifyUserToken,      // verify user token
-      // isDistributorAlreadyActiveOrInactive, // is already active or inactive 
+      // isEmployeeAlreadyActiveOrInactive, // is already active or inactive
       ctrl.patchSecurityGuardStatus // get controller 
     );
 

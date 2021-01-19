@@ -73,16 +73,16 @@ module.exports = async (req, res, next) => {
                     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.vehicle.dataIsNotChanged, req.body.isNotChanged);
                 else next(); // move on
 
-                // invalid Brand
+                // invalid Employee
             } else {
-                error('INVALID Brand!');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.vehicle.vehicleIdInvalidEitherDeletedOrDeactivated);
+                error('INVALID Employee!');
+                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidEmployeeId);
             }
 
             // asm id is invalid 
         } else {
-            error('The Brand ID is Invalid !');
-            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidAsmId);
+            error('The Employee ID is Invalid !');
+            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidEmployeeId);
         }
 
         // catch any runtime error 

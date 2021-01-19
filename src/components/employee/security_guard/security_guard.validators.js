@@ -148,6 +148,7 @@ const schemas = {
   // joi employee status
   joiEmployeeChangeStatus: Joi.object().keys({
     employeeId: Joi.string().trim().label('Employee Id').required(),
+    employeeType: Joi.string().trim().label('Employee Type').required().valid(['securityGuard', 'pickerBoy', 'deliveryExecutive']),
     type: Joi.string().trim().valid(['activate', 'deactivate']).label('Type').required()
   }),
 }
