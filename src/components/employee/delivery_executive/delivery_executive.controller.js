@@ -147,36 +147,36 @@ class deliveryExecutiveCtrl extends BaseController {
   };
 
 
-    // Internal Function get full details 
-    getdeliveryFullDetails = async (deliveryId) => {
-      try {
-        info('Delivery GET DETAILS !');
-  
-        // get picker boy details
-        let deliveryData = await Model.aggregate([{
-          $match: {
-            _id: mongoose.Types.ObjectId(deliveryId)
-          }
-        }
-        ]).allowDiskUse(true);
-  
-        // check if inserted 
-        if (deliveryData && deliveryData.length) return {
-          success: true,
-          data: deliveryData[deliveryData.length - 1]
-        };
-        else return { success: false };
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        return {
-          success: false,
-          error: err
+  // Internal Function get full details 
+  getdeliveryFullDetails = async (deliveryId) => {
+    try {
+      info('Delivery GET DETAILS !');
+
+      // get picker boy details
+      let deliveryData = await Model.aggregate([{
+        $match: {
+          _id: mongoose.Types.ObjectId(deliveryId)
         }
       }
+      ]).allowDiskUse(true);
+
+      // check if inserted 
+      if (deliveryData && deliveryData.length) return {
+        success: true,
+        data: deliveryData[deliveryData.length - 1]
+      };
+      else return { success: false };
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
     }
-  
+  }
+
 
   // Internal function to update the details
   updateDetails = async (dataObject, id) => {
@@ -367,22 +367,22 @@ class deliveryExecutiveCtrl extends BaseController {
   }
 
 
- // patch the request
-  updateDeliveryExecutiveDetails = async (req, res) => {
+  // patch the request
+  updateDeliveryExecutiveDetails = async (employeeId, body) => {
     try {
-      info("Employee CHANGE ! !");
+      info("Delivery Executive Employee Update !");
 
       // creating data to insert
       let dataToUpdate = {
         $set: {
-          ...req.body,
+          ...body,
         },
       };
 
       // inserting data into the db
       let isUpdated = await Model.findOneAndUpdate(
         {
-          _id: mongoose.Types.ObjectId(req.params.employeeId),
+          _id: mongoose.Types.ObjectId(employeeId),
         },
         dataToUpdate,
         {
@@ -392,20 +392,23 @@ class deliveryExecutiveCtrl extends BaseController {
         }
       );
 
-      // check if inserted
-      if (isUpdated && !_.isEmpty(isUpdated))
-        return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.deliveryExecutiveUpdatedSuccessfully);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdatedSuccessfully);
-
+      // check if updated
+      if (isUpdated && !_.isEmpty(isUpdated)) {
+        return {
+          success: true,
+          data: isUpdated
+        }
+      }
+      else return {
+        success: false
+      }
       // catch any runtime error
     } catch (err) {
       error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
+      return {
+        success: false,
+        error: err
+      }
     }
   };
 
