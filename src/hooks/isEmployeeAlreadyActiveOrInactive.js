@@ -36,11 +36,11 @@ module.exports = async (req, res, next) => {
                 // status is activate
                 if (getEmployeeDetails.data.status == 1 && type == 'activate') {
                     error('Employee already Activated !');
-                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.distributor.distributorAlreadyActivated);
+                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.employeeAlreadyActivated);
                 } else if (getEmployeeDetails.data.status == 0 && type == 'deactivate') {
                     // status is deactivate
-                    error('distributor already Deactivated !');
-                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.distributor.distributorAlreadyDeactivated);
+                    error('Employee already Deactivated !');
+                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.employeeAlreadyDeactivated);
                 }
                 // move on
                 next();

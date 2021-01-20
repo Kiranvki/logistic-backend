@@ -64,6 +64,14 @@ function securityRoutes() {
       ctrl.deleteEmployee // controller function 
     );
 
+    // activate or deactive security guard
+    closed.route('/:employeeId/:employeeType/status/:type').patch(
+      [joiEmployeeChangeStatus], // joi validation
+      verifyUserToken,      // verify user token
+      isEmployeeAlreadyActiveOrInactive, // is already active or inactive
+      ctrl.patchSecurityGuardStatus // get controller 
+    );
+
     //get the security guard list
     closed.route('/securityGuard').get(
       // [joiTransporterList], // joi validation
@@ -80,13 +88,7 @@ function securityRoutes() {
       ctrl.getZohoDetails              // controller function 
     );
 
-    // activate or deactive security guard
-    closed.route('/:employeeType/:employeeId/status/:type').patch(
-      [joiEmployeeChangeStatus], // joi validation
-      verifyUserToken,      // verify user token
-      // isEmployeeAlreadyActiveOrInactive, // is already active or inactive
-      ctrl.patchSecurityGuardStatus // get controller 
-    );
+
 
   }
 }

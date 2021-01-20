@@ -62,10 +62,13 @@ module.exports = {
   pickerBoyUpdatedSuccessfully: 'Picker Boy Updated Successfully !',
   pickerBoyNotUpdated: 'Error! Updating Picker Boy!',
   employeeDetailsNotFound: 'Employee Details Not Found !',
-  userDetailsFetchedSuccessfully :'User Details Fetched Successfully',
+  userDetailsFetchedSuccessfully: 'User Details Fetched Successfully',
   userNotFound: "User Details Not Found",
-  deliveryIdInvalidEitherDeletedOrDeactivated : 'Delivery Id Invalid Either Deleted Or Deactivated',
-  invalidDeliveryId : 'Invalid Delivery Id',
-  invalidSecurityId : 'Invalid Security Id',
-  securityIdInvalidEitherDeletedOrDeactivated: 'Security Id Invalid Either Deleted Or Deactivated'
+  deliveryIdInvalidEitherDeletedOrDeactivated: 'Delivery Id Invalid Either Deleted Or Deactivated',
+  invalidDeliveryId: 'Invalid Delivery Id',
+  invalidSecurityId: 'Invalid Security Id',
+  securityIdInvalidEitherDeletedOrDeactivated: 'Security Id Invalid Either Deleted Or Deactivated',
+  employeeAlreadyActivated: 'Employee is already Activated !',
+  employeeAlreadyDeactivated: 'Employee is already Deactivated !',
+
 };

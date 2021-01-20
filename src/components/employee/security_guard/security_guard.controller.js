@@ -723,15 +723,15 @@ class securityController extends BaseController {
     }
   };
 
-  // patch Security Guard status
+  // patch employee status
   patchSecurityGuardStatus = async (req, res) => {
     try {
       info("Picker Boy STATUS CHANGE !");
 
       // type id
       let type = req.params.type,
-        employeeId = req.params.employeeId;
-      let empType = req.params.employeeType;
+        employeeId = req.params.employeeId,
+        empType = req.params.employeeType;
 
       if (empType == "deliveryExecutive") {
         let deliveryResponse = await deliveryCtrl.patchDeliveryExecutiveStatus(
@@ -768,33 +768,14 @@ class securityController extends BaseController {
 
         // check if inserted
         if (isUpdated && !_.isEmpty(isUpdated))
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            isUpdated,
-            type == "activate"
-              ? this.messageTypes.securityguardActivatedSuccessfully
-              : this.messageTypes.securityguardDeactivatedSuccessfully
-          );
+          return this.success(req, res, this.status.HTTP_OK, isUpdated, type == "activate" ? this.messageTypes.securityguardActivatedSuccessfully : this.messageTypes.securityguardDeactivatedSuccessfully);
         else
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.securityGuardNotUpdatedSuccessfully
-          );
-
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdatedSuccessfully);
         // catch any runtime error
       }
     } catch (err) {
       error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   };
 
