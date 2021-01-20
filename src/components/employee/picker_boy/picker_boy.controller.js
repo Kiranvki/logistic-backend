@@ -625,13 +625,14 @@ class PickerBoyController extends BaseController {
   }
 
   // patchpicker boy status
-  patchPickerBoyStatus = async (req, res) => {
+  patchPickerBoyStatus = async (type, employeeId) => {
     try {
       info('Picker Boy STATUS CHANGE !');
 
       // type id 
-      let type = req.params.type,
-        employeeId = req.params.employeeId;
+      // let type = req.params.type,
+      //    employeeId = req.params.employeeId;
+
       // creating data to insert
       let dataToUpdate = {
         $set: {
@@ -648,14 +649,22 @@ class PickerBoyController extends BaseController {
         lean: true
       });
 
-      // check if inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.pickerboyActivatedSuccessfully : this.messageTypes.pickerboyDeactivatedSuccessfully);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerboyNotUpdated);
-
+      // check if updated 
+      if (isUpdated && !_.isEmpty(isUpdated))
+        return {
+          success: true,
+          data: isUpdated
+        }
+      else return {
+        success: false,
+      }
       // catch any runtime error 
     } catch (err) {
       error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      return {
+        success: false,
+        error: err
+      }
     }
   }
 

@@ -23,13 +23,11 @@ module.exports = {
   deliveryExecutiveNotDeletedSuccessfully: 'Delivery Executive Deleted!',
   deliveryExecutiveUpdatedSuccessfully: 'Delivery Executive Updated Successfully!',
   deliveryExecutiveNotUpdatedSuccessfully: 'Delivery Executive Not Updated !',
-  deliveryExecutiveNotUpdatedSuccessfully: 'Delivery Executive Not Updated !',
   deliveryExecutiveActivatedSuccessfully: 'Delivery Executive Activated Successfully !',
   deliveryExecutiveDeactivatedSuccessfully: 'Delivery Executive Deactivated Successfully !',
   deliveryExecutiveIdInvalidEitherDeletedOrDeactivated: 'Delivery Executive Id is Invalid or is either deleted !',
+
   invalidDeliveryExecutive: 'The Delivery Executive id is Invalid !',
-  deliveryExecutiveActivatedSuccessfully: 'Delivery Executive Activated Successfully !',
-  deliveryExecutiveDeactivatedSuccessfully: 'Delivery Executive Deactivated Successfully !',
   securityGuardCreated: 'Security Guard Successfully Created !',
   securityGuardNotCreated: 'Unable to create Security Guard !',
   securityGuardFetchedSuccessfully: 'Security Guard Fetched Successfully !',
@@ -43,7 +41,7 @@ module.exports = {
   securityGuardNotUpdatedSuccessfully: 'Security Guard Not Updated !',
   pickerboyActivatedSuccessfully: 'Pickerboy Activated Successfully !',
   pickerboyDeactivatedSuccessfully: 'Pickerboy Deactivated Successfully !',
-  pickerboyNotUpdated: 'pickerboy Not Updated Successfully !',
+  pickerboyNotUpdated: 'Unable to update pickerboy!',
   invalidSalesmanIds: (salesmanIds) => {
     return `Invalid Salesman Id Found ${salesmanIds}`
   },
@@ -51,9 +49,6 @@ module.exports = {
   employeeIdIsInvalidOrDeactivated: 'Employee Id is Invalid or is either deleted !',
   sameEmpIsAlreadyCreatedAsAsm: 'Same Employee is already Created as ASM !',
   sameUserIsAlreadyASalesman: 'Same Employee is already Created as Salesman !',
-  pickerboyActivatedSuccessfully: 'Pickerboy Activated Successfully !',
-  pickerboyDeactivatedSuccessfully: 'Pickerboy Deactivated Successfully !',
-  pickerboyNotUpdated: 'pickerboy Not Updated Successfully !',
   onboardedCustomersList: 'Onboarded Customer List Fetched Successfully !',
   deliveryExecutiveUpdatedSuccessfully: 'Delivery Executive Updated Successfully !',
   deliveryExecutiveNotUpdated: 'Error! Updating Delivery Executive!',

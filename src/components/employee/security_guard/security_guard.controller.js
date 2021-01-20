@@ -734,18 +734,23 @@ class securityController extends BaseController {
         empType = req.params.employeeType;
 
       if (empType == "deliveryExecutive") {
-        let deliveryResponse = await deliveryCtrl.patchDeliveryExecutiveStatus(
-          req,
-          res
-        );
-        return;
-      } else if (empType == "pickerBoy") {
-        let pickerboyResponse = await pickerBoyCtrl.patchPickerBoyStatus(
-          req,
-          res
-        );
-        return;
-      } else if (empType == "securityGuard") {
+        let deliveryResponse = await deliveryCtrl.patchDeliveryExecutiveStatus(type, employeeId);
+
+        if (deliveryResponse.success)
+          return this.success(req, res, this.status.HTTP_OK, deliveryResponse.data, type == "activate" ? this.messageTypes.deliveryExecutiveActivatedSuccessfully : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully);
+        else
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdated);
+
+      }
+      else if (empType == "pickerBoy") {
+        let pickerboyResponse = await pickerBoyCtrl.patchPickerBoyStatus(type, employeeId);
+        if (pickerboyResponse.success)
+          return this.success(req, res, this.status.HTTP_OK, pickerboyResponse.data, type == "activate" ? this.messageTypes.pickerboyActivatedSuccessfully : this.messageTypes.pickerboyDeactivatedSuccessfully);
+        else
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerboyNotUpdated);
+
+      }
+      else if (empType == "securityGuard") {
         // creating data to insert
         let dataToUpdate = {
           $set: {

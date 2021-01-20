@@ -452,13 +452,14 @@ class deliveryExecutiveCtrl extends BaseController {
   }
 
   // patch Delivery Executive status
-  patchDeliveryExecutiveStatus = async (req, res) => {
+  patchDeliveryExecutiveStatus = async (type, employeeId) => {
     try {
       info('Delivery Executive STATUS CHANGE !');
 
       // type id 
-      let type = req.params.type,
-        employeeId = req.params.employeeId;
+      //  let type = req.params.type,
+      //  employeeId = req.params.employeeId;
+
       // creating data to insert
       let dataToUpdate = {
         $set: {
@@ -475,14 +476,22 @@ class deliveryExecutiveCtrl extends BaseController {
         lean: true
       });
 
-      // check if inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, isUpdated, type == 'activate' ? this.messageTypes.deliveryExecutiveActivatedSuccessfully : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully);
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdatedSuccessfully);
-
+      // check if updated 
+      if (isUpdated && !_.isEmpty(isUpdated))
+        return {
+          success: true,
+          data: isUpdated
+        }
+      else return {
+        success: false,
+      }
       // catch any runtime error 
     } catch (err) {
       error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      return {
+        success: false,
+        error: err
+      }
     }
   }
 }
