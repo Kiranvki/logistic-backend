@@ -60,7 +60,6 @@ class MyTrip extends BaseController {
               });
             
         } catch (error) {
-            console.log(error);
             res.send({ status: 500, message: 'Internal server error'})
         }
     };
