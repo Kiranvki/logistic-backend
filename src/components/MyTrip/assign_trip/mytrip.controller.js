@@ -2,6 +2,7 @@ const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 const { error, info } = require('../../../utils').logging;
 const SalesOrderModel = require('../../sales_order/sales_order/models/sales_order.model')
+const tripModel = require('./model/trip.model');
 
 class MyTrip extends BaseController {
 
@@ -32,10 +33,19 @@ class MyTrip extends BaseController {
                 'deliveryDate':  { '$gte': startDate, '$lte': endDate }
             };
 
+            if (req.query.searchText && !req.query.searchText == '') {
+                projection =  { ... projection, ...   {
+                    '$or':  [ { 'invoiceNo': { $regex:  req.query.searchText, $options: 'i' } },
+                                { 'customerName': { $regex:  req.query.searchText, $options: 'i' } } ]
+                } }
+            }
+
+            console.log(projection)
+
             let getSalesOrder = await SalesOrderModel.find(projection)
             .limit(limit)
             .skip(skipRec)
-            .select('invoiceNo deliveryDate customerName cityId orderItems orderItems')
+            .select('invoiceNo deliveryDate customerName cityId orderItems orderItems orderPK')
             .lean();
 
             let totalRec = await SalesOrderModel.countDocuments(projection);
@@ -59,8 +69,33 @@ class MyTrip extends BaseController {
                 }
               });
             
+        } catch (err) {
+            error(err);
+            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+        }
+    };
+
+    vehicleCountAndDetails = async (req, res) => {
+        try {
+
+
+
         } catch (error) {
-            res.send({ status: 500, message: 'Internal server error'})
+            error(err);
+            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+        }
+    };
+
+    createTrip = async (req, res) => {
+        try {
+                req.body.tripId = await tripModel.countDocuments() + 1;
+                
+                let trip = await tripModel.create(req.body);
+                
+                return this.success(req, res, this.status.HTTP_OK, trip, 'Trip Created !');    
+            } catch (error) {
+            error(err);
+            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
         }
     };
 
