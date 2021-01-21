@@ -21,8 +21,10 @@ function deliveryExecutive() {
       ctrl.getList // controller function 
     );
 
-
-
+    closed.route('/deliveryExecutive/minified/list').get(
+   [joiDeliveryList], // joi validation
+      ctrl.getMinifiedList // controller function 
+    );
   }
 }
 
