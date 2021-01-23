@@ -4,6 +4,28 @@ const Schema = mongoose.Schema;
 // schema
 const invoiceMaster = new Schema({
 
+  soId: {
+    type: Number
+  },
+  
+  so_db_id: {
+    type: Schema.Types.ObjectId,
+    ref: 'salesOrder'
+  },
+
+  so_deliveryDate: {
+    type: Date
+  },
+
+  'cityId': {
+    type: 'String',
+    enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
+  },
+
+  customerName: {
+    type: String
+  },
+
   'companyDetails':
   {
     'name': {
@@ -240,8 +262,14 @@ const invoiceMaster = new Schema({
       'netValueForSingleItem': {
         type: 'Number'
       },
+      'weightInKg': {
+        type: Number
+      },
     }
   ],
+  'totalWeight': {
+    type: Number
+  }
 
 }, {
   timestamps: true
