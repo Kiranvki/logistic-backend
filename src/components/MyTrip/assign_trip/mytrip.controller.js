@@ -57,8 +57,8 @@ class MyTrip extends BaseController {
             
             getSalesOrder = getSalesOrder.map( ( v ) => {
                 items = v.itemSupplied.length;
-                v.so_db_id = v.so_db_id._id;
                 v.so_id =  v.so_db_id.orderPK;
+                v.so_db_id = v.so_db_id._id;
                 v.deliveryDate = v.so_deliveryDate
                 v.items = items;
                 v.itemSupplied.map( ( item ) => { quantity += item.quantity; } );
@@ -80,6 +80,21 @@ class MyTrip extends BaseController {
             error(err);
             this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
         }
+    };
+
+    getItemsByInvoiceId = async (req, res) => {
+        try {
+
+            let items = await invoiceMasterModel.findOne({ invoiceNo: req.params.invoiceNo }).select('invoiceNo soId itemSupplied').lean();
+            return this.success(req, res, this.status.HTTP_OK, {
+                results: items,
+                success: true
+              });
+
+        } catch (error) {
+            error(err);
+            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+        };
     };
 
     vehicleCountAndDetails = async (req, res) => {
