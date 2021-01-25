@@ -3,7 +3,7 @@ const BaseController = require('../../baseController');
 const { error, info } = require('../../../utils').logging;
 const SalesOrderModel = require('../../sales_order/sales_order/models/sales_order.model')
 const invoiceMasterModel = require('../../picker_app/invoice_master/models/invoice_master.model')
-const tripModel = require('./model/trip.model');
+const tripStageModel = require('./model/tripstages.model')
 
 class MyTrip extends BaseController {
 
@@ -42,7 +42,6 @@ class MyTrip extends BaseController {
                                 { 'customerName': { $regex: req.query.searchText, $options: 'i' } }
                             ]
                 } };
-
             };
 
             let getSalesOrder = await invoiceMasterModel.find(projection)
@@ -82,6 +81,24 @@ class MyTrip extends BaseController {
         }
     };
 
+    storeSelectedInvoices = async(req, res) => {
+        try {
+
+            let dataObj = {
+                phase: 'select invoices',
+                userId: '',
+                isInvoicesSelected: true,
+                selectInvoices: req.body.invoices
+            }
+
+            let storeInvoiceStag = await tripStageModel.create(dataObj);
+
+        } catch (error) {
+            error(err);
+            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+        };
+    };
+
     getItemsByInvoiceId = async (req, res) => {
         try {
 
@@ -112,7 +129,7 @@ class MyTrip extends BaseController {
         try {
                 req.body.tripId = await tripModel.countDocuments() + 1; // Mandatory to create sequence incremental unique Id
                 if (!req.body.tripId) return false;
-                
+
                 let trip = await tripModel.create(req.body);
                 
                 return this.success(req, res, this.status.HTTP_OK, trip, 'Trip Created !');    
