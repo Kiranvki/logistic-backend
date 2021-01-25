@@ -110,7 +110,8 @@ class MyTrip extends BaseController {
 
     createTrip = async (req, res) => {
         try {
-                req.body.tripId = await tripModel.countDocuments() + 1;
+                req.body.tripId = await tripModel.countDocuments() + 1; // Mandatory to create sequence incremental unique Id
+                if (!req.body.tripId) return false;
                 
                 let trip = await tripModel.create(req.body);
                 
