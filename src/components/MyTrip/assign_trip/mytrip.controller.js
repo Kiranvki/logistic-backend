@@ -2,6 +2,7 @@ const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 const { error, info } = require('../../../utils').logging;
 const SalesOrderModel = require('../../sales_order/sales_order/models/sales_order.model')
+const invoiceMasterModel = require('../../picker_app/invoice_master/models/invoice_master.model')
 const tripModel = require('./model/trip.model');
 
 class MyTrip extends BaseController {
@@ -30,31 +31,37 @@ class MyTrip extends BaseController {
 
             let projection = { 
                 'cityId': cityId,
-                'deliveryDate':  { '$gte': startDate, '$lte': endDate }
+                'so_db_id': { $exists: true },
+                'so_deliveryDate':  { '$gte': startDate, '$lte': endDate }
             };
 
             if (req.query.searchText && !req.query.searchText == '') {
+
                 projection =  { ... projection, ...   {
-                    '$or':  [ { 'invoiceNo': { $regex:  req.query.searchText, $options: 'i' } },
-                                { 'customerName': { $regex:  req.query.searchText, $options: 'i' } } ]
-                } }
-            }
+                    '$or':  [ { 'invoiceNo': { $regex: req.query.searchText, $options: 'i' } },
+                                { 'customerName': { $regex: req.query.searchText, $options: 'i' } }
+                            ]
+                } };
 
-            console.log(projection)
+            };
 
-            let getSalesOrder = await SalesOrderModel.find(projection)
-            .limit(limit)
-            .skip(skipRec)
-            .select('invoiceNo deliveryDate customerName cityId orderItems orderItems orderPK')
-            .lean();
+            let getSalesOrder = await invoiceMasterModel.find(projection)
+                                .populate({path: 'so_db_id', select: 'orderPK' })
+                                .limit(limit)
+                                .skip(skipRec)
+                                .select('invoiceNo so_deliveryDate customerName cityId itemSupplied orderPK')
+                                .lean();
 
             let totalRec = await SalesOrderModel.countDocuments(projection);
             let items = 0, quantity = 0;
             
             getSalesOrder = getSalesOrder.map( ( v ) => {
-                items = v.orderItems.length;
+                items = v.itemSupplied.length;
+                v.so_id =  v.so_db_id.orderPK;
+                v.so_db_id = v.so_db_id._id;
+                v.deliveryDate = v.so_deliveryDate
                 v.items = items;
-                v.orderItems.map( ( item ) => { quantity += item.quantity; } );
+                v.itemSupplied.map( ( item ) => { quantity += item.quantity; } );
                 v.quantity = quantity;
                 quantity = 0;
                 return v;
@@ -73,6 +80,21 @@ class MyTrip extends BaseController {
             error(err);
             this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
         }
+    };
+
+    getItemsByInvoiceId = async (req, res) => {
+        try {
+
+            let items = await invoiceMasterModel.findOne({ invoiceNo: req.params.invoiceNo }).select('invoiceNo soId itemSupplied').lean();
+            return this.success(req, res, this.status.HTTP_OK, {
+                results: items,
+                success: true
+              });
+
+        } catch (error) {
+            error(err);
+            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+        };
     };
 
     vehicleCountAndDetails = async (req, res) => {

@@ -21,6 +21,11 @@ function tripsRoutes() {
       ctrl.createTrip // controller function 
     );
 
+    closed.route('/getItem/:invoiceNo').get(
+      // verifyUserToken, // verify user token
+      ctrl.getItemsByInvoiceId
+    )
+
     };
     
     
