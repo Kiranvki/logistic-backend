@@ -16,7 +16,7 @@ function deliveryExecutive() {
   return (open, closed) => {
     // get all 
     closed.route('/deliveryExecutive').get(
-      // [joiTransporterList], // joi validation
+      [joiDeliveryList], // joi validation
       verifyUserToken,         // verify user token
       ctrl.getList // controller function 
     );
