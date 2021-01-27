@@ -6,11 +6,11 @@ const Schema = mongoose.Schema;
 let tripSchema = Schema ({
     vehicleId: [{
         type: Schema.Types.ObjectId,
-        ref: 'vehiclemasters'
+        ref: 'vehicleMaster'
     }],
     checkedInId: [{
         type: Schema.Types.ObjectId,
-        ref: 'vehicleattendances'
+        ref: 'vehicleAttendance'
     }],
     salesOrderId: [{
         type: Schema.Types.ObjectId,
@@ -18,11 +18,11 @@ let tripSchema = Schema ({
     }],
     deliveryExecutiveId: [{
         type: Schema.Types.ObjectId,
-        ref: 'deliveryexecutives'
+        ref: 'deliveryExecutive'
     }],
     invoice_db_id: [{
         type: Schema.Types.ObjectId,
-        ref: 'invoicemasters'
+        ref: 'invoiceMaster'
     }],
     invoiceNo: [{
         type: String
