@@ -815,6 +815,62 @@ class securityController extends BaseController {
     }
   }
 
+    // Internal function to update the details
+    updateDetails = async (dataObject, id) => {
+      try {
+        info("Update Security Guard details Internal Function !");
+  
+        // creating data to insert
+        let dataToUpdate = {
+          $set: {
+            ...dataObject,
+          },
+        };
+  
+        return Model.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId(id),
+          },
+          dataToUpdate,
+          {
+            new: true,
+            upsert: false,
+            lean: true,
+          }
+        )
+          .then((res) => {
+            if (res) {
+              return {
+                success: true,
+                data: res,
+              };
+            } else {
+              error("Error Updating Data in Delivery Executive DB!");
+              return {
+                success: false,
+              };
+            }
+          })
+          .catch((err) => {
+            error(err);
+            return {
+              success: false,
+              error: err,
+            };
+          });
+  
+        // catch any runtime error
+      } catch (err) {
+        error(err);
+        this.errors(
+          req,
+          res,
+          this.status.HTTP_INTERNAL_SERVER_ERROR,
+          this.exceptions.internalServerErr(req, err)
+        );
+      }
+    };
+
 }
 // exporting the modules
 module.exports = new securityController();
