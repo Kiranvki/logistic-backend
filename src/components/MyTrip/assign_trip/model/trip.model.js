@@ -5,19 +5,66 @@ const Schema = mongoose.Schema;
 
 let tripSchema = Schema ({
     vehicleId: [{
-        type: Schema.Types.ObjectId
+        type: Schema.Types.ObjectId,
+        ref: 'vehicleMaster'
     }],
     checkedInId: [{
-        type: Schema.Types.ObjectId
+        type: Schema.Types.ObjectId,
+        ref: 'vehicleAttendance'
     }],
     salesOrderId: [{
-        type: Schema.Types.ObjectId
+        type: Schema.Types.ObjectId,
+        ref: 'salesOrder'
+    }],
+    deliveryExecutiveId: [{
+        type: Schema.Types.ObjectId,
+        ref: 'deliveryExecutive'
+    }],
+    invoice_db_id: [{
+        type: Schema.Types.ObjectId,
+        ref: 'invoiceMaster'
+    }],
+    invoiceNo: [{
+        type: String
     }],
     deliveryDetails: {
         invoicesNo: [String],
         stockTransfer: [String],
         netWeight: Number
     },
+    transporterDetails: [{
+        transporter: {
+            type: String
+        },
+        invoiceNo: {
+            type: String
+        },
+        invoice_db_id: {
+            type: Schema.Types.ObjectId,
+            ref: 'invoicemasters'
+        },
+        vehicle: {
+            type: String
+        },
+        vehicleId: {
+            type: Schema.Types.ObjectId,
+            ref: 'vehiclemasters'
+        },
+        deliveryExecutiveName: {
+            type: String
+        },
+        deliveryExecutiveId: {
+            type: String
+        },
+        tonnage: {
+            type: Number
+        },
+        measureUnit: {
+            type: String,
+            default: 'kg',
+            enum: ['kg', 'tons']
+        }
+    }],
     approvedBySecurityGuard: {
         type: Number,
         default: 0

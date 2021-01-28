@@ -56,6 +56,11 @@ const vehicleAttendance = new Schema({
       default: 1
     }
   }],
+  inTrip: {
+    type: Number,
+    enum: [0,1],
+    default: 0
+  },
   status: {
     type: Number,
     default: 1

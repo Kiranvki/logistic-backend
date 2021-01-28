@@ -4,6 +4,7 @@ const { createTripVal } = require('./mytrip.validators')
 
 // auth 
 const { verifyAppToken  } = require('../../../hooks/app/Auth');
+const { getAllCheckInVehicleDetails } = require('../../../hooks');
 
 function tripsRoutes() {
     //open, closed
@@ -24,6 +25,12 @@ function tripsRoutes() {
     closed.route('/getItem/:invoiceNo').get(
       // verifyUserToken, // verify user token
       ctrl.getItemsByInvoiceId
+    );
+
+    closed.route('/getAvailableVehicle').get(
+      // verifyUserToken, // verify user token,
+      getAllCheckInVehicleDetails,
+      ctrl.vehicleCountAndDetails
     )
 
     };
