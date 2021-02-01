@@ -146,10 +146,8 @@ class MyTrip extends BaseController {
               '$lte': endOfTheDay
             },
           }).lean();
+
           alreadyCheckInVehicleIds = await alreadyCheckInVehicleIds.map((v) => v.vehicleId);
-
-           console.log(alreadyCheckInVehicleIds);
-
          alreadyCheckInVehicleIds = req.body.alreadyCheckInVehicleIds || [];
         
         let page = req.query.page || 1,
@@ -365,9 +363,10 @@ class MyTrip extends BaseController {
                 let trip = await tripModel.create(req.body);
                 
                 let orders = await tripModel.findOne({ _id: trip._id })
-                                   .populate('vehicleId checkedInId salesOrderId deliveryExecutiveId invoice_db_id')
-                                   .lean();
-
+                                   .populate('vehicleId rateCategoryId checkedInId salesOrderId deliveryExecutiveId invoice_db_id')
+                                   .populate({ path: 'vehicleId', populate: {path: 'rateCategoryId'} })
+                                   .lean();                
+                  
                 let orderArray = [], vehicleArray = [];
 
                 for (let so of orders.salesOrderId) {
@@ -400,20 +399,46 @@ class MyTrip extends BaseController {
                 for (let v of orders.vehicleId) {
                     let vehicleObj = {}; 
                     let transport = _.find(orders.transporterDetails, { vehicleId: v._id });
+                    let cost = 0;
+                    /*
+                      If Rate Type Type Monthly ,
+                      Total Cost =Fixed Rental + { Total Distance across all trip sheets in a month - Total Included Distance } * Cost per additional Km. 
+                      If Total Distance across all trip sheets in a month - Total Included Distance is negative , kindly take Zero. 
+
+                      If the Rate type is Daily ;
+
+                      Cost = (Fixed Rental)+ { Total Distance across all trip sheets in day - (Total Included Distance)} *Cost per additional Km. 
+
+                      If the Value (Total Included Distance * No of Days in month vehicles used by that specific transporter) is Negative , take as zero.
+
+                    */
+                    if (v.rateCategoryId && v.rateCategoryId.rateCategoryDetails) {
+                      
+                      let rentalAmount = v.rateCategoryId.rateCategoryDetails.fixedRentalAmount || 0;
+                      let additionalAmount = v.rateCategoryId.rateCategoryDetails.additionalAmount || 0;
+
+                      if (v.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Monthly') {
+                        cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance  
+                      };
+
+                      if (v.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Daily') {
+                        cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance
+                      };
+
+                    };
 
                     vehicleObj = {
                         vehicleId: transport.vehicleId,
                         name:  v.vehicleModel,
                         class: v.vehicleType,
                         capacity: v.tonnage,
-                        cost:  0
+                        cost:  cost
                     };
 
-                    vehicleArray.push(vehicleObj)
-
+                    vehicleArray.push(vehicleObj);
                 };
                 
-                return this.success(req, res, this.status.HTTP_OK, {orderArray, vehicleArray, trip}, 'Trip Created !');    
+                return this.success(req, res, this.status.HTTP_OK, {orderArray, vehicleArray, orders}, 'Trip Created !');    
             } catch (error) {
             console.log(error)
             error(error);
