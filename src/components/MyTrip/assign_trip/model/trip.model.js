@@ -12,6 +12,10 @@ let tripSchema = Schema ({
         type: Schema.Types.ObjectId,
         ref: 'vehicleAttendance'
     }],
+    rateCategoryId: [{
+        type: Schema.Types.ObjectId,
+        ref: 'rateCategoryModel'
+    }],
     salesOrderId: [{
         type: Schema.Types.ObjectId,
         ref: 'salesOrder'
