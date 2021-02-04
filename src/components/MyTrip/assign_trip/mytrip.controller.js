@@ -10,7 +10,6 @@ const vehicleMasterModel = require('../../vehicle/vehicle_master/models/vehicle_
 const deliveryExecModel = require('../../employee/delivery_executive/models/delivery_executive.model');
 const tripModel = require('../assign_trip/model/trip.model');
 const _ = require('lodash');
-const { findOneAndUpdate } = require('../../sales_order/sales_order/models/sales_order.model');
 
 class MyTrip extends BaseController {
 
