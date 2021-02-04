@@ -4,6 +4,8 @@ const { createTripVal } = require('./mytrip.validators')
 
 // auth 
 const { verifyAppToken  } = require('../../../hooks/app/Auth');
+// auth 
+const { verifyUserToken } = require('../../../hooks/Auth');
 const { getAllCheckInVehicleDetails } = require('../../../hooks');
 
 function tripsRoutes() {
@@ -11,24 +13,24 @@ function tripsRoutes() {
     return (open, closed) => {
 
     closed.route('/getSalesOrder').get(
-        // verifyAppToken, 
+        verifyAppToken, 
         ctrl.getSalesOrders 
       );
 
       // post 
     closed.route('/').post(
       [createTripVal], // joi validation
-      // verifyUserToken, // verify user token
+      verifyUserToken, // verify user token
       ctrl.createTrip // controller function 
     );
 
     closed.route('/getItem/:invoiceNo').get(
-      // verifyUserToken, // verify user token
+      verifyUserToken, // verify user token
       ctrl.getItemsByInvoiceId
     );
 
     closed.route('/getAvailableVehicle').get(
-      // verifyUserToken, // verify user token,
+      verifyUserToken, // verify user token,
       getAllCheckInVehicleDetails,
       ctrl.vehicleCountAndDetails
     )
