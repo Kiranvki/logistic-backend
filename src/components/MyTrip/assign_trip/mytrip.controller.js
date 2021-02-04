@@ -7,8 +7,10 @@ const invoiceMasterModel = require('../../picker_app/invoice_master/models/invoi
 const tripStageModel = require('./model/tripstages.model')
 const vehicleCheckedInModel = require('../../vehicle/vehicle_attendance/models/vehicle_attendance.model');
 const vehicleMasterModel = require('../../vehicle/vehicle_master/models/vehicle_master.model');
+const deliveryExecModel = require('../../employee/delivery_executive/models/delivery_executive.model');
 const tripModel = require('../assign_trip/model/trip.model');
 const _ = require('lodash');
+const { findOneAndUpdate } = require('../../sales_order/sales_order/models/sales_order.model');
 
 class MyTrip extends BaseController {
 
@@ -429,7 +431,7 @@ class MyTrip extends BaseController {
                     };
 
                     vehicleObj = {
-                        vehicleId: transport.vehicleId,
+                        vehicleId: transport ? transport.vehicleId : '',
                         name:  v.vehicleModel,
                         class: v.vehicleType,
                         capacity: v.tonnage,
@@ -438,8 +440,17 @@ class MyTrip extends BaseController {
 
                     vehicleArray.push(vehicleObj);
                 };
+
+                for (let v of req.body.checkedInId ) {
+                  await vehicleCheckedInModel.findOneAndUpdate({ _id: v }, { $set: { inTrip: 1 } } ); 
+                };
+
+                for (let v of req.body.transporterDetails) {
+                  await deliveryExecModel.findOneAndUpdate({ _id: v.deliveryExecutiveId }, { $set: { inTrip: 1 } }); 
+                }
                 
                 return this.success(req, res, this.status.HTTP_OK, {orderArray, vehicleArray, orders}, 'Trip Created !');    
+            
             } catch (error) {
             console.log(error)
             error(error);
