@@ -16,7 +16,7 @@ class MyTrip extends BaseController {
   constructor() {
     super();
     this.messageTypes = this.messageTypes.vehicle;
-  }
+  };
 
     getSalesOrders = async (req, res) => {
         try {
@@ -400,6 +400,7 @@ class MyTrip extends BaseController {
                     let vehicleObj = {}; 
                     let transport = _.find(orders.transporterDetails, { vehicleId: v._id });
                     let cost = 0;
+
                     /*
                       If Rate Type Type Monthly ,
                       Total Cost =Fixed Rental + { Total Distance across all trip sheets in a month - Total Included Distance } * Cost per additional Km. 
