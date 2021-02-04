@@ -20,7 +20,7 @@ function tripsRoutes() {
       // post 
     closed.route('/').post(
       [createTripVal], // joi validation
-      verifyUserToken, // verify user token
+      // verifyUserToken, // verify user token
       ctrl.createTrip // controller function 
     );
 

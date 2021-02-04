@@ -44,7 +44,6 @@ const vehicleMaster = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'rateCategoryModel'
   }
-
 },
   {
     timestamps: true

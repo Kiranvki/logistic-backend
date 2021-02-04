@@ -99,6 +99,11 @@ const deliveryExecutive = new Schema(
       type: Number,
       default: 0,
     },
+    inTrip: {
+      type: Number,
+      default: 0,
+      enum: [0,1]
+    },
   },
   {
     timestamps: true,
