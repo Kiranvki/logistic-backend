@@ -115,8 +115,8 @@ class MyTrip extends BaseController {
               });
 
         } catch (error) {
-            error(err);
-            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+            error(error);
+            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
         };
     };
 
@@ -453,8 +453,45 @@ class MyTrip extends BaseController {
             } catch (error) {
             console.log(error)
             error(error);
-            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
         }
+    };
+
+    getCheckedInVehicleCount = async (req, res) => {
+      try {
+        let startOfTheDay = moment().set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+  
+        // getting the end of the day 
+        let endOfTheDay = moment().set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+        let vehicleCount = await vehicleCheckedInModel.countDocuments({
+            'status': 1,
+            'isDeleted': 0,
+            'inTrip': 0,
+            'dateOfAttendance': {
+              '$gte': startOfTheDay,
+              '$lte': endOfTheDay
+            },
+          }).lean();
+
+          return this.success(req, res, this.status.HTTP_OK, {
+            count: vehicleCount,
+          });
+
+      } catch (error) {
+        error(error);
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
+      };
     };
 
 };

@@ -33,6 +33,11 @@ function tripsRoutes() {
       verifyUserToken, // verify user token,
       getAllCheckInVehicleDetails,
       ctrl.vehicleCountAndDetails
+    );
+
+    closed.route('/getVehicleCount').get(
+      // verifyUserToken,
+      ctrl.getCheckedInVehicleCount
     )
 
     };
