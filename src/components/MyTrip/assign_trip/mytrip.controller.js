@@ -9,6 +9,8 @@ const vehicleCheckedInModel = require('../../vehicle/vehicle_attendance/models/v
 const vehicleMasterModel = require('../../vehicle/vehicle_master/models/vehicle_master.model');
 const deliveryExecModel = require('../../employee/delivery_executive/models/delivery_executive.model');
 const tripModel = require('../assign_trip/model/trip.model');
+const transporterModel = require('../../transporter/transporter/models/transporter.model');
+const transVehicleModel = require('../../rate_category/ratecategory_transporter_vehicle_mapping/models/ratecategory_transporter_vehicle_mapping.model')
 const _ = require('lodash');
 
 class MyTrip extends BaseController {
@@ -137,6 +139,11 @@ class MyTrip extends BaseController {
                 s: 0,
                 millisecond: 0
               }).toDate();
+
+              let getTransporter = await transporterModel.find({ 'vehicleDetails.name': { $regex: req.query.transporterName, $options: 'i' } }).select('_Id'); 
+              getTransporter = await getTransporter.map((v)=> {return v._id})
+              // console.log(getTransporter);
+              // transVehicleModel
 
         let alreadyCheckInVehicleIds = await vehicleCheckedInModel.find({
             'status': 1,

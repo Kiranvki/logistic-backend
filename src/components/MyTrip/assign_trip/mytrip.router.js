@@ -13,7 +13,7 @@ function tripsRoutes() {
     return (open, closed) => {
 
     closed.route('/getSalesOrder').get(
-        verifyAppToken, 
+        // verifyAppToken, 
         ctrl.getSalesOrders 
       );
 
