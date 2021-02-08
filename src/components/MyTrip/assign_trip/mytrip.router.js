@@ -29,7 +29,7 @@ function tripsRoutes() {
       ctrl.getItemsByInvoiceId
     );
 
-    closed.route('/getAvailableVehicle').get(
+    closed.route('/getAvailableVehicle').post(
       // verifyUserToken, // verify user token,
       getAllCheckInVehicleDetails,
       ctrl.vehicleCountAndDetails
@@ -38,6 +38,21 @@ function tripsRoutes() {
     closed.route('/getVehicleCount').get(
       // verifyUserToken,
       ctrl.getCheckedInVehicleCount
+    );
+
+    closed.route('/getTrip').post(
+      // verifyUserToken,
+      ctrl.getTrip
+    );
+
+    closed.route('/getSalesMan').get(
+      // verifyUserToken,
+      ctrl.getSalesMan
+    );
+
+    closed.route('/getItemsByLocation').get(
+      // verifyUserToken,
+      ctrl.getItemsByLocation
     )
 
     };

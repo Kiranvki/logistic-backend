@@ -31,12 +31,18 @@ let tripSchema = Schema ({
     invoiceNo: [{
         type: String
     }],
+    createdByName: {
+        type: String
+    },
+    createdById: {
+        type: Schema.Types.ObjectId
+    },
     deliveryDetails: {
         invoicesNo: [String],
         stockTransfer: [String],
         netWeight: Number
     },
-    transporterDetails: [{
+    transporterDetails: {
         transporter: {
             type: String
         },
@@ -68,7 +74,7 @@ let tripSchema = Schema ({
             default: 'kg',
             enum: ['kg', 'tons']
         }
-    }],
+    },
     approvedBySecurityGuard: {
         type: Number,
         default: 0
