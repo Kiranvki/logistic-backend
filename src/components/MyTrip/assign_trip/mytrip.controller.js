@@ -141,7 +141,7 @@ class MyTrip extends BaseController {
                 millisecond: 0
               }).toDate();
               if (!req.body.vehicleId) req.body.vehicleId = [];
-              let getTransporter = await transporterModel.find({ 'vehicleDetails.name': { $regex: req.body.transporterName || '', $options: 'i' } }).select('_Id'); 
+              let getTransporter = await transporterModel.find({ _id: req.body.transporterId }).select('_id'); 
               getTransporter = await getTransporter.map((v)=> { return v._id })
               
               let vehicleIds = await transVehicleModel.find({transporterId: { $in: getTransporter } } ).select('vehicleId');
@@ -640,15 +640,14 @@ class MyTrip extends BaseController {
 
         let cityId =  req.query.cityId || 'chennai', limit = 10, page = 1, skipRec = 0;
 
-          limit = !req.query.limit ? limit = limit : limit = parseInt(req.query.limit);
-          page = !req.query.page ? page = page - 1 : page = parseInt(req.query.page) - 1; 
-        
-          skipRec = page * limit;
+        limit = !req.query.limit ? limit = limit : limit = parseInt(req.query.limit);
+        page = !req.query.page ? page = page - 1 : page = parseInt(req.query.page) - 1; 
+      
+        skipRec = page * limit;
 
-          let query = { cityId: cityId };
+        let query = { cityId: cityId };
 
-          if (req.query.searchText) query = { cityId: cityId, itemName: { '$regex': req.query.searchText, '$options': 'i' } }; 
-
+        if (req.query.searchText) query = { cityId: cityId, itemName: { '$regex': req.query.searchText, '$options': 'i' } }; 
         
         const MongoClient = require('mongodb').MongoClient;
         let url = "mongodb://admin:myadminpassword@40.65.152.232:27017/";
@@ -667,9 +666,20 @@ class MyTrip extends BaseController {
       }
     };
 
-    
+    getTriplisting = async (req, res) => {
+      try {
+        
+        let trips = await tripModel.find({})
+                          .populate('vehicleId rateCategoryId checkedInId salesOrderId deliveryExecutiveId invoice_db_id')
+                          .populate({ path: 'vehicleId', populate: { path: 'rateCategoryId' } })
+                          .lean();
 
+        return this.success(req, res, this.status.HTTP_OK, { result: trips });
 
+      } catch (error) {
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
+      };
+    };
 };
 
 module.exports = new MyTrip();
