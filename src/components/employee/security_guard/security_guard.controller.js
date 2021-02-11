@@ -23,7 +23,7 @@ class securityController extends BaseController {
   // getting the security guard details using other fields
   getDetailsUsingField = async (fieldValue) => {
     try {
-      info("Get security guard details !");
+      info('Get security guard details !');
 
       // find the  security guard
       return await Model.aggregate([
@@ -40,7 +40,7 @@ class securityController extends BaseController {
             'status': 1,
             'isDeleted': 0,
           }
-        },
+        }
       ])
         .allowDiskUse(true)
         .then((res) => {
@@ -50,7 +50,7 @@ class securityController extends BaseController {
               data: res[res.length - 1],
             };
           } else {
-            error("Error Searching Data in  security guard DB!");
+            error('Error Searching Data in  security guard DB!');
             return {
               success: false,
             };

@@ -8,9 +8,9 @@ const {
 
 function connectDb() {
   //process.env.DB
-  mongoose.connect('mongodb://dmspickeruser:dmspicker123@40.65.152.232:27017/dms-picker', {
-  // mongoose.connect('mongodb://dmspickeruser:dmspicker123@13.76.40.217:27017/dms-picker', {
-  // mongoose.connect('mongodb://dmsbranduser:dmsbrand123@40.65.152.232:27017/dms-brand', {
+  mongoose.connect(process.env.DB, {
+    // mongoose.connect('mongodb://dmspickeruser:dmspicker123@13.76.40.217:27017/dms-picker', {
+    // mongoose.connect('mongodb://dmsbranduser:dmsbrand123@40.65.152.232:27017/dms-brand', {
     // mongoose.connect('mongodb://localhost:27017/dms-picker', {
     useNewUrlParser: true,
     useUnifiedTopology: true
