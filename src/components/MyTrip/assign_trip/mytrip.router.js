@@ -53,7 +53,17 @@ function tripsRoutes() {
     closed.route('/getItemsByLocation').get(
       // verifyUserToken,
       ctrl.getItemsByLocation
-    )
+    );
+
+    closed.route('/listTrips').get(
+      // verifyUserToken,
+      ctrl.getTriplisting
+    );
+
+    closed.route('/storeOnSpotSales').post(
+      // verifyUserToken,
+      ctrl.storeOnSpotSales
+    );
 
     };
     

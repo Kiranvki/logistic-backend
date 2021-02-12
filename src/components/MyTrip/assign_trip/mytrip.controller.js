@@ -11,6 +11,7 @@ const deliveryExecModel = require('../../employee/delivery_executive/models/deli
 const tripModel = require('../assign_trip/model/trip.model');
 const transporterModel = require('../../transporter/transporter/models/transporter.model');
 const transVehicleModel = require('../../rate_category/ratecategory_transporter_vehicle_mapping/models/ratecategory_transporter_vehicle_mapping.model')
+const spotModel = require('./model/spotsales.model');
 const _ = require('lodash');
 const request = require('request-promise');
 
@@ -515,9 +516,13 @@ class MyTrip extends BaseController {
       try {
         
         let trips = await tripModel.find({_id: { $in: req.body.tripIds } } )
-                          .populate('vehicleId rateCategoryId checkedInId salesOrderId deliveryExecutiveId invoice_db_id')
+                          .populate('vehicleId spotSalesId rateCategoryId checkedInId salesOrderId deliveryExecutiveId invoice_db_id')
                           .populate({ path: 'vehicleId', populate: { path: 'rateCategoryId' } })
                           .lean();
+
+          for (let trip of trips) {
+            if (!trip.spotSalesId) trip.spotSalesId = {};
+          };  
 
         return this.success(req, res, this.status.HTTP_OK, { result: trips });
 
@@ -668,8 +673,22 @@ class MyTrip extends BaseController {
 
     getTriplisting = async (req, res) => {
       try {
+
+        let cityId =  req.query.cityId || 'chennai', limit = 10, page = 1, skipRec = 0;
+
+        limit = !req.query.limit ? limit = limit : limit = parseInt(req.query.limit);
+        page = !req.query.page ? page = page - 1 : page = parseInt(req.query.page) - 1; 
+      
+        skipRec = page * limit;
+
+        let query = {  };
+
+        if (req.query.searchText) query = { cityId: cityId, itemName: { '$regex': req.query.searchText, '$options': 'i' } }; 
         
-        let trips = await tripModel.find({})
+        
+        let trips = await tripModel.find(query)
+                          .skip(skipRec)
+                          .limit(limit)
                           .populate('vehicleId rateCategoryId checkedInId salesOrderId deliveryExecutiveId invoice_db_id')
                           .populate({ path: 'vehicleId', populate: { path: 'rateCategoryId' } })
                           .lean();
@@ -680,6 +699,28 @@ class MyTrip extends BaseController {
         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
       };
     };
+
+    storeOnSpotSales = async (req, res) => {
+      try {
+
+         let trip = await tripModel.findOne({_id: req.body.tripId }).lean();
+         if (!trip) return res.send({status: 200, message: 'incorrect trip id'});
+
+         let spotId  = await spotModel.countDocuments() + 1;
+         req.body.spotId = spotId; 
+
+         let spotSales = await spotModel.create(req.body);
+
+         await tripModel.findOneAndUpdate({ _id: trip._id }, {$set: { spotSalesId: spotSales._id} });
+         
+        return this.success(req, res, this.status.HTTP_OK, { result: spotSales });
+
+      } catch (error) {
+        console.log(error)
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error)); 
+      };
+    };
+
 };
 
 module.exports = new MyTrip();

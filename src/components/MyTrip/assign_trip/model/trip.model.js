@@ -110,6 +110,10 @@ let tripSchema = Schema ({
         unique: true,
         required: true
     },
+    spotSalesId: {
+        type: Schema.Types.ObjectId,
+        ref: 'spotSales'
+    },
     cityId: {
         type: String,
         enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
