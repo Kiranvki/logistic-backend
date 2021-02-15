@@ -326,22 +326,22 @@ class userController extends BaseController {
         }
       }
 
-        // weekly grouped data
-        let weeklyGroupedData = _.groupBy(attendanceSheet, 'week');
-        let keys = Object.keys(weeklyGroupedData);
-  
-        // keys length
-        for (let i = 0; i < keys.length; i++) {
-  
-          // attendance sheet 
-          attendanceWithWeekSorted.push({
-            'week': keys[i],
-            'attendanceSheet': weeklyGroupedData[keys[i]]
-          });
-        }
+      // weekly grouped data
+      let weeklyGroupedData = _.groupBy(attendanceSheet, 'week');
+      let keys = Object.keys(weeklyGroupedData);
 
-       // check user attendance sheet
-       if (attendanceWithWeekSorted && attendanceWithWeekSorted.length) {
+      // keys length
+      for (let i = 0; i < keys.length; i++) {
+
+        // attendance sheet 
+        attendanceWithWeekSorted.push({
+          'week': keys[i],
+          'attendanceSheet': weeklyGroupedData[keys[i]]
+        });
+      }
+
+      // check user attendance sheet
+      if (attendanceWithWeekSorted && attendanceWithWeekSorted.length) {
         // success response 
         return this.success(req, res, this.status.HTTP_OK, attendanceWithWeekSorted, this.messageTypes.userAttendanceFetchedSuccessfully);
       } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userAttendanceFetchError);
