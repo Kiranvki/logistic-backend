@@ -197,7 +197,7 @@ class pickerUserSessionController extends BaseController {
   // get valid user token 
   getUserToken = async (pickerBoyId) => {
     try {
-      info('Get the session key for the given salesman id !');
+      info('Get the session key for the given picker id !');
 
       // checking day object 
       if (pickerBoyId) {
