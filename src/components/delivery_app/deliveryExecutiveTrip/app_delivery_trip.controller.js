@@ -21,6 +21,7 @@ const request = require('request-promise');
 const mongoose = require('mongoose');
 const { ObjectId } = require('mongoose');
 
+
 class DeliveryExecutivetrip extends BaseController {
 
     // constructor 
@@ -132,7 +133,7 @@ class DeliveryExecutivetrip extends BaseController {
     // success(req, res, status, data = null, message = 'success')
 
   }
-
+// Trip detail by tripID
   getTripByDeliveryTripId = async(req,res,next) =>{
     console.log(req.query.page)
     let pageSize=100;
@@ -174,7 +175,7 @@ class DeliveryExecutivetrip extends BaseController {
       $project:{
 _id:0
       }
-    }
+    },
     // {
     //   $group: {
     //     _id: '$spotSalesId',
@@ -186,7 +187,11 @@ _id:0
     //   }
     // },
    
-
+    {
+      $skip:(pageSize*(pageNumber-1))
+    },{
+      $limit:100
+    }
 
     ]
     let trip =await tripModel.aggregate(pipeline);
@@ -236,6 +241,10 @@ _id:0
         $match:{
           '_id':mongoose.Types.ObjectId(req.params.orderid)
         }
+      },{
+        $skip:(pageSize*(pageNumber-1))
+      },{
+        $limit:100
       }
     ]
     let orderData = await model.aggregate(pipeline)

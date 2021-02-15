@@ -4,29 +4,31 @@ const { createTripVal } = require('./app_delivery_trip.validators')
  
 
 // auth 
-const { verifyAppToken  } = require('../../../hooks/app/Auth');
+// const { verifyAppToken  } = require('../../../hooks/delivery-executive/Auth/verifyAppToken');
 // auth 
 const { verifyUserToken } = require('../../../hooks/Auth');
 const { getAllCheckInVehicleDetails } = require('../../../hooks');
+
+
 
 function tripsRoutes() {
     //open, closed
     return (open, closed) => {
 
     closed.route('/get-trip/:deid').get(
-        // verifyAppToken, 
+      // verifyAppToken, // verify app token
         ctrl.getTripByDeliveryExecutiveId 
       );
 
       closed.route('/get-trip/detail/:tripid').get(
-        // verifyAppToken, 
+        // verifyAppToken, // verify app token
         ctrl.getTripByDeliveryTripId 
       );
 
       // post 
       // type orderid
       closed.route('/orderdetail/:type/:orderid').get(
-        // verifyAppToken, 
+        // verifyAppToken, // verify app token
         ctrl.getOrderDetails 
       );
 
