@@ -256,6 +256,7 @@ class userController extends BaseController {
       let user = req.user, // user 
         salesmanId = user._id, // salesman Id
         attendanceSheet = [], // attendance sheet 
+        attendanceWithWeekSorted = [], // attendance sheet with week sorted 
         endDateOfTheMonth = req.body.endDateOfTheMonth, // end date of the month
         startDateOfTheMonth = req.body.startDateOfTheMonth; //  start date of the month
 
@@ -308,22 +309,41 @@ class userController extends BaseController {
           attendanceSheet.push({
             isAttended: 1,
             date: date,
+            week: moment(date, "DD-MM-YYYY").week(),
             attendanceLogArray: attendanceLogArray,
             totalWorkingForTheDayInMins: _.sumBy(attendanceLogArray, 'totalTimeTaken')
           })
         } else {
-          attendanceSheet.push({
-            isAttended: 0,
-            attendanceLogArray: [],
-            date: date
-          })
+          let isAfter = moment(date, "DD-MM-YYYY").isAfter(new Date())
+          if (!isAfter)
+            attendanceSheet.push({
+              isAttended: 0,
+              attendanceLogArray: [],
+              totalWorkingForTheDayInMins: 0,
+              week: moment(date, "DD-MM-YYYY").week(),
+              date: date
+            })
         }
       }
 
-      // check user attendance sheet
-      if (attendanceSheet && attendanceSheet.length) {
+        // weekly grouped data
+        let weeklyGroupedData = _.groupBy(attendanceSheet, 'week');
+        let keys = Object.keys(weeklyGroupedData);
+  
+        // keys length
+        for (let i = 0; i < keys.length; i++) {
+  
+          // attendance sheet 
+          attendanceWithWeekSorted.push({
+            'week': keys[i],
+            'attendanceSheet': weeklyGroupedData[keys[i]]
+          });
+        }
+
+       // check user attendance sheet
+       if (attendanceWithWeekSorted && attendanceWithWeekSorted.length) {
         // success response 
-        return this.success(req, res, this.status.HTTP_OK, attendanceSheet, this.messageTypes.userAttendanceFetchedSuccessfully);
+        return this.success(req, res, this.status.HTTP_OK, attendanceWithWeekSorted, this.messageTypes.userAttendanceFetchedSuccessfully);
       } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.userAttendanceFetchError);
 
       // catch any runtime error 

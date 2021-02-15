@@ -144,7 +144,7 @@ class deliveryUserSessionController extends BaseController {
       info('Login Verify Token !');
 
       // getting the Delivery Executive id
-      let deliveryId = req.params.deliveryId,
+      let deliveryId = req.params.deliveryExecutiveId,
       deliveryExecutiveDetails = req.body.isValidDeliveryExecutive;
 
       // login object 
