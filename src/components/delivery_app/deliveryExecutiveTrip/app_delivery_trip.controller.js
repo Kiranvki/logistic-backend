@@ -136,9 +136,9 @@ class DeliveryExecutivetrip extends BaseController {
 // Trip detail by tripID
   getTripByDeliveryTripId = async(req,res,next) =>{
     console.log(req.query.page)
-    let pageSize=100;
-    let ID = parseInt(req.params.tripid);
     
+    let ID = parseInt(req.params.tripid);
+    let pageSize=100;
     let pageNumber = req.query.page;
     info('getting trip data!');
     let pipeline = [
@@ -219,6 +219,8 @@ _id:0
 
   getOrderDetails = async (req,res,next)=>{
     let model;
+    let pageSize=100;
+    let pageNumber = req.query.page;
     switch(req.params.type){
       case 'salesorder':
         model= salesOrderModel;

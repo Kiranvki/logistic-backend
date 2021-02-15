@@ -10,10 +10,10 @@ const {
 const _ = require('lodash');
 
 class deliveryUserSessionController extends BaseController {
-    constructor() {
-      super();
-      this.messageTypes = this.messageTypes.appUserOnBoard;
-    }
+  constructor() {
+    super();
+    this.messageTypes = this.messageTypes.appUserOnBoard;
+  }
   // Internal Function to get user session data
   getDeliveryUserSession = async (deliveryId) => {
     try {
@@ -54,8 +54,8 @@ class deliveryUserSessionController extends BaseController {
     }
   }
 
-   // do something 
-   create = async (req, res) => {
+  // do something 
+  create = async (req, res) => {
     try {
       info('Creating a new user !');
 
@@ -79,65 +79,64 @@ class deliveryUserSessionController extends BaseController {
     }
   }
 
-    // login authentication
-    loginRequest = async (req, res) => {
-      try {
-        info('OTP generation and DB entry !');
-  
-        // getting the salesman id 
-        let otpObject = req.body.otpObject || {};
-  
-        // checking if otp object is valid 
-        if (!_.isEmpty(otpObject)) {
-  
-          // creating the push object 
-          let pushObject = {
-            'otp': otpObject.otp,
-            'createdAt': otpObject.otpCreatedDate,
-            'expiryInMin': otpObject.expiryTimeForAppToken,
-            'otpType': req.params.type,
-            'requestId': otpObject.reqId,
-            'status': 1,
-            'email': req.body.email,
-            'mobileNumber': req.body.mobileNumber,
-          };
-          console.log("eeeeeeeeeee",req.body.deliveryexecutiveDetails);
-  
-          // updating the last login details 
-          let deliveryExecutiveDetail = await Model.findOneAndUpdate({
-            deliveryId : mongoose.Types.ObjectId(req.body.deliveryexecutiveDetails._id),
-            status: 1,
-            isDeleted: 0
-          },
-           {
+  // login authentication
+  loginRequest = async (req, res) => {
+    try {
+      info('OTP generation and DB entry !');
+
+      // getting the salesman id 
+      let otpObject = req.body.otpObject || {};
+
+      // checking if otp object is valid 
+      if (!_.isEmpty(otpObject)) {
+
+        // creating the push object 
+        let pushObject = {
+          'otp': otpObject.otp,
+          'createdAt': otpObject.otpCreatedDate,
+          'expiryInMin': otpObject.expiryTimeForAppToken,
+          'otpType': req.params.type,
+          'requestId': otpObject.reqId,
+          'status': 1,
+          'email': req.body.email,
+          'mobileNumber': req.body.mobileNumber,
+        };
+
+        // updating the last login details 
+        let deliveryExecutiveDetail = await Model.findOneAndUpdate({
+          deliveryId: mongoose.Types.ObjectId(req.body.deliveryexecutiveDetails._id),
+          status: 1,
+          isDeleted: 0
+        },
+          {
             $push: {
               'otpSend': pushObject
             }
           }, {
-            'upsert': true,
-            'new': true
-          });
+          'upsert': true,
+          'new': true
+        });
 
-          console.log("deliveryExecutiveDetail",deliveryExecutiveDetail);
+        console.log("deliveryExecutiveDetail", deliveryExecutiveDetail);
 
-          // is logged in 
-          return this.success(req, res, this.status.HTTP_OK, {
-            deliveryId: req.body.deliveryexecutiveDetails._id,
-            deliveryexecutiveDetails: {
-              name: req.body.deliveryexecutiveDetails.fullName,
-              cityId: req.body.deliveryexecutiveDetails.cityId,
-              employeeId: req.body.deliveryexecutiveDetails.employeeId,
-              profilePic: req.body.deliveryexecutiveDetails.profilePic,
-            }
-          }, this.messageTypes.otpRegeneratedSuccessfully);
-        } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToGenerateOtpRightNow);
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-      }
+        // is logged in 
+        return this.success(req, res, this.status.HTTP_OK, {
+          deliveryId: req.body.deliveryexecutiveDetails._id,
+          deliveryexecutiveDetails: {
+            name: req.body.deliveryexecutiveDetails.fullName,
+            cityId: req.body.deliveryexecutiveDetails.cityId,
+            employeeId: req.body.deliveryexecutiveDetails.employeeId,
+            profilePic: req.body.deliveryexecutiveDetails.profilePic,
+          }
+        }, this.messageTypes.otpRegeneratedSuccessfully);
+      } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToGenerateOtpRightNow);
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
-  
+  }
+
   // login verify
   loginVerify = async (req, res) => {
     try {
@@ -194,7 +193,7 @@ class deliveryUserSessionController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
-  
+
   // get valid user token 
   getUserToken = async (deliveryId) => {
     try {
@@ -237,7 +236,7 @@ class deliveryUserSessionController extends BaseController {
       }
     }
   }
-  }
+}
 
 // exporting the modules 
 module.exports = new deliveryUserSessionController();
