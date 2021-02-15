@@ -10,6 +10,8 @@ const { error, info } = require('../../../utils').logging;
 // const vehicleMasterModel = require('../../vehicle/vehicle_master/models/vehicle_master.model');
 // const deliveryExecModel = require('../../employee/delivery_executive/models/delivery_executive.model');
 const tripModel = require('../../MyTrip/assign_trip/model/trip.model')
+const salesOrderModel= require('../../sales_order/sales_order/models/sales_order.model')
+const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model')
 
 // const transporterModel = require('../../transporter/transporter/models/transporter.model');
 // const transVehicleModel = require('../../rate_category/ratecategory_transporter_vehicle_mapping/models/ratecategory_transporter_vehicle_mapping.model')
@@ -17,13 +19,14 @@ const tripModel = require('../../MyTrip/assign_trip/model/trip.model')
 const _ = require('lodash');
 const request = require('request-promise');
 const mongoose = require('mongoose');
+const { ObjectId } = require('mongoose');
 
 class DeliveryExecutivetrip extends BaseController {
 
     // constructor 
   constructor() {
     super();
-    this.messageTypes = this.messageTypes.vehicle;
+    this.messageTypes = this.messageTypes.deliveryExecutive;
   };
 
   getTripByDeliveryExecutiveId = async(req,res,next) =>{
@@ -118,7 +121,7 @@ class DeliveryExecutivetrip extends BaseController {
       // success response 
       this.success(req, res, this.status.HTTP_OK, 
         trip || []
-      , this.messageTypes.userCheckedOut);
+      , this.messageTypes.deliveryExecutiveTriplistFetchedSuccessfully);
 
       // catch any runtime error 
     } catch (err) {
@@ -197,7 +200,7 @@ _id:0
       // success response 
       this.success(req, res, this.status.HTTP_OK, 
         trip || []
-      , this.messageTypes.userCheckedOut);
+      , this.messageTypes.deliveryExecutiveTripDetailsFetchedSuccessfully);
 
       // catch any runtime error 
     } catch (err) {
@@ -207,6 +210,51 @@ _id:0
 
     // success(req, res, status, data = null, message = 'success')
 
+  }
+
+  getOrderDetails = async (req,res,next)=>{
+    let model;
+    switch(req.params.type){
+      case 'salesorder':
+        model= salesOrderModel;
+        break;
+      case 'spotsales':
+        model= spotSalesModel;
+        
+        break;
+      case 'assettransfer':
+        model= require('../../MyTrip/assign_trip/model/spotsales.model')
+        break;
+      default:
+        model=null
+        break;
+
+    }
+
+    let pipeline =[
+      {
+        $match:{
+          '_id':mongoose.Types.ObjectId(req.params.orderid)
+        }
+      }
+    ]
+    let orderData = await model.aggregate(pipeline)
+
+    
+    try {
+      info('getting order data!');
+
+      // success response 
+      this.success(req, res, this.status.HTTP_OK, 
+        orderData || []
+      , this.messageTypes.deliveryExecutiveOrderDetailsFetchedSuccessfully);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  
   }
 
 

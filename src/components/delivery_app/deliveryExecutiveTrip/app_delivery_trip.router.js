@@ -24,7 +24,11 @@ function tripsRoutes() {
       );
 
       // post 
-  
+      // type orderid
+      closed.route('/orderdetail/:type/:orderid').get(
+        // verifyAppToken, 
+        ctrl.getOrderDetails 
+      );
 
     };
     
