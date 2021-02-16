@@ -32,6 +32,24 @@ function tripsRoutes() {
         ctrl.getOrderDetails 
       );
 
+
+      // closed.route('/orderdetail/:type/:orderid').post(
+      //   // verifyAppToken, // verify app token
+      //   ctrl.getOrderDetails 
+      // );
+
+      closed.route('/orderdetail/update/:deid/:type/:orderid').post(
+        // verifyAppToken, // verify app token
+        ctrl.updateOrderStatus 
+      );
+
+      closed.route('/trip/generategpn').post(
+        // verifyAppToken, // verify app token
+        ctrl.generateGpnNumber 
+      );
+
+      
+
     };
     
     
