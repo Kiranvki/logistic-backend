@@ -43,10 +43,20 @@ function tripsRoutes() {
         ctrl.updateOrderStatus 
       );
 
-      closed.route('/trip/generategpn').post(
+      closed.route('/trip/generategpn/:tripid/:type/:soid').get(
         // verifyAppToken, // verify app token
         ctrl.generateGpnNumber 
       );
+
+
+      closed.route('/trip/viewinvoice').get(
+        // verifyAppToken, // verify app token
+        ctrl.getInvoiceByNumber 
+      );
+
+
+
+      
 
       
 

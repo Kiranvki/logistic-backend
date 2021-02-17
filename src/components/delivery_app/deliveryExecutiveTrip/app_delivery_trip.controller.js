@@ -4,7 +4,7 @@ const { error, info } = require('../../../utils').logging;
 
 // const moment = require('moment')
 // const SalesOrderModel = require('../../sales_order/sales_order/models/sales_order.model')
-// const invoiceMasterModel = require('../../picker_app/invoice_master/models/invoice_master.model')
+const invoiceMasterModel = require('../../picker_app/invoice_master/models/invoice_master.model')
 // const tripStageModel = require('./model/tripstages.model')
 // const vehicleCheckedInModel = require('../../vehicle/vehicle_attendance/models/vehicle_attendance.model');
 // const vehicleMasterModel = require('../../vehicle/vehicle_master/models/vehicle_master.model');
@@ -21,7 +21,7 @@ const _ = require('lodash');
 const request = require('request-promise');
 const mongoose = require('mongoose');
 const { ObjectId } = require('mongoose');
-
+var QRCode = require('qrcode');//QR code
 
 class DeliveryExecutivetrip extends BaseController {
 
@@ -136,7 +136,7 @@ class DeliveryExecutivetrip extends BaseController {
   }
 // Trip detail by tripID
   getTripByDeliveryTripId = async(req,res,next) =>{
-    console.log(req.query.page)
+   
     
     let ID = parseInt(req.params.tripid);
     let pageSize=100;
@@ -338,23 +338,89 @@ _id:0
   }
 }
 
-  generateGpnNumber= async (req,res,next)=>{
-    // let suppliedQty = req.body.data[0].supplied_qty;
-    // let itemRemarks = req.body.data[0].item_remarks;
-    // let caret_count = req.body.data[0].caret_count;
-    // let isVerified = req.body.data[0].isverified;
-    // let string_ = suppliedQty+' '+itemRemarks+' '+caret_count+' '+isVerified;
+  generateGpnNumber = async (req,res,next)=>{
+    let ID = parseInt(req.params.tripid);
+    let salesOrderId = req.params.soid
+    let orderType = req.params.type
+    let pageSize=100;
+    let pageNumber = req.query.page;
+    let isVerify = req.query.verify;
+
+    
+    info('getting trip data!');
+    let pipeline = [
+      {$match:{
+        so_db_id:mongoose.Types.ObjectId('5ff4161a56742a7178ed445d')
+      }},
+      {
+      $lookup:{
+        from:'salesorders',
+        localField:'so_db_id',
+        foreignField:'_id',
+        as:'salesOrder'
+      }
+    }, 
+    // {
+    //   $group: {
+    //     _id: '$salesOrderId',
+    //     totalSalesOrder:{$sum:1},
+    //     salesData: {
+    //       $push: '$$ROOT'
+    //     }
+       
+    //   }
+    // },
+    
+    {
+      $project:{
+_id:0
+      }
+    },
+    // {
+    //   $group: {
+    //     _id: '$spotSalesId',
+    //     totalSalesOrder:{$sum:1},
+    //     spotSales: {
+    //       $push: '$$ROOT'
+    //     }
+      
+    //   }
+    // },
+   
+ 
+
+    ]
+    let invoiceData =await invoiceMasterModel.aggregate(pipeline);
+    // find().populate('spotSalesId vehicleId salesOrderId');
+  
+  
 
     try {
       info('generating GPN!');
+      
+//  DE ID,Invoice ID,Trip ID,SO ID,invoice_no
+      let objToEncode = {
+        'deliverExecutiveId':'DE-TEST',
+        'invoice_id':'fsibvhh893wuruihbuhzcJc',
+        'trip_id':'TRI-123',
+        'so_id':'SO-123',
+        'invoice_no':'INV-123',
+        'gpn_number':'GPN-0001',
+        'sales_order_no':'SO-123',
+        'order_date':'20/02/2021'
+
+      }
+      let qr = await QRCode.toDataURL(JSON.stringify(objToEncode),{type:'terminal'}); //Generate Base64 encode QR code String
      
-    //     salesOrderModel.update({saleOrderId 'orderItems._id': mongoose.Types.ObjectId('6023d4cce4cd267f8e79466d') }, { $set : { '$.orderItems.suppliedQty': 11 }}, done);
-    // }, function allDone (err) {
-    //     // this will be called when all the updates are done or an error occurred during the iteration
-    // });
-      // success response 
+      // invoiceData[0]['qr']=Buffer.from(qr).toString('base64');
+      invoiceData[0]['qr'] = qr;
+      invoiceData[0]['isverify'] = isVerify||0;
+      
+      console.log(qr);
+      console.log(pageNumber)
+     
       this.success(req, res, this.status.HTTP_OK, 
-        req.body.data || []
+        invoiceData || []
       , this.messageTypes.deliveryExecutiveGPNGeneratedSuccessfully);
 
       // catch any runtime error 
@@ -363,6 +429,52 @@ _id:0
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
 
+
+  }
+
+
+  getInvoiceByNumber = async (req,res,next)=>{
+
+    let invoiceId = req.query.invoiceId ;
+    let invoiceNo = req.query.invoiceno || 0;
+
+
+
+
+    let pipeline = [
+      {
+        $match:{
+          $or:[
+          {'_id':mongoose.Types.ObjectId(invoiceId)},
+          {'invoiceDetails.invoiceNo':invoiceNo}
+          ]
+        }
+      },{
+        $lookup:{
+          from:'spotSales',
+          localField:'spotSalesId',
+          foreignField:'_id',
+          as:'spotSales'
+        }
+      }
+    ]
+    let invoiceDetail = await invoiceMasterModel.aggregate(pipeline)
+
+
+    try {
+      info('Getting invoice Detail!');
+      
+  
+      // success response 
+      this.success(req, res, this.status.HTTP_OK, 
+        invoiceDetail || []
+      , this.messageTypes.deliveryExecutiveInvoiceFetchedSuccessfully);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
 
   }
 
