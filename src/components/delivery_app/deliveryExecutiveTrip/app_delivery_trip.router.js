@@ -22,7 +22,7 @@ function tripsRoutes() {
 
       closed.route('/get-trip/detail/:tripid').get(
         // verifyAppToken, // verify app token
-        ctrl.getTripByDeliveryTripId 
+        ctrl.getTripByTripId 
       );
 
       // post 
@@ -54,6 +54,10 @@ function tripsRoutes() {
         ctrl.getInvoiceByNumber 
       );
 
+      closed.route('/trip/startodometer/:tripid').patch(
+        // verifyAppToken, // verify app token
+        ctrl.updateOdometerReading
+      );
 
 
       

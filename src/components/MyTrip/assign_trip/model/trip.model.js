@@ -86,6 +86,16 @@ let tripSchema = Schema ({
         type: Number,
         default: 0
     },
+    startOdometerReading:{
+        type:Number,
+        default:0
+
+    },
+    endOdometerReading:{
+        type:Number,
+        default:0
+        
+    },
     isActive: {
         type: Number,
         default: 0

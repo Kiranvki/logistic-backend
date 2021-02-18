@@ -54,5 +54,6 @@ let spotSalesSchema = Schema({
 spotSalesSchema.index({ 'cityId': 1, 'tripId': 1, 'spotId': 1 });
 
 let spotSalesModel = mongoose.model('spotSales', spotSalesSchema, 'spotSales');
+
 module.exports = spotSalesModel;
 

@@ -32,6 +32,14 @@ const salesOrder = new Schema({
   'updatedAt': {
     type: 'Date'
   },
+  'salesOrderCreatedAt': {
+    type: 'Date',
+    default: Date.now
+  },
+  'salesOrderUpdatedAt': {
+    type: 'Date',
+    default: Date.now
+  },
   'status': {
     type: 'String'
   },

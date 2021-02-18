@@ -13,6 +13,10 @@ const tripModel = require('../../MyTrip/assign_trip/model/trip.model')
 const salesOrderModel= require('../../sales_order/sales_order/models/sales_order.model')
 const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model');
 var async = require('async');
+import { v4 as uuidv4 } from 'uuid';
+const gpnModel = require('./model/gpn_model')
+
+
 
 // const transporterModel = require('../../transporter/transporter/models/transporter.model');
 // const transVehicleModel = require('../../rate_category/ratecategory_transporter_vehicle_mapping/models/ratecategory_transporter_vehicle_mapping.model')
@@ -135,7 +139,7 @@ class DeliveryExecutivetrip extends BaseController {
 
   }
 // Trip detail by tripID
-  getTripByDeliveryTripId = async(req,res,next) =>{
+  getTripByTripId = async(req,res,next) =>{
    
     
     let ID = parseInt(req.params.tripid);
@@ -400,16 +404,21 @@ _id:0
       
 //  DE ID,Invoice ID,Trip ID,SO ID,invoice_no
       let objToEncode = {
-        'deliverExecutiveId':'DE-TEST',
-        'invoice_id':'fsibvhh893wuruihbuhzcJc',
-        'trip_id':'TRI-123',
-        'so_id':'SO-123',
-        'invoice_no':'INV-123',
-        'gpn_number':'GPN-0001',
-        'sales_order_no':'SO-123',
-        'order_date':'20/02/2021'
+        // 'deliverExecutiveId':'5ff4161a56742a7178ed445d',
+        // 'invoice_id':[mongoose.Types.ObjectId('5ff4161a56742a7178ed445d')],
+        // 'trip_id':mongoose.Types.ObjectId('5ff4161a56742a7178ed445d'),
+        // 'salesOrderId':[mongoose.Types.ObjectId('5ff4161a56742a7178ed445d3')],
+        'invoiceNumber':['INV-123'],
+        'gpn':uuidv4(),
+        // 'sales_order_no':['SO-123'],
+        'order_date':'20/02/2021',
+        // 'spotSalesId':'5ff4161a56742a7178ed445d',
+        'status':0,
+        'isDeleted':0
 
       }
+
+      let gpnData = gpnModel.generateGpn(objToEncode)
       let qr = await QRCode.toDataURL(JSON.stringify(objToEncode),{type:'terminal'}); //Generate Base64 encode QR code String
      
       // invoiceData[0]['qr']=Buffer.from(qr).toString('base64');
@@ -476,6 +485,46 @@ _id:0
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
 
+  }
+
+
+  updateOdometerReading = async (req,res,next)=>{
+    let ID = parseInt(req.params.tripid);
+    
+    let updateObject = {
+      startOdometerReading:parseInt(req.body.odometerreading),
+      isTripStarted:1,
+      isActive:1
+
+    }
+
+    let odometerReading = await tripModel.findOneAndUpdate({
+      'tripId': ID
+      
+    },
+      {
+        $set: updateObject
+      }, {
+      
+      'new': true
+    });
+
+
+
+    try {
+      info('Getting invoice Detail!');
+      
+  
+      // success response 
+      this.success(req, res, this.status.HTTP_OK, 
+        odometerReading || []
+      , this.messageTypes.deliveryExecutiveOdometerReadingUpdatedSuccessfully);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
   }
 
 

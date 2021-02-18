@@ -81,6 +81,8 @@ module.exports = async (req, res, next) => {
                   type: 'Point',
                   coordinates: [!isNaN(data.longitude) ? data.longitude : null, !isNaN(data.latitude) ? data.latitude : null]
                 };
+                data.salesOrderCreatedAt = data.createdAt ? data.createdAt : moment(Date.now()).format('MM/DD/YYYY');
+                data.salesOrderUpdatedAt = data.updatedAt ? data.updatedAt : moment(Date.now()).format('MM/DD/YYYY');
                 return resolve(data);
               })
             })
