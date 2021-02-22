@@ -38,13 +38,15 @@ class DeliveryExecutivetrip extends BaseController {
   getTripByDeliveryExecutiveId = async(req,res,next) =>{
     console.log(req.query.page)
     let pageSize=100;
+    let user = req.user, // user 
+    deliveryExecutiveId = user._id
     let pageNumber = req.query.page;
     let pipeline = [{
 
     
       $match:{
         
-          'transporterDetails.deliveryExecutiveId':req.params.deid
+          'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
           
 
        
@@ -141,7 +143,8 @@ class DeliveryExecutivetrip extends BaseController {
 // Trip detail by tripID
   getTripByTripId = async(req,res,next) =>{
    
-    
+    let user = req.user, // user 
+    deliveryExecutiveId = user._id
     let ID = parseInt(req.params.tripid);
     let pageSize=100;
     let pageNumber = req.query.page;
@@ -279,6 +282,8 @@ _id:0
     let pageSize=100;
     let pageNumber = req.query.page;
     let dataObj = req.body
+    let user = req.user, // user 
+    deliveryId = user._id
 
     switch(req.params.type){
       case 'salesorder':
@@ -343,12 +348,14 @@ _id:0
 }
 
   generateGpnNumber = async (req,res,next)=>{
+    let user = req.user, // user 
+    deliveryExecutiveId = user._id
     let ID = parseInt(req.params.tripid);
     let salesOrderId = req.params.soid
     let orderType = req.params.type
     let pageSize=100;
-    let pageNumber = req.query.page;
-    let isVerify = req.query.verify;
+    
+    let isVerify = req.query.verify?req.query.verify:0;
 
     
     info('getting trip data!');
@@ -404,7 +411,7 @@ _id:0
       
 //  DE ID,Invoice ID,Trip ID,SO ID,invoice_no
       let objToEncode = {
-        // 'deliverExecutiveId':'5ff4161a56742a7178ed445d',
+        'deliverExecutiveId':deliveryExecutiveId,
         // 'invoice_id':[mongoose.Types.ObjectId('5ff4161a56742a7178ed445d')],
         // 'trip_id':mongoose.Types.ObjectId('5ff4161a56742a7178ed445d'),
         // 'salesOrderId':[mongoose.Types.ObjectId('5ff4161a56742a7178ed445d3')],
@@ -413,7 +420,7 @@ _id:0
         // 'sales_order_no':['SO-123'],
         'order_date':'20/02/2021',
         // 'spotSalesId':'5ff4161a56742a7178ed445d',
-        'status':0,
+        'isVerify':isVerify,
         'isDeleted':0
 
       }
@@ -426,7 +433,7 @@ _id:0
       invoiceData[0]['isverify'] = isVerify||0;
       
       console.log(qr);
-      console.log(pageNumber)
+      
      
       this.success(req, res, this.status.HTTP_OK, 
         invoiceData || []
@@ -443,7 +450,8 @@ _id:0
 
 
   getInvoiceByNumber = async (req,res,next)=>{
-
+    let user = req.user, // user 
+    deliveryExecutiveId = user._id
     let invoiceId = req.query.invoiceId ;
     let invoiceNo = req.query.invoiceno || 0;
 
@@ -490,6 +498,8 @@ _id:0
 
   updateOdometerReading = async (req,res,next)=>{
     let ID = parseInt(req.params.tripid);
+    let user = req.user, // user 
+  deliveryExecutiveId = user._id
     
     let updateObject = {
       startOdometerReading:parseInt(req.body.odometerreading),
@@ -526,6 +536,44 @@ _id:0
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+
+
+getInTrip = async (req,res,next)=>{
+  let user = req.user, // user 
+  deliveryExecutiveId = user._id
+  let pipeline = [{
+    $match:{$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
+    {
+      'isActive':1
+    }
+  ]
+  }
+  }]
+
+  let activeTripData = await tripModel.find({$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
+  {
+    'isActive':1
+  }
+]
+}).populate('spotSalesId vehicleId salesOrderId');
+  
+
+  try {
+    info('Getting invoice Detail!');
+    
+
+    // success response 
+    this.success(req, res, this.status.HTTP_OK, 
+      activeTripData || []
+    , this.messageTypes.deliveryExecutiveInTripDataFetchedSuccessfully);
+
+    // catch any runtime error 
+  } catch (err) {
+    error(err);
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  }
+}
 
 
 }

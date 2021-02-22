@@ -36,7 +36,7 @@ const gatePassNumberSchema = new Schema({
         default:0
       },
 
-    status: {
+    isVerify: {
         type: Number,
         
         required:true,
@@ -48,7 +48,9 @@ const gatePassNumberSchema = new Schema({
         default: 0
       }
 
-})
+},{
+    timestamps: true
+  })
 
 gatePassNumberSchema.plugin(autopopulate);
 

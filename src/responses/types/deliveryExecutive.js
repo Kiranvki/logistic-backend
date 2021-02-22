@@ -6,6 +6,7 @@ module.exports = {
     deliveryExecutiveGPNGeneratedSuccessfully: 'GPN Generated Successfully.',
     deliveryExecutiveInvoiceFetchedSuccessfully: 'Invoice Details Fetched Successfully.',
     deliveryExecutiveOdometerReadingUpdatedSuccessfully: 'Odometer Reading Updated Successfully.',
+    deliveryExecutiveInTripDataFetchedSuccessfully: 'Intrip Data Fetched Successfully.',
     
     
 
