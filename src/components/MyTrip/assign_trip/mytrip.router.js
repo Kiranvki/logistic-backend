@@ -70,7 +70,17 @@ function tripsRoutes() {
       verifyUserToken,
       createSpotSalesVal,
       ctrl.createSpotSales
-    )
+    );
+
+    closed.route('/getSpotSalesList').get(
+      verifyUserToken,
+      ctrl.getSpotSalesList
+    );
+
+    closed.route('/storeAssetTransfer').get(
+      verifyUserToken,
+      ctrl.storeAssetTransfer
+    );
 
     };
 };
