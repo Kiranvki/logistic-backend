@@ -742,13 +742,13 @@ updateItemStatusAndCaretOut = async (req,res,next)=>{
 
 
  
-    info('Getting History Detail!');
+    info('Delivery Status Updating!');
     
 
     // success response 
     this.success(req, res, this.status.HTTP_OK, 
       updatedOrderDetail || []
-    , this.messageTypes.deliveryExecutiveHistoryDataFetchedSuccessfully);
+    , this.messageTypes.deliveryExecutiveDeliveryStatusUpdateSuccessfully);
 
     // catch any runtime error 
   } catch (err) {

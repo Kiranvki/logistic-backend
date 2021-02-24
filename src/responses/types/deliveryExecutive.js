@@ -8,6 +8,7 @@ module.exports = {
     deliveryExecutiveOdometerReadingUpdatedSuccessfully: 'Odometer Reading Updated Successfully.',
     deliveryExecutiveHistoryDataFetchedSuccessfully: 'History Details Fetched Successfully.',
     deliveryExecutiveInTripDataFetchedSuccessfully: 'Intrip Data Fetched Successfully.',
+    deliveryExecutiveDeliveryStatusUpdateSuccessfully: 'Delivery Status Updated Successfully.',
     
     
 

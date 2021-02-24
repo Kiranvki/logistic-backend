@@ -98,10 +98,10 @@ function tripsRoutes() {
         ctrl.getHistory
       );
 
-
+// salesorderID
       closed.route('/trip/deliverystatus/:id').post(
-        // verifyDeliveryAppToken,
-        // isValidDeliveryId,
+        verifyDeliveryAppToken,
+        isValidDeliveryId,
         
         
         ctrl.updateItemStatusAndCaretOut
