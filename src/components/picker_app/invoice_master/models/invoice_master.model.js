@@ -110,7 +110,6 @@ const invoiceMaster = new Schema({
     },
   },
 
-
   'invoiceDetails':
   {
     'invoiceNo': {

@@ -6,6 +6,12 @@ let spotSalesSchema = Schema({
         type: Schema.Types.ObjectId,
         ref: 'trips'
     },
+    tripAllotted: {
+        type: Boolean,
+        default: false,
+        enum: [true, false],
+        required: true
+    },
     vehicleId: {
         type: Schema.Types.ObjectId,
         ref: 'vehicleMaster'
@@ -38,15 +44,21 @@ let spotSalesSchema = Schema({
         measureUnit: {
             type: String
         } 
-      }],
-      cityId: {
-          type: String
-      },
-      spotId: {
-        type: Number,
-        unique: true,
-        required: true
-      }    
+    }],
+    createdById: {
+        type: Schema.Types.ObjectId
+    },
+    createdByEmpId: {
+        type: String
+    },
+    cityId: {
+        type: String
+    },
+    spotId: {
+    type: Number,
+    unique: true,
+    required: true
+    }    
 },{
     timestamps: true
 });
