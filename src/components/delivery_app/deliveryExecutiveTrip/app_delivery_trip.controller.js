@@ -696,7 +696,7 @@ updateItemStatusAndCaretOut = async (req,res,next)=>{
             })
 
     orderItems.forEach(async (item,index)=>{
-      console.log('item',item)
+      
       let updateObj = {
         'orderItems.$.itemDeliveryStatus':item.itemDeliveryStatus||item.itemdeliverystatus||0,
         'orderItems.$.rejectedQuantity':item.RejectedQuantity||item.rejectedquantity||0,
