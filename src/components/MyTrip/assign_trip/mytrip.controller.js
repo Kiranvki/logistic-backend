@@ -141,12 +141,13 @@ class MyTrip extends BaseController {
                 s: 0,
                 millisecond: 0
               }).toDate();
-              if (!req.body.vehicleId) req.body.vehicleId = [];
-              let getTransporter = await transporterModel.find({ _id: req.body.transporterId }).select('_id'); 
-              getTransporter = await getTransporter.map((v)=> { return v._id })
-              
-              let vehicleIds = await transVehicleModel.find({transporterId: { $in: getTransporter } } ).select('vehicleId');
-              vehicleIds = await vehicleIds.map( ( v ) => { return v.vehicleId });
+
+            if (!req.body.vehicleId) req.body.vehicleId = [];
+
+            let getTransporter = await transporterModel.findOne({ _id: req.body.transporterId }).lean(); 
+
+            let vehicleIds = await transVehicleModel.find({ transporterId: getTransporter._id } ).select('vehicleId');
+            vehicleIds = await vehicleIds.map( ( v ) => { return v.vehicleId });
 
         let alreadyCheckInVehicleIds = await vehicleCheckedInModel.find({
             'vehicleId': { $in: vehicleIds },
@@ -158,6 +159,8 @@ class MyTrip extends BaseController {
               '$lte': endOfTheDay
             },
           }).lean();
+
+          console.log(vehicleIds, alreadyCheckInVehicleIds)
 
           
           alreadyCheckInVehicleIds = await alreadyCheckInVehicleIds.map((v) => v.vehicleId);
@@ -201,18 +204,14 @@ class MyTrip extends BaseController {
         ...searchObject
       });
 
+      console.log(totalVehicle)
+
 
       // get the Vehicle list 
       let vehicleList = await vehicleMasterModel.aggregate([{
         '$match': {
           ...searchObject
         }
-      }, {
-        '$sort': sortingArray
-      }, {
-        '$skip': skip
-      }, {
-        '$limit': pageSize
       },
       {
         $lookup: {
@@ -359,8 +358,8 @@ class MyTrip extends BaseController {
       return this.success(req, res, this.status.HTTP_OK, {
         results: vehicleList,
         pageMeta: {
-          skip: parseInt(skip),
-          pageSize: pageSize,
+          skip: 0,
+          pageSize: 0,
           total: totalVehicle
         }
       });
@@ -709,6 +708,9 @@ class MyTrip extends BaseController {
          let spotId  = await spotModel.countDocuments() + 1;
          req.body.spotId = spotId; 
 
+         req.body.createdByEmpId = req.user.empId;
+         req.body.createdById = req.user._id;
+
          let spotSales = await spotModel.create(req.body);
 
          await tripModel.findOneAndUpdate({ _id: trip._id }, {$set: { spotSalesId: spotSales._id} });
@@ -721,6 +723,30 @@ class MyTrip extends BaseController {
       };
     };
 
+    //---------------------------------------------------------
+
+    createSpotSales = async (req, res) => {
+      try {
+
+        if (!req.body.items.length) return 
+
+        let spotId  = await spotModel.countDocuments() + 1;
+        req.body.spotId = spotId; 
+
+        req.body.createdByEmpId = req.user.empId;
+        req.body.createdById = req.user._id;
+
+        let spotSales = await spotModel.create(req.body);
+        return this.success(req, res, this.status.HTTP_OK, { result: spotSales });
+
+      } catch (error) {
+        console.log(error)
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error)); 
+      };
+    }; 
+
 };
 
 module.exports = new MyTrip();
+
+

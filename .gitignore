@@ -66,3 +66,4 @@ typings/
 cron_logs/
 logs/
 
+src/components/MyTrip/assign_trip/mytrip.validators.js

@@ -279,6 +279,10 @@ const salesOrder = new Schema({
       'orderPK': {
         type: 'Number'
       },
+      'deliveryStatus': {
+        type: 'Number',
+        default: 0
+      }
     }
   ],
 

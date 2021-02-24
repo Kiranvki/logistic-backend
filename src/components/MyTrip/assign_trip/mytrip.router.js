@@ -1,6 +1,6 @@
 const ctrl = require('./mytrip.controller');
 
-const { createTripVal } = require('./mytrip.validators')
+const { createTripVal, createSpotSalesVal, createOnSpotSaleVal } = require('./mytrip.validators')
 
 // auth 
 const { verifyAppToken  } = require('../../../hooks/app/Auth');
@@ -13,62 +13,66 @@ function tripsRoutes() {
     return (open, closed) => {
 
     closed.route('/getSalesOrder').get(
-        // verifyAppToken, 
+        verifyAppToken, 
         ctrl.getSalesOrders 
       );
 
       // post 
     closed.route('/').post(
       [createTripVal], // joi validation
-      // verifyUserToken, // verify user token
+      verifyUserToken, // verify user token
       ctrl.createTrip // controller function 
     );
 
     closed.route('/getItem/:invoiceNo').get(
-      // verifyUserToken, // verify user token
+      verifyUserToken, // verify user token
       ctrl.getItemsByInvoiceId
     );
 
     closed.route('/getAvailableVehicle').post(
-      // verifyUserToken, // verify user token,
-      getAllCheckInVehicleDetails,
+      verifyUserToken, // verify user token,
+      // getAllCheckInVehicleDetails,
       ctrl.vehicleCountAndDetails
     );
 
     closed.route('/getVehicleCount').get(
-      // verifyUserToken,
+      verifyUserToken,
       ctrl.getCheckedInVehicleCount
     );
 
     closed.route('/getTrip').post(
-      // verifyUserToken,
+      verifyUserToken,
       ctrl.getTrip
     );
 
     closed.route('/getSalesMan').get(
-      // verifyUserToken,
+      verifyUserToken,
       ctrl.getSalesMan
     );
 
     closed.route('/getItemsByLocation').get(
-      // verifyUserToken,
+      verifyUserToken,
       ctrl.getItemsByLocation
     );
 
     closed.route('/listTrips').get(
-      // verifyUserToken,
+      verifyUserToken,
       ctrl.getTriplisting
     );
 
-    closed.route('/storeOnSpotSales').post(
-      // verifyUserToken,
+    closed.route('/storeOnSpotSales').post( // With trip and Vehicle allocation
+      verifyUserToken,
+      createOnSpotSaleVal,
       ctrl.storeOnSpotSales
     );
 
-    };
-    
-    
+    closed.route('/createSpotSales').post( // Without trip and Vehicle allocation
+      verifyUserToken,
+      createSpotSalesVal,
+      ctrl.createSpotSales
+    )
 
+    };
 };
 
 
