@@ -77,4 +77,4 @@ transporter.index({
 
 
 // exporting the entire module
-module.exports = mongoose.model('transporter', transporter);
+module.exports = mongoose.model('transporters', transporter, 'transporters');
