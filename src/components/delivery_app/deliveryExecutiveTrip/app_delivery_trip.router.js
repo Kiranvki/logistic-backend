@@ -64,6 +64,9 @@ function tripsRoutes() {
       );
 
 
+
+
+
       closed.route('/trip/viewinvoice').get(
         verifyDeliveryAppToken,
         isValidDeliveryId,
@@ -87,11 +90,25 @@ function tripsRoutes() {
       );
 
 
+      closed.route('/trip/history').get(
+        verifyDeliveryAppToken,
+        isValidDeliveryId,
+        
+        
+        ctrl.getHistory
+      );
+
+
+      closed.route('/trip/deliverystatus/:id').post(
+        // verifyDeliveryAppToken,
+        // isValidDeliveryId,
+        
+        
+        ctrl.updateItemStatusAndCaretOut
+      );
 
       
-
       
-
       
 
     };

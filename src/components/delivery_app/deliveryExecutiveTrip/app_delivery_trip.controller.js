@@ -2,7 +2,7 @@ const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 const { error, info } = require('../../../utils').logging;
 
-// const moment = require('moment')
+const moment = require('moment')
 // const SalesOrderModel = require('../../sales_order/sales_order/models/sales_order.model')
 const invoiceMasterModel = require('../../picker_app/invoice_master/models/invoice_master.model')
 // const tripStageModel = require('./model/tripstages.model')
@@ -41,12 +41,23 @@ class DeliveryExecutivetrip extends BaseController {
     let user = req.user, // user 
     deliveryExecutiveId = user._id
     let pageNumber = req.query.page;
+
+    let dateToday= moment(Date.now()).set({
+      h: 24,
+      m: 59,
+      s: 0,
+      millisecond: 0
+    }).toDate();
+    
     let pipeline = [{
 
     
-      $match:{
+      $match:{$and:[{
         
           'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+      },
+      {'createdAt':{$gte:dateToday}
+    }]
           
 
        
@@ -311,8 +322,9 @@ _id:0
 
       // creating the push object 
       let updateObject = {
-        'orderItems.$.suppliedQty': dataObj.supplied_qty,
-        'orderItems.$.itemRemarks': dataObj.item_remarks[0]
+        // 'orderItems.$.suppliedQty': dataObj.supplied_qty,
+        'orderItems.$.itemRemarks': dataObj.itemRemarks[0],
+        'caretCount':dataObj.caretCount
         
       };
 
@@ -353,10 +365,37 @@ _id:0
     let ID = parseInt(req.params.tripid);
     let salesOrderId = req.params.soid
     let orderType = req.params.type
+    let cratetIn = req.query.cratecount || req.query.crateCount  || 0;
     let pageSize=100;
+    
     
     let isVerify = req.query.verify?req.query.verify:0;
 
+
+    // sales order update caret
+    
+  
+    let updatedOrderDetail = await salesOrderModel.update(
+      {
+        '_id': mongoose.Types.ObjectId('6023d4cce4cd267f8e79466e') 
+      },
+      {
+         $inc: 
+         {
+            'crateIn': crateIn
+          }
+         }
+   )
+    
+
+  //  sales order update end
+    
+    
+    
+    
+  
+
+   
     
     info('getting trip data!');
     let pipeline = [
@@ -421,7 +460,8 @@ _id:0
         'order_date':'20/02/2021',
         // 'spotSalesId':'5ff4161a56742a7178ed445d',
         'isVerify':isVerify,
-        'isDeleted':0
+        'isDeleted':0,
+        'crateCount':parseInt(crateIn)
 
       }
 
@@ -567,6 +607,148 @@ getInTrip = async (req,res,next)=>{
     this.success(req, res, this.status.HTTP_OK, 
       activeTripData || []
     , this.messageTypes.deliveryExecutiveInTripDataFetchedSuccessfully);
+
+    // catch any runtime error 
+  } catch (err) {
+    error(err);
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  }
+}
+
+
+
+// delivery EXecutive history
+
+getHistory = async (req,res,next)=>{
+  let user = req.user, // user 
+  deliveryExecutiveId = user._id,
+  pageNumber = parseInt(req.query.page) || 1,
+  pageSize = 10;
+
+
+  let pipeline = [
+    {$match:{$and:[{
+      'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+    },
+    {
+      'isCompleteDeleiveryDone':0
+    }
+    // {
+    // delivery executive todays trip field
+    // }
+  ]
+}
+},
+    {
+    $skip:(pageSize*(pageNumber-1))
+    },
+    {
+      $limit:pageNumber}
+  ]
+
+  let historyData = await tripModel.aggregate(pipeline)
+ 
+
+  try {
+    info('Getting History Detail!');
+    
+
+    // success response 
+    this.success(req, res, this.status.HTTP_OK, 
+      historyData || []
+    , this.messageTypes.deliveryExecutiveHistoryDataFetchedSuccessfully);
+
+    // catch any runtime error 
+  } catch (err) {
+    error(err);
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  }
+}
+
+
+
+updateItemStatusAndCaretOut = async (req,res,next)=>{
+  let _id = req.params.id;
+  let crateOut = req.body.crateOut || req.body.crateout  || 0;
+  let crateOutWithItem = req.body.crateOutWithItem || req.body.crateoutwithitem  || 0;
+  // let itemDeliveryStatus = req.body.itemDeliveryStatus || req.body.itemdeliverystatus  || 0;
+  // let RejecteditemQuantity = req.body.rejectedQuantity || req.body.rejectedquantity  || 0;
+  // let comment = req.body.rejectedQuantity || req.body.rejectedquantity  || 0;
+  let orderItems = req.body.itemdata || req.body.itemData || []
+  let updatedOrderDetail ;
+  let caretDetailUpdated;
+    // sales order update crate
+
+    try {
+      caretDetailUpdated = await salesOrderModel.update(
+        {
+          '_id': mongoose.Types.ObjectId(_id)
+        },{
+
+      $inc: 
+             {
+                'crateIn': -((crateOut + crateOutWithItem))
+              },
+              // 'orderItems.rejectedQuantity':RejecteditemQuantity,
+              // 'orderItems.itemDeliveryStatus':itemDeliveryStatus,
+              'crateOut':crateOut,
+              'crateOutWithItem':crateOutWithItem
+            })
+
+    orderItems.forEach(async (item,index)=>{
+      console.log('item',item)
+      let updateObj = {
+        'orderItems.$.itemDeliveryStatus':item.itemDeliveryStatus||item.itemdeliverystatus||0,
+        'orderItems.$.rejectedQuantity':item.RejectedQuantity||item.rejectedquantity||0,
+        'orderItems.$.comments':item.comments||item.Comments||''
+    
+      }
+    
+     
+         updatedOrderDetail = await salesOrderModel.update(
+          {
+            '_id': mongoose.Types.ObjectId(_id) ,
+            'orderItems._id':mongoose.Types.ObjectId(item.id)
+          
+            
+          },
+          {$set: {...updateObj} 
+          // {
+          //    $inc: 
+          //    {
+          //       'crateIn': -((crateOut + crateOutWithItem))
+          //     },
+          //     // 'orderItems.rejectedQuantity':RejecteditemQuantity,
+          //     // 'orderItems.itemDeliveryStatus':itemDeliveryStatus,
+          //     'crateOut':crateOut,
+          //     'crateOutWithItem':crateOutWithItem,
+              
+          //     // {$set: {levels.$.questions.$: upQstnObj} 
+    
+          //     // }
+          //   }
+    
+    
+              
+             }
+       )
+        
+    
+      //  sales order update end
+
+    });
+    
+ 
+
+
+ 
+    info('Getting History Detail!');
+    
+
+    // success response 
+    this.success(req, res, this.status.HTTP_OK, 
+      updatedOrderDetail || []
+    , this.messageTypes.deliveryExecutiveHistoryDataFetchedSuccessfully);
 
     // catch any runtime error 
   } catch (err) {

@@ -287,8 +287,37 @@ const salesOrder = new Schema({
       'orderPK': {
         type: 'Number'
       },
+      
+      'itemDeliveryStatus':{
+        type: 'Number',
+        default:0 //0 not deliver 1 processing 2 deliver
+      },
+      'rejectedQuantity':{
+        type: 'Number',
+        default:0
+
+      },
+     'comments':{
+      type: 'String'
+     }
+
     }
   ],
+  'crateIn':
+      {
+        type: 'Number',
+        default:0
+      },
+   'crateOut':
+      {
+        type: 'Number',
+        default:0
+      },
+    'crateOutWithItem':
+      {
+        type: 'Number',
+        default:0
+      },
 
 }, {
   timestamps: true
