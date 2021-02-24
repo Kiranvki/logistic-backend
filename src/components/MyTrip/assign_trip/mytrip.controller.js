@@ -12,6 +12,7 @@ const tripModel = require('../assign_trip/model/trip.model');
 const transporterModel = require('../../transporter/transporter/models/transporter.model');
 const transVehicleModel = require('../../rate_category/ratecategory_transporter_vehicle_mapping/models/ratecategory_transporter_vehicle_mapping.model')
 const spotModel = require('./model/spotsales.model');
+const assetModel = require('./model/assetTransfer');
 const _ = require('lodash');
 const request = require('request-promise');
 
@@ -743,7 +744,85 @@ class MyTrip extends BaseController {
         console.log(error)
         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error)); 
       };
-    }; 
+    };
+    
+    getSpotSalesList = async (req, res) => {
+      try {
+        let cityId = req.query.cityId || 'chennai', endDate, startDate, limit = 10, page = 1, skipRec = 0;
+
+        limit = !req.query.limit ? limit = limit : limit = parseInt(req.query.limit);
+        page = !req.query.page ? page = page - 1 : page = parseInt(req.query.page) - 1; 
+    
+        skipRec = page * limit;
+
+        startDate = !req.query.startDate ? startDate = new Date() : startDate = new Date(req.query.startDate)
+        endDate = !req.query.endDate ? endDate = startDate : endDate = new Date(req.query.endDate);
+
+        startDate = startDate.setHours(0,0,0,0);
+        endDate = endDate.setHours(23,59,59,999);
+
+        let projection = { 
+            'cityId': cityId,
+
+        };
+
+        if (req.query.searchText && !req.query.searchText == '') {
+          projection =  { ... projection, ...   {
+              '$or':  [ { 'spotId': { $regex: req.query.searchText, $options: 'i' } } ]
+          } };
+        };
+
+        let spotSales = await spotModel.find(projection).limit(limit).skip(skipRec).lean();
+
+      return this.success(req, res, this.status.HTTP_OK, { result: spotSales });
+
+      } catch (error) {
+        console.log(error)
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error)); 
+      };
+    };
+
+    storeAssetTransfer = async (req, res) => {
+      try {
+
+        let options = {
+          method: 'GET',
+          uri: 'http://uat.apps.waycool.in:3001/api/v1/warehouse/'+req.user.warehouseId,
+          headers: {
+            'x-access-token': req.user.token,
+            'Content-Type': 'application/json' 
+        },
+          json: true
+        };
+
+        let response = await request(options);
+        
+        let assetRecId  = await assetModel.countDocuments() + 1;
+        req.body.assetRecId = assetRecId;
+
+        if (!req.body.cityId) req.body.cityId = req.user.region;
+        
+        req.body.sourceWarehouseName = response.data.name;
+        req.body.sourceWarehouseId = req.user.warehouseId;
+
+        req.body.createdByEmpId = req.user.empId;
+        req.body.createdById = req.user._id;
+        req.body.createdByName = req.user.firstName + ' ' + req.user.lastName;
+
+        req.body.stage = [{
+          name: 'created',
+          empName: req.user.firstName + ' ' + req.user.lastName,
+          dateTime: new Date()
+        }];
+        
+        let assetTransfer = await assetModel.create(req.body);
+        return this.success(req, res, this.status.HTTP_OK, { result: assetTransfer });
+
+      } catch (error) {
+        console.log(error)
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error)); 
+      };
+    };
 
 };
 
