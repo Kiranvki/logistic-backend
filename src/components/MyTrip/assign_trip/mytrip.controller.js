@@ -12,7 +12,8 @@ const tripModel = require('../assign_trip/model/trip.model');
 const transporterModel = require('../../transporter/transporter/models/transporter.model');
 const transVehicleModel = require('../../rate_category/ratecategory_transporter_vehicle_mapping/models/ratecategory_transporter_vehicle_mapping.model')
 const spotModel = require('./model/spotsales.model');
-const assetModel = require('./model/assetTransfer');
+const assetModel = require('./model/assetTransfer.model');
+const seriesModel = require('./model/incremental.model');
 const _ = require('lodash');
 const request = require('request-promise');
 
@@ -123,393 +124,6 @@ class MyTrip extends BaseController {
             error(error);
             this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
         };
-    };
-
-    vehicleCountAndDetails = async (req, res) => {
-        try {
-
-            let startOfTheDay = moment().set({
-                h: 0,
-                m: 0,
-                s: 0,
-                millisecond: 0
-              }).toDate();
-        
-              // getting the end of the day 
-              let endOfTheDay = moment().set({
-                h: 24,
-                m: 24,
-                s: 0,
-                millisecond: 0
-              }).toDate();
-
-            if (!req.body.vehicleId) req.body.vehicleId = [];
-
-            let getTransporter = await transporterModel.findOne({ _id: req.body.transporterId }).lean(); 
-
-            let vehicleIds = await transVehicleModel.find({ transporterId: getTransporter._id } ).select('vehicleId');
-            vehicleIds = await vehicleIds.map( ( v ) => { return v.vehicleId });
-
-        let alreadyCheckInVehicleIds = await vehicleCheckedInModel.find({
-            'vehicleId': { $in: vehicleIds },
-            'status': 1,
-            'isDeleted': 0,
-            'inTrip': 0,
-            'dateOfAttendance': {
-              '$gte': startOfTheDay,
-              '$lte': endOfTheDay
-            },
-          }).lean();
-
-          console.log(vehicleIds, alreadyCheckInVehicleIds)
-
-          
-          alreadyCheckInVehicleIds = await alreadyCheckInVehicleIds.map((v) => v.vehicleId);
-        
-        let page = req.query.page || 1,
-        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey = req.query.search || '',
-        sortBy = req.query.sortBy || 'createdAt',
-        sortingArray = {};
-
-      sortingArray[sortBy] = -1;
-      let skip = parseInt(page - 1) * pageSize;
-
-      // get the list of asm in the allocated city
-      let searchObject = {
-        'isDeleted': 0,
-        '_id': {
-          '$in': alreadyCheckInVehicleIds
-        }
-      };
-
-      // creating a match object
-      if (searchKey !== '')
-        searchObject = {
-          ...searchObject,
-          '$or': [{
-            'regNumber': {
-              $regex: searchKey,
-              $options: 'is'
-            }
-          }, {
-            'vehicleModel': {
-              $regex: searchKey,
-              $options: 'is'
-            }
-          }]
-        };
-
-      // // get the total rate category
-      let totalVehicle = await vehicleMasterModel.countDocuments({
-        ...searchObject
-      });
-
-      console.log(totalVehicle)
-
-
-      // get the Vehicle list 
-      let vehicleList = await vehicleMasterModel.aggregate([{
-        '$match': {
-          ...searchObject
-        }
-      },
-      {
-        $lookup: {
-          from: 'ratecategorytransportervehiclemappings',
-          let: {
-            'id': '$_id'
-          },
-          pipeline: [
-            {
-              $match: {
-                // 'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$vehicleId', '$$id']
-                }
-              }
-            }, {
-              $project: {
-                '_id': 1,
-                'status': 1,
-                'isDeleted': 1,
-                'vehicleId': 1,
-                'transporterId': 1,
-                'rateCategoryId': 1
-              }
-            },
-            {
-              $lookup: {
-                from: 'transporters',
-                localField: "transporterId",
-                foreignField: "_id",
-                as: 'transporter'
-              }
-            },
-            {
-              $unwind: {
-                path: '$transporter',
-                preserveNullAndEmptyArrays: true
-              }
-            },
-            {
-              $lookup: {
-                from: 'ratecategorymodels',
-                localField: "rateCategoryId",
-                foreignField: "_id",
-                as: 'rateCategory'
-              }
-            },
-            {
-              $unwind: {
-                path: '$rateCategory',
-                preserveNullAndEmptyArrays: true
-              }
-            },
-          ],
-          as: 'transporterRateCategoryDetails'
-        }
-      },
-      {
-        $unwind: {
-          path: '$transporterRateCategoryDetails',
-          preserveNullAndEmptyArrays: true
-        }
-      },
-      {
-        $lookup: {
-          from: 'vehicleattendances',
-          let: {
-            'id': '$_id'
-          },
-          pipeline: [
-            {
-              $match: {
-                // 'status': 1,
-                'isDeleted': 0,
-                '$expr': {
-                  '$eq': ['$vehicleId', '$$id']
-                },
-                'dateOfAttendance': {
-                  '$gte': startOfTheDay,
-                  '$lte': endOfTheDay
-                },
-
-              }
-            }, {
-              $project: {
-                //  '_id': 0,
-                'attendanceLog': 1,
-                'vehicleId': 1,
-                'dateOfAttendance': { $dateToString: { format: "%m-%d-%Y", date: "$dateOfAttendance", timezone: "+05:30" } },
-              }
-            },
-
-
-            { $unwind: '$attendanceLog' },
-            { $sort: { 'attendanceLog.checkInDate': 1 } },
-            { $group: { _id: '$_id', 'attendanceLog': { $push: '$attendanceLog' } } },
-            //   { $project: { 'attendanceLog': '$attendanceLog' } },
-
-
-          ],
-          as: 'attendanceDetails'
-        },
-      },
-      {
-        $unwind: {
-          path: '$attendanceDetails',
-          preserveNullAndEmptyArrays: true
-        }
-      },
-
-
-      // { $unwind: '$attendanceDetails.attendanceLog' },
-      // { $sort: { 'attendanceDetails.attendanceLog.checkInDate': 1 } },
-      // { $group: { _id: '$attendanceDetails._id', 'attendanceLog': { $push: '$attendanceDetails.attendanceLog' } } },
-      // // { $project: { 'attendanceDetails.attendanceLog': '$attendanceLog' } },
-
-      {
-        $project: {
-          '_id': 1,
-          'regNumber': 1,
-          'vehicleType': 1,
-          'vehicleModel': 1,
-          'height': 1,
-          'length': 1,
-          'breadth': 1,
-          'tonnage': 1,
-          'status': 1,
-          // 'rateCategoryId': '$transporterRateCategoryDetails.rateCategory._id',
-          // 'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
-          'rateCategoryDetails': '$transporterRateCategoryDetails.rateCategory',
-          'attendanceDetails': 1,
-          // 'attendanceDetails.attendanceLog': '$attendanceLog',
-          'transporterId': '$transporterRateCategoryDetails.transporter._id',
-          'transporterName': '$transporterRateCategoryDetails.transporter.vehicleDetails.name',
-        }
-      },
-      ]).allowDiskUse(true);
-
-      for (let v of req.body.vehicleId) {
-        _.remove(vehicleList, (o) => { return o._id.toString() === v.toString(); });
-      };
-      
-      return this.success(req, res, this.status.HTTP_OK, {
-        results: vehicleList,
-        pageMeta: {
-          skip: 0,
-          pageSize: 0,
-          total: totalVehicle
-        }
-      });
-
-        } catch (error) {
-            console.log(error)
-            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-        }
-    };
-
-    createTrip = async (req, res) => {
-        try {
-                let trip = {}, transporterDetails = req.body.transporterDetails, orderArray = [], vehicleArray = [], trip_ids=[];
-
-                for ( let v of transporterDetails ) {
-
-                  req.body.tripId = await tripModel.countDocuments() + 1; // Mandatory to create sequence incremental unique Id
-                  if (!req.body.tripId) return false;
-                  
-                  req.body.transporterDetails = v
-              
-                  trip = await tripModel.create(req.body);
-                  trip_ids.push(trip._id);
-              
-                let orders = await tripModel.findOne({ _id: trip._id })
-                                   .populate('vehicleId rateCategoryId checkedInId salesOrderId deliveryExecutiveId invoice_db_id')
-                                   .populate({ path: 'vehicleId', populate: {path: 'rateCategoryId'} })
-                                   .lean();
-
-                for (let so of orders.salesOrderId) {
-                    
-                    let orderObj = {};
-                    let weight = _.find(orders.invoice_db_id, { so_db_id: so._id });
-                    
-                    so.totalWeight = weight.totalWeight;
-                    let DeliveryDate = new Date(so.deliveryDate);
-                    DeliveryDate = DeliveryDate.toISOString().split('T')[0];
-
-                    let startOfTheDay = (DeliveryDate + " 00 00 00").toString();
-                    let endOfTheDay = (DeliveryDate + " 23 59 00").toString();
-                    
-                    orderObj = {
-                        customerName: so.customerName,
-                        customerCode: so.customerCode,
-                        latitude: so.latitude,
-                        longitude: so.longitude,
-                        deliveryTimeStart: startOfTheDay,
-                        deliveryTimeEnd: endOfTheDay,
-                        orderWeight: so.totalWeight
-                    };
-
-                    orderArray.push(orderObj);
-                };
-
-                for (let v of orders.vehicleId) {
-                    let vehicleObj = {}; 
-                    let transport = _.find(orders.transporterDetails, { vehicleId: v._id });
-                    let cost = 0;
-
-                    /*
-                      If Rate Type Type Monthly ,
-                      Total Cost =Fixed Rental + { Total Distance across all trip sheets in a month - Total Included Distance } * Cost per additional Km. 
-                      If Total Distance across all trip sheets in a month - Total Included Distance is negative , kindly take Zero. 
-
-                      If the Rate type is Daily ;
-
-                      Cost = (Fixed Rental)+ { Total Distance across all trip sheets in day - (Total Included Distance)} *Cost per additional Km. 
-
-                      If the Value (Total Included Distance * No of Days in month vehicles used by that specific transporter) is Negative , take as zero.
-
-                    */
-                    if (v.rateCategoryId && v.rateCategoryId.rateCategoryDetails) {
-                      
-                      let rentalAmount = v.rateCategoryId.rateCategoryDetails.fixedRentalAmount || 0;
-                      let additionalAmount = v.rateCategoryId.rateCategoryDetails.additionalAmount || 0;
-
-                      if (v.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Monthly') {
-                        cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance  
-                      };
-
-                      if (v.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Daily') {
-                        cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance
-                      };
-
-                    };
-
-                    vehicleObj = {
-                        vehicleId: transport ? transport.vehicleId : '',
-                        name:  v.vehicleModel,
-                        class: v.vehicleType,
-                        capacity: v.tonnage,
-                        cost:  cost
-                    };
-
-                    vehicleArray.push(vehicleObj);
-                };
-
-              };
-
-                for (let v of req.body.checkedInId ) {
-                  await vehicleCheckedInModel.findOneAndUpdate({ _id: v }, { $set: { inTrip: 1 } } ); 
-                };
-
-                for (let v of transporterDetails) {
-                  await deliveryExecModel.findOneAndUpdate({ _id: v.deliveryExecutiveId }, { $set: { inTrip: 1 } }); 
-                };
-                
-                return this.success(req, res, this.status.HTTP_OK, {trip_ids, orderArray, vehicleArray}, 'Trip Created !');    
-            
-            } catch (error) {
-            console.log(error)
-            this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
-        }
-    };
-
-    getCheckedInVehicleCount = async (req, res) => {
-      try {
-        let startOfTheDay = moment().set({
-          h: 0,
-          m: 0,
-          s: 0,
-          millisecond: 0
-        }).toDate();
-  
-        // getting the end of the day 
-        let endOfTheDay = moment().set({
-          h: 24,
-          m: 24,
-          s: 0,
-          millisecond: 0
-        }).toDate();
-
-        let vehicleCount = await vehicleCheckedInModel.countDocuments({
-            'status': 1,
-            'isDeleted': 0,
-            'inTrip': 0,
-            'dateOfAttendance': {
-              '$gte': startOfTheDay,
-              '$lte': endOfTheDay
-            },
-          }).lean();
-
-          return this.success(req, res, this.status.HTTP_OK, {
-            count: vehicleCount,
-          });
-
-      } catch (error) {
-        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
-      };
     };
 
     getTrip = async (req, res) => {
@@ -706,16 +320,20 @@ class MyTrip extends BaseController {
          let trip = await tripModel.findOne({_id: req.body.tripId }).lean();
          if (!trip) return res.send({status: 200, message: 'incorrect trip id'});
 
-         let spotId  = await spotModel.countDocuments() + 1;
-         req.body.spotId = spotId; 
+         let spotId  = await seriesModel.findOne({ modelName: 'spotsales' }).lean();
+         if (!spotId) spotId = await seriesModel.create({ modelName: 'spotsales', currentCount: 0 });
+ 
+         let currentCount = spotId.currentCount + 1;
+         req.body.spotId = currentCount; 
 
          req.body.createdByEmpId = req.user.empId;
          req.body.createdById = req.user._id;
 
          let spotSales = await spotModel.create(req.body);
+         await seriesModel.findOneAndUpdate({ _id: spotId._id }, { $set: { currentCount: currentCount } });
 
          await tripModel.findOneAndUpdate({ _id: trip._id }, {$set: { spotSalesId: spotSales._id} });
-         
+
         return this.success(req, res, this.status.HTTP_OK, { result: spotSales });
 
       } catch (error) {
@@ -731,13 +349,18 @@ class MyTrip extends BaseController {
 
         if (!req.body.items.length) return 
 
-        let spotId  = await spotModel.countDocuments() + 1;
-        req.body.spotId = spotId; 
+        let spotId  = await seriesModel.findOne({ modelName: 'spotsales' }).lean();
+        if (!spotId) spotId = await seriesModel.create({ modelName: 'spotsales', currentCount: 0 });
+
+        let currentCount = spotId.currentCount + 1;
+        req.body.spotId = currentCount; 
 
         req.body.createdByEmpId = req.user.empId;
         req.body.createdById = req.user._id;
 
         let spotSales = await spotModel.create(req.body);
+        await seriesModel.findOneAndUpdate({ _id: spotId._id }, { $set: { currentCount: currentCount } });
+        
         return this.success(req, res, this.status.HTTP_OK, { result: spotSales });
 
       } catch (error) {
@@ -796,9 +419,12 @@ class MyTrip extends BaseController {
         };
 
         let response = await request(options);
-        
-        let assetRecId  = await assetModel.countDocuments() + 1;
-        req.body.assetRecId = assetRecId;
+
+        let assetRecId  = await seriesModel.findOne({ modelName: 'assetTransfer' }).lean();
+        if (!assetRecId) assetRecId = await seriesModel.create({ modelName: 'assetTransfer', currentCount: 0 });
+
+        let currentCount = assetRecId.currentCount + 1;
+        req.body.assetRecId = currentCount; 
 
         if (!req.body.cityId) req.body.cityId = req.user.region;
         
@@ -816,6 +442,8 @@ class MyTrip extends BaseController {
         }];
         
         let assetTransfer = await assetModel.create(req.body);
+        await seriesModel.findOneAndUpdate({_id: assetRecId._id }, { $set: { currentCount: currentCount } });
+
         return this.success(req, res, this.status.HTTP_OK, { result: assetTransfer });
 
       } catch (error) {
@@ -823,6 +451,200 @@ class MyTrip extends BaseController {
         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error)); 
       };
     };
+
+    getAssetTransfer = async (req, res) => {
+      try {
+       
+        let cityId = req.query.cityId || 'chennai', endDate, startDate, limit = 10, page = 1, skipRec = 0;
+
+        limit = !req.query.limit ? limit = limit : limit = parseInt(req.query.limit);
+        page = !req.query.page ? page = page - 1 : page = parseInt(req.query.page) - 1; 
+    
+        skipRec = page * limit;
+
+        startDate = !req.query.startDate ? startDate = new Date() : startDate = new Date(req.query.startDate)
+        endDate = !req.query.endDate ? endDate = startDate : endDate = new Date(req.query.endDate);
+
+        startDate = startDate.setHours(0,0,0,0);
+        endDate = endDate.setHours(23,59,59,999);
+
+        let projection = { 
+            'cityId': cityId
+        };
+
+        if (req.query.searchText && !req.query.searchText == '') {
+          projection =  { ... projection, ...   {
+              '$or':  [ { 'assetRecId': { $regex: req.query.searchText, $options: 'i' } } ]
+          } };
+        };
+
+        let assetlist = await assetModel.find(projection).limit(limit).skip(skipRec).lean();
+
+      return this.success(req, res, this.status.HTTP_OK, { result: assetlist });
+
+      } catch (error) {
+        console.log(error)
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error)); 
+      }
+    };
+
+    getCheckedInVehicleCount = async (req, res) => {
+      try {
+               
+        let vehicleCount = await vehicleMasterModel.countDocuments({ 'status': 1, 'isDeleted': 0 }).lean();
+
+        return this.success(req, res, this.status.HTTP_OK, {
+          count: vehicleCount,
+        });
+
+      } catch (error) {
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
+      };
+    };
+
+    vehicleCountAndDetails = async (req, res) => {
+      try {
+
+          if (!req.body.vehicleId) req.body.vehicleId = [];
+
+          let getTransporter = await transporterModel.findOne({ _id: req.body.transporterId }).lean(); 
+          
+          let vehicleIds = await transVehicleModel.find({ 
+          'transporterId': getTransporter._id,
+          'status': 0,
+          'isDeleted': 0,
+          'vehicleId': { $nin: req.body.vehicleId }
+         } ).select('vehicleId');
+
+         vehicleIds = vehicleIds.map((v)=>{ return v.vehicleId });
+         
+         let vehicleList = await vehicleMasterModel.find({_id: { $in: vehicleIds }, 'inTrip': 0, 'status': 1, 'isDeleted': 0, }).select('-status -isDeleted -createdAt -updatedAt -__v').lean();
+         let totalVehicle = await vehicleMasterModel.countDocuments({ _id: { $in: vehicleIds }, 'inTrip': 0, 'status': 1, 'isDeleted': 0, });
+          
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: vehicleList,
+          pageMeta: {
+            skip: 0,
+            pageSize: 0,
+            total: totalVehicle
+          }
+        });
+
+      } catch (error) {
+          console.log(error)
+          this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
+      }
+    };
+
+    createTrip = async (req, res) => {
+      try {
+
+          
+
+            //   let trip = {}, transporterDetails = req.body.transporterDetails, orderArray = [], vehicleArray = [], trip_ids=[];
+
+            //   for ( let v of transporterDetails ) {
+
+            //     req.body.tripId = await tripModel.countDocuments() + 1; // Mandatory to create sequence incremental unique Id
+            //     if (!req.body.tripId) return false;
+                
+            //     req.body.transporterDetails = v
+            
+            //     trip = await tripModel.create(req.body);
+            //     trip_ids.push(trip._id);
+            
+            //   let orders = await tripModel.findOne({ _id: trip._id })
+            //                      .populate('vehicleId rateCategoryId checkedInId salesOrderId deliveryExecutiveId invoice_db_id')
+            //                      .populate({ path: 'vehicleId', populate: {path: 'rateCategoryId'} })
+            //                      .lean();
+
+            //   for (let so of orders.salesOrderId) {
+                  
+            //       let orderObj = {};
+            //       let weight = _.find(orders.invoice_db_id, { so_db_id: so._id });
+                  
+            //       so.totalWeight = weight.totalWeight;
+            //       let DeliveryDate = new Date(so.deliveryDate);
+            //       DeliveryDate = DeliveryDate.toISOString().split('T')[0];
+
+            //       let startOfTheDay = (DeliveryDate + " 00 00 00").toString();
+            //       let endOfTheDay = (DeliveryDate + " 23 59 00").toString();
+                  
+            //       orderObj = {
+            //           customerName: so.customerName,
+            //           customerCode: so.customerCode,
+            //           latitude: so.latitude,
+            //           longitude: so.longitude,
+            //           deliveryTimeStart: startOfTheDay,
+            //           deliveryTimeEnd: endOfTheDay,
+            //           orderWeight: so.totalWeight
+            //       };
+
+            //       orderArray.push(orderObj);
+            //   };
+
+            //   for (let v of orders.vehicleId) {
+            //       let vehicleObj = {}; 
+            //       let transport = _.find(orders.transporterDetails, { vehicleId: v._id });
+            //       let cost = 0;
+
+            //       /*
+            //         If Rate Type Type Monthly ,
+            //         Total Cost =Fixed Rental + { Total Distance across all trip sheets in a month - Total Included Distance } * Cost per additional Km. 
+            //         If Total Distance across all trip sheets in a month - Total Included Distance is negative , kindly take Zero. 
+
+            //         If the Rate type is Daily ;
+
+            //         Cost = (Fixed Rental)+ { Total Distance across all trip sheets in day - (Total Included Distance)} *Cost per additional Km. 
+
+            //         If the Value (Total Included Distance * No of Days in month vehicles used by that specific transporter) is Negative , take as zero.
+
+            //       */
+            //       if (v.rateCategoryId && v.rateCategoryId.rateCategoryDetails) {
+                    
+            //         let rentalAmount = v.rateCategoryId.rateCategoryDetails.fixedRentalAmount || 0;
+            //         let additionalAmount = v.rateCategoryId.rateCategoryDetails.additionalAmount || 0;
+
+            //         if (v.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Monthly') {
+            //           cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance  
+            //         };
+
+            //         if (v.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Daily') {
+            //           cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance
+            //         };
+
+            //       };
+
+            //       vehicleObj = {
+            //           vehicleId: transport ? transport.vehicleId : '',
+            //           name:  v.vehicleModel,
+            //           class: v.vehicleType,
+            //           capacity: v.tonnage,
+            //           cost:  cost
+            //       };
+
+            //       vehicleArray.push(vehicleObj);
+            //   };
+
+            // };
+
+            //   for (let v of req.body.checkedInId ) {
+            //     await vehicleCheckedInModel.findOneAndUpdate({ _id: v }, { $set: { inTrip: 1 } } ); 
+            //   };
+
+            //   for (let v of transporterDetails) {
+            //     await deliveryExecModel.findOneAndUpdate({ _id: v.deliveryExecutiveId }, { $set: { inTrip: 1 } }); 
+            //   };
+              
+            //   return this.success(req, res, this.status.HTTP_OK, {trip_ids, orderArray, vehicleArray}, 'Trip Created !');    
+          
+          } catch (error) {
+          console.log(error)
+          this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
+      }
+  };
+
+
 
 };
 
