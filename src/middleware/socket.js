@@ -12,8 +12,8 @@ class Socket {
   }
 
   init = (server) => {
-    this.io = require('socket.io').listen(server);
-    console.log('test',this.io)
+    this.io = require('socket.io').listen(server,{ path: '/socket'});
+    
     global.io = this.io; //added
     info(chalk.blue(' [ ✓ ] ') + `Application - Socket Initialized`);
     socketListeners.userListener.socketConnection(this.io); // USER LISTENERS 
