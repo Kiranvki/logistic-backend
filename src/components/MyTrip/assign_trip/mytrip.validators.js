@@ -13,6 +13,7 @@ const schemas = {
         salesOrderId: Joi.array().items(Joi.string()).min(1),
         deliveryDetails: Joi.optional()
     }),
+    
     createSpotSalesVal: Joi.object().keys({
         items: Joi.array().items(Joi.object()).min(1),
         salesManName: Joi.string().required(),

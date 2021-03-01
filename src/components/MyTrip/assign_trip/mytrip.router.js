@@ -13,7 +13,7 @@ function tripsRoutes() {
     return (open, closed) => {
 
     closed.route('/getSalesOrder').get(
-        verifyAppToken, 
+      verifyUserToken, 
         ctrl.getSalesOrders 
       );
 
@@ -30,8 +30,7 @@ function tripsRoutes() {
     );
 
     closed.route('/getAvailableVehicle').post(
-      verifyUserToken, // verify user token,
-      // getAllCheckInVehicleDetails,
+      verifyUserToken, 
       ctrl.vehicleCountAndDetails
     );
 
@@ -77,10 +76,15 @@ function tripsRoutes() {
       ctrl.getSpotSalesList
     );
 
-    closed.route('/storeAssetTransfer').get(
+    closed.route('/storeAssetTransfer').post(
       verifyUserToken,
       ctrl.storeAssetTransfer
     );
+
+    closed.route('/getAssetTransfer').get(
+      verifyUserToken,
+      ctrl.getAssetTransfer
+    )
 
     };
 };
