@@ -12,6 +12,7 @@ const invoiceMasterModel = require('../../picker_app/invoice_master/models/invoi
 const tripModel = require('../../MyTrip/assign_trip/model/trip.model')
 const salesOrderModel= require('../../sales_order/sales_order/models/sales_order.model')
 const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model');
+const requestHttp = require('request');
 var async = require('async');
 import { v4 as uuidv4 } from 'uuid';
 const gpnModel = require('./model/gpn_model')
@@ -154,13 +155,17 @@ class DeliveryExecutivetrip extends BaseController {
 // Trip detail by tripID
   getTripByTripId = async(req,res,next) =>{
    
-    let user = req.user, // user 
-    deliveryExecutiveId = user._id
+    let user = req.user // user 
+    // deliveryExecutiveId = user._id
     let ID = parseInt(req.params.tripid);
+    let pipeline = [];
+    let type = req.params.type;
     let pageSize=100;
     let pageNumber = req.query.page;
     info('getting trip data!');
-    let pipeline = [
+    if(type === 'salesorders'||type === 'salesOrder')
+    {
+    pipeline = [
       {$match:{
         tripId:ID
       }},
@@ -182,17 +187,18 @@ class DeliveryExecutivetrip extends BaseController {
        
     //   }
     // },
-    {
-      $lookup:{
-        from:'spotSales',
-        localField:'spotSalesId',
-        foreignField:'_id',
-        as:'spotSales'
-      }
-    }, 
+    // {
+    //   $lookup:{
+    //     from:'spotSales',
+    //     localField:'spotSalesId',
+    //     foreignField:'_id',
+    //     as:'spotSales'
+    //   }
+    // }, 
     {
       $project:{
-_id:0
+_id:0,
+spotSalesId:0
       }
     },
     // {
@@ -213,6 +219,64 @@ _id:0
     }
 
     ]
+  }
+    else if(type === 'spotsales' || type === 'spotSales'){
+      pipeline = [
+        {$match:{
+          tripId:ID
+        }},
+      //   {
+      //   $lookup:{
+      //     from:'salesorders',
+      //     localField:'salesOrderId',
+      //     foreignField:'_id',
+      //     as:'salesOrder'
+      //   }
+      // }, 
+      // {
+      //   $group: {
+      //     _id: '$salesOrderId',
+      //     totalSalesOrder:{$sum:1},
+      //     salesData: {
+      //       $push: '$$ROOT'
+      //     }
+         
+      //   }
+      // },
+      {
+        $lookup:{
+          from:'spotSales',
+          localField:'spotSalesId',
+          foreignField:'_id',
+          as:'spotSales'
+        }
+      }, 
+      {
+        $project:{
+  _id:0,
+  salesOrderId:0
+        }
+      },
+      // {
+      //   $group: {
+      //     _id: '$spotSalesId',
+      //     totalSalesOrder:{$sum:1},
+      //     spotSales: {
+      //       $push: '$$ROOT'
+      //     }
+        
+      //   }
+      // },
+     
+      {
+        $skip:(pageSize*(pageNumber-1))
+      },{
+        $limit:100
+      }
+  
+      ]
+
+    }
     let trip =await tripModel.aggregate(pipeline);
     // find().populate('spotSalesId vehicleId salesOrderId');
   
@@ -581,7 +645,8 @@ _id:0
 
 getInTrip = async (req,res,next)=>{
   let user = req.user, // user 
-  deliveryExecutiveId = user._id
+  deliveryExecutiveId = user._id,
+  type = req.params.type;
   let pipeline = [{
     $match:{$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
     {
@@ -590,13 +655,69 @@ getInTrip = async (req,res,next)=>{
   ]
   }
   }]
+  if(type === 'saleorder' || type === 'salesOrder'){
+  pipeline.push(
+    ...[
+      {
+        $lookup:{
+          from:'salesorders',
+          localField:'salesOrderId',
+          foreignField:'_id',
+          as:'salesOrder'
+          
+        }
+      },{
+        $project:{
+          spotSalesId:0
+        }
+    
+      }
+    ]
+  )
 
-  let activeTripData = await tripModel.find({$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
-  {
-    'isActive':1
+  // {
+  //   $lookup:{
+  //     from:'salesorders',
+  //     localField:'salesOrderId',
+  //     foreignField:'_id',
+  //     as:'salesOrder'
+      
+  //   }
+  // },{
+  //   $project:{
+  //     spotSalesId:0
+  //   }
+
+  // }
+
+
   }
-]
-}).populate('spotSalesId vehicleId salesOrderId');
+  if(type === 'spotsales' || type === 'spotSales'){
+    pipeline.push(
+      ...[{
+      $lookup:{
+        from:'spotSales',
+        localField:'spotSalesId',
+        foreignField:'_id',
+        as:'spotSales'
+      }
+    }, 
+    {
+      $project:{
+_id:0,
+salesOrderId:0
+  }}])
+
+
+//   let activeTripData = await tripModel.find({$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
+//   {
+//     'isActive':1
+//   }
+// ]
+// }).populate('spotSalesId vehicleId salesOrderId');
+
+
+let activeTripData = await tripModel.aggregate(pipeline).populate('vehicleId');
   
 
   try {
@@ -615,36 +736,105 @@ getInTrip = async (req,res,next)=>{
   }
 }
 
-
+}
 
 // delivery EXecutive history
 
 getHistory = async (req,res,next)=>{
   let user = req.user, // user 
+   type = req.params.type
   deliveryExecutiveId = user._id,
   pageNumber = parseInt(req.query.page) || 1,
   pageSize = 10;
 
 
-  let pipeline = [
-    {$match:{$and:[{
-      'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+  let pipeline = [{
+    $match:{$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
+    {
+      'isActive':1
     },
     {
       'isCompleteDeleiveryDone':0
     }
-    // {
-    // delivery executive todays trip field
-    // }
   ]
-}
-},
-    {
-    $skip:(pageSize*(pageNumber-1))
-    },
-    {
-      $limit:pageNumber}
-  ]
+  }
+  }]
+  if(type === 'saleorder' || type === 'salesOrder'){
+  pipeline.push(
+    ...[
+      {
+        $lookup:{
+          from:'salesorders',
+          localField:'salesOrderId',
+          foreignField:'_id',
+          as:'salesOrder'
+          
+        }
+      },{
+        $project:{
+          spotSalesId:0
+        },
+        
+    
+      },
+      {
+            $skip:(pageSize*(pageNumber-1))
+            },
+            {
+              $limit:pageNumber}
+    ]
+  )
+
+  }
+
+  if(type === 'spotsales' || type === 'spotSales'){
+    pipeline.push(
+      ...[
+        {
+          $lookup:{
+            from:'spotsales',
+            localField:'spotsalesId',
+            foreignField:'_id',
+            as:'spotsales'
+            
+          }
+        },{
+          $project:{
+            spotSalesId:0,
+            _id:0
+          },
+          
+      
+        },
+        {
+              $skip:(pageSize*(pageNumber-1))
+              },
+              {
+                $limit:pageNumber}
+      ]
+    )
+  
+    }
+
+//   let pipeline = [
+//     {$match:{$and:[{
+//       'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+//     },
+//     {
+//       'isCompleteDeleiveryDone':0
+//     }
+//     // {
+//     // delivery executive todays trip field
+//     // }
+//   ]
+// }
+// },
+//     {
+//     $skip:(pageSize*(pageNumber-1))
+//     },
+//     {
+//       $limit:pageNumber}
+//   ]
 
   let historyData = await tripModel.aggregate(pipeline)
  
@@ -755,6 +945,37 @@ updateItemStatusAndCaretOut = async (req,res,next)=>{
     error(err);
     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
   }
+}
+
+
+getDirection = async(req,res,next)=>{
+  let cloc = req.query.cloc||req.query.Cloc || [0,0];//current location 0->lat,1->long
+  let dloc = req.query.dloc||req.query.Dloc || [0,0];
+  cloc = cloc.split(',')
+  dloc = dloc.split(',')
+  // let destinationLat = req.query.dloc;
+  // let destinationLng = req.query.dlong;
+  console.log(cloc,dloc)
+  let data;
+  try{
+   
+  // console.log(data);
+  
+  info('Get Direction!');
+    
+
+  // success response 
+  this.success(req, res, this.status.HTTP_OK, 
+    data || []
+  , this.messageTypes.deliveryExecutiveDeliveryStatusUpdateSuccessfully);
+
+  // catch any runtime error 
+} catch (err) {
+  error(err);
+  this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+}
+  // https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=40.6655101,-73.89188969999998&destinations=40.6905615%2C-73.9976592
+
 }
 
 

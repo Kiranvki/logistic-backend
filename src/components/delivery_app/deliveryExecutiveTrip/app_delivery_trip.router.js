@@ -27,9 +27,9 @@ function tripsRoutes() {
         ctrl.getTripByDeliveryExecutiveId 
       );
 
-      closed.route('/get-trip/detail/:tripid').get(
-        verifyDeliveryAppToken,
-        isValidDeliveryId,
+      closed.route('/get-trip/:type/detail/:tripid').get(
+        // verifyDeliveryAppToken,
+        // isValidDeliveryId,
         // verifyAppToken, // verify app token
         ctrl.getTripByTripId 
       );
@@ -81,7 +81,7 @@ function tripsRoutes() {
         ctrl.updateOdometerReading
       );
 
-      closed.route('/trip/intrip').get(
+      closed.route('/trip/intrip/:type').get(
         verifyDeliveryAppToken,
         isValidDeliveryId,
         
@@ -90,7 +90,7 @@ function tripsRoutes() {
       );
 
 
-      closed.route('/trip/history').get(
+      closed.route('/trip/history/:type').get(
         verifyDeliveryAppToken,
         isValidDeliveryId,
         
@@ -105,6 +105,17 @@ function tripsRoutes() {
         
         
         ctrl.updateItemStatusAndCaretOut
+      );
+
+
+      // get Direction
+
+      closed.route('/trip/getdirection').get(
+        // verifyDeliveryAppToken,
+        // isValidDeliveryId,
+        
+        
+        ctrl.getDirection
       );
 
       

@@ -1,5 +1,7 @@
 class Events {
   SUCCESS = 'success'
+  ETA = 'eta'
+  MESSAGE = 'message'
   FAILED = 'failed'
   CONNECTION = 'connection'
   SUBSCRIBE = 'subscribe'

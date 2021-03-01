@@ -22,6 +22,15 @@ class SocketListeners {
         });
       })
   }
+ 
+
+  socketDisconnect = async (socket) => {
+    // default namespace
+    socket.of(Namespace.DEFAULT).on('disconnect', function () {
+      console.log('disconnect')
+      socket.emit('disconnected');
+    })
+  }
 
   emitData = async (socket, data) => {
     // socket.join(roomId)
