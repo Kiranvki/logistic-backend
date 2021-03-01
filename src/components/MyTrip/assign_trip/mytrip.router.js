@@ -3,21 +3,21 @@ const ctrl = require('./mytrip.controller');
 const { createTripVal, createSpotSalesVal, createOnSpotSaleVal } = require('./mytrip.validators')
 
 // auth 
-const { verifyAppToken  } = require('../../../hooks/app/Auth');
+const { verifyAppToken } = require('../../../hooks/app/Auth');
 // auth 
 const { verifyUserToken } = require('../../../hooks/Auth');
 const { getAllCheckInVehicleDetails } = require('../../../hooks');
 
 function tripsRoutes() {
-    //open, closed
-    return (open, closed) => {
+  //open, closed
+  return (open, closed) => {
 
     closed.route('/getSalesOrder').get(
-        verifyAppToken, 
-        ctrl.getSalesOrders 
-      );
+      verifyUserToken,
+      ctrl.getSalesOrders
+    );
 
-      // post 
+    // post 
     closed.route('/').post(
       [createTripVal], // joi validation
       verifyUserToken, // verify user token
@@ -70,9 +70,19 @@ function tripsRoutes() {
       verifyUserToken,
       createSpotSalesVal,
       ctrl.createSpotSales
-    )
+    );
 
-    };
+    closed.route('/getSpotSalesList').get(
+      verifyUserToken,
+      ctrl.getSpotSalesList
+    );
+
+    closed.route('/storeAssetTransfer').get(
+      verifyUserToken,
+      ctrl.storeAssetTransfer
+    );
+
+  };
 };
 
 
