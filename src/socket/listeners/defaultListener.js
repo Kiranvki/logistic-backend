@@ -15,15 +15,18 @@ class SocketListeners {
     socket.of(Namespace.DEFAULT)
       .on(Events.CONNECTION, (sock) => {
         info("Default Socket Connection Established");
-        
+        console.log(sock.id)
         // listening to a event 
-        sock.emit('message','test',()=>{
+        sock.emit('message','test',function(){
           console.log('emitted')
         })
         sock.on(Events.LISTEN, data => {
           info(data);
           this.emitData(sock, data)
         });
+        sock.on('disconnect',data=>{
+          console.log('disconnected.')
+        })
       })
   }
  
