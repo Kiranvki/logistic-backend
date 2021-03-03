@@ -155,8 +155,8 @@ class DeliveryExecutivetrip extends BaseController {
 // Trip detail by tripID
   getTripByTripId = async(req,res,next) =>{
    
-    let user = req.user // user 
-    // deliveryExecutiveId = user._id
+    let user = req.user, // user 
+    deliveryExecutiveId = user._id
     let ID = parseInt(req.params.tripid);
     let pipeline = [];
     let type = req.params.type;
@@ -166,9 +166,14 @@ class DeliveryExecutivetrip extends BaseController {
     if(type === 'salesorders'||type === 'salesOrder')
     {
     pipeline = [
-      {$match:{
+      {$match:{$and:[{
+        
+        
+          'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
+      },
+        {
         tripId:ID
-      }},
+      }]}},
       {
       $lookup:{
         from:'salesorders',
@@ -222,9 +227,14 @@ spotSalesId:0
   }
     else if(type === 'spotsales' || type === 'spotSales'){
       pipeline = [
-        {$match:{
-          tripId:ID
-        }},
+        {$match:{$and:[{
+        
+        
+          'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
+      },
+        {
+        tripId:ID
+      }]}},
       //   {
       //   $lookup:{
       //     from:'salesorders',
@@ -556,7 +566,7 @@ _id:0
   getInvoiceByNumber = async (req,res,next)=>{
     let user = req.user, // user 
     deliveryExecutiveId = user._id
-    let invoiceId = req.query.invoiceId ;
+    let invoiceId = req.query.invoiceid ;
     let invoiceNo = req.query.invoiceno || 0;
 
 
@@ -602,8 +612,13 @@ _id:0
 
   updateOdometerReading = async (req,res,next)=>{
     let ID = parseInt(req.params.tripid);
-    let user = req.user, // user 
-  deliveryExecutiveId = user._id
+    let user = req.user // user 
+    let pageSize=100;
+    
+    let deliveryExecutiveId = user._id
+    
+    let pageNumber = req.query.page||1;
+  
     
     let updateObject = {
       startOdometerReading:parseInt(req.body.odometerreading),
@@ -624,14 +639,108 @@ _id:0
     });
 
 
+    
+
+    let dateToday= moment(Date.now()).set({
+      h: 24,
+      m: 59,
+      s: 0,
+      millisecond: 0
+    }).toDate();
+    
+    let pipeline = [{
+
+    
+      $match:{$and:[{
+        
+          'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+      },
+      {'createdAt':{$gte:dateToday}
+    }]
+          
+
+       
+      }
+      
+    }
+  //   {
+  //     $unwind: "$salesOrderId"
+  // }
+   
+    ,{
+      $project:{
+       _id:0,
+        deliveryDetails:0,
+        vehicleId:0,
+        checkedInId:0,
+        rateCategoryId:0,
+     
+        deliveryExecutiveId:0,
+        invoice_db_id:0,
+        invoiceNo:0,
+        approvedBySecurityGuard: 0,
+        isTripStarted: 0,
+        isActive: 0,
+        tripFinished: 0,
+        isCompleteDeleiveryDone: 0,
+        isPartialDeliveryDone: 0,
+        returnedStockDetails: 0,
+      
+        __v:0
+
+
+
+
+      }
+    },
+    {
+      $skip:(pageSize*(pageNumber-1))
+    },{
+      $limit:100
+    },
+    // {
+    //   $group: {
+    //     _id: '$_id',
+    //     totalSales:{$sum:1},
+    //     orders:{
+    //       $push: '$$ROOT'
+    //     }
+    //     // 'attendanceLog': { $push: '$attendanceLog' },
+    //     // 'userId': { $push: '$userId' }
+    //   }
+    // },
+    
+     {
+      $group: {
+        _id: '$transporterDetails.deliveryExecutiveId',
+        total:{$sum:1},
+        tripData: {
+          $push: '$$ROOT'
+        }
+        // 'attendanceLog': { $push: '$attendanceLog' },
+        // 'userId': { $push: '$userId' }
+      }
+    },
+    {$sort:{
+      _id:-1
+    }
+  },
+  
+  
+  
+  ]
+    let trip =await tripModel.aggregate(pipeline);
+  
+  
+
 
     try {
-      info('Getting invoice Detail!');
+      info('Getting trip Detail!');
       
-  
+// odometerReading
       // success response 
       this.success(req, res, this.status.HTTP_OK, 
-        odometerReading || []
+        trip || []
       , this.messageTypes.deliveryExecutiveOdometerReadingUpdatedSuccessfully);
 
       // catch any runtime error 
@@ -742,7 +851,7 @@ let activeTripData = await tripModel.aggregate(pipeline).populate('vehicleId');
 
 getHistory = async (req,res,next)=>{
   let user = req.user, // user 
-   type = req.params.type
+   type = req.params.type,
   deliveryExecutiveId = user._id,
   pageNumber = parseInt(req.query.page) || 1,
   pageSize = 10;

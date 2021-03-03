@@ -1,6 +1,13 @@
 const ctrl = require('./app_delivery_trip.controller');
 
-const { createTripVal } = require('./app_delivery_trip.validators')
+const { updateDeliveryStatusVal,
+  getHistoryVal,
+  getInTripVal,
+  updateOdometerReadingVal,
+  getInvoiceVal,
+  updateOrderStatusVal,
+  getOrderDetailVal,
+  getTripByIdVal } = require('./app_delivery_trip.validators')
 
 const {
   isDeliveryExecutiveCheckedIn, // is user checked in
@@ -28,8 +35,9 @@ function tripsRoutes() {
       );
 
       closed.route('/get-trip/:type/detail/:tripid').get(
-        // verifyDeliveryAppToken,
-        // isValidDeliveryId,
+        getTripByIdVal,
+        verifyDeliveryAppToken,
+        isValidDeliveryId,
         // verifyAppToken, // verify app token
         ctrl.getTripByTripId 
       );
@@ -37,6 +45,7 @@ function tripsRoutes() {
       // post 
       // type orderid
       closed.route('/orderdetail/:type/:orderid').get(
+        getOrderDetailVal,
         verifyDeliveryAppToken,
         isValidDeliveryId,
         // verifyAppToken, // verify app token
@@ -50,13 +59,15 @@ function tripsRoutes() {
       // );
 
       closed.route('/orderdetail/update/:type/:orderid').post(
+        updateOrderStatusVal,
         verifyDeliveryAppToken,
         isValidDeliveryId,
         // verifyAppToken, // verify app token
         ctrl.updateOrderStatus 
       );
-
+// validation Pending
       closed.route('/trip/generategpn/:tripid/:type/:soid').get(
+        
         verifyDeliveryAppToken,
         isValidDeliveryId,
         // verifyAppToken, // verify app token
@@ -68,13 +79,15 @@ function tripsRoutes() {
 
 
       closed.route('/trip/viewinvoice').get(
+        getInvoiceVal,
         verifyDeliveryAppToken,
         isValidDeliveryId,
         // verifyAppToken, // verify app token
         ctrl.getInvoiceByNumber 
       );
 
-      closed.route('/trip/startodometer/:tripid').patch(
+      closed.route('/trip/starttrip/:tripid').patch(
+        updateOdometerReadingVal,
         verifyDeliveryAppToken,
         isValidDeliveryId,
         // verifyAppToken, // verify app token
@@ -82,6 +95,7 @@ function tripsRoutes() {
       );
 
       closed.route('/trip/intrip/:type').get(
+        getInTripVal,
         verifyDeliveryAppToken,
         isValidDeliveryId,
         
@@ -91,6 +105,7 @@ function tripsRoutes() {
 
 
       closed.route('/trip/history/:type').get(
+        getHistoryVal,
         verifyDeliveryAppToken,
         isValidDeliveryId,
         
@@ -99,7 +114,8 @@ function tripsRoutes() {
       );
 
 // salesorderID
-      closed.route('/trip/deliverystatus/:id').post(
+      closed.route('/trip/deliverystatus/:type/:id').post(
+        updateDeliveryStatusVal,
         verifyDeliveryAppToken,
         isValidDeliveryId,
         
@@ -109,7 +125,7 @@ function tripsRoutes() {
 
 
       // get Direction
-
+// validation pending
       closed.route('/trip/getdirection').get(
         // verifyDeliveryAppToken,
         // isValidDeliveryId,
