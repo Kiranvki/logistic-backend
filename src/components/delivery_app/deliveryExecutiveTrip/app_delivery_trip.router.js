@@ -7,7 +7,8 @@ const { updateDeliveryStatusVal,
   getInvoiceVal,
   updateOrderStatusVal,
   getOrderDetailVal,
-  getTripByIdVal } = require('./app_delivery_trip.validators')
+  getTripByIdVal, 
+  generateGpnVal} = require('./app_delivery_trip.validators')
 
 const {
   isDeliveryExecutiveCheckedIn, // is user checked in
@@ -66,8 +67,8 @@ function tripsRoutes() {
         ctrl.updateOrderStatus 
       );
 // validation Pending
-      closed.route('/trip/generategpn/:tripid/:type/:soid').get(
-        
+      closed.route('/trip/generategpn/:type').post(
+        generateGpnVal,
         verifyDeliveryAppToken,
         isValidDeliveryId,
         // verifyAppToken, // verify app token

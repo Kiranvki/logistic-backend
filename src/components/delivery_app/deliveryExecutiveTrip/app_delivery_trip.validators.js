@@ -51,17 +51,29 @@ const schemas = {
     }),
 
     generateGpnVal: Joi.object().keys({
-      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      verify: Joi.number().integer().label('Verify as a parameter in url').valid(0, 1).options({
         language: {
           string: {
             regex: {
-              base: 'should be a valid type'
+              base: 'should be a valid status'
             }
           }
         }
       }).required(),
-        tripid: Joi.string().trim().label('tripid').required().max(20),
-        soid:Joi.string().trim().label('soid').required().max(20),
+        invoiceId: Joi.string().trim().label('Invoice Id').required().min(20),
+        tripId:Joi.string().trim().label('Trip Id').required().min(20),
+        invoiceNumber:Joi.string().trim().label('Invoice Number').required().max(20),
+        salesOrderId:Joi.string().trim().label('soid').min(20),
+        spotSalesId:Joi.string().trim().label('soid').min(20),
+        crateIn:Joi.number().integer().label('Caret in').options({
+          language: {
+            string: {
+              regex: {
+                base: 'should be a valid status'
+              }
+            }
+          }
+        }).required()
         
       
     }),
@@ -264,6 +276,27 @@ getHistoryVal: (req, res, next) => {
  
   // validating the schema 
   schema.validate({'type':req.params.type}, option).then(() => {
+      next();
+      // if error occured
+  }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+          error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+  });
+},
+
+
+generateGpnVal: (req, res, next) => {
+  // getting the schemas 
+  let schema = schemas.generateGpnVal;
+  let option = options.basic;
+ 
+  // validating the schema 
+  schema.validate({'verify':req.query.verify,...req.body}, option).then(() => {
       next();
       // if error occured
   }).catch((err) => {

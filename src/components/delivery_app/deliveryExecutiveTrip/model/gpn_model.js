@@ -11,11 +11,11 @@ const gatePassNumberSchema = new Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'salesOrder'
     }],
-    invoice_id:[{
+    invoiceId:[{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'invoiceMaster'
     }],
-    trip_id:{
+    tripId:{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'trips'
     },
@@ -42,6 +42,16 @@ const gatePassNumberSchema = new Schema({
         required:true,
         default:0
       },
+      orderType: {
+        type: String,
+        required:true,
+        
+      },
+      status: {
+        type: Number,
+        required:true,
+        default: 0
+      },
       isDeleted: {
         type: Number,
         required:true,
@@ -59,14 +69,15 @@ gatePassNumberSchema.plugin(autopopulate);
 class GpnClass{
 
     static async generateGpn(gpnData) {
-        
+        console.log(gpnData)
         // let userExist = await this.count({ email });
         // if(userExist) throw new Error('Email is already exist.');
         // let phoneExist = await this.count({cell_phone})
         // if(phoneExist) throw new Error('Phone is already exist.');
         
-        console.log(gpnData)
+        
         let gpnDetail = await new this(gpnData).save();
+        console.log(gpnDetail)
 
         return gpnDetail.toObject();
         

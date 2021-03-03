@@ -14,6 +14,7 @@ const salesOrderModel= require('../../sales_order/sales_order/models/sales_order
 const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model');
 const requestHttp = require('request');
 var async = require('async');
+import { type } from 'ramda';
 import { v4 as uuidv4 } from 'uuid';
 const gpnModel = require('./model/gpn_model')
 
@@ -436,14 +437,18 @@ spotSalesId:0
   generateGpnNumber = async (req,res,next)=>{
     let user = req.user, // user 
     deliveryExecutiveId = user._id
-    let ID = parseInt(req.params.tripid);
-    let salesOrderId = req.params.soid
-    let orderType = req.params.type
-    let cratetIn = req.query.cratecount || req.query.crateCount  || 0;
-    let pageSize=100;
+    let tripId = req.body.tripid||req.body.tripId;
+    let invoiceId = req.body.invoiceid||req.body.invoiceId;
+    let invoiceNumber = req.body.invoiceNumber||req.body.invoicenumber;
+    let salesOrderId = req.body.salesOrderId||req.body.salesorderid
+    let orderType = req.params.type,
+    spotSalesId = req.body.spotSalesId||req.body.spotsalesid
+    let crateIn = req.body.cratein || req.body.crateIn  || 0;
+    let pageSize=100,
+    pageNumber = req.query.page || 1;
     
     
-    let isVerify = req.query.verify?req.query.verify:0;
+    let isVerify = parseInt(req.query.verify)?parseInt(req.query.verify):0;
 
 
     // sales order update caret
@@ -451,7 +456,7 @@ spotSalesId:0
   
     let updatedOrderDetail = await salesOrderModel.update(
       {
-        '_id': mongoose.Types.ObjectId('6023d4cce4cd267f8e79466e') 
+        '_id': mongoose.Types.ObjectId(salesOrderId) 
       },
       {
          $inc: 
@@ -474,7 +479,7 @@ spotSalesId:0
     info('getting trip data!');
     let pipeline = [
       {$match:{
-        so_db_id:mongoose.Types.ObjectId('5ff4161a56742a7178ed445d')
+        so_db_id:mongoose.Types.ObjectId(invoiceId)
       }},
       {
       $lookup:{
@@ -525,10 +530,15 @@ _id:0
 //  DE ID,Invoice ID,Trip ID,SO ID,invoice_no
       let objToEncode = {
         'deliverExecutiveId':deliveryExecutiveId,
-        // 'invoice_id':[mongoose.Types.ObjectId('5ff4161a56742a7178ed445d')],
-        // 'trip_id':mongoose.Types.ObjectId('5ff4161a56742a7178ed445d'),
-        // 'salesOrderId':[mongoose.Types.ObjectId('5ff4161a56742a7178ed445d3')],
-        'invoiceNumber':['INV-123'],
+        'invoiceId':[mongoose.Types.ObjectId(invoiceId)],
+        'tripId':mongoose.Types.ObjectId(tripId),
+        'salesOrderId':[mongoose.Types.ObjectId(salesOrderId)],
+        'orderType':orderType,
+
+    
+   
+        'spotSalesId':[mongoose.Types.ObjectId(spotSalesId)],
+        'invoiceNumber':[invoiceNumber],
         'gpn':uuidv4(),
         // 'sales_order_no':['SO-123'],
         'order_date':'20/02/2021',
@@ -539,18 +549,23 @@ _id:0
 
       }
 
-      let gpnData = gpnModel.generateGpn(objToEncode)
+      let gpnData = await gpnModel.generateGpn(objToEncode)
       let qr = await QRCode.toDataURL(JSON.stringify(objToEncode),{type:'terminal'}); //Generate Base64 encode QR code String
-     
+      let responseObj = {
+        'invoiceNumber':invoiceNumber,
+        'invoiceId':invoiceId,
+        'qr':qr,
+
+      }
       // invoiceData[0]['qr']=Buffer.from(qr).toString('base64');
-      invoiceData[0]['qr'] = qr;
-      invoiceData[0]['isverify'] = isVerify||0;
+      // invoiceData[0]['qr'] = qr;
+      // invoiceData[0]['isverify'] = isVerify||0;
       
-      console.log(qr);
+      // console.log(qr);
       
      
       this.success(req, res, this.status.HTTP_OK, 
-        invoiceData || []
+        responseObj || []
       , this.messageTypes.deliveryExecutiveGPNGeneratedSuccessfully);
 
       // catch any runtime error 
