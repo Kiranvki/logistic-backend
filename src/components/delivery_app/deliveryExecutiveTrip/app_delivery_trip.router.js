@@ -27,7 +27,7 @@ function tripsRoutes() {
     //open, closed
     return (open, closed) => {
 
-    closed.route('/get-trip/').get(
+    closed.route('/get-trip').get(
       verifyDeliveryAppToken,
         isValidDeliveryId,
       // verifyAppToken, // verify app token
