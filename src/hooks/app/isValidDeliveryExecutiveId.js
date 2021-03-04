@@ -53,7 +53,7 @@ module.exports = async (req, res, next) => {
         return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.deliveryExecutiveIdInvalidEitherDeletedOrDeactivated);
       }
     } else {
-      error('The salesman ID is Invalid !');
+      error('The Delivery Executive ID is Invalid !');
       return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidDeliveryExecutive);
     }
 

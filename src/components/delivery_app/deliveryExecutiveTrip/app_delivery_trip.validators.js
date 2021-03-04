@@ -32,7 +32,7 @@ const schemas = {
           }
         }
       }).required(),
-        order: Joi.string().trim().label('orderid').required().max(20)
+        orderid: Joi.string().trim().label('Order id').required().min(18)
       
     }),
     updateOrderDetailVal: Joi.object().keys({
@@ -45,7 +45,7 @@ const schemas = {
           }
         }
       }).required(),
-        orderid: Joi.string().trim().label('orderid').required().max(20),
+        orderid: Joi.string().trim().label('Order id').required().min(18),
         itemRemarks:Joi.array().items(Joi.string()).required()
       
     }),
@@ -178,9 +178,9 @@ module.exports = {
       // getting the schemas 
       let schema = schemas.getOrderDetailVal;
       let option = options.basic;
-
+      
       // validating the schema 
-      schema.validate({'type':req.params.type,'tripid':req.params.orderid}, option).then(() => {
+      schema.validate({'type':req.params.type,'orderid':req.params.orderid}, option).then(() => {
           next();
           // if error occured
       }).catch((err) => {
@@ -199,7 +199,7 @@ module.exports = {
     let option = options.basic;
 
     // validating the schema 
-    schema.validate({'type':req.params.type,'tripid':req.params.orderid,...req.body}, option).then(() => {
+    schema.validate({'type':req.params.type,'orderid':req.params.itemid,...req.body}, option).then(() => {
         next();
         // if error occured
     }).catch((err) => {

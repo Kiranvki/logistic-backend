@@ -59,7 +59,7 @@ function tripsRoutes() {
       //   ctrl.getOrderDetails 
       // );
 
-      closed.route('/orderdetail/update/:type/:orderid').post(
+      closed.route('/orderdetail/update/:type/:itemid').post(
         updateOrderStatusVal,
         verifyDeliveryAppToken,
         isValidDeliveryId,

@@ -316,7 +316,7 @@ spotSalesId:0
     let pageSize=100;
     let pageNumber = req.query.page;
     switch(req.params.type){
-      case 'salesorder':
+      case 'salesorders':
         model= salesOrderModel;
         break;
       case 'spotsales':
@@ -372,7 +372,7 @@ spotSalesId:0
     deliveryId = user._id
 
     switch(req.params.type){
-      case 'salesorder':
+      case 'salesorders':
         Model= salesOrderModel;
         break;
       case 'spotsales':
@@ -405,7 +405,7 @@ spotSalesId:0
 
       // updating the last login details 
       let updatedOrderDetail = await Model.findOneAndUpdate({
-        'orderItems._id': mongoose.Types.ObjectId(req.params.orderid)
+        'orderItems._id': mongoose.Types.ObjectId(req.params.itemid)
         
       },
         {
@@ -657,13 +657,11 @@ _id:0
 
 
     
+    const now = new Date();
+    let dateToday= new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    let dateToday= moment(Date.now()).set({
-      h: 24,
-      m: 59,
-      s: 0,
-      millisecond: 0
-    }).toDate();
+
+
     
     let pipeline = [{
 
@@ -770,18 +768,26 @@ _id:0
 
 
 getInTrip = async (req,res,next)=>{
+  info('getting in trip data!')
   let user = req.user, // user 
   deliveryExecutiveId = user._id,
   type = req.params.type;
   let pipeline = [{
-    $match:{$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
+    $match:{$and:[{
+        
+        
+      'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
+  },
     {
       'isActive':1
     }
   ]
   }
-  }]
-  if(type === 'saleorder' || type === 'salesOrder'){
+  }
+  
+
+]
+  if(type === 'salesorders' || type === 'salesOrders'){
   pipeline.push(
     ...[
       {
@@ -793,6 +799,14 @@ getInTrip = async (req,res,next)=>{
           
         }
       },{
+      $lookup:{
+        from:'vehiclemasters',
+        localField:'transporterDetails.vehicleId',
+        foreignField:'_id',
+        as:'vehicleDetail'
+      }
+    }
+      ,{
         $project:{
           spotSalesId:0
         }
@@ -827,12 +841,21 @@ getInTrip = async (req,res,next)=>{
         foreignField:'_id',
         as:'spotSales'
       }
+    },
+    {
+      $lookup:{
+        from:'vehiclemasters',
+        localField:'transporterDetails.vehicleId',
+        foreignField:'_id',
+        as:'vehicleDetail'
+      }
     }, 
     {
       $project:{
 _id:0,
 salesOrderId:0
   }}])
+  }
 
 
 //   let activeTripData = await tripModel.find({$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
@@ -843,11 +866,11 @@ salesOrderId:0
 // }).populate('spotSalesId vehicleId salesOrderId');
 
 
-let activeTripData = await tripModel.aggregate(pipeline).populate('vehicleId');
-  
+let activeTripData = await tripModel.aggregate(pipeline);
+  console.log(activeTripData)
 
   try {
-    info('Getting invoice Detail!');
+    info('Getting trip Detail!');
     
 
     // success response 
@@ -862,7 +885,7 @@ let activeTripData = await tripModel.aggregate(pipeline).populate('vehicleId');
   }
 }
 
-}
+
 
 // delivery EXecutive history
 
@@ -877,11 +900,20 @@ getHistory = async (req,res,next)=>{
   let pipeline = [{
     $match:{$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
     {
-      'isActive':1
+      'isActive':0
     },
+    {$or:[
     {
       'isCompleteDeleiveryDone':0
-    }
+    },
+    {
+      'isPartialDeliveryDone':1
+    },
+    {
+      'tripFinished':1
+    },
+  ]
+  }
   ]
   }
   }]
