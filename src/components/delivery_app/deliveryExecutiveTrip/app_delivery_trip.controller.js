@@ -550,8 +550,10 @@ _id:0
       }
 
       let gpnData = await gpnModel.generateGpn(objToEncode)
-      let qr = await QRCode.toDataURL(JSON.stringify(objToEncode),{type:'terminal'}); //Generate Base64 encode QR code String
+      
+      let qr = await QRCode.toDataURL(JSON.stringify(gpnData),{type:'terminal'}); //Generate Base64 encode QR code String
       let responseObj = {
+        
         'invoiceNumber':invoiceNumber,
         'invoiceId':invoiceId,
         'qr':qr,
