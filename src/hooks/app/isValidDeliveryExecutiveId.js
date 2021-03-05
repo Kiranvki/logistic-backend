@@ -18,20 +18,20 @@ module.exports = async (req, res, next) => {
   try {
     info('Check whether the Delivery Executive id is valid or not !');
     let objectId = mongoose.Types.ObjectId; // object id
-    let deliveryId = req.body.deliveryId || req.params.deliveryId || req.user._id; // get the delivery executive id
+    let deliveryExecutiveId = req.body.deliveryExecutiveId || req.params.deliveryExecutiveId || req.user._id; // get the delivery executive id
 
     // mongoose valid id 
-    if (objectId.isValid(deliveryId)) {
+    if (objectId.isValid(deliveryExecutiveId)) {
 
       // check whether the email id is unique or not 
-      let isValidDeliveryExecutive= await deliveryCtrl.getDeliveryDetails(deliveryId)
+      let isValidDeliveryExecutive= await deliveryCtrl.getDeliveryDetails(deliveryExecutiveId)
 
       // if email is unique
       if (isValidDeliveryExecutive.success) {
         info('Valid Delivery Executive')
 
         // check whether user session data is created 
-        let userSession = await deliveryExecutiveSessionCtrl.getDeliveryUserSession(deliveryId);
+        let userSession = await deliveryExecutiveSessionCtrl.getDeliveryUserSession(deliveryExecutiveId);
 
         // user session check 
         if (userSession.success) {
@@ -50,11 +50,11 @@ module.exports = async (req, res, next) => {
         }
       } else {
         error('INVALID salesman!');
-        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.salesmanIdInvalidEitherDeletedOrDeactivated);
+        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.deliveryExecutiveIdInvalidEitherDeletedOrDeactivated);
       }
     } else {
-      error('The salesman ID is Invalid !');
-      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidSalesmanId);
+      error('The Delivery Executive ID is Invalid !');
+      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidDeliveryExecutive);
     }
 
     // catch any runtime error 

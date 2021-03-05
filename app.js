@@ -26,6 +26,9 @@ require('./src/config/db');
 const onBoardPickerOpenRouter = express.Router(); // Open routes 
 const onBoardPickerApiRouter = express.Router(); // Protected routes
 
+const deliveryExecutiveOpenRouter = express.Router(); // Open routes 
+const deliveryExecutiveApiRouter = express.Router(); // protected routes 
+
 const onBoardSecurityOpenRouter = express.Router(); // Open routes 
 const onBoardSecurityApiRouter = express.Router(); // Protected routes
 
@@ -103,6 +106,19 @@ glob('./src/components/delivery_app/onBoard/*', null, (err, items) => {
   });
 });
 
+
+/* Fetch router files and apply them to our routers */
+glob('./src/components/delivery_app/*', null, (err, items) => {
+  items.forEach(component => {
+    if (component != './src/components/delivery_app/onBoard')
+    if (require(component).routes) require(component).routes(
+      deliveryExecutiveOpenRouter,
+      deliveryExecutiveApiRouter,
+    );
+  });
+});
+
+
 /* Fetch router files and apply them to our routers */
 glob('./src/components/picker_app/*', null, (err, items) => {
   items.forEach(component => {
@@ -113,6 +129,9 @@ glob('./src/components/picker_app/*', null, (err, items) => {
       );
   });
 });
+
+
+
 
 
 /* Fetch router files and apply them to our routers */
@@ -258,6 +277,10 @@ app.use('/api/v1/rate-category', rateCategoryAPIRouter);
 app.use('/v1/vehicle', vehicleRouter);
 app.use('/api/v1/vehicle', vehicleAPIRouter);
 
+// Delivery executive
+
+app.use('/v1/delivery-executive', deliveryExecutiveOpenRouter);
+app.use('/api/v1/delivery-executive', deliveryExecutiveApiRouter);
 
 //My Trip 
 app.use('/v1/trip', tripRouter)

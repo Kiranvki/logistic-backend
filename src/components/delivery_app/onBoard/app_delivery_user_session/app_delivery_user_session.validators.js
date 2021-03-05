@@ -77,7 +77,7 @@ const schemas = {
   // joi verify login 
   joiLoginVerify: Joi.object().keys({
     params: {
-        deliveryId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Salesman Id').required().options({
+      deliveryExecutiveId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Salesman Id').required().options({
         language: {
           string: {
             regex: {

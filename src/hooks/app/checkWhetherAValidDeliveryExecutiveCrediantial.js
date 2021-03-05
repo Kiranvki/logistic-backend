@@ -22,11 +22,12 @@ module.exports = async (req, res, next) => {
 
         // getting the pickerboy details 
         let deliveryexecutiveDetails = await deliveryCtrl.getDetailsDeliveryUsingField(parseInt(mobileNumber) || email);
-
+        
         // if Delivery Executive details not found
         if (deliveryexecutiveDetails.success) {
             info('Delivery Executive Details Fetched Successfully')
             req.body.deliveryexecutiveDetails = deliveryexecutiveDetails.data;
+         
             console.log("deliveryexecutiveDetails",req.body.deliveryexecutiveDetails);
             return next();
         } else {
