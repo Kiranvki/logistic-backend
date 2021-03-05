@@ -133,6 +133,7 @@ class deliveryExecutiveCtrl extends BaseController {
       ])
         .allowDiskUse(true)
         .then((res) => {
+         
           if (res && res.length) {
             return {
               success: true,

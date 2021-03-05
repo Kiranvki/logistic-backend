@@ -35,7 +35,7 @@ function deliveryRoutes() {
     );
 
     // forget password
-    open.route('/user/:deliveryId/login-verify/otp').post(
+    open.route('/user/:deliveryExecutiveId/login-verify/otp').post(
       [joiLoginVerify], // joi validation
       isValidDeliveryId, // check whether the picker id is valid or not
       checkOtpIsValidOrNot, // check whether the OTP is valid or not

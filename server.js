@@ -64,9 +64,15 @@ if (NODE_ENV == 'staging') {
 }
 
 // checking the environment of the node 
-server = app.listen(port, () => {
-  info(chalk.blue(' [ ✓ ] ') + `Application - Process ${process.pid} is listening to all incoming requests at: ${port} `);
-});
-server.setTimeout(1200000);
+// server = app.listen(port, () => {
+//   info(chalk.blue(' [ ✓ ] ') + `Application - Process ${process.pid} is listening to all incoming requests at: ${port} `);
+// });
 
+
+ server = require("http").createServer(app);
+ 
+server.listen(port,() => {
+    info(chalk.blue(' [ ✓ ] ') + `Application - Process ${process.pid} is listening to all incoming requests at: ${port} `);
+  });
+  server.setTimeout(1200000);
 socket.init(server);

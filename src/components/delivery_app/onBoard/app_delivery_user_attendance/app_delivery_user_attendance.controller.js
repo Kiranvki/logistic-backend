@@ -255,7 +255,7 @@ class DeliveryuserController extends BaseController {
       info('get the user attendance for a month !');
 
       let user = req.user, // user 
-        deliveryId = user._id, // salesman Id
+        deliveryId = user._id, // DE Id
         attendanceSheet = [], // attendance sheet 
         attendanceWithWeekSorted = [], // attendance sheet with week sorted 
         endDateOfTheMonth = req.body.endDateOfTheMonth, // end date of the month

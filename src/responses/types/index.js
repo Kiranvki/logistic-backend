@@ -3,6 +3,7 @@ module.exports = {
   joiValidation: require('./joiValidation'), // joi validation 
   fileHandler: require('./fileHandler'), // file handler 
   employee: require('./employee'), // employee  
+  deliveryExecutive: require('./deliveryExecutive'), // employee  
   appUserOnBoard: require('./appUserOnBoard'), // app user onboard
   appUserAttendance: require('./appUserAttendance'), // app user attendance
   salesOrder: require('./salesOrder'), // sales order

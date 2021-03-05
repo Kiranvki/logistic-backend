@@ -32,6 +32,14 @@ const salesOrder = new Schema({
   'updatedAt': {
     type: 'Date'
   },
+  'salesOrderCreatedAt': {
+    type: 'Date',
+    default: Date.now
+  },
+  'salesOrderUpdatedAt': {
+    type: 'Date',
+    default: Date.now
+  },
   'status': {
     type: 'String'
   },
@@ -279,12 +287,37 @@ const salesOrder = new Schema({
       'orderPK': {
         type: 'Number'
       },
-      'deliveryStatus': {
+      
+      'itemDeliveryStatus':{
         type: 'Number',
-        default: 0
-      }
+        default:0 //0 not deliver 1 processing 2 deliver
+      },
+      'rejectedQuantity':{
+        type: 'Number',
+        default:0
+
+      },
+     'comments':{
+      type: 'String'
+     }
+
     }
   ],
+  'crateIn':
+      {
+        type: 'Number',
+        default:0
+      },
+   'crateOut':
+      {
+        type: 'Number',
+        default:0
+      },
+    'crateOutWithItem':
+      {
+        type: 'Number',
+        default:0
+      },
 
 }, {
   timestamps: true
