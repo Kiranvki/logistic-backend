@@ -101,7 +101,6 @@ let tripSchema = Schema ({
         type: Number,
         default: 0
     },
-
     isActive: {
         type: Number,
         default: 0

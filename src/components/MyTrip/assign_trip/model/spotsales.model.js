@@ -25,6 +25,9 @@ let spotSalesSchema = Schema({
     salesManCode: {
         type: String
     },
+    spotSalesDate: {
+        type: Date
+    },
     items: [{
         itemName: {
             type: String
