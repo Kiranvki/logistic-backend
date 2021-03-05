@@ -362,7 +362,7 @@ class MyTrip extends BaseController {
 
         let currentCount = spotId.currentCount + 1;
         req.body.spotId = currentCount; 
-
+        
         req.body.createdByEmpId = req.user.empId;
         req.body.createdById = req.user._id;
 
