@@ -29,6 +29,8 @@ const mongoose = require('mongoose');
 const { ObjectId } = require('mongoose');
 var QRCode = require('qrcode');//QR code
 
+// "pageMeta":{"skip":0,"pageSize":10,"total":96}}}
+
 class DeliveryExecutivetrip extends BaseController {
 
     // constructor 
@@ -97,6 +99,7 @@ class DeliveryExecutivetrip extends BaseController {
 
       }
     },
+ 
     {
       $skip:(pageSize*(pageNumber-1))
     },{
@@ -129,11 +132,28 @@ class DeliveryExecutivetrip extends BaseController {
       _id:-1
     }
   },
-  
-  
-  
+
   ]
+
+
     let trip =await tripModel.aggregate(pipeline);
+
+    let totalCount = await tripModel.count({$and:[{
+        
+      'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+  },
+  {'createdAt':{$gte:dateToday}
+}]
+}
+);
+    let data = {
+      'results':trip,
+      'pageMeta':{
+        'skip':(pageSize*(pageNumber-1)),
+        'pageSize':pageSize,
+        'total':totalCount
+      }
+    }
   
   
 
@@ -142,7 +162,7 @@ class DeliveryExecutivetrip extends BaseController {
 
       // success response 
       this.success(req, res, this.status.HTTP_OK, 
-        trip || []
+        data || []
       , this.messageTypes.deliveryExecutiveTriplistFetchedSuccessfully);
 
       // catch any runtime error 
@@ -292,6 +312,24 @@ spotSalesId:0
     }
     let trip =await tripModel.aggregate(pipeline);
     // find().populate('spotSalesId vehicleId salesOrderId');
+
+    let totalCount = await tripModel.count({$and:[{
+        
+      'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+  },
+  {tripId:ID
+}]
+}
+);
+    let data = {
+      'results':trip,
+      'pageMeta':{
+        'skip':(pageSize*(pageNumber-1)),
+        'pageSize':pageSize,
+        'total':totalCount
+      }
+    }
+  
   
   
 
@@ -300,7 +338,7 @@ spotSalesId:0
  
       // success response 
       this.success(req, res, this.status.HTTP_OK, 
-        trip || []
+        data || []
       , this.messageTypes.deliveryExecutiveTripDetailsFetchedSuccessfully);
 
       // catch any runtime error 
@@ -347,10 +385,15 @@ spotSalesId:0
     ]
 
     let orderData = await model.aggregate(pipeline)
+  
+
+  
 
     
     try {
       info('getting order data!');
+
+
 
       // success response 
       this.success(req, res, this.status.HTTP_OK, 
@@ -869,6 +912,7 @@ salesOrderId:0
 
 
 let activeTripData = await tripModel.aggregate(pipeline);
+
   console.log(activeTripData)
 
   try {
@@ -906,7 +950,7 @@ getHistory = async (req,res,next)=>{
     },
     {$or:[
     {
-      'isCompleteDeleiveryDone':0
+      'isCompleteDeleiveryDone':1
     },
     {
       'isPartialDeliveryDone':1
@@ -970,7 +1014,7 @@ getHistory = async (req,res,next)=>{
               $skip:(pageSize*(pageNumber-1))
               },
               {
-                $limit:pageNumber}
+                $limit:pageSize}
       ]
     )
   
@@ -997,6 +1041,35 @@ getHistory = async (req,res,next)=>{
 //   ]
 
   let historyData = await tripModel.aggregate(pipeline)
+
+  let totalCount = await tripModel.count({$and:[{'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
+  {
+    'isActive':0
+  },
+  {$or:[
+  {
+    'isCompleteDeleiveryDone':1
+  },
+  {
+    'isPartialDeliveryDone':1
+  },
+  {
+    'tripFinished':1
+  },
+]
+}
+]
+}
+);
+  let data = {
+    'results':historyData,
+    'pageMeta':{
+      'skip':(pageSize*(pageNumber-1)),
+      'pageSize':pageSize,
+      'total':totalCount
+    }
+  }
+  
  
 
   try {
@@ -1005,7 +1078,7 @@ getHistory = async (req,res,next)=>{
 
     // success response 
     this.success(req, res, this.status.HTTP_OK, 
-      historyData || []
+      data || []
     , this.messageTypes.deliveryExecutiveHistoryDataFetchedSuccessfully);
 
     // catch any runtime error 
