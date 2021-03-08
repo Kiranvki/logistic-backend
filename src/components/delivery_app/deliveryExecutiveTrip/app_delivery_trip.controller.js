@@ -59,7 +59,8 @@ class DeliveryExecutivetrip extends BaseController {
           'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
       },
       {'createdAt':{$gte:dateToday}
-    }]
+    }
+  ]
           
 
        
@@ -167,10 +168,11 @@ class DeliveryExecutivetrip extends BaseController {
     if(type === 'salesorders'||type === 'salesOrder')
     {
     pipeline = [
-      {$match:{$and:[{
+      {$match:{$and:[
+        {
         
         
-          'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
+          'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
       },
         {
         tripId:ID
@@ -231,7 +233,7 @@ spotSalesId:0
         {$match:{$and:[{
         
         
-          'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
+          'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
       },
         {
         tripId:ID
@@ -776,7 +778,7 @@ getInTrip = async (req,res,next)=>{
     $match:{$and:[{
         
         
-      'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
+      'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
   },
     {
       'isActive':1
@@ -898,7 +900,7 @@ getHistory = async (req,res,next)=>{
 
 
   let pipeline = [{
-    $match:{$and:[{'transporterDetails.deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
+    $match:{$and:[{'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
     {
       'isActive':0
     },
