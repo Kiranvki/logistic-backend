@@ -2,11 +2,13 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 let primarySchema = Schema({
+    
     modelName: {
         type: String,
         required: true,
-        enum: ['assetTransfer', 'spotsales', 'trip']
+        enum: ['assetTransfer', 'spotsales', 'trip', 'tripSalesOrder']
     },
+
     currentCount: {
         type: Number,
         required: true

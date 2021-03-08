@@ -275,10 +275,18 @@ class MyTrip extends BaseController {
         let dbo = db.db("dms");
         
         let items = await dbo.collection("itemmasters").find(query).skip(skipRec).limit(limit).toArray();
-
+        
+        let totalItems = await dbo.collection("itemmasters").countDocuments(query)
+        totalItems = Math.ceil(totalItems / limit);
+        
+        let pageMeta = {
+          "skip": skipRec,
+          "pageSize": limit,
+          "total": totalItems
+      }
         await db.close();
 
-        return this.success(req, res, this.status.HTTP_OK, { result: items });
+        return this.success(req, res, this.status.HTTP_OK, { result: items, pageMeta });
 
       } catch (error) {
 
@@ -354,7 +362,7 @@ class MyTrip extends BaseController {
 
         let currentCount = spotId.currentCount + 1;
         req.body.spotId = currentCount; 
-
+        
         req.body.createdByEmpId = req.user.empId;
         req.body.createdById = req.user._id;
 
@@ -539,6 +547,10 @@ class MyTrip extends BaseController {
     createTrip = async (req, res) => {
       try {
 
+        console.log(req.body)
+
+      
+
           
 
             //   let trip = {}, transporterDetails = req.body.transporterDetails, orderArray = [], vehicleArray = [], trip_ids=[];
@@ -642,10 +654,7 @@ class MyTrip extends BaseController {
           console.log(error)
           this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
       }
-  };
-
-
-
+    };
 };
 
 module.exports = new MyTrip();
