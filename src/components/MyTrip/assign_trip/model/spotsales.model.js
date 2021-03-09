@@ -64,6 +64,9 @@ let spotSalesSchema = Schema({
     cityId: {
         type: String
     },
+    spotIdAlias: {
+        type: String
+    },
     spotId: {
     type: Number,
     unique: true,
