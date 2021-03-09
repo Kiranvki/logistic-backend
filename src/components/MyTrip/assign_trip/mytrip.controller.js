@@ -448,7 +448,9 @@ class MyTrip extends BaseController {
         if (!assetRecId) assetRecId = await seriesModel.create({ modelName: 'assetTransfer', currentCount: 0 });
 
         let currentCount = assetRecId.currentCount + 1;
+        
         req.body.assetRecId = currentCount; 
+        req.body.assetRecIdAlias = currentCount;
 
         if (!req.body.cityId) req.body.cityId = req.user.region;
         
@@ -492,19 +494,34 @@ class MyTrip extends BaseController {
         startDate = startDate.setHours(0,0,0,0);
         endDate = endDate.setHours(23,59,59,999);
 
-        let projection = { 
-            'cityId': cityId
-        };
+        let projection = { 'cityId': cityId };
+
+        if ( req.query.startDate || req.query.endDate ) {
+          
+          projection = { ... projection, ... {
+            createdAt:  { '$gte': startDate, '$lte': endDate }
+          } };
+
+        }; 
 
         if (req.query.searchText && !req.query.searchText == '') {
+
           projection =  { ... projection, ...   {
-              '$or':  [ { 'assetRecId': { $regex: req.query.searchText, $options: 'i' } } ]
-          } };
-        };
+            '$or':  [ { 'assetRecIdAlias': { $regex: req.query.searchText, $options: 'i' } }
+            // , { 'salesManCode': { $regex: req.query.searchText, $options: 'i' } }
+           ]
+        } };
+          
+      };
 
-        let assetlist = await assetModel.find(projection).limit(limit).skip(skipRec).lean();
-
-      return this.success(req, res, this.status.HTTP_OK, { result: assetlist });
+      let assetlist = await assetModel.find(projection).limit(limit).skip(skipRec).sort('-createdAt').lean();
+      let totalRec = await assetModel.countDocuments(projection);
+      
+      return this.success(req, res, this.status.HTTP_OK, { result: assetlist, pageMeta: {
+        skip: parseInt(skipRec),
+        pageSize: limit,
+        total: totalRec
+        } });
 
       } catch (error) {
         console.log(error)
