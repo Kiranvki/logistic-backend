@@ -87,6 +87,9 @@ let assetSchema = Schema({
         type: Number,
         unique: true,
         required: true
+    },
+    assetRecIdAlias: {
+        type: String
     }        
 },{
     timestamps: true

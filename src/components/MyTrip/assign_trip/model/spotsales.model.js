@@ -76,7 +76,7 @@ let spotSalesSchema = Schema({
     timestamps: true
 });
 
-spotSalesSchema.index({ 'cityId': 1, 'tripId': 1, 'spotId': 1 });
+spotSalesSchema.index({ 'spotIdAlias': 1, 'cityId': 1, 'tripId': 1, 'spotId': 1 });
 
 let spotSalesModel = mongoose.model('spotSales', spotSalesSchema, 'spotSales');
 
