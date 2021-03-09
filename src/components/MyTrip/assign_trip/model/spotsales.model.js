@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 let spotSalesSchema = Schema({
+    
     tripId: {
         type: Schema.Types.ObjectId,
         ref: 'trips'
@@ -28,6 +29,9 @@ let spotSalesSchema = Schema({
     spotSalesDate: {
         type: Date
     },
+    totalWeight: {
+        type: Number
+    },
     items: [{
         itemName: {
             type: String
@@ -46,6 +50,9 @@ let spotSalesSchema = Schema({
         }, 
         measureUnit: {
             type: String
+        },
+        itemTotalWeight: {
+            type: Number
         } 
     }],
     createdById: {
