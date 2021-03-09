@@ -333,6 +333,7 @@ class MyTrip extends BaseController {
  
          let currentCount = spotId.currentCount + 1;
          req.body.spotId = currentCount; 
+         req.body.spotIdAlias = currentCount;
 
          req.body.createdByEmpId = req.user.empId;
          req.body.createdById = req.user._id;
@@ -363,10 +364,11 @@ class MyTrip extends BaseController {
 
         let currentCount = spotId.currentCount + 1;
         req.body.spotId = currentCount; 
-        
+        req.body.spotIdAlias = currentCount;
+
         req.body.createdByEmpId = req.user.empId;
         req.body.createdById = req.user._id;
-
+        
         let spotSales = await spotModel.create(req.body);
         await seriesModel.findOneAndUpdate({ _id: spotId._id }, { $set: { currentCount: currentCount } });
         
@@ -380,6 +382,7 @@ class MyTrip extends BaseController {
     
     getSpotSalesList = async (req, res) => {
       try {
+        
         let cityId = req.query.cityId || 'chennai', endDate, startDate, limit = 10, page = 1, skipRec = 0;
 
         limit = !req.query.limit ? limit = limit : limit = parseInt(req.query.limit);
@@ -393,20 +396,32 @@ class MyTrip extends BaseController {
         startDate = startDate.setHours(0,0,0,0);
         endDate = endDate.setHours(23,59,59,999);
 
-        let projection = { 
-            'cityId': cityId,
+        let projection = { 'cityId': cityId };
 
-        };
+        if ( req.query.startDate || req.query.endDate ) {
+
+          projection = { ... projection, ... {
+            spotSalesDate:  { '$gte': startDate, '$lte': endDate }
+          } }
+
+        }; 
 
         if (req.query.searchText && !req.query.searchText == '') {
+
           projection =  { ... projection, ...   {
-              '$or':  [ { 'spotId': { $regex: req.query.searchText, $options: 'i' } } ]
-          } };
-        };
+            '$or':  [ { 'spotIdAlias': { $regex: req.query.searchText, $options: 'i' } }, { 'salesManCode': { $regex: req.query.searchText, $options: 'i' } } ]
+        } };
+          
+      };
 
-        let spotSales = await spotModel.find(projection).limit(limit).skip(skipRec).lean();
+      let spotSales = await spotModel.find(projection).limit(limit).skip(skipRec).sort('-createdAt').lean();
+      let totalRec = await spotModel.countDocuments(projection);
 
-      return this.success(req, res, this.status.HTTP_OK, { result: spotSales });
+      return this.success(req, res, this.status.HTTP_OK, { result: spotSales, pageMeta: {
+        skip: parseInt(skipRec),
+        pageSize: limit,
+        total: totalRec
+      } });
 
       } catch (error) {
         console.log(error)
