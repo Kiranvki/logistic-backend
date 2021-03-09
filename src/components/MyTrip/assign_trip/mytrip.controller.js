@@ -338,6 +338,7 @@ class MyTrip extends BaseController {
          req.body.createdById = req.user._id;
 
          let spotSales = await spotModel.create(req.body);
+
          await seriesModel.findOneAndUpdate({ _id: spotId._id }, { $set: { currentCount: currentCount } });
 
          await tripModel.findOneAndUpdate({ _id: trip._id }, {$set: { spotSalesId: spotSales._id} });
@@ -352,7 +353,7 @@ class MyTrip extends BaseController {
 
     //---------------------------------------------------------
 
-    createSpotSales = async (req, res) => {
+    createSpotSales = async (req, res) => { // WithOut Trip Id
       try {
 
         if (!req.body.items.length) return 
@@ -658,5 +659,4 @@ class MyTrip extends BaseController {
 };
 
 module.exports = new MyTrip();
-
 
