@@ -612,8 +612,10 @@ class MyTrip extends BaseController {
           trip.tripIdAlias = currentCount;
 
           if (trip.hasSalesOrderOrStcokTransfer === true ) {
-              trip.salesOrderTripIds = salesOrderTripIds;
+            trip.salesOrderTripIds = salesOrderTripIds;
           };
+
+          trip.deliveryDetails = req.body.deliveryDetails
 
           let tripCreated = await tripModel.create(trip);
           await seriesModel.findOneAndUpdate({ _id: tripId._id }, { $set: { currentCount: currentCount } });
