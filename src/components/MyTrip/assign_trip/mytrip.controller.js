@@ -14,6 +14,7 @@ const transVehicleModel = require('../../rate_category/ratecategory_transporter_
 const spotModel = require('./model/spotsales.model');
 const assetModel = require('./model/assetTransfer.model');
 const seriesModel = require('./model/incremental.model');
+const tripSaleModel = require('./model/salesOrder.model')
 const _ = require('lodash');
 const request = require('request-promise');
 
@@ -409,7 +410,7 @@ class MyTrip extends BaseController {
         if (req.query.searchText && !req.query.searchText == '') {
 
           projection =  { ... projection, ...   {
-            '$or':  [ { 'spotIdAlias': { $regex: req.query.searchText, $options: 'i' } }, { 'salesManCode': { $regex: req.query.searchText, $options: 'i' } } ]
+            '$or':  [ { 'spotIdAlias': { $regex: req.query.searchText, $options: 'i' } }, { 'salesManName': { $regex: req.query.searchText, $options: 'i' } } ]
         } };
           
       };
@@ -578,13 +579,139 @@ class MyTrip extends BaseController {
     };
 
     createTrip = async (req, res) => {
+
       try {
 
-        console.log(req.body)
+        let salesOrderTripIds = [], tripIds = [], orderArray = [], vehicleArray = [];
 
-      
-
+        for (let Sotrip of req.body.salesOrder) {
           
+            let salesOrderCode  = await seriesModel.findOne({ modelName: 'tripSalesOrder' }).lean();
+            if (!salesOrderCode) salesOrderCode = await seriesModel.create({ modelName: 'tripSalesOrder', currentCount: 0 });
+            
+            let currentCount = salesOrderCode.currentCount + 1;
+            
+            Sotrip.salesOrderCode = currentCount; 
+            Sotrip.salesOrderCodeAlias = currentCount;
+    
+            let soTrip = await tripSaleModel.create(Sotrip);
+            await seriesModel.findOneAndUpdate({ _id: salesOrderCode._id }, { $set: { currentCount: currentCount } });
+            
+            salesOrderTripIds.push(soTrip._id);
+
+        };
+        
+        for ( let trip of req.body.trips ) {
+          
+          let tripId  = await seriesModel.findOne({ modelName: 'trip' }).lean();
+          if (!tripId) tripId = await seriesModel.create({ modelName: 'trip', currentCount: 0 });
+          
+          let currentCount = tripId.currentCount + 1;
+          
+          trip.tripId = currentCount; 
+          trip.tripIdAlias = currentCount;
+
+          if (trip.hasSalesOrderOrStcokTransfer === true ) {
+              trip.salesOrderTripIds = salesOrderTripIds;
+          };
+
+          let tripCreated = await tripModel.create(trip);
+          await seriesModel.findOneAndUpdate({ _id: tripId._id }, { $set: { currentCount: currentCount } });
+          
+          tripIds.push(tripCreated._id);
+          
+        };
+
+        let orders = await tripModel.find({ _id: { $in: tripIds } })
+                    .populate('deliveryExecutiveId transporterId')
+                    .populate({ path: 'vehicleId', populate: { path: 'rateCategoryId' } })
+                    .populate({ path: 'salesOrderTripIds', populate: { path: 'salesOrderId invoice_db_id'  } })
+                    .lean();
+
+        for (let order of orders) {
+
+          for (let so of order.salesOrderTripIds) {
+                
+                let orderObj = {};
+
+                // let weight = _.find(order.invoice_db_id, { so_db_id: so._id });
+                
+                let weight = _.sumBy(order.invoice_db_id, 'totalWeight');
+
+                let DeliveryDate = new Date(so.salesOrderId.deliveryDate);
+                DeliveryDate = DeliveryDate.toISOString().split('T')[0];
+
+                let startOfTheDay = (DeliveryDate + " 00 00 00").toString();
+                let endOfTheDay = (DeliveryDate + " 23 59 00").toString();
+                
+                orderObj = {
+                    customerName: so.salesOrderId.customerName,
+                    customerCode: so.salesOrderId.customerCode,
+                    latitude: so.salesOrderId.latitude,
+                    longitude: so.salesOrderId.longitude,
+                    deliveryTimeStart: startOfTheDay,
+                    deliveryTimeEnd: endOfTheDay,
+                    orderWeight: weight
+                };
+
+                orderArray.push(orderObj);
+            };
+        };
+
+        for (let v of orders) {
+
+              let vehicleObj = {}, cost = 0;
+
+              /*
+
+                If Rate Type Type Monthly ,
+                Total Cost =Fixed Rental + { Total Distance across all trip sheets in a month - Total Included Distance } * Cost per additional Km. 
+                If Total Distance across all trip sheets in a month - Total Included Distance is negative , kindly take Zero. 
+
+                If the Rate type is Daily ;
+
+                Cost = (Fixed Rental)+ { Total Distance across all trip sheets in day - (Total Included Distance)} *Cost per additional Km. 
+
+                If the Value (Total Included Distance * No of Days in month vehicles used by that specific transporter) is Negative , take as zero.
+
+              */
+
+              if (v.vehicleId.rateCategoryId && v.vehicleId.rateCategoryId.rateCategoryDetails) {
+                
+                let rentalAmount = v.vehicleId.rateCategoryId.rateCategoryDetails.fixedRentalAmount || 0;
+                let additionalAmount = v.vehicleId.rateCategoryId.rateCategoryDetails.additionalAmount || 0;
+                
+                if (v.vehicleId && v.vehicleId.rateCategoryId) {
+
+                  if (v.vehicleId.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Monthly') {
+                    cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance  
+                  };
+
+                  if (v.vehicleId.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Daily') {
+                    cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance
+                  };
+
+                };
+
+              };
+
+              vehicleObj = {
+                  vehicleId: v.vehicleId._id,
+                  name:  v.vehicleModel,
+                  class: v.vehicleType,
+                  capacity: v.tonnage,
+                  cost:  cost
+              };
+
+              vehicleArray.push(vehicleObj);
+        };
+
+        return this.success(req, res, this.status.HTTP_OK, {
+          orderArray, vehicleArray, tripIds
+        });
+          
+          
+        return
 
             //   let trip = {}, transporterDetails = req.body.transporterDetails, orderArray = [], vehicleArray = [], trip_ids=[];
 

@@ -1,12 +1,12 @@
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema();
+const Schema = mongoose.Schema;
 
 let salesOrderSchema = Schema({
 
-    salesOrderId: [{
+    salesOrderId: {
         type: Schema.Types.ObjectId,
         ref: 'salesOrder'
-    }],
+    },
 
     soId: {
         type: Number
@@ -25,11 +25,13 @@ let salesOrderSchema = Schema({
         type: Number,
         unique: true,
         required: true
+    },
+    salesOrderCodeAlias: {
+        type: String
     }
-
 },{
     timestamps: true
 });
 
-let tripSalesOrderModel = mongoose.model('tripSalesOrder', salesOrderSchema, 'tripSalesOrder');
+let tripSalesOrderModel = mongoose.model('tripSalesOrders', salesOrderSchema, 'tripSalesOrders');
 module.exports = tripSalesOrderModel;
