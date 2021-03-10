@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 let tripSchema = Schema ({
      
     deliveryDetails: {
-        invoicesNo: [String],
+        invoiceNo: [String],
         stockTransfer: [String],
         assetTransfer: [String],
         spotSales: [String],
