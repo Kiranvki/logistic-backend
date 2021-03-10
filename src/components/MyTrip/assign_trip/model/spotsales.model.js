@@ -21,7 +21,7 @@ let spotSalesSchema = Schema({
         type: String
     },
     salesManId: {
-        type: Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId
     },
     salesManCode: {
         type: String
