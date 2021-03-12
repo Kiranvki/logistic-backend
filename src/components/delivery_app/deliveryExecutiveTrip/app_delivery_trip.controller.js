@@ -138,6 +138,32 @@ class DeliveryExecutivetrip extends BaseController {
 
     let trip =await tripModel.aggregate(pipeline);
 
+  //   let totalCrateCount = db.collection.aggregate([
+
+  //     // Unwind the first array
+  //     { "$unwind": "$clicks" },
+  
+  //     // Sum results and keep the other array per document
+  //     { "$group": {
+  //         "_id": "$_id",
+  //         "total_clicks": { "$sum": "$clicks.clicks" }
+  //         "impressions": { "$first": "$impressions" }
+  //     }},
+  
+  //     // Unwind the second array
+  //     { "$unwind": "$impressions" },
+  
+  //     // Group the final result keeping the first result
+  //     { "$group": {
+  //         "_id": "$_id",
+  //         "total_clicks": { "$first": "$total_clicks" },
+  //         "total_impressions": { "$sum": "$impressions.impressions" }
+  //     }}
+  
+  // ])
+
+
+
     let totalCount = await tripModel.count({$and:[{
         
       'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
@@ -853,7 +879,10 @@ getInTrip = async (req,res,next)=>{
     }
       ,{
         $project:{
-          spotSalesId:0
+          tripId:1,
+          salesOrder:1,
+          transporterDetails:1,
+          totalCrate: { $sum: ["$salesOrder.crateIn"] }
         }
     
       }
@@ -911,9 +940,11 @@ salesOrderId:0
 // }).populate('spotSalesId vehicleId salesOrderId');
 
 
+
 let activeTripData = await tripModel.aggregate(pipeline);
 
-  console.log(activeTripData)
+
+  // console.log('totalCrateCount',data)
 
   try {
     info('Getting trip Detail!');
@@ -935,33 +966,31 @@ let activeTripData = await tripModel.aggregate(pipeline);
 
 // delivery EXecutive history
 
-getHistory = async (req,res,next)=>{
+getHistoryByOrderType = async (req,res,next)=>{
   let user = req.user, // user 
    type = req.params.type,
   deliveryExecutiveId = user._id,
   pageNumber = parseInt(req.query.page) || 1,
   pageSize = 10;
-
+  let dateToday= moment(Date.now()).set({
+    h: 24,
+    m: 59,
+    s: 0,
+    millisecond: 0
+  }).toDate();
+ 
 
   let pipeline = [{
-    $match:{$and:[{'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
+    $match:{$and:[
+      {'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
     {
       'isActive':0
     },
-    {$or:[
-    {
-      'isCompleteDeleiveryDone':1
-    },
-    {
-      'isPartialDeliveryDone':1
-    },
-    {
-      'tripFinished':1
-    },
-  ]
+    {'createdAt':{$lt:dateToday}  
   }
-  ]
-  }
+    ]
+  
+}
   }]
   if(type === 'saleorder' || type === 'salesOrder'){
   pipeline.push(
@@ -976,7 +1005,10 @@ getHistory = async (req,res,next)=>{
         }
       },{
         $project:{
-          spotSalesId:0
+          tripId:1,
+          salesOrder:1,
+          transporterDetails:1,
+          totalCrate: { $sum: ["$salesOrder.crateIn"] }
         },
         
     
@@ -1004,8 +1036,10 @@ getHistory = async (req,res,next)=>{
           }
         },{
           $project:{
-            spotSalesId:0,
-            _id:0
+            tripId:1,
+            salesOrder:1,
+            transporterDetails:1,
+            totalCrate: { $sum: ["$salesOrder.crateIn"] }
           },
           
       
@@ -1181,35 +1215,244 @@ updateItemStatusAndCaretOut = async (req,res,next)=>{
 }
 
 
-getDirection = async(req,res,next)=>{
-  let cloc = req.query.cloc||req.query.Cloc || [0,0];//current location 0->lat,1->long
-  let dloc = req.query.dloc||req.query.Dloc || [0,0];
-  cloc = cloc.split(',')
-  dloc = dloc.split(',')
-  // let destinationLat = req.query.dloc;
-  // let destinationLng = req.query.dlong;
-  console.log(cloc,dloc)
-  let data;
-  try{
-   
-  // console.log(data);
+getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
+  console.log(req.query.page)
+  let pageSize=100;
+  let user = req.user, // user 
+  deliveryExecutiveId = user._id
+  let pageNumber = req.query.page;
+
+  let dateToday= moment(Date.now()).set({
+    h: 24,
+    m: 59,
+    s: 0,
+    millisecond: 0
+  }).toDate();
   
-  info('Get Direction!');
+  let pipeline = [{
+
+  
+    $match:{$and:[{
+      
+        'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+    },
+    {'createdAt':{$lt:dateToday}
+  }
+]
+        
+
+     
+    }
     
+  }
+//   {
+//     $unwind: "$salesOrderId"
+// }
+ 
+  ,{
+    $project:{
+     _id:0,
+      deliveryDetails:0,
+      vehicleId:0,
+      checkedInId:0,
+      rateCategoryId:0,
+   
+      deliveryExecutiveId:0,
+      invoice_db_id:0,
+      invoiceNo:0,
+      approvedBySecurityGuard: 0,
+      isTripStarted: 0,
+      isActive: 0,
+      tripFinished: 0,
+      isCompleteDeleiveryDone: 0,
+      isPartialDeliveryDone: 0,
+      returnedStockDetails: 0,
+    
+      __v:0
 
-  // success response 
-  this.success(req, res, this.status.HTTP_OK, 
-    data || []
-  , this.messageTypes.deliveryExecutiveDeliveryStatusUpdateSuccessfully);
 
-  // catch any runtime error 
-} catch (err) {
-  error(err);
-  this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+
+
+    }
+  },
+
+  {
+    $skip:(pageSize*(pageNumber-1))
+  },{
+    $limit:100
+  },
+  // {
+  //   $group: {
+  //     _id: '$_id',
+  //     totalSales:{$sum:1},
+  //     orders:{
+  //       $push: '$$ROOT'
+  //     }
+  //     // 'attendanceLog': { $push: '$attendanceLog' },
+  //     // 'userId': { $push: '$userId' }
+  //   }
+  // },
+  
+   {
+    $group: {
+      _id: '$transporterDetails.deliveryExecutiveId',
+      total:{$sum:1},
+      tripData: {
+        $push: '$$ROOT'
+      }
+      // 'attendanceLog': { $push: '$attendanceLog' },
+      // 'userId': { $push: '$userId' }
+    }
+  },
+  {$sort:{
+    _id:-1
+  }
+},
+
+]
+
+
+  let trip =await tripModel.aggregate(pipeline);
+
+  let totalCount = await tripModel.count({$and:[{
+      
+    'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+},
+{'createdAt':{$lt:dateToday}
+}]
 }
-  // https://maps.googleapis.com/maps/api/distancematrix/json?units=imperial&origins=40.6655101,-73.89188969999998&destinations=40.6905615%2C-73.9976592
+);
+  let data = {
+    'results':trip,
+    'pageMeta':{
+      'skip':(pageSize*(pageNumber-1)),
+      'pageSize':pageSize,
+      'total':totalCount
+    }
+  }
+
+
+
+  try {
+    info('getting delivery executive trip data!');
+
+    // success response 
+    this.success(req, res, this.status.HTTP_OK, 
+      data || []
+    , this.messageTypes.deliveryExecutiveTripHistoryFetchedSuccessfully);
+
+    // catch any runtime error 
+  } catch (err) {
+    error(err);
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  }
+
+  // success(req, res, status, data = null, message = 'success')
 
 }
+
+
+
+
+
+
+getPendingTrip = async(req,res,next)=>{
+  info('getting delivery executive pending trip data!');
+  let user = req.user, // user 
+   type = req.params.type,
+  deliveryExecutiveId = user._id,
+  pageNumber = parseInt(req.query.page) || 1,
+  pageSize = 10;
+  let dateToday= moment(Date.now()).set({
+    h: 24,
+    m: 59,
+    s: 0,
+    millisecond: 0
+  }).toDate();
+ 
+
+  let pipeline = [{
+    $match:{$and:[
+      // {'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
+    {
+      'isActive':0
+    },
+    {'createdAt':{$lt:dateToday}},
+    {$or:[{
+      'isTripStarted':0 
+     
+    },
+{
+    'tripFinished':0 
+     
+    },{
+
+    'isCompleteDeleiveryDone':0 
+    
+    }
+    ]}  
+  
+    ]
+  
+}
+  }]
+  let trip =await tripModel.aggregate(pipeline);
+
+  let totalCount = await tripModel.count({
+    $and:[
+      {'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
+    {
+      'isActive':0
+    },
+    {'createdAt':{$lt:dateToday}},
+    {$or:[{
+      'isTripStarted':0 
+     
+    },
+{
+    'tripFinished':0 
+     
+    },{
+
+    'isCompleteDeleiveryDone':0 
+    
+    }
+    ]}  
+  
+    ]
+  
+}
+  
+);
+  let data = {
+    'results':trip,
+    'pageMeta':{
+      'skip':(pageSize*(pageNumber-1)),
+      'pageSize':pageSize,
+      'total':totalCount
+    }
+  }
+
+
+
+  try {
+    info('getting delivery executive trip data!');
+
+    // success response 
+    this.success(req, res, this.status.HTTP_OK, 
+      data || []
+    , this.messageTypes.deliveryExecutivePendingTripFetchedSuccessfully);
+
+    // catch any runtime error 
+  } catch (err) {
+    error(err);
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  }
+
+  // success(req, res, status, data = null, message = 'success')
+
+}
+
 
 
 }

@@ -35,6 +35,13 @@ function tripsRoutes() {
         ctrl.getTripByDeliveryExecutiveId 
       );
 
+
+
+
+
+
+
+
       closed.route('/get-trip/:type/detail/:tripid').get(
         getTripByIdVal,
         verifyDeliveryAppToken,
@@ -104,6 +111,14 @@ function tripsRoutes() {
         ctrl.getInTrip
       );
 
+      
+      closed.route('/get-trip/history').get(
+        verifyDeliveryAppToken,
+          isValidDeliveryId,
+        // verifyAppToken, // verify app token
+          ctrl.getTripHistoryByDeliveryExecutiveId 
+        );
+  
 
       closed.route('/trip/history/:type').get(
         getHistoryVal,
@@ -111,7 +126,7 @@ function tripsRoutes() {
         isValidDeliveryId,
         
         
-        ctrl.getHistory
+        ctrl.getHistoryByOrderType
       );
 
 // salesorderID
@@ -126,15 +141,16 @@ function tripsRoutes() {
 
 
       // get Direction
-// validation pending
-      closed.route('/trip/getdirection').get(
-        // verifyDeliveryAppToken,
-        // isValidDeliveryId,
-        
-        
-        ctrl.getDirection
-      );
 
+
+      closed.route('/get-trip/pending').get(
+        verifyDeliveryAppToken,
+          isValidDeliveryId,
+        // verifyAppToken, // verify app token
+          ctrl.getPendingTrip 
+        );
+  
+      
       
       
       

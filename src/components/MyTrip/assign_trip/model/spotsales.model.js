@@ -57,6 +57,16 @@ let spotSalesSchema = Schema({
     cityId: {
         type: String
     },
+    crateIn:
+    {
+      type: 'Number',
+      default:0
+    },
+    crateOut:
+    {
+      type: 'Number',
+      default:0
+    },
     spotId: {
     type: Number,
     unique: true,

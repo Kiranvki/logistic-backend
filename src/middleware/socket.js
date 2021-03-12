@@ -12,13 +12,14 @@ class Socket {
   }
 
   init = (server) => {
-    this.io = require('socket.io').listen(server, {transports: [ 'websocket', 'polling' ] });
+    this.io = require('socket.io')(server, {transports: [ 'websocket', 'polling' ] });
     
     global.io = this.io; //added
     info(chalk.blue(' [ ✓ ] ') + `Application - Socket Initialized`);
     socketListeners.userListener.socketConnection(this.io); // USER LISTENERS 
-    socketListeners.defaultListener.socketConnection(this.io); // DEFAULT LISTENERS 
+   
     socketListeners.adminListener.socketConnection(this.io); // ADMIN LISTENERS 
+    socketListeners.defaultListener.socketConnection(this.io); // DEFAULT LISTENERS 
     // return this.io
   }
 

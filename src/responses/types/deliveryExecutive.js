@@ -1,5 +1,7 @@
 module.exports = {
     deliveryExecutiveTriplistFetchedSuccessfully: 'Trip Data Fetched Successfully.',
+    deliveryExecutiveTripHistoryFetchedSuccessfully: 'Trip History Fetched Successfully.',
+    deliveryExecutivePendingTripFetchedSuccessfully: 'Pending Trip Fetched Successfully.',
     deliveryExecutiveTripDetailsFetchedSuccessfully: 'Trip Details Fetched Successfully.',
     deliveryExecutiveOrderDetailsFetchedSuccessfully: 'Order Details Fetched Successfully.',
     deliveryExecutiveOrderUpdatedSuccessfully: 'Order Updated Successfully.',
