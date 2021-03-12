@@ -1,12 +1,11 @@
 const mongoose = require('mongoose');
 const autopopulate = require('mongoose-autopopulate');
-const { pleaseSelectAFileToUpload } = require('../../../../responses/types/fileHandler');
 const Schema = mongoose.Schema;
 
 let tripSchema = Schema ({
      
     deliveryDetails: {
-        invoicesNo: [String],
+        invoiceNo: [String],
         stockTransfer: [String],
         assetTransfer: [String],
         spotSales: [String],
@@ -33,14 +32,19 @@ let tripSchema = Schema ({
         default: false
     },
 
-    salesOrderIds: [{
+    salesOrderTripIds: [{
         type: Schema.Types.ObjectId,
-        ref: 'tripsSalesOrder'
+        ref: 'tripSalesOrders'
     }],
 
     hasSalesOrderOrStcokTransfer: {
         type: Boolean,
         default: false
+    },
+
+    salesOrder: {
+        type: Schema.Types.ObjectId,
+        ref: 'salesOrder'
     },
 
     transporterName: {
@@ -49,7 +53,12 @@ let tripSchema = Schema ({
 
     transporterId: {
         type: Schema.Types.ObjectId,
-        ref: ''
+        ref: 'transporters'
+    },
+
+    rateCategoryId: {
+        type: Schema.Types.ObjectId,
+        ref: 'rateCategoryModel'
     },
 
     vehicleRegNumber: {
@@ -58,7 +67,7 @@ let tripSchema = Schema ({
 
     vehicleId: {
         type: Schema.Types.ObjectId,
-        ref: ''
+        ref: 'vehicleMaster'
     },
 
     vehicleModel: {
@@ -71,7 +80,7 @@ let tripSchema = Schema ({
 
     deliveryExecutiveId: {
         type: Schema.Types.ObjectId,
-        ref: ''
+        ref: 'deliveryExecutive'
     },
 
     deliveryExecutiveEmpCode: {
@@ -137,6 +146,10 @@ let tripSchema = Schema ({
         type: Number,
         unique: true,
         required: true
+    },
+
+    tripIdAlias: {
+        type: String
     },
 
     cityId: {
