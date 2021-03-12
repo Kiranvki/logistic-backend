@@ -64,7 +64,7 @@ class MyTrip extends BaseController {
                                 .select('invoiceNo so_deliveryDate customerName cityId itemSupplied orderPK')
                                 .lean();
 
-            let totalRec = await SalesOrderModel.countDocuments(projection);
+            let totalRec = await invoiceMasterModel.countDocuments(projection);
             let items = 0, quantity = 0;
             
             getSalesOrder = getSalesOrder.map( ( v ) => {
