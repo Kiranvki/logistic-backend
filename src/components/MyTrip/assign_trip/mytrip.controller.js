@@ -58,18 +58,19 @@ class MyTrip extends BaseController {
             };
 
             let getSalesOrder = await invoiceMasterModel.find(projection)
-                                .populate({path: 'so_db_id', select: 'orderPK' })
+                                .populate({path: 'so_db_id', select: 'orderPK status' })
                                 .limit(limit)
                                 .skip(skipRec)
                                 .select('invoiceNo so_deliveryDate customerName cityId itemSupplied orderPK')
                                 .lean();
 
-            let totalRec = await SalesOrderModel.countDocuments(projection);
+            let totalRec = await invoiceMasterModel.countDocuments(projection);
             let items = 0, quantity = 0;
             
             getSalesOrder = getSalesOrder.map( ( v ) => {
                 items = v.itemSupplied.length;
                 v.so_id =  v.so_db_id.orderPK;
+                v.status = v.so_db_id.status;
                 v.so_db_id = v.so_db_id._id;
                 v.deliveryDate = v.so_deliveryDate
                 v.items = items;
