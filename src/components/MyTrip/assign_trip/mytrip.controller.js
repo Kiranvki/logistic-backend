@@ -545,6 +545,54 @@ class MyTrip extends BaseController {
       };
     };
 
+    getTransporterlist = async (req, res) => {
+      try {
+
+        let cityId = req.query.cityId || req.user.region, transporterArray = [], limit = 10, page = 1, skipRec = 0;
+
+        limit = !req.query.limit ? limit = limit : limit = parseInt(req.query.limit);
+        page = !req.query.page ? page = page - 1 : page = parseInt(req.query.page) - 1; 
+    
+        skipRec = page * limit;
+        
+        let projection = { 'locationDetails.city': cityId };
+
+        if (req.query.searchText && !req.query.searchText == '') {
+
+          projection =  { ... projection, ...   {
+            '$or':  [ { 'transporterDetails.name': { $regex: req.query.searchText, $options: 'i' } }
+            // , { 'salesManCode': { $regex: req.query.searchText, $options: 'i' } }
+           ]
+        } };
+          
+      };
+        
+        let transporters = await transporterModel.find(projection).select('vehicleDetails locationDetails transporterDetails').limit(limit).skip(skipRec).sort('-createdAt').lean();;
+        let totalRec = await transporterModel.countDocuments(projection);
+
+        for (let transporter of transporters ) {
+
+          let obj = {
+            name:  transporter.vehicleDetails ? transporter.vehicleDetails.name :  transporter.transporterDetails ? transporter.transporterDetails.name : '',
+            _id: transporter._id
+          };
+
+          transporterArray.push(obj);
+
+        };
+
+        return this.success(req, res, this.status.HTTP_OK, { result: transporterArray, pageMeta: {
+          skip: parseInt(skipRec),
+          pageSize: limit,
+          total: totalRec
+          } });
+
+      } catch (error) {
+        console.log(error)
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
+      };
+    };
+
     vehicleCountAndDetails = async (req, res) => {
       try {
 
