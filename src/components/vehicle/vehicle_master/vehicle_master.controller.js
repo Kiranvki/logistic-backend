@@ -3,6 +3,7 @@ const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 const rateTransporterVehicleMappingCtrl = require('../../rate_category/ratecategory_transporter_vehicle_mapping/ratecategory_transporter_vehicle_mapping.controller');
 const Model = require('./models/vehicle_master.model');
+const vehicleTransporterRcMappingModel = require('../vehicle_transporter_rc_mapping/models/vehicle_transporter_rc_mapping.model')
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const {
@@ -61,39 +62,39 @@ class vehicleController extends BaseController {
       info('Vehicle Create Controller !');
 
       //initializing variable
-      let transporterId = req.body.transporterId || '',
-        rateCategoryId = req.body.rateCategoryId || '';
-
+      const transporterId = req.body.transporterId ;
+      const rateCategoryId = req.body.rateCategoryId;
+      const vehicleModelId = req.body.vehicleModelId;
       // creating data to insert
       let dataToInsert = {
         'regNumber': req.body.regNumber,
         'vehicleType': req.body.vehicleType,
-        'vehicleModel': req.body.vehicleModel,
+        // 'vehicleModel': req.body.vehicleModel,
         'height': req.body.height,
         'length': req.body.length,
         'breadth': req.body.breadth,
-        'tonnage': req.body.tonnage,
-        'cityId': req.user.region || 'bangalore',
-        'warehouseId': req.user.warehouseId || null
+        // 'tonnage': req.body.tonnage,
+        'cityId': (req.user && req.user.region)? req.user.region : 'bangalore',
+        'warehouseId': ( req.user && req.user.warehouseId)? req.user.warehouseId : null
       }
-
+      console.log('RC: ',rateCategoryId)
       // inserting data into the db 
       let isInserted = await Model.create(dataToInsert);
-
+      const dataForMapping = {
+        vehicleId: isInserted._id,
+        transporterId: transporterId,
+        rateCategoryId: rateCategoryId,
+        vehicleModelId: vehicleModelId
+      }
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-
-        let rateTransporterVehicleMappingObject = {
-          vehicleId: isInserted._id,
-          transporterId,
-          rateCategoryId
-        }
-
-        if (transporterId && !_.isEmpty(transporterId) && rateCategoryId && !_.isEmpty(rateCategoryId)) {
-          //creating mapping of transporter vehicle and rate category 
-          await rateTransporterVehicleMappingCtrl.createSingle(rateTransporterVehicleMappingObject);
-        }
-        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.vehicleCreated);
+        const mappedVehicle = await vehicleTransporterRcMappingModel.create(dataForMapping)
+          if(mappedVehicle){
+            return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.vehicleCreated);
+          }
+          else{
+            return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotCreated);
+          }
       } else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleNotCreated);
 
       // catch any runtime error 

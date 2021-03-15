@@ -13,45 +13,45 @@ const schemas = {
     joiRateCategoryCreate: Joi.object().keys({
         rateCategoryDetails: Joi.object().keys({
             rateCategoryName: Joi.string().trim().label('Rate Category Name').required(),
-            rateCategoryType: Joi.string().trim().label('Rate Category Type').required(),
+            rateCategoryType: Joi.string().trim().label('Rate Category Type').required().valid('Monthly','Daily'),
             fixedRentalAmount: Joi.number().label('Fixed Rental Amount').required(),
             includedAmount: Joi.number().label('Included Amount').required(),
             includedDistance: Joi.number().label('Included Distance').required(),
             additionalAmount: Joi.number().label('Additional Amount').required(),
         }),
 
-        noOfVehicles: Joi.number().label('Number Of Vehicles').required()
-            .valid(Joi.ref('vehicleDetails.length')).options({
-                language: {
-                    any: {
-                        allowOnly: 'Mismatch',
-                    }
-                }
-            }),
+        // noOfVehicles: Joi.number().label('Number Of Vehicles').required()
+        //     .valid(Joi.ref('vehicleDetails.length')).options({
+        //         language: {
+        //             any: {
+        //                 allowOnly: 'Mismatch',
+        //             }
+        //         }
+        //     }),
 
-        vehicleDetails: Joi.array().items(
-            Joi.object().keys({
-                transporterId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
-                    language: {
-                        string: {
-                            regex: {
-                                base: 'should be a valid mongoose Id.'
-                            }
-                        }
-                    }
-                }).optional().allow(''), // keeping it optional for now,will have to make it required
+        // vehicleDetails: Joi.array().items(
+        //     Joi.object().keys({
+        //         transporterId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
+        //             language: {
+        //                 string: {
+        //                     regex: {
+        //                         base: 'should be a valid mongoose Id.'
+        //                     }
+        //                 }
+        //             }
+        //         }).optional().allow(''), // keeping it optional for now,will have to make it required
 
-                rateCategoryId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('RateCategory Id').required().options({
-                    language: {
-                        string: {
-                            regex: {
-                                base: 'should be a valid mongoose Id.'
-                            }
-                        }
-                    }
-                }).optional().allow(''),// keeping it optional for now,will have to make it required
-            })
-        ).min(1).max(20),
+        //         rateCategoryId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('RateCategory Id').required().options({
+        //             language: {
+        //                 string: {
+        //                     regex: {
+        //                         base: 'should be a valid mongoose Id.'
+        //                     }
+        //                 }
+        //             }
+        //         }).optional().allow(''),// keeping it optional for now,will have to make it required
+        //     })
+        // ).min(1).max(20),
     }),
 
     //Rate Category patch
@@ -103,6 +103,7 @@ const schemas = {
     joiRateCategoryList: Joi.object().keys({
         page: Joi.number().integer().min(1).label('Page').required(),
         search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
+        sortBy: Joi.string().trim().valid('createdAt','updatedAt')
     }),
 
     // joi Rate Category get details

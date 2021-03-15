@@ -12,11 +12,20 @@ const schemas = {
     joiVehicleCreate: Joi.object().keys({
         regNumber: Joi.string().trim().label('Registration Number').required(),
         vehicleType: Joi.string().trim().label('Vehicle Type').required(),
-        vehicleModel: Joi.string().trim().label('Vehicle Model').required(),
+        vehicleModel: Joi.string().trim().label('Vehicle Model'),
         height: Joi.number().label('Height').required(),
         length: Joi.number().label('Length').required(),
         breadth: Joi.number().label('Breadth').required(),
-        tonnage: Joi.number().label('Tonnage').required(),
+        tonnage: Joi.number().label('Tonnage'),
+        vehicleModelId:  Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Vehicle Model Id').required().options({
+            language: {
+                string: {
+                    regex: {
+                        base: 'should be a valid mongoose Id.'
+                    }
+                }
+            }
+        }).required(),
         transporterId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Transporter Id').required().options({
             language: {
                 string: {
@@ -25,7 +34,7 @@ const schemas = {
                     }
                 }
             }
-        }).optional().allow(''), // keeping it optional for now,will have to make it required
+        }).required(), // keeping it optional for now,will have to make it required
         rateCategoryId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('RateCategory Id').required().options({
             language: {
                 string: {
@@ -34,7 +43,7 @@ const schemas = {
                     }
                 }
             }
-        }).optional().allow(''),// keeping it optional for now,will have to make it required
+        }).required(),// keeping it optional for now,will have to make it required
     }),
 
     // get vehicle list 

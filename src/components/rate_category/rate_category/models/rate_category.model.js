@@ -25,9 +25,9 @@ const rateCategoryModel = new Schema({
         }
     },
 
-    'noOfVehicles': {
-        type: 'Number',
-    },
+    // 'noOfVehicles': {
+    //     type: 'Number',
+    // },
 
     'status': {
         type: Number,
