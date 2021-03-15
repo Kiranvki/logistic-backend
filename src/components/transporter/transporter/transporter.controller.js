@@ -615,7 +615,7 @@ class transporterController extends BaseController {
 
       let fieldsToProject = {
         '_id': 1,
-        'vehicleDetails': '$vehicleDetails.name',
+        'transporterDetails': '$transporterDetails.name',
       }
 
 
@@ -630,7 +630,7 @@ class transporterController extends BaseController {
         searchObject = {
           ...searchObject,
           '$or': [{
-            'vehicleDetails.name': {
+            'transporterDetails.name': {
               $regex: searchKey,
               $options: 'is'
             }
@@ -837,7 +837,7 @@ class transporterController extends BaseController {
     try {
       info('Transporter Patch Controller !');
 
-      let vehicleDetails = {},
+      let transporterDetails = {},
         locationDetails = {},
         contactPersonalDetails = {},
         toChangeObject = req.body.toChangeObject || '',
@@ -846,7 +846,7 @@ class transporterController extends BaseController {
         contactPersonalDetailsFromDb = req.body.contactPersonalDetailsFromDb || '';
 
       // creating data to insert
-      vehicleDetails = {
+      transporterDetails = {
         'name': toChangeObject.name ? toChangeObject.name : vehicleDetailsFromDb.name,
         'contactNo': toChangeObject.contactNo ? toChangeObject.contactNo : vehicleDetailsFromDb.contactNo,
         'altContactNo': toChangeObject.altContactNo ? toChangeObject.altContactNo : vehicleDetailsFromDb.altContactNo,
@@ -872,7 +872,7 @@ class transporterController extends BaseController {
 
       let dataToUpdate = {
         $set: {
-          'vehicleDetails': vehicleDetails,
+          'transporterDetails': transporterDetails,
           'locationDetails': locationDetails,
           'contactPersonalDetails': contactPersonalDetails,
         }
