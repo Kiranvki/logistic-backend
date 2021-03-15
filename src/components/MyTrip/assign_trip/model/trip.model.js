@@ -37,10 +37,15 @@ let tripSchema = Schema ({
         ref: 'tripSalesOrders'
     }],
 
-    hasSalesOrderOrStcokTransfer: {
+    hasStockTransfer: {
         type: Boolean,
         default: false
     },
+
+    stockTransferIds: [{
+        type: Schema.Types.ObjectId
+        // ref: ''
+    }],
 
     salesOrder: {
         type: Schema.Types.ObjectId,
@@ -167,4 +172,7 @@ tripSchema.index({ 'cityId': 1 });
 
 let tripModel = mongoose.model('trips', tripSchema, 'trips');
 module.exports = tripModel;
+
+
+
 
