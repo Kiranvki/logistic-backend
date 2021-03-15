@@ -59,30 +59,30 @@ class rateCategoryController extends BaseController {
       //Initializing the field
       info('Creating a new Rate category !');
 
-      let dataToInsert = {
-        'rateCategoryDetails': req.body.rateCategoryDetails,
-        'noOfVehicles': req.body.noOfVehicles
-      }
+      // let dataToInsert = {
+      //   'rateCategoryDetails': req.body.rateCategoryDetails,
+      //   'noOfVehicles': req.body.noOfVehicles
+      // }
       //inserting data into the db
-      let isInserted = await Model.create(dataToInsert);
+      let isInserted = await Model.create(req.body.rateCategoryDetails);
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
         //inserting the transporter and vehicle mapping
-        if (req.body.vehicleDetails && Array.isArray(req.body.vehicleDetails) && req.body.vehicleDetails.length) {
-          let transporterVehicleRateCategoryMapping = [];
-          for (let data of req.body.vehicleDetails) {
-            let vehicleData = {
-              transporterId: data.transporterId,
-              vehicleId: data.vehicleId,
-              rateCategoryId: isInserted._id
-            }
-            transporterVehicleRateCategoryMapping.push(vehicleData);
+        // if (req.body.vehicleDetails && Array.isArray(req.body.vehicleDetails) && req.body.vehicleDetails.length) {
+        //   let transporterVehicleRateCategoryMapping = [];
+        //   for (let data of req.body.vehicleDetails) {
+        //     let vehicleData = {
+        //       transporterId: data.transporterId,
+        //       vehicleId: data.vehicleId,
+        //       rateCategoryId: isInserted._id
+        //     }
+        //     transporterVehicleRateCategoryMapping.push(vehicleData);
 
-          }
-          //Inserting the mapping into the DB
-          await rateTransporterVehicleMappingCtrl.create(transporterVehicleRateCategoryMapping);
-        }
+        //   }
+        //   //Inserting the mapping into the DB
+        //   await rateTransporterVehicleMappingCtrl.create(transporterVehicleRateCategoryMapping);
+        // }
 
         return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.rateCategoryCreated);
       }
@@ -252,6 +252,163 @@ class rateCategoryController extends BaseController {
 
   }
 
+  // get ratecategory list 
+  getListNew = async (req, res) => {
+    try {
+      info('Get the Rate Category List  !');
+      // get the query params
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        sortingArray = {};
+
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // get the list of asm in the allocated city
+      let searchObject = {
+        'isDeleted': 0,
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'rateCategoryDetails.rateCategoryName': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'rateCategoryDetails.rateCategoryType': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+
+      // // get the total rate category
+      let totalRateCategory = await Model.countDocuments({
+        ...searchObject
+      });
+
+      // get the distributor list
+      let rateCategoryList = await Model.aggregate([{
+        '$match': {
+          ...searchObject
+        }
+      },
+      {
+        '$sort': sortingArray
+      }, {
+        '$skip': skip
+      }, {
+        '$limit': pageSize
+      },
+      {
+        $lookup: {
+          from: 'vehicletransporterrcmappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$rateCategoryId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                '_id': 1,
+                'status': 1,
+                'isDeleted': 1,
+                'vehicleId': 1,
+                'transporterId': 1,
+                'rateCategoryId':1
+              }
+            },
+            // {
+            //   $lookup: {
+            //     from: 'vehiclemasters',
+            //     localField: "vehicleId",
+            //     foreignField: "_id",
+            //     as: 'vehicle'
+            //   }
+
+            // },
+            // {
+            //   $unwind: {
+            //     path: '$vehicle',
+            //     preserveNullAndEmptyArrays: true
+            //   }
+            // },
+            // {
+            //   $lookup: {
+            //     from: 'transporters',
+            //     localField: "transporterId",
+            //     foreignField: "_id",
+            //     as: 'transporter'
+            //   }
+            // },
+            // {
+            //   $unwind: {
+            //     path: '$transporter',
+            //     preserveNullAndEmptyArrays: true
+            //   }
+            // },
+          ],
+          as: 'transporterVehicleRcMapping'
+        }
+      },
+
+      {
+        $project: {
+          'rateCategoryDetails': 1,
+          // 'noOfVehicles': 1,
+          'noOfVehicles': { $cond: { if: { $isArray: "$transporterVehicleRcMapping" }, then: { $size: "$transporterVehicleRcMapping" }, else: "NA" } },
+          'status': 1,
+          'isDeleted': 1,
+          '_id': 1,
+          'transporterVehicleRcMapping':1
+          // 'transporter.vehicleDetails.name': 1,
+          // 'transporter._id': 1,
+          // 'vehicle._id': 1,
+          // 'transporterVehicleMapping._id': 1,
+          // 'transporterVehicleMapping.status': 1,
+          // 'transporterVehicleMapping.vehicle._id': 1,
+          // 'transporterVehicleMapping.vehicle.vehicleType': 1,
+          // 'transporterVehicleMapping.vehicle.vehicleModel': 1,
+          // 'transporterVehicleMapping.vehicle.tonnage': 1,
+          // 'transporterVehicleMapping.transporter._id': 1,
+          // 'transporterVehicleMapping.transporter.vehicleDetails.name': 1,
+        }
+      },
+
+      ]).allowDiskUse(true);
+
+
+      // success 
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: rateCategoryList,
+        pageMeta: {
+          skip: parseInt(skip),
+          pageSize: pageSize,
+          total: totalRateCategory
+        }
+      }, this.messageTypes.rateCategoryDetailsFetched);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
+
   // get minfied ratecategory list 
   getListMinified = async (req, res) => {
     try {
@@ -347,6 +504,213 @@ class rateCategoryController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
 
+  }
+
+  // get ratecategory list 
+  getRateCaregoryById = async (req, res) => {
+    try {
+      info('Get the Rate Category List  !');
+      // get the query params
+      // let page = req.query.page || 1,
+      //   pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+      //   searchKey = req.query.search || '',
+      //   sortBy = req.query.sortBy || 'createdAt',
+      //   sortingArray = {};
+
+      // sortingArray[sortBy] = -1;
+      // let skip = parseInt(page - 1) * pageSize;
+
+      // get the list of asm in the allocated city
+      // let searchObject = {
+      //   'isDeleted': 0,
+      // };
+
+      // creating a match object
+      // if (searchKey !== '')
+      //   searchObject = {
+      //     ...searchObject,
+      //     '$or': [{
+      //       'rateCategoryDetails.rateCategoryName': {
+      //         $regex: searchKey,
+      //         $options: 'is'
+      //       }
+      //     }, {
+      //       'rateCategoryDetails.rateCategoryType': {
+      //         $regex: searchKey,
+      //         $options: 'is'
+      //       }
+      //     }]
+      //   };
+
+      // // get the total rate category
+      // let totalRateCategory = await Model.countDocuments({
+      //   ...searchObject
+      // });
+
+      // get the distributor list
+      let rateCategoryList = await Model.aggregate([{
+        '$match': {
+          _id: mongoose.Types.ObjectId(req.params.rateCategoryId)
+        }
+      },
+      // {
+      //   '$sort': sortingArray
+      // },
+      //  {
+      //   '$skip': skip
+      // }, {
+      //   '$limit': pageSize
+      // },
+      {
+        $lookup: {
+          from: 'vehicletransporterrcmappings',
+          let: {
+            'id': '$_id'
+          },
+          pipeline: [
+            {
+              $match: {
+                // 'status': 1,
+                'isDeleted': 0,
+                '$expr': {
+                  '$eq': ['$rateCategoryId', '$$id']
+                }
+              }
+            }, {
+              $project: {
+                '_id': 1,
+                'status': 1,
+                'isDeleted': 1,
+                'vehicleId': 1,
+                'vehicleModelId':1,
+                'transporterId': 1,
+                'rateCategoryId':1
+              }
+            },
+            {
+              $lookup: {
+                from: 'vehiclemasters',
+                localField: "vehicleId",
+                foreignField: "_id",
+                as: 'vehicle'
+              }
+
+            },
+            {
+              $unwind: {
+                path: '$vehicle',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'transporters',
+                localField: "transporterId",
+                foreignField: "_id",
+                as: 'transporter'
+              }
+            },
+            {
+              $unwind: {
+                path: '$transporter',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'vehiclemodelmasters',
+                localField: "vehicleModelId",
+                foreignField: "_id",
+                as: 'vehicleModel'
+              }
+            },
+            {
+              $unwind: {
+                path: '$vehicleModel',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+            {
+              $lookup: {
+                from: 'transportervehiclemodelrcmappings',
+                localField: "rateCategoryId",
+                foreignField: "rateCategoryId",
+                as: 'transporterRcMapping'
+              }
+            },
+            {
+              $unwind: {
+                path: '$transporterRcMapping',
+                preserveNullAndEmptyArrays: true
+              }
+            },
+          ],
+          as: 'transporterVehicleRcMapping'
+        }
+      },
+
+      {
+        $project: {
+          'rateCategoryDetails': 1,
+          // 'noOfVehicles': 1,
+          // 'noOfVehicles': { $cond: { if: { $isArray: "$transporterVehicleRcMapping" }, then: { $size: "$transporterVehicleRcMapping" }, else: "NA" } },
+          'status': 1,
+          'isDeleted': 1,
+          '_id': 1,
+          'transporterVehicleRcMapping':1
+          // 'transporter.vehicleDetails.name': 1,
+          // 'transporter._id': 1,
+          // 'vehicle._id': 1,
+          // 'transporterVehicleMapping._id': 1,
+          // 'transporterVehicleMapping.status': 1,
+          // 'transporterVehicleMapping.vehicle._id': 1,
+          // 'transporterVehicleMapping.vehicle.vehicleType': 1,
+          // 'transporterVehicleMapping.vehicle.vehicleModel': 1,
+          // 'transporterVehicleMapping.vehicle.tonnage': 1,
+          // 'transporterVehicleMapping.transporter._id': 1,
+          // 'transporterVehicleMapping.transporter.vehicleDetails.name': 1,
+        }
+      },
+
+      ]).allowDiskUse(true);
+
+      // rateCategoryList[0].transporterVehicleRcMapping.map(data=>{
+      //   data.rateCategoryExpiry = this.checkRateCategoryExpiry(data.rateCategory,data.createdAt)
+      // })
+      // success 
+      return this.success(req, res, this.status.HTTP_OK, 
+         rateCategoryList,
+        // pageMeta: {
+        //   skip: parseInt(skip),
+        //   pageSize: pageSize,
+        //   total: totalRateCategory
+        // }
+       this.messageTypes.rateCategoryDetailsFetched);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
+
+  checkRateCategoryExpiry=  (rateCategory,createdAt)=>{
+    let expiresOn;
+    if(rateCategory.rateCategoryDetails.rateCategoryType==='Daily'){
+     const rateCatogaryDate = createdAt
+     const rateCategoryExpiryDate = new Date(rateCatogaryDate.setDate(rateCatogaryDate.getDate() + 1));
+      const currentDate = new Date();
+      expiresOn = currentDate>rateCategoryExpiryDate?'expired':moment(rateCategoryExpiryDate).format("DD MMM YYYY")
+    }
+    if(rateCategory.rateCategoryDetails.rateCategoryType==='Monthly'){
+      const rateCatogaryDate = rateCategory.createdAt
+      const rateCategoryExpiryDate = rateCatogaryDate.setDate(rateCatogaryDate.getDate() + 30);
+      const currentDate = new Date();
+      expiresOn = currentDate>rateCategoryExpiryDate?'expired':moment(rateCategoryExpiryDate).format("DD MMM YYYY")
+
+    }
+    return expiresOn
   }
 
   // get details 

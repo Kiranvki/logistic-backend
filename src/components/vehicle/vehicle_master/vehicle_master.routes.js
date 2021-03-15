@@ -26,7 +26,7 @@ function vehicle() {
     // post 
     closed.route('/').post(
       [joiVehicleCreate], // joi validation
-      verifyUserToken, // verify user token
+     // verifyUserToken, // verify user token
       ctrl.post // controller function 
     );
 

@@ -38,7 +38,7 @@ function ratecategory() {
     closed.route('/').get(
       [joiRateCategoryList], // joi validation
       //verifyUserToken,        // verify user token
-      ctrl.getList            // controller function 
+      ctrl.getListNew            // controller function 
     );
 
     // get minified list
@@ -56,6 +56,14 @@ function ratecategory() {
       ctrl.getRateCategory          // get controller 
     );
 
+
+    //get single rate category details
+    closed.route('/:rateCategoryId/details').get(
+      [joiRateCategoryGetDetails],     // joi validation
+      //verifyUserToken,            // verify user token
+      isValidRateCategory, // check is valid Rate Category id 
+      ctrl.getRateCaregoryById          // get controller 
+    );
 
     closed.route('/:rateCategoryId').patch(
       [joiRateCategoryPatch],   // joi validation
