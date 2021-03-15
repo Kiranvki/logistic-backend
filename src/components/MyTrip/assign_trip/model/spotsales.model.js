@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 let spotSalesSchema = Schema({
+    
     tripId: {
         type: Schema.Types.ObjectId,
         ref: 'trips'
@@ -20,10 +21,16 @@ let spotSalesSchema = Schema({
         type: String
     },
     salesManId: {
-        type: Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId
     },
     salesManCode: {
         type: String
+    },
+    spotSalesDate: {
+        type: Date
+    },
+    totalWeight: {
+        type: Number
     },
     items: [{
         itemName: {
@@ -43,6 +50,9 @@ let spotSalesSchema = Schema({
         }, 
         measureUnit: {
             type: String
+        },
+        itemTotalWeight: {
+            type: Number
         } 
     }],
     createdById: {
@@ -54,6 +64,9 @@ let spotSalesSchema = Schema({
     cityId: {
         type: String
     },
+    spotIdAlias: {
+        type: String
+    },
     spotId: {
     type: Number,
     unique: true,
@@ -63,7 +76,7 @@ let spotSalesSchema = Schema({
     timestamps: true
 });
 
-spotSalesSchema.index({ 'cityId': 1, 'tripId': 1, 'spotId': 1 });
+spotSalesSchema.index({ 'spotIdAlias': 1, 'cityId': 1, 'tripId': 1, 'spotId': 1 });
 
 let spotSalesModel = mongoose.model('spotSales', spotSalesSchema, 'spotSales');
 

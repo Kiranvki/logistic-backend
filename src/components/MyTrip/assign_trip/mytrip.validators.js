@@ -20,7 +20,8 @@ const schemas = {
         numberOfItem: Joi.number().required(),
         salesManId: Joi.string().required(),
         salesManCode: Joi.string().required(),
-        cityId: Joi.string().required()
+        cityId: Joi.string().required(),
+        spotSalesDate: Joi.string().required()
     }),
 
     createOnSpotSaleVal: Joi.object().keys({

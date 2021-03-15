@@ -14,6 +14,7 @@ const transVehicleModel = require('../../rate_category/ratecategory_transporter_
 const spotModel = require('./model/spotsales.model');
 const assetModel = require('./model/assetTransfer.model');
 const seriesModel = require('./model/incremental.model');
+const tripSaleModel = require('./model/salesOrder.model')
 const _ = require('lodash');
 const request = require('request-promise');
 
@@ -57,18 +58,19 @@ class MyTrip extends BaseController {
             };
 
             let getSalesOrder = await invoiceMasterModel.find(projection)
-                                .populate({path: 'so_db_id', select: 'orderPK' })
+                                .populate({path: 'so_db_id', select: 'orderPK status' })
                                 .limit(limit)
                                 .skip(skipRec)
                                 .select('invoiceNo so_deliveryDate customerName cityId itemSupplied orderPK')
                                 .lean();
 
-            let totalRec = await SalesOrderModel.countDocuments(projection);
+            let totalRec = await invoiceMasterModel.countDocuments(projection);
             let items = 0, quantity = 0;
             
             getSalesOrder = getSalesOrder.map( ( v ) => {
                 items = v.itemSupplied.length;
                 v.so_id =  v.so_db_id.orderPK;
+                v.status = v.so_db_id.status;
                 v.so_db_id = v.so_db_id._id;
                 v.deliveryDate = v.so_deliveryDate
                 v.items = items;
@@ -333,11 +335,13 @@ class MyTrip extends BaseController {
  
          let currentCount = spotId.currentCount + 1;
          req.body.spotId = currentCount; 
+         req.body.spotIdAlias = currentCount;
 
          req.body.createdByEmpId = req.user.empId;
          req.body.createdById = req.user._id;
 
          let spotSales = await spotModel.create(req.body);
+
          await seriesModel.findOneAndUpdate({ _id: spotId._id }, { $set: { currentCount: currentCount } });
 
          await tripModel.findOneAndUpdate({ _id: trip._id }, {$set: { spotSalesId: spotSales._id} });
@@ -352,7 +356,7 @@ class MyTrip extends BaseController {
 
     //---------------------------------------------------------
 
-    createSpotSales = async (req, res) => {
+    createSpotSales = async (req, res) => { // WithOut Trip Id
       try {
 
         if (!req.body.items.length) return 
@@ -362,10 +366,11 @@ class MyTrip extends BaseController {
 
         let currentCount = spotId.currentCount + 1;
         req.body.spotId = currentCount; 
+        req.body.spotIdAlias = currentCount;
 
         req.body.createdByEmpId = req.user.empId;
         req.body.createdById = req.user._id;
-
+        
         let spotSales = await spotModel.create(req.body);
         await seriesModel.findOneAndUpdate({ _id: spotId._id }, { $set: { currentCount: currentCount } });
         
@@ -379,6 +384,7 @@ class MyTrip extends BaseController {
     
     getSpotSalesList = async (req, res) => {
       try {
+        
         let cityId = req.query.cityId || 'chennai', endDate, startDate, limit = 10, page = 1, skipRec = 0;
 
         limit = !req.query.limit ? limit = limit : limit = parseInt(req.query.limit);
@@ -392,20 +398,32 @@ class MyTrip extends BaseController {
         startDate = startDate.setHours(0,0,0,0);
         endDate = endDate.setHours(23,59,59,999);
 
-        let projection = { 
-            'cityId': cityId,
+        let projection = { 'cityId': cityId };
 
-        };
+        if ( req.query.startDate || req.query.endDate ) {
+
+          projection = { ... projection, ... {
+            spotSalesDate:  { '$gte': startDate, '$lte': endDate }
+          } }
+
+        }; 
 
         if (req.query.searchText && !req.query.searchText == '') {
+
           projection =  { ... projection, ...   {
-              '$or':  [ { 'spotId': { $regex: req.query.searchText, $options: 'i' } } ]
-          } };
-        };
+            '$or':  [ { 'spotIdAlias': { $regex: req.query.searchText, $options: 'i' } }, { 'salesManName': { $regex: req.query.searchText, $options: 'i' } } ]
+        } };
+          
+      };
 
-        let spotSales = await spotModel.find(projection).limit(limit).skip(skipRec).lean();
+      let spotSales = await spotModel.find(projection).limit(limit).skip(skipRec).sort('-createdAt').lean();
+      let totalRec = await spotModel.countDocuments(projection);
 
-      return this.success(req, res, this.status.HTTP_OK, { result: spotSales });
+      return this.success(req, res, this.status.HTTP_OK, { result: spotSales, pageMeta: {
+        skip: parseInt(skipRec),
+        pageSize: limit,
+        total: totalRec
+      } });
 
       } catch (error) {
         console.log(error)
@@ -432,7 +450,9 @@ class MyTrip extends BaseController {
         if (!assetRecId) assetRecId = await seriesModel.create({ modelName: 'assetTransfer', currentCount: 0 });
 
         let currentCount = assetRecId.currentCount + 1;
+        
         req.body.assetRecId = currentCount; 
+        req.body.assetRecIdAlias = currentCount;
 
         if (!req.body.cityId) req.body.cityId = req.user.region;
         
@@ -476,19 +496,34 @@ class MyTrip extends BaseController {
         startDate = startDate.setHours(0,0,0,0);
         endDate = endDate.setHours(23,59,59,999);
 
-        let projection = { 
-            'cityId': cityId
-        };
+        let projection = { 'cityId': cityId };
+
+        if ( req.query.startDate || req.query.endDate ) {
+          
+          projection = { ... projection, ... {
+            createdAt:  { '$gte': startDate, '$lte': endDate }
+          } };
+
+        }; 
 
         if (req.query.searchText && !req.query.searchText == '') {
+
           projection =  { ... projection, ...   {
-              '$or':  [ { 'assetRecId': { $regex: req.query.searchText, $options: 'i' } } ]
-          } };
-        };
+            '$or':  [ { 'assetRecIdAlias': { $regex: req.query.searchText, $options: 'i' } }
+            // , { 'salesManCode': { $regex: req.query.searchText, $options: 'i' } }
+           ]
+        } };
+          
+      };
 
-        let assetlist = await assetModel.find(projection).limit(limit).skip(skipRec).lean();
-
-      return this.success(req, res, this.status.HTTP_OK, { result: assetlist });
+      let assetlist = await assetModel.find(projection).limit(limit).skip(skipRec).sort('-createdAt').lean();
+      let totalRec = await assetModel.countDocuments(projection);
+      
+      return this.success(req, res, this.status.HTTP_OK, { result: assetlist, pageMeta: {
+        skip: parseInt(skipRec),
+        pageSize: limit,
+        total: totalRec
+        } });
 
       } catch (error) {
         console.log(error)
@@ -545,13 +580,141 @@ class MyTrip extends BaseController {
     };
 
     createTrip = async (req, res) => {
+
       try {
 
-        console.log(req.body)
+        let salesOrderTripIds = [], tripIds = [], orderArray = [], vehicleArray = [];
 
-      
-
+        for (let Sotrip of req.body.salesOrder) {
           
+            let salesOrderCode  = await seriesModel.findOne({ modelName: 'tripSalesOrder' }).lean();
+            if (!salesOrderCode) salesOrderCode = await seriesModel.create({ modelName: 'tripSalesOrder', currentCount: 0 });
+            
+            let currentCount = salesOrderCode.currentCount + 1;
+            
+            Sotrip.salesOrderCode = currentCount; 
+            Sotrip.salesOrderCodeAlias = currentCount;
+    
+            let soTrip = await tripSaleModel.create(Sotrip);
+            await seriesModel.findOneAndUpdate({ _id: salesOrderCode._id }, { $set: { currentCount: currentCount } });
+            
+            salesOrderTripIds.push(soTrip._id);
+
+        };
+        
+        for ( let trip of req.body.trips ) {
+          
+          let tripId  = await seriesModel.findOne({ modelName: 'trip' }).lean();
+          if (!tripId) tripId = await seriesModel.create({ modelName: 'trip', currentCount: 0 });
+          
+          let currentCount = tripId.currentCount + 1;
+          
+          trip.tripId = currentCount; 
+          trip.tripIdAlias = currentCount;
+
+          if (trip.hasSalesOrderOrStcokTransfer === true ) {
+            trip.salesOrderTripIds = salesOrderTripIds;
+          };
+
+          trip.deliveryDetails = req.body.deliveryDetails
+
+          let tripCreated = await tripModel.create(trip);
+          await seriesModel.findOneAndUpdate({ _id: tripId._id }, { $set: { currentCount: currentCount } });
+          
+          tripIds.push(tripCreated._id);
+          
+        };
+
+        let orders = await tripModel.find({ _id: { $in: tripIds } })
+                    .populate('deliveryExecutiveId transporterId')
+                    .populate({ path: 'vehicleId', populate: { path: 'rateCategoryId' } })
+                    .populate({ path: 'salesOrderTripIds', populate: { path: 'salesOrderId invoice_db_id'  } })
+                    .lean();
+
+        for (let order of orders) {
+
+          for (let so of order.salesOrderTripIds) {
+                
+                let orderObj = {};
+
+                // let weight = _.find(order.invoice_db_id, { so_db_id: so._id });
+                
+                let weight = _.sumBy(order.invoice_db_id, 'totalWeight');
+
+                let DeliveryDate = new Date(so.salesOrderId.deliveryDate);
+                DeliveryDate = DeliveryDate.toISOString().split('T')[0];
+
+                let startOfTheDay = (DeliveryDate + " 00 00 00").toString();
+                let endOfTheDay = (DeliveryDate + " 23 59 00").toString();
+                
+                orderObj = {
+                    customerName: so.salesOrderId.customerName,
+                    customerCode: so.salesOrderId.customerCode,
+                    latitude: so.salesOrderId.latitude,
+                    longitude: so.salesOrderId.longitude,
+                    deliveryTimeStart: startOfTheDay,
+                    deliveryTimeEnd: endOfTheDay,
+                    orderWeight: weight
+                };
+
+                orderArray.push(orderObj);
+            };
+        };
+
+        for (let v of orders) {
+
+              let vehicleObj = {}, cost = 0;
+
+              /*
+
+                If Rate Type Type Monthly ,
+                Total Cost =Fixed Rental + { Total Distance across all trip sheets in a month - Total Included Distance } * Cost per additional Km. 
+                If Total Distance across all trip sheets in a month - Total Included Distance is negative , kindly take Zero. 
+
+                If the Rate type is Daily ;
+
+                Cost = (Fixed Rental)+ { Total Distance across all trip sheets in day - (Total Included Distance)} *Cost per additional Km. 
+
+                If the Value (Total Included Distance * No of Days in month vehicles used by that specific transporter) is Negative , take as zero.
+
+              */
+
+              if (v.vehicleId.rateCategoryId && v.vehicleId.rateCategoryId.rateCategoryDetails) {
+                
+                let rentalAmount = v.vehicleId.rateCategoryId.rateCategoryDetails.fixedRentalAmount || 0;
+                let additionalAmount = v.vehicleId.rateCategoryId.rateCategoryDetails.additionalAmount || 0;
+                
+                if (v.vehicleId && v.vehicleId.rateCategoryId) {
+
+                  if (v.vehicleId.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Monthly') {
+                    cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance  
+                  };
+
+                  if (v.vehicleId.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Daily') {
+                    cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance
+                  };
+
+                };
+
+              };
+
+              vehicleObj = {
+                  vehicleId: v.vehicleId._id,
+                  name:  v.vehicleModel,
+                  class: v.vehicleType,
+                  capacity: v.tonnage,
+                  cost:  cost
+              };
+
+              vehicleArray.push(vehicleObj);
+        };
+
+        return this.success(req, res, this.status.HTTP_OK, {
+          orderArray, vehicleArray, tripIds
+        });
+          
+          
+        return
 
             //   let trip = {}, transporterDetails = req.body.transporterDetails, orderArray = [], vehicleArray = [], trip_ids=[];
 
@@ -658,5 +821,4 @@ class MyTrip extends BaseController {
 };
 
 module.exports = new MyTrip();
-
 
