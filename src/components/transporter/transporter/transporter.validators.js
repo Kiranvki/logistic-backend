@@ -100,7 +100,7 @@ const schemas = {
             transporterid: Joi.string().trim().label('Transporter Id')
         },
         body: Joi.object({
-            vehicleDetails: Joi.object().keys({
+            transporterDetails: Joi.object().keys({
                 name: Joi.string().trim().label('name').regex(/^[a-z ,.'-]+$/i).options({
                     language: {
                         string: {
