@@ -59,7 +59,15 @@ function tripsRoutes() {
         // verifyAppToken, // verify app token
         ctrl.getOrderDetails 
       );
-
+// get sales order by customer mobile
+closed.route('/trip/order/:type/:orderId/:phoneNumber').get(
+  // getHistoryVal,
+  // verifyDeliveryAppToken,
+  // isValidDeliveryId,
+  
+  
+  ctrl.getOrderByCustomer
+);
 
       // closed.route('/orderdetail/:type/:orderid').post(
       //   // verifyAppToken, // verify app token

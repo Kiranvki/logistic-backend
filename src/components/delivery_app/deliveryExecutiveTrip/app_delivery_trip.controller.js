@@ -12,6 +12,7 @@ const invoiceMasterModel = require('../../picker_app/invoice_master/models/invoi
 const tripModel = require('../../MyTrip/assign_trip/model/trip.model')
 const salesOrderModel= require('../../sales_order/sales_order/models/sales_order.model')
 const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model');
+const tripSalesOrders = require('../../MyTrip/assign_trip/model/salesOrder.model');
 const requestHttp = require('request');
 var async = require('async');
 import { type } from 'ramda';
@@ -58,7 +59,7 @@ class DeliveryExecutivetrip extends BaseController {
     
       $match:{$and:[{
         
-          'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+          'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
       },
       {'createdAt':{$gte:dateToday}
     }
@@ -119,7 +120,7 @@ class DeliveryExecutivetrip extends BaseController {
     
      {
       $group: {
-        _id: '$transporterDetails.deliveryExecutiveId',
+        _id: '$deliveryExecutiveId',
         total:{$sum:1},
         tripData: {
           $push: '$$ROOT'
@@ -166,7 +167,7 @@ class DeliveryExecutivetrip extends BaseController {
 
     let totalCount = await tripModel.count({$and:[{
         
-      'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+      'deliveryExecutiveId':deliveryExecutiveId
   },
   {'createdAt':{$gte:dateToday}
 }]
@@ -218,29 +219,41 @@ class DeliveryExecutivetrip extends BaseController {
         {
         
         
-          'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+          'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
       },
         {
         tripId:ID
       }]}},
       {
-      $lookup:{
-        from:'salesorders',
-        localField:'salesOrderId',
-        foreignField:'_id',
-        as:'salesOrder'
-      }
-    }, 
-    // {
-    //   $group: {
-    //     _id: '$salesOrderId',
-    //     totalSalesOrder:{$sum:1},
-    //     salesData: {
-    //       $push: '$$ROOT'
-    //     }
+        $lookup:{
+          from:'tripSalesOrders',
+          localField:'salesOrderTripIds',
+          foreignField:'_id',
+          as:'salesOrder'
+          
+        }
+      }, {
+        $lookup:{
+          from:'salesorders',
+          localField:'salesOrder.salesOrderId',
+          foreignField:'_id',
+          as:'salesOrder.details'
+          
+        }
+      },
+    {
+      $group: {
+        _id: '$salesOrder.details.customerPhone',
+        'totalCrate':{$sum:'salesOrder.crateIn'},
+        totalSalesOrder:{$sum:1},
        
-    //   }
-    // },
+        orderData: {
+          $push: '$$ROOT'
+        }
+       
+      }
+      
+    },
     // {
     //   $lookup:{
     //     from:'spotSales',
@@ -251,7 +264,7 @@ class DeliveryExecutivetrip extends BaseController {
     // }, 
     {
       $project:{
-_id:0,
+
 spotSalesId:0
       }
     },
@@ -279,7 +292,7 @@ spotSalesId:0
         {$match:{$and:[{
         
         
-          'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+          'deliveryExecutiveId':deliveryExecutiveId
       },
         {
         tripId:ID
@@ -341,7 +354,7 @@ spotSalesId:0
 
     let totalCount = await tripModel.count({$and:[{
         
-      'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+      'deliveryExecutiveId':deliveryExecutiveId
   },
   {tripId:ID
 }]
@@ -376,6 +389,44 @@ spotSalesId:0
     // success(req, res, status, data = null, message = 'success')
 
   }
+
+
+
+  getOrderByCustomer = async (req,res,next)=>{
+    let user = req.user, // user 
+    deliveryExecutiveId = user._id
+    let ID = parseInt(req.params.orderId);
+    let phNo = req.params.phoneNumber
+    let pipeline = [];
+    let type = req.params.type;
+    let pageSize=100;
+    let pageNumber = req.query.page;
+
+    let customerSalesOrderData = await tripSalesOrders.find({'_id': mongoose.Types.ObjectId(ID)})
+    .populate({ path: 'salesOrderId', 'match': { 'customerPhone': phNo }, options: {
+      limit: pageSize,
+      sort: { created: -1},
+      skip: pageNumber*pageSize
+
+  } })
+
+
+    try {
+      info('getting salesorder data!');
+ 
+      // success response 
+      this.success(req, res, this.status.HTTP_OK, 
+        customerSalesOrderData || []
+      , this.messageTypes.deliveryExecutiveTripDetailsFetchedSuccessfully);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
 
   getOrderDetails = async (req,res,next)=>{
     let model;
@@ -709,7 +760,7 @@ _id:0
   
     
     let updateObject = {
-      startOdometerReading:parseInt(req.body.odometerreading),
+      initialOdometerReading:parseInt(req.body.odometerreading),
       isTripStarted:1,
       isActive:1
 
@@ -739,7 +790,7 @@ _id:0
     
       $match:{$and:[{
         
-          'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+          'deliveryExecutiveId':deliveryExecutiveId
       },
       {'createdAt':{$gte:dateToday}
     }]
@@ -798,7 +849,7 @@ _id:0
     
      {
       $group: {
-        _id: '$transporterDetails.deliveryExecutiveId',
+        _id: '$deliveryExecutiveId',
         total:{$sum:1},
         tripData: {
           $push: '$$ROOT'
@@ -847,7 +898,7 @@ getInTrip = async (req,res,next)=>{
     $match:{$and:[{
         
         
-      'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+      'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
   },
     {
       'isActive':1
@@ -863,29 +914,38 @@ getInTrip = async (req,res,next)=>{
     ...[
       {
         $lookup:{
-          from:'salesorders',
-          localField:'salesOrderId',
+          from:'tripSalesOrders',
+          localField:'salesOrderTripIds',
           foreignField:'_id',
-          as:'salesOrder'
+          as:'order'
           
         }
-      },{
+      },  {
+        $lookup:{
+          from:'salesorders',
+          localField:'order.salesOrderId',
+          foreignField:'_id',
+          as:'order.details'
+          
+        }
+      }
+      ,{
       $lookup:{
         from:'vehiclemasters',
-        localField:'transporterDetails.vehicleId',
+        localField:'vehicleId',
         foreignField:'_id',
         as:'vehicleDetail'
       }
-    }
-      ,{
-        $project:{
-          tripId:1,
-          salesOrder:1,
-          transporterDetails:1,
-          totalCrate: { $sum: ["$salesOrder.crateIn"] }
-        }
-    
+    },
+    {
+      $group:{
+        _id:'$order.details.customerName',
+        orderData: {
+          $push: '$$ROOT'
+        },
+        'totalCrate':{$sum:'crateIn'}
       }
+    }
     ]
   )
 
@@ -919,14 +979,19 @@ getInTrip = async (req,res,next)=>{
     {
       $lookup:{
         from:'vehiclemasters',
-        localField:'transporterDetails.vehicleId',
+        localField:'vehicleId',
         foreignField:'_id',
         as:'vehicleDetail'
       }
     }, 
     {
+      $group:{
+        _id:'salesManName'
+      }
+    }, 
+    {
       $project:{
-_id:0,
+
 salesOrderId:0
   }}])
   }
@@ -982,7 +1047,7 @@ getHistoryByOrderType = async (req,res,next)=>{
 
   let pipeline = [{
     $match:{$and:[
-      {'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
+      {'deliveryExecutiveId':deliveryExecutiveId},
     {
       'isActive':0
     },
@@ -1076,7 +1141,7 @@ getHistoryByOrderType = async (req,res,next)=>{
 
   let historyData = await tripModel.aggregate(pipeline)
 
-  let totalCount = await tripModel.count({$and:[{'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
+  let totalCount = await tripModel.count({$and:[{'deliveryExecutiveId':deliveryExecutiveId},
   {
     'isActive':0
   },
@@ -1234,7 +1299,7 @@ getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
   
     $match:{$and:[{
       
-        'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+        'deliveryExecutiveId':deliveryExecutiveId
     },
     {'createdAt':{$lt:dateToday}
   }
@@ -1295,7 +1360,7 @@ getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
   
    {
     $group: {
-      _id: '$transporterDetails.deliveryExecutiveId',
+      _id: '$deliveryExecutiveId',
       total:{$sum:1},
       tripData: {
         $push: '$$ROOT'
@@ -1316,7 +1381,7 @@ getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
 
   let totalCount = await tripModel.count({$and:[{
       
-    'transporterDetails.deliveryExecutiveId':deliveryExecutiveId
+    'deliveryExecutiveId':deliveryExecutiveId
 },
 {'createdAt':{$lt:dateToday}
 }]
@@ -1373,7 +1438,7 @@ getPendingTrip = async(req,res,next)=>{
 
   let pipeline = [{
     $match:{$and:[
-      // {'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
+      {'deliveryExecutiveId':deliveryExecutiveId},
     {
       'isActive':0
     },
@@ -1389,8 +1454,10 @@ getPendingTrip = async(req,res,next)=>{
 
     'isCompleteDeleiveryDone':0 
     
-    }
-    ]}  
+    },
+
+    ]}
+   
   
     ]
   
@@ -1400,7 +1467,7 @@ getPendingTrip = async(req,res,next)=>{
 
   let totalCount = await tripModel.count({
     $and:[
-      {'transporterDetails.deliveryExecutiveId':deliveryExecutiveId},
+      {'deliveryExecutiveId':deliveryExecutiveId},
     {
       'isActive':0
     },

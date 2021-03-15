@@ -37,7 +37,7 @@ let tripSchema = Schema ({
         ref: 'tripSalesOrders'
     }],
 
-    hasSalesOrderOrStcokTransfer: {
+    hasSalesOrderOrStockTransfer: {
         type: Boolean,
         default: false
     },
@@ -116,6 +116,10 @@ let tripSchema = Schema ({
     },
 
     tripFinished: {
+        type: Number,
+        default: 0
+    },
+    initialOdometerReading: {
         type: Number,
         default: 0
     },

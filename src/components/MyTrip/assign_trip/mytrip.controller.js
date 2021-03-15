@@ -612,7 +612,7 @@ class MyTrip extends BaseController {
           trip.tripId = currentCount; 
           trip.tripIdAlias = currentCount;
 
-          if (trip.hasSalesOrderOrStcokTransfer === true ) {
+          if (trip.hasSalesOrderOrStockTransfer === true ) {
             trip.salesOrderTripIds = salesOrderTripIds;
           };
 
