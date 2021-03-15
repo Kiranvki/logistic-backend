@@ -9,7 +9,7 @@ const Response = require('../../../responses/response');
 // add joi schema 
 const schemas = {
     joiTransporter: Joi.object().keys({
-        vehicleDetails: {
+        transporterDetails: {
             name: Joi.string().trim().label('name').regex(/^[a-z ,.'-]+$/i).options({
                 language: {
                     string: {
@@ -196,7 +196,20 @@ const schemas = {
         search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
     }),
 
+   // get Transporter list 
+   joiRateCategoryListByTransporterId: Joi.object().keys({
+       query:{
+        sort: Joi.string().valid(['createdAt','updatedAt']),
+       },
+       params:{
+           transporterId: Joi.string().trim().label('Transporter Id').required()
+       }
+}),
 
+JoiGetVehicleByModelId : Joi.object().keys({
+    modelId: Joi.string().required(),
+    transporterId: Joi.string().required()
+})
 }
 
 // joi options
@@ -221,6 +234,50 @@ const options = {
 
 
 module.exports = {
+     
+    JoiGetVehicleByModelId: (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.JoiGetVehicleByModelId;
+        let option = options.basic;
+
+        // validating the schema 
+        schema.validate(req.params, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
+
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
+
+
+    // joi Transporter element patch
+    joiRateCategoryListByTransporterId: (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.joiRateCategoryListByTransporterId;
+        let option = options.basic;
+
+        // validating the schema 
+        schema.validate({ params: req.params, query: req.query }, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
+
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
+
+
     joiTransporter: (req, res, next) => {
         // getting the schemas 
         let schema = schemas.joiTransporter;

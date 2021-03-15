@@ -8,6 +8,9 @@ const {
   joiIdInParams,
   joiDistributorChangeStatus, // is Distributor changed status
   joiTransporterElementPatch,
+  joiRateCategoryListByTransporterId,
+  JoiGetVehicleByModelId,
+  getTransporterById
 } = require('./transporter.validators');
 
 // hooks 
@@ -28,21 +31,43 @@ function transporter() {
     );
 
     // get all 
-    closed.route('/').get(
+    closed.route('/').get(          // Transporter List page with pagination
       [joiTransporterList], // joi validation
-      // verifyAppToken,
-      ctrl.getList // controller function 
+   //   verifyAppToken,
+      ctrl.getListNew // controller function 
     );
 
-    closed.route('/:transporterId').get(
+    closed.route('/:transporterId/rate-category').get(     // rate-category list by transporterId
+     [joiRateCategoryListByTransporterId], // joi validation
+      // verifyAppToken,
+     isValidTransporter,
+      ctrl.getRateCategoryList // controller function 
+    );
+
+
+    closed.route('/:transporterId/model/:modelId/vehicles').get(     
+      [JoiGetVehicleByModelId], // joi validation
+      // verifyAppToken,
+      isValidTransporter,
+      ctrl.getVehicleForModel
+    );
+
+
+    // closed.route('/:transporterId').get(      // not required
+    //   [joiTransporterGetDetails], // joi validation
+    //   // verifyAppToken,
+    //   isValidTransporter,
+    //   ctrl.getTransporter // controller function 
+    // );
+
+    closed.route('/:transporterId/details').get(    
       [joiTransporterGetDetails], // joi validation
       // verifyAppToken,
       isValidTransporter,
-      ctrl.getTransporter // controller function 
+      ctrl.getTransporterById // controller function 
     );
-
     //delete
-    closed.route('/:transporterId').delete(
+    closed.route('/:transporterId').delete(         // delete transporter and model mapping
       [joiIdInParams], // joi validation
       isValidTransporter, // get the data from go frugal 
       ctrl.deleteTransporter // get controller 
@@ -56,7 +81,7 @@ function transporter() {
     );
 
     //patch
-    closed.route('/:transporterId').patch(
+    closed.route('/:transporterId').patch(     // update transporter
       [joiTransporterPatch], // joi validation
       checkWhetherItsAValidTransporterUpdate,
       ctrl.patchTransporter // get controller 
