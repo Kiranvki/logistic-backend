@@ -140,6 +140,12 @@ const schemas = {
     joiIdInParams: Joi.object().keys({
         rateCategoryId: Joi.string().trim().label('rateCategory Id').required(),
     }),
+    
+    // delete rate-category for transporter
+    joiDeleteRateCategoryForTransporter: Joi.object().keys({
+        rateCategoryId: Joi.string().trim().label('rateCategory Id').required(),
+        transporterId: Joi.string().trim().label('transporter Id').required(),
+    }),
 
     // joi delete ratecategory vehicle transporter mapping
     joiDeleterateCategoryVehicleTransporterMapping: Joi.object().keys({
@@ -295,6 +301,27 @@ module.exports = {
         });
     },
 
+    // check whether id in params
+    joiDeleteRateCategoryForTransporter : (req, res, next) => {
+        // getting the schemas 
+        let schema = schemas.joiDeleteRateCategoryForTransporter;
+        let option = options.basic;
+
+        // validating the schema 
+        schema.validate(req.params, option).then(() => {
+            next();
+            // if error occured
+        }).catch((err) => {
+            let error = [];
+            err.details.forEach(element => {
+                error.push(element.message);
+            });
+
+            // returning the response 
+            Response.joierrors(req, res, err);
+        });
+    },
+      
     // check whether id in params
     joiIdInParams: (req, res, next) => {
         // getting the schemas 

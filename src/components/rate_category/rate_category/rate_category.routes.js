@@ -10,6 +10,7 @@ const {
   joiRateCategoryAddVehiclePatch, // joi rate category add vehicle patch
   joiIdInParams, // joi asm id in params
   joiDeleterateCategoryVehicleTransporterMapping, // joi delete ratecategory vehicle transporter mapping
+  joiDeleteRateCategoryForTransporter
 } = require('./rate_category.validators');
 
 // hooks 
@@ -48,7 +49,7 @@ function ratecategory() {
       ctrl.getListMinified // controller function 
     );
 
-    //get single rate category details
+    //get single rate category details   .  /******* Not Required */
     closed.route('/:rateCategoryId').get(
       [joiRateCategoryGetDetails],     // joi validation
       //verifyUserToken,            // verify user token
@@ -73,11 +74,19 @@ function ratecategory() {
     );
 
     //deleting the rate category itself
-    closed.route('/:rateCategoryId').delete(
-      [joiIdInParams], // joi validation
+    closed.route('/:rateCategoryId/transporters/:transporterId').delete(
+      [joiDeleteRateCategoryForTransporter], // joi validation
       //verifyUserToken,          // verify user token
       isValidRateCategory, // check is valid Rate Category id 
       ctrl.deleteRateCategory     // delete controller 
+    );
+
+    //deleting the rate category itself
+    closed.route('/:rateCategoryId/transporters').delete(
+      [joiIdInParams], // joi validation
+      //verifyUserToken,          // verify user token
+      isValidRateCategory, // check is valid Rate Category id 
+      ctrl.deleteRateCategoryForAllTranspporters     // delete controller 
     );
 
     //adding the rate category, vehicle and transporter mapping

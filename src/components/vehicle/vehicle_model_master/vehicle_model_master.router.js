@@ -24,7 +24,7 @@ return (open,closed)=>{
 
     closed.route('/vehicle-model/details').get(
       [JoiGetVehilceModelList],
-      verifyUserToken, // verify user token
+       verifyUserToken, // verify user token
         ctrl.getVehicleModel
         )
     
