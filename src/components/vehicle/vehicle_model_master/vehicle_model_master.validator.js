@@ -15,7 +15,8 @@ const schemas = {
    }),
 
    JoiGetVehilceModelList: Joi.object().keys({
-    page: Joi.number().integer().min(1).label('Page').required()
+    page: Joi.number().integer().min(1).label('Page').required(),
+    sortBy: Joi.string().valid('createdAt','updatedAt')
 }),
 JoiGetVehilceModelByTransporterId: Joi.object().keys({
     transporterId: Joi.string().required()

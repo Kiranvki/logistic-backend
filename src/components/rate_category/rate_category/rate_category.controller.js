@@ -4,11 +4,16 @@ const BaseController = require('../../baseController');
 const Model = require('./models/rate_category.model');
 const rateTransporterVehicleMappingCtrl = require('../ratecategory_transporter_vehicle_mapping/ratecategory_transporter_vehicle_mapping.controller');
 const mongoose = require('mongoose');
+const transportModelRcMappingModel = require('../../transporter/transporter-model-rate-mapping/models/transporter-model-rate-mapping')
+const vehicleTransporterRateCategoryMappingModel = require('../../vehicle/vehicle_transporter_rc_mapping/models/vehicle_transporter_rc_mapping.model')
+const vehicleMasterModel = require('../../vehicle/vehicle_master/models/vehicle_master.model')
 const _ = require('lodash');
 const {
   error,
   info
 } = require('../../../utils').logging;
+const { ConsoleTransportOptions } = require('winston/lib/winston/transports');
+const vehicleModel = require('../../../responses/types/vehicleModel');
 
 //getting the model 
 class rateCategoryController extends BaseController {
@@ -64,8 +69,8 @@ class rateCategoryController extends BaseController {
       //   'noOfVehicles': req.body.noOfVehicles
       // }
       //inserting data into the db
-      let isInserted = await Model.create(req.body.rateCategoryDetails);
-
+      let isInserted = await Model.create({rateCategoryDetails:req.body.rateCategoryDetails});
+      
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
         //inserting the transporter and vehicle mapping
@@ -308,7 +313,7 @@ class rateCategoryController extends BaseController {
       },
       {
         $lookup: {
-          from: 'vehicletransporterrcmappings',
+          from: 'transportervehiclemodelrcmappings',
           let: {
             'id': '$_id'
           },
@@ -369,7 +374,7 @@ class rateCategoryController extends BaseController {
         $project: {
           'rateCategoryDetails': 1,
           // 'noOfVehicles': 1,
-          'noOfVehicles': { $cond: { if: { $isArray: "$transporterVehicleRcMapping" }, then: { $size: "$transporterVehicleRcMapping" }, else: "NA" } },
+          'noOfTransporters': { $cond: { if: { $isArray: "$transporterVehicleRcMapping" }, then: { $size: "$transporterVehicleRcMapping" }, else: "NA" } },
           'status': 1,
           'isDeleted': 1,
           '_id': 1,
@@ -563,7 +568,7 @@ class rateCategoryController extends BaseController {
       // },
       {
         $lookup: {
-          from: 'vehicletransporterrcmappings',
+          from: 'transportervehiclemodelrcmappings',
           let: {
             'id': '$_id'
           },
@@ -584,22 +589,8 @@ class rateCategoryController extends BaseController {
                 'vehicleId': 1,
                 'vehicleModelId':1,
                 'transporterId': 1,
+                'createdAt': 1,
                 'rateCategoryId':1
-              }
-            },
-            {
-              $lookup: {
-                from: 'vehiclemasters',
-                localField: "vehicleId",
-                foreignField: "_id",
-                as: 'vehicle'
-              }
-
-            },
-            {
-              $unwind: {
-                path: '$vehicle',
-                preserveNullAndEmptyArrays: true
               }
             },
             {
@@ -629,21 +620,7 @@ class rateCategoryController extends BaseController {
                 path: '$vehicleModel',
                 preserveNullAndEmptyArrays: true
               }
-            },
-            {
-              $lookup: {
-                from: 'transportervehiclemodelrcmappings',
-                localField: "rateCategoryId",
-                foreignField: "rateCategoryId",
-                as: 'transporterRcMapping'
-              }
-            },
-            {
-              $unwind: {
-                path: '$transporterRcMapping',
-                preserveNullAndEmptyArrays: true
-              }
-            },
+            }
           ],
           as: 'transporterVehicleRcMapping'
         }
@@ -657,26 +634,31 @@ class rateCategoryController extends BaseController {
           'status': 1,
           'isDeleted': 1,
           '_id': 1,
-          'transporterVehicleRcMapping':1
-          // 'transporter.vehicleDetails.name': 1,
-          // 'transporter._id': 1,
-          // 'vehicle._id': 1,
-          // 'transporterVehicleMapping._id': 1,
-          // 'transporterVehicleMapping.status': 1,
-          // 'transporterVehicleMapping.vehicle._id': 1,
-          // 'transporterVehicleMapping.vehicle.vehicleType': 1,
-          // 'transporterVehicleMapping.vehicle.vehicleModel': 1,
-          // 'transporterVehicleMapping.vehicle.tonnage': 1,
-          // 'transporterVehicleMapping.transporter._id': 1,
-          // 'transporterVehicleMapping.transporter.vehicleDetails.name': 1,
+          'transporterVehicleRcMapping':
+          {
+            $filter: {
+              input: "$transporterVehicleRcMapping",
+              as: "transporterRateCategory",
+              cond: {
+                $and: [{
+                  $eq: ["$$transporterRateCategory.vehicleModel.isDeleted", 0]
+  
+                },
+                {
+                  $eq: ["$$transporterRateCategory.transporter.isDeleted", 0]
+  
+                }]
+              }
+            }
+          }
         }
       },
 
       ]).allowDiskUse(true);
 
-      // rateCategoryList[0].transporterVehicleRcMapping.map(data=>{
-      //   data.rateCategoryExpiry = this.checkRateCategoryExpiry(data.rateCategory,data.createdAt)
-      // })
+      rateCategoryList[0].transporterVehicleRcMapping.map(data=>{
+        data.rateCategoryExpiry = this.checkRateCategoryExpiry(rateCategoryList[0],data.createdAt)
+      })
       // success 
       return this.success(req, res, this.status.HTTP_OK, 
          rateCategoryList,
@@ -922,7 +904,8 @@ class rateCategoryController extends BaseController {
     try {
       info('Rate category  Delete!');
 
-      let rateCategoryId = req.params.rateCategoryId || '';
+      const rateCategoryId = req.params.rateCategoryId;
+      const transporterId = req.params.transporterId
 
       // creating data to update
       let dataToUpdate = {
@@ -933,8 +916,10 @@ class rateCategoryController extends BaseController {
       };
 
       // inserting data into the db 
-      let isUpdated = await Model.findOneAndUpdate({
-        _id: mongoose.Types.ObjectId(rateCategoryId)
+      let isUpdated = await transportModelRcMappingModel.findOneAndUpdate({
+        rateCategoryId: mongoose.Types.ObjectId(rateCategoryId),
+        transporterId: mongoose.Types.ObjectId(transporterId)
+
       }, dataToUpdate, {
         new: true,
         upsert: false,
@@ -942,8 +927,104 @@ class rateCategoryController extends BaseController {
       })
 
       // check if inserted 
-      if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.rateCategoryDeletedSuccessfully);
+      if (isUpdated && !_.isEmpty(isUpdated)) {
+
+        const isVehicleUnlinked = await vehicleTransporterRateCategoryMappingModel.update({
+          rateCategoryId: mongoose.Types.ObjectId(rateCategoryId),
+          transporterId: mongoose.Types.ObjectId(transporterId)
+        }, dataToUpdate, {
+          new: true,
+          upsert: false,
+          multi: true,
+          lean: true
+        })
+        if(isVehicleUnlinked && !_.isEmpty(isVehicleUnlinked)){
+          return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.rateCategoryDeletedSuccessfully);
+        }
+        else{
+         return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryNotDeletedSuccessfully);
+
+        }
+      }
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryNotDeletedSuccessfully);
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
+
+
+  deleteRateCategoryForAllTranspporters = async (req, res) => {
+    try {
+      info('Rate category  Delete!');
+
+      let rateCategoryId = req.params.rateCategoryId;
+
+      // creating data to update
+      let dataToUpdate = {
+        $set: {
+          status: 0,
+          isDeleted: 1
+        }
+      };
+
+      // inserting data into the db 
+
+      const isRateCategoryDeleted = await Model.findOneAndUpdate({
+        _id : mongoose.Types.ObjectId(rateCategoryId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      })
+      console.log('Rate Category Deleted :',isRateCategoryDeleted)
+      if(isRateCategoryDeleted && !_.isEmpty(isRateCategoryDeleted)){
+        let isUpdated = await transportModelRcMappingModel.update({
+          rateCategoryId: mongoose.Types.ObjectId(rateCategoryId)
+        }, dataToUpdate, {
+          new: true,
+          upsert: false,
+          multi: true,
+          lean: true
+        })
+        if (isUpdated && !_.isEmpty(isUpdated)) {
+          const isVehicleUnlinked = await vehicleTransporterRateCategoryMappingModel.update({
+            rateCategoryId: mongoose.Types.ObjectId(rateCategoryId)
+          }, dataToUpdate, {
+            new: true,
+            upsert: false,
+            multi: true,
+            lean: true
+          })
+          console.log('isVehicleUnlinked',isVehicleUnlinked)
+          if(isVehicleUnlinked && !_.isEmpty(isVehicleUnlinked)){
+            return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.rateCategoryDeletedSuccessfully);
+          }else{
+             return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryNotDeletedSuccessfully);
+          }
+
+        }
+        else{
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryNotDeletedSuccessfully);
+       }
+
+      }
+      else{
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryNotDeletedSuccessfully);
+     }
+      // let isUpdated = await transportModelRcMappingModel.findAndUpdate({
+      //   rateCategoryId: mongoose.Types.ObjectId(rateCategoryId)
+      // }, dataToUpdate, {
+      //   new: true,
+      //   upsert: false,
+      //   lean: true
+      // })
+
+      // // check if inserted 
+      // if (isUpdated && !_.isEmpty(isUpdated)) return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.rateCategoryDeletedSuccessfully);
+      // else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.rateCategoryNotDeletedSuccessfully);
 
       // catch any runtime error 
     } catch (err) {

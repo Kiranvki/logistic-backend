@@ -393,6 +393,7 @@ class transporterController extends BaseController {
       const vehicleData = await vehicleTransporterModelMapping.aggregate([
       {
          $match: { 
+           isDeleted: 0,
            $and: [ { 'vehicleModelId': mongoose.Types.ObjectId(modelId)} ,{'transporterId': mongoose.Types.ObjectId(transporterId)} ]
           }
       },
@@ -686,7 +687,6 @@ class transporterController extends BaseController {
    const transporterData = await Model.findOne({
      _id: mongoose.Types.ObjectId(transporterId),
     isDeleted: 0}).lean()
-    console.log('transp', transporterData);
      if(transporterData){
      return this.success(req, res, this.status.HTTP_OK,transporterData , this.messageTypes.transporterFetched);
      }
@@ -801,21 +801,21 @@ class transporterController extends BaseController {
   //         'locationDetails': 1,
   //         'contactPersonalDetails': 1,
   //         'vehicleRateCategoryDetails': {
-  //           $filter: {
-  //             input: "$vehicleRateCategoryDetails",
-  //             as: "vehicleRateCategory",
-  //             cond: {
-  //               $and: [{
-  //                 $eq: ["$$vehicleRateCategory.vehicle.isDeleted", 0]
+          //   $filter: {
+          //     input: "$vehicleRateCategoryDetails",
+          //     as: "vehicleRateCategory",
+          //     cond: {
+          //       $and: [{
+          //         $eq: ["$$vehicleRateCategory.vehicle.isDeleted", 0]
 
-  //               },
-  //               {
-  //                 $eq: ["$$vehicleRateCategory.rateCategory.isDeleted", 0]
+          //       },
+          //       {
+          //         $eq: ["$$vehicleRateCategory.rateCategory.isDeleted", 0]
 
-  //               }]
-  //             }
-  //           }
-  //         },
+          //       }]
+          //     }
+          //   }
+          // },
 
   //       }
   //     },
@@ -903,36 +903,37 @@ class transporterController extends BaseController {
 
   deleteTransporter = async (req, res) => {
     try {
-      info('New Vehicle Delete!');
-
-      // inserting the new user into the db
-      let isUpdated = await Model.findByIdAndDelete({
-        _id: mongoose.Types.ObjectId(req.params.transporterId),
-      }, {
+      info('Request to delete transporter');
+      const transporterId = req.params.transporterId
+      let dataToUpdate = {
         $set: {
-          ...req.body
+          status: 0,
+          isDeleted: 1
         }
+      };
+      let isUpdated = await Model.findOneAndUpdate({
+        transporterId: mongoose.Types.ObjectId(transporterId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
       })
-
       // check if inserted 
       if (isUpdated && !_.isEmpty(isUpdated)){
-       const mappingDeleted = await modelAndRcMappingModel.findByIdAndDelete({
-          _id: mongoose.Types.ObjectId(req.params.transporterId),
-        },
-        {
-          $set: {
-            ...req.body
-          }
+        let isRateCategoryUnlinked = await modelAndRcMappingModel.findOneAndUpdate({
+          transporterId: mongoose.Types.ObjectId(transporterId)
+        }, dataToUpdate, {
+          new: true,
+          upsert: false,
+          lean: true
         })
-        if(mappingDeleted && !_isEmpty(mappingDeleted)){
-          return this.deleteTransporterVehicleMapping(req.params.transporterId,req.body)
-          // return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.transporterDeleted);
+        if(isRateCategoryUnlinked && !_isEmpty(isRateCategoryUnlinked)){
+          return this.deleteTransporterVehicleMapping(req.params.transporterId,dataToUpdate)
 
         }else{
          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotDeleted);
 
         }
-        // return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.transporterDeleted);
       } 
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotDeleted);
 
@@ -943,14 +944,13 @@ class transporterController extends BaseController {
     }
   }
 
-   deleteTransporterVehicleMapping=async (transporterId,body)=>{
-    const mappingDeleted = await vehicleTransporterModelMapping.findByIdAndDelete({
-      _id: mongoose.Types.ObjectId(transporterId),
-    },
-    {
-      $set: {
-        ...body
-      }
+   deleteTransporterVehicleMapping=async (transporterId,dataToUpdate)=>{
+    const mappingDeleted = await vehicleTransporterModelMapping.findOneAndUpdate({
+      transporterId: mongoose.Types.ObjectId(transporterId)
+    }, dataToUpdate, {
+      new: true,
+      upsert: false,
+      lean: true
     })
     if(mappingDeleted && !_isEmpty(mappingDeleted)){
       return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.transporterDeleted);

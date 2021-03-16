@@ -35,10 +35,10 @@ const vehicleModelMaster = new Schema({
     timestamps: true
   });
 
-vehicleModelMaster.index({
-  'name': 1,
-  'brand': 1
-},{unique: true});
+// vehicleModelMaster.index({
+//   'name': 1,
+//   'brand': 1
+// },{unique: true});
 
 // exporting the entire module
 module.exports = mongoose.model('vehicleModelMaster', vehicleModelMaster);
