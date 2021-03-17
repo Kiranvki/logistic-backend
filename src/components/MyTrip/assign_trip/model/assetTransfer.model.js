@@ -83,6 +83,10 @@ let assetSchema = Schema({
             type: Date
         }
     }],
+    isSelected: {
+        type: Boolean,
+        default: false
+    },
     assetRecId: {
         type: Number,
         unique: true,

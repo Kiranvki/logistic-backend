@@ -28,7 +28,11 @@ let salesOrderSchema = Schema({
     },
     salesOrderCodeAlias: {
         type: String
-    }
+    },
+    isSelected: {
+        type: Boolean,
+        default: false
+    },
 },{
     timestamps: true
 });

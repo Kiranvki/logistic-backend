@@ -355,6 +355,24 @@ class MyTrip extends BaseController {
     };
 
     //---------------------------------------------------------
+    
+    updateSelectedStatus = async (req, res) =>{
+      try {
+        
+        let selection = { _id: req.body._id }
+        let updateObj = { $set: { isSelected: req.body.isSelected } }
+        
+        if (req.body.tripType === 'spotsales') await spotModel.findOneAndUpdate(selection, updateObj)
+        if (req.body.tripType === 'assetTransfer') await assetModel.findOneAndUpdate(selection,updateObj)
+        if (req.body.tripType === 'salesOrder') await invoiceMasterModel.findOneAndUpdate(selection,updateObj)
+
+        return this.success(req, res, this.status.HTTP_OK, {messge: 'Select Status updated successfully'});
+
+      } catch (error) {
+        console.log(error)
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error)); 
+      };
+    };
 
     createSpotSales = async (req, res) => { // WithOut Trip Id
       try {
@@ -633,13 +651,25 @@ class MyTrip extends BaseController {
 
         let salesOrderTripIds = [], tripIds = [], orderArray = [], vehicleArray = [];
 
+        let options = {
+          method: 'GET',
+          uri: 'http://uat.apps.waycool.in:3001/api/v1/warehouse/'+req.user.warehouseId,
+          headers: {
+            'x-access-token': req.user.token,
+            'Content-Type': 'application/json' 
+        },
+          json: true
+        };
+
+        let response = await request(options);
+        if ( response.status != 200 ) return  this.success(req, res, this.status.HTTP_OK, { message: 'Warehouse not found' });
+        
         for (let Sotrip of req.body.salesOrder) {
           
             let salesOrderCode  = await seriesModel.findOne({ modelName: 'tripSalesOrder' }).lean();
             if (!salesOrderCode) salesOrderCode = await seriesModel.create({ modelName: 'tripSalesOrder', currentCount: 0 });
-            
-            let currentCount = salesOrderCode.currentCount + 1;
-            
+
+            let currentCount = salesOrderCode.currentCount + 1;            
             Sotrip.salesOrderCode = currentCount; 
             Sotrip.salesOrderCodeAlias = currentCount;
     
@@ -656,14 +686,10 @@ class MyTrip extends BaseController {
           if (!tripId) tripId = await seriesModel.create({ modelName: 'trip', currentCount: 0 });
           
           let currentCount = tripId.currentCount + 1;
-          
           trip.tripId = currentCount; 
           trip.tripIdAlias = currentCount;
 
-          if (trip.hasSalesOrderOrStcokTransfer === true ) {
-            trip.salesOrderTripIds = salesOrderTripIds;
-          };
-
+          if (trip.hasSalesOrder === true ) trip.salesOrderTripIds = salesOrderTripIds;
           trip.deliveryDetails = req.body.deliveryDetails
 
           let tripCreated = await tripModel.create(trip);
@@ -696,6 +722,7 @@ class MyTrip extends BaseController {
                 let endOfTheDay = (DeliveryDate + " 23 59 00").toString();
                 
                 orderObj = {
+                    tripSalesOrderId:so._id,
                     customerName: so.salesOrderId.customerName,
                     customerCode: so.salesOrderId.customerCode,
                     latitude: so.salesOrderId.latitude,
@@ -747,6 +774,7 @@ class MyTrip extends BaseController {
               };
 
               vehicleObj = {
+                  tripId: v._id,
                   vehicleId: v.vehicleId._id,
                   name:  v.vehicleModel,
                   class: v.vehicleType,

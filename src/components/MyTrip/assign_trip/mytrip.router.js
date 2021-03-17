@@ -91,6 +91,11 @@ function tripsRoutes() {
       ctrl.getTransporterlist
     );
 
+    closed.route('/updateSelectedStatus').post(
+      verifyUserToken,
+      ctrl.updateSelectedStatus
+    )
+
     };
 };
 
