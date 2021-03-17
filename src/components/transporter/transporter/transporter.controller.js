@@ -911,7 +911,7 @@ class transporterController extends BaseController {
           isDeleted: 1
         }
       };
-      let isUpdated = await Model.findOneAndUpdate({
+      let isUpdated = await Model.update({
         transporterId: mongoose.Types.ObjectId(transporterId)
       }, dataToUpdate, {
         new: true,
@@ -920,22 +920,23 @@ class transporterController extends BaseController {
       })
       // check if inserted 
       if (isUpdated && !_.isEmpty(isUpdated)){
-        let isRateCategoryUnlinked = await modelAndRcMappingModel.findOneAndUpdate({
+        let isRateCategoryUnlinked = await modelAndRcMappingModel.update({
           transporterId: mongoose.Types.ObjectId(transporterId)
         }, dataToUpdate, {
           new: true,
           upsert: false,
           lean: true
         })
-        if(isRateCategoryUnlinked && !_isEmpty(isRateCategoryUnlinked)){
-          return this.deleteTransporterVehicleMapping(req.params.transporterId,dataToUpdate)
+        if(isRateCategoryUnlinked && !_.isEmpty(isRateCategoryUnlinked)){
+          return this.deleteTransporterVehicleMapping(req.params.transporterId,dataToUpdate,req,res)
 
         }else{
          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotDeleted);
 
         }
       } 
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotDeleted);
+      else 
+      return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.transporterNotDeleted);
 
       // catch any runtime error 
     } catch (err) {
@@ -944,15 +945,15 @@ class transporterController extends BaseController {
     }
   }
 
-   deleteTransporterVehicleMapping=async (transporterId,dataToUpdate)=>{
-    const mappingDeleted = await vehicleTransporterModelMapping.findOneAndUpdate({
+   deleteTransporterVehicleMapping=async (transporterId,dataToUpdate,req,res)=>{
+    const mappingDeleted = await vehicleTransporterModelMapping.update({
       transporterId: mongoose.Types.ObjectId(transporterId)
     }, dataToUpdate, {
       new: true,
       upsert: false,
       lean: true
     })
-    if(mappingDeleted && !_isEmpty(mappingDeleted)){
+    if(mappingDeleted && !_.isEmpty(mappingDeleted)){
       return this.success(req, res, this.status.HTTP_OK, {}, this.messageTypes.transporterDeleted);
 
     }else{
