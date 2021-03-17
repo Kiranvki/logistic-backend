@@ -17,6 +17,11 @@ const invoiceMaster = new Schema({
     type: Date
   },
 
+  isSelected: {
+    type: Boolean,
+    default: false
+  },
+
   'cityId': {
     type: 'String',
     enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
