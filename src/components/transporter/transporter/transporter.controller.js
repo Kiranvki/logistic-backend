@@ -911,8 +911,8 @@ class transporterController extends BaseController {
           isDeleted: 1
         }
       };
-      let isUpdated = await Model.update({
-        transporterId: mongoose.Types.ObjectId(transporterId)
+      let isUpdated = await Model.updateMany({
+        _id: mongoose.Types.ObjectId(transporterId)
       }, dataToUpdate, {
         new: true,
         upsert: false,
@@ -920,7 +920,7 @@ class transporterController extends BaseController {
       })
       // check if inserted 
       if (isUpdated && !_.isEmpty(isUpdated)){
-        let isRateCategoryUnlinked = await modelAndRcMappingModel.update({
+        let isRateCategoryUnlinked = await modelAndRcMappingModel.updateMany({
           transporterId: mongoose.Types.ObjectId(transporterId)
         }, dataToUpdate, {
           new: true,
@@ -946,7 +946,7 @@ class transporterController extends BaseController {
   }
 
    deleteTransporterVehicleMapping=async (transporterId,dataToUpdate,req,res)=>{
-    const mappingDeleted = await vehicleTransporterModelMapping.update({
+    const mappingDeleted = await vehicleTransporterModelMapping.updateMany({
       transporterId: mongoose.Types.ObjectId(transporterId)
     }, dataToUpdate, {
       new: true,
