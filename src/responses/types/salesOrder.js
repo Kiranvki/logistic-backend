@@ -28,6 +28,7 @@ module.exports = {
     pickerBoyDetailsNotUpdated: 'Error! Updating PickerBoy details !',
     // pending sales order details
     pendingSalesOrderFetchedSuccessfully: 'Pending SalesOrder Details Fetched Successfully !',
+    todoOrderFetchedSuccessfully: 'Todo Order Details Fetched Successfully !',
     unableToFetchedPendingSalesOrder: 'Unable to fetch Pending SalesOrder Details!',
     //pickerboy salesorder mapping id or item code is invalid
     pickerBoySalesOrderIdOrItemCodeInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id or Item Code is either deleted or deactivated !',

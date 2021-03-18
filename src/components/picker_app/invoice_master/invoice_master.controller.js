@@ -36,6 +36,7 @@ class areaSalesManagerController extends BaseController {
     this.messageTypes = this.messageTypes.invoice;
   }
   getDetails = async (saleOrderId) => {
+    console.log(saleOrderId)
     try {
       info('Get saleOrderId  details !');
 

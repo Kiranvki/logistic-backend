@@ -444,7 +444,7 @@ spotSalesId:0
         model= require('../../MyTrip/assign_trip/model/spotsales.model')
         break;
       default:
-        model=null
+        model=null;
         break;
 
     }
@@ -461,7 +461,7 @@ spotSalesId:0
       }
     ]
 
-    let orderData = await model.aggregate(pipeline)
+    let orderData = await model.aggregate(pipeline);
   
 
   
@@ -748,7 +748,7 @@ _id:0
 
   }
 
-
+// CHeck the reponse and add proper key and vehicle details
   updateOdometerReading = async (req,res,next)=>{
     let ID = parseInt(req.params.tripid);
     let user = req.user // user 
@@ -888,7 +888,7 @@ _id:0
   }
 
 
-
+// Changes required and check the response
 getInTrip = async (req,res,next)=>{
   info('getting in trip data!')
   let user = req.user, // user 
@@ -1030,7 +1030,7 @@ let activeTripData = await tripModel.aggregate(pipeline);
 
 
 // delivery EXecutive history
-
+// Changes required
 getHistoryByOrderType = async (req,res,next)=>{
   let user = req.user, // user 
    type = req.params.type,
@@ -1279,7 +1279,7 @@ updateItemStatusAndCaretOut = async (req,res,next)=>{
   }
 }
 
-
+// Changes required and check the response body
 getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
   console.log(req.query.page)
   let pageSize=100;

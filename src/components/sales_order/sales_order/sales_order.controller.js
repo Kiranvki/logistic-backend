@@ -43,9 +43,11 @@ class areaSalesManagerController extends BaseController {
     try {
       info('Get saleOrderId  details !');
 
+
+
       // get details 
       return await Model.findOne({
-        _id: mongoose.Types.ObjectId(saleOrderId),
+        _id: mongoose.Types.ObjectId(saleOrderId)
         // status: 1,
         // isDeleted: 0
       }).lean().then((res) => {
@@ -310,6 +312,107 @@ class areaSalesManagerController extends BaseController {
       }
     }
   }
+
+
+
+    // Internal Function get the history sales order details 
+    getHistorySalesOrder = async (salesQueryDetails) => {
+      try {
+        info('Get History Sales Order details !');
+        let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
+        let sortingArray = {};
+        sortingArray[sortBy] = -1;
+        let skip = parseInt(page - 1) * pageSize;
+  
+  console.log(startOfTheDay)
+        let searchObject = {
+          // 'isPacked': 0,
+          // 'fulfillmentStatus': 0,
+          // 'locationId': parseInt(locationId),
+          // 'cityId': cityId,
+  
+          'deliveryDate': {
+          
+            '$lte': startOfTheDay
+          }
+        };
+  
+        // creating a match object
+        if (searchKey !== '')
+          searchObject = {
+            ...searchObject,
+            '$or': [{
+              'customerName': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'customerCode': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }]
+          };
+          console.log(...searchObject)
+        let totalCount = await Model.aggregate([{
+          $match: 
+            searchObject
+          
+        },
+        {
+          $count: 'sum'
+        }
+        ]).allowDiskUse(true);
+  
+        // calculating the total number of applications for the given scenario
+        if (totalCount[0] !== undefined)
+          totalCount = totalCount[0].sum;
+        else
+          totalCount = 0;
+  
+        // get list  
+        let salesOrderList = await Model.aggregate([{
+          $match: {
+            ...searchObject
+          }
+        }, {
+          $sort: sortingArray
+        }, {
+          $skip: skip
+        }, {
+          $limit: pageSize
+        },
+        {
+          $project: {
+            'onlineReferenceNo': 1,
+            'customerCode': 1,
+            'customerName': 1,
+            'customerType': 1,
+            'shippingId':1,
+            'cityId':1,
+            'status':1,
+            'invoiceNo': 1,
+            'deliveryDate':1,
+            'fulfillmentStatus': 1,
+            'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
+          }
+        }
+        ]).allowDiskUse(true)
+  
+        return {
+          success: true,
+          data: salesOrderList,
+          total: totalCount
+        };
+  
+        // catch any runtime error 
+      } catch (err) {
+        error(err);
+        return {
+          success: false,
+        }
+      }
+    }
 
   // get user details 
   get = async (req, res) => {
@@ -1582,6 +1685,55 @@ class areaSalesManagerController extends BaseController {
         error: err
       }
     }
+  }
+
+  getOrderByDeliveryDate = async (searchObject)=>{
+    
+   try{
+    let totalCount = await Model.aggregate([{
+      $match: {
+        ...searchObject
+      }
+    },
+    {
+      $count: 'sum'
+    }
+    ]).allowDiskUse(true);
+
+    // calculating the total number of applications for the given scenario
+    if (totalCount[0] !== undefined)
+      totalCount = totalCount[0].sum;
+    else
+      totalCount = 0;
+    return Model.aggregate([
+      {
+        '$match':{
+          ...searchObject
+        }
+      }
+  ]).allowDiskUse(true)
+  .then((data) => {
+    if (data && data.length) {
+      return {
+        total: totalCount,
+        success: true,
+        data: data
+      };
+    } else {
+      return {
+        success: false
+      }
+    }
+  })
+
+// catch any runtime error
+} catch (err) {
+error(err);
+return {
+  success: false,
+  error: err
+}
+}
   }
 }
 

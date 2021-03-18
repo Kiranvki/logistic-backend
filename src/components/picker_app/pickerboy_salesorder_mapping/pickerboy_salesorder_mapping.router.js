@@ -55,23 +55,35 @@ function userRoutes() {
     // get customer details 
     closed.route('/customer/details/:customerId/city/:cityId').get(
       [joiCustomerGetDetails], // joi validation
-      verifyAppToken, // verify app user token 
+      // verifyAppToken, // verify app user token 
       ctrl.getCustomerDetails // controller function 
     );
 
     // get the todays task sales order for today
-    closed.route('/sales-order/todays-task').get(
-      verifyAppToken,   // verify app token
-      ctrl.getToDoSalesOrder // get controller 
+    // salesorders,stocksales,spotsales,assetTransfer 
+
+    // closed.route('/:type/todays-task').get(
+    //   verifyAppToken,   // verify app token
+    //   ctrl.getToDoSalesOrder // get controller 
+    // );
+
+    closed.route('/:type/todays-task').get(
+      // verifyAppToken,   // verify app token
+      ctrl.getTodaysOrder // get controller 
     );
 
+
+    
     // get the single sale order details
-    closed.route('/sales-order/:saleOrderId').get(
+    closed.route('/:type/detail/:orderId').get(
       [joiSalesOrderDetails],
-      verifyAppToken,   // verify app token
-      isValidSalesOrder,
-      ctrl.getSalesOrder // get controller 
+      // verifyAppToken,   // verify app token
+      // isValidSalesOrder,
+      ctrl.getOrderDetails // get controller 
     );
+
+    
+
 
     // add the salesorder in the packing stage
     closed.route('/sales-order/start-pick/:saleOrderId').patch(
@@ -111,13 +123,19 @@ function userRoutes() {
       verifyAppToken,   // verify app token
       ctrl.getPendingSalesOrder // ongoing SO/invoice status
     );
-
+    
+// get the invoice detail by invoice mongo id
+    closed.route('/invoice/:type/:invId').get(
+       // joi history SO
+      // verifyAppToken,   // verify app token
+      ctrl.getInvoiceDocumentDetail // history SO/invoice status
+    );
 
 
     // get the history invoice status
-    closed.route('/history').get(
+    closed.route('/history/:type').get(
       [joiHistoryOfSO], // joi history SO
-      verifyAppToken,   // verify app token
+      // verifyAppToken,   // verify app token
       ctrl.getHistoryOfSalesOrder // history SO/invoice status
     );
   };

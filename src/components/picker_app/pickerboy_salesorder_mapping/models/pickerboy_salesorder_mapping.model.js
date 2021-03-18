@@ -18,7 +18,22 @@ const pickerBoySalesOrderMapping = new Schema({
     type: String,
   },
   'salesOrderId': {
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'salesorder',
+  },
+  'purchaseOrderId': {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'salesorder',
+  },
+  'stockTransferId': {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'salesorder',
+  },
+  'assetTransferId': {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'salesorder',
+  },
+  'truckSpotSalesId': {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'salesorder',
   },

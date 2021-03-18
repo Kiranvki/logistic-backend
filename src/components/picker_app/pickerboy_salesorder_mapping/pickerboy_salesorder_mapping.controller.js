@@ -2,8 +2,12 @@
 const SalesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
 const PickerBoyCtrl = require('../../employee/picker_boy/picker_boy.controller');
 const AttendanceCtrl = require('../onBoard/app_picker_user_attendance/app_picker_user_attendance.controller');
-
+const salesOrderModel= require('../../sales_order/sales_order/models/sales_order.model')
+const salesOrderInvMappingModel = require('../../MyTrip/assign_trip/model/salesOrder.model');
+const salesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
+const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model');
 const BasicCtrl = require('../../basic_config/basic_config.controller');
+const invMasterCtrl = require('../invoice_master/invoice_master.controller');
 const BaseController = require('../../baseController');
 const Model = require('./models/pickerboy_salesorder_mapping.model');
 const mongoose = require('mongoose');
@@ -117,6 +121,31 @@ class pickerboySalesOrderMappingController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+// get Invoice
+
+getInvoiceDocumentDetail = async (req,res)=>{
+      // get the sale Order Details
+      try{
+      let id = req.params.invId
+      console.log('id',id)
+      let dataObj  = await invMasterCtrl.getDetails(id);
+      let saleOrderDetails = {'type':req.params.type};
+
+      // check if inserted 
+      if (dataObj && !_.isEmpty(dataObj)) return this.success(req, res, this.status.HTTP_OK, dataObj, this.messageTypes.salesOrderDetailsFetched);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  
+
+
 
   // get customer details 
   getCustomerDetails = async (req, res) => {
@@ -262,12 +291,12 @@ class pickerboySalesOrderMappingController extends BaseController {
 
 
 
-
+// pending logic clarification required
 
   // get to do sales order details
   getToDoSalesOrder = async (req, res) => {
     try {
-      info('Getting  Sales Order  Data !');
+      info('Getting  Sales Order  Data !!!');
       let page = req.query.page || 1,
         assignedSalesOrderId = [],
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
@@ -293,6 +322,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       }).toDate();
 
       //finding the total sales order records, which are already assigned to the pickerboy
+
 
       let assignedSalesOrderData = await Model.find({
         'createdAt': {
@@ -342,14 +372,102 @@ class pickerboySalesOrderMappingController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+// pending for spot transfer asset transfer
+
+getOrderDetails = async (req,res,next)=>{
+    let Model;
+    info('Getting the Order History!!!');
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        orderId = req.params.orderId,
+        searchKey =  '', //req.query.search ||
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId =  'N/A', // cityId req.user.cityId ||
+        searchDate = req.body.searchDate || '',
+         orderData = {}
+    try {
+      info('SalesOrder GET DETAILS !');
+      console.log(req.params.type)
+      switch(req.params.type){
+        case 'salesorders':
+          Model= salesOrderInvMappingModel;
+          orderData = await salesOrderInvMappingModel.findOne({'salesOrderId':mongoose.Types.ObjectId('5ff4161a56742a7178ed445d')}).populate('salesOrderId').lean().then((res) => {
+          
+            if (res && !_.isEmpty(res)) {
+              return {
+                success: true,
+                data: res
+              }
+            } else {
+              error('Error Searching Data in saleOrder DB!');
+              return {
+                success: false
+              }
+            }
+          }).catch(err => {
+            error(err);
+            return {
+              success: false,
+              error: err
+            }
+          });
+          
+          break;
+        case 'spotsales':
+          Model= spotSalesModel;
+          
+          break;
+        case 'assettransfer':
+          mMdel= require('../../MyTrip/assign_trip/model/spotsales.model')
+          break;
+        default:
+          Model=null
+          break;
+  
+      }
+      // get the sale Order Details
+      let saleOrderDetails = {'type':req.params.type};
+      
+    
+      // check if inserted 
+      if (orderData && !_.isEmpty(orderData)) return this.success(req, res, this.status.HTTP_OK, orderData, this.messageTypes.salesOrderDetailsFetched);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
 
   // get details 
   getSalesOrder = async (req, res) => {
+    let Model;
     try {
       info('SalesOrder GET DETAILS !');
-
+      console.log(req.params.type)
+      switch(req.params.type){
+        case 'salesorders':
+          Model= salesOrderModel;
+          break;
+        case 'spotsales':
+          Model= spotSalesModel;
+          
+          break;
+        case 'assettransfer':
+          mMdel= require('../../MyTrip/assign_trip/model/spotsales.model')
+          break;
+        default:
+          Model=null
+          break;
+  
+      }
       // get the sale Order Details
-      let saleOrderDetails = req.body.saleOrderDetails;
+      let saleOrderDetails = {'type':req.params.type};
 
       // check if inserted 
       if (saleOrderDetails && !_.isEmpty(saleOrderDetails)) return this.success(req, res, this.status.HTTP_OK, saleOrderDetails, this.messageTypes.salesOrderDetailsFetched);
@@ -983,7 +1101,7 @@ class pickerboySalesOrderMappingController extends BaseController {
         startOfTheDay,
         endOfTheDay
       }
-      console.log('salesQueryDetails', salesQueryDetails);
+      // console.log('salesQueryDetails', salesQueryDetails);
 
       // finding the  data from the db 
       let salesOrderData = await SalesOrderCtrl.getPartialSalesOrder(salesQueryDetails);
@@ -1012,14 +1130,14 @@ class pickerboySalesOrderMappingController extends BaseController {
   // get history salesorder details
   getHistoryOfSalesOrder = async (req, res) => {
     try {
-      info('Getting  the Pending Sales Order  Data !');
+      info('Getting the Order History!!!');
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey = req.query.search || '',
+        searchKey =  '', //req.query.search ||
         sortBy = req.query.sortBy || 'createdAt',
         skip = parseInt(page - 1) * pageSize,
-        locationId = req.user.locationId || 0, // locationId 
-        cityId = req.user.cityId || 'N/A', // cityId 
+        locationId = 0, // locationId req.user.locationId || 
+        cityId =  'N/A', // cityId req.user.cityId ||
         searchDate = req.body.searchDate || '';
 
       let startOfTheDay = moment().set({
@@ -1029,13 +1147,13 @@ class pickerboySalesOrderMappingController extends BaseController {
         millisecond: 0
       }).toDate();
 
-      // getting the end of the day 
       let endOfTheDay = moment().set({
         h: 24,
         m: 24,
         s: 0,
         millisecond: 0
       }).toDate();
+  
 
       if (searchDate && !_.isEmpty(searchDate)) {
         console.log('he');
@@ -1067,18 +1185,20 @@ class pickerboySalesOrderMappingController extends BaseController {
         startOfTheDay,
         endOfTheDay
       }
+
       console.log('salesQueryDetails', salesQueryDetails);
 
       // finding the  data from the db 
-      let salesOrderData = await SalesOrderCtrl.getPartialSalesOrder(salesQueryDetails);
-      // success
-      if (salesOrderData.success) {
+      let hisoryData = await SalesOrderCtrl.getHistorySalesOrder(salesQueryDetails);
+      console.log(hisoryData)
+      // success 
+      if (hisoryData.success) {
         return this.success(req, res, this.status.HTTP_OK, {
-          results: salesOrderData.data,
+          results: hisoryData.data,
           pageMeta: {
             skip: parseInt(skip),
             pageSize: pageSize,
-            total: salesOrderData.total
+            total: hisoryData.total
           }
         }, this.messageTypes.pendingSalesOrderFetchedSuccessfully);
       }
@@ -1177,6 +1297,136 @@ class pickerboySalesOrderMappingController extends BaseController {
       }
     }
   }
+
+
+
+  getTodaysOrder = async(req,res,next)=>{
+    let orderCtrl
+try{
+    info('Getting the Order History!!!');
+    let page = req.query.page || 1,
+      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+      searchKey =  '', //req.query.search ||
+      sortBy = req.query.sortBy || 'createdAt',
+      skip = parseInt(page - 1) * pageSize,
+      locationId = 0, // locationId req.user.locationId || 
+      cityId =  'N/A', // cityId req.user.cityId ||
+      searchDate = req.body.searchDate || '',
+      type = req.params.type;
+
+    let startOfTheDay = moment().set({
+      h: 0,
+      m: 0,
+      s: 0,
+      millisecond: 0
+    }).toDate();
+
+    let endOfTheDay = moment().set({
+      h: 24,
+      m: 24,
+      s: 0,
+      millisecond: 0
+    }).toDate();
+
+    
+    if (searchDate && !_.isEmpty(searchDate)) {
+      
+
+      startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+
+      // getting the end of the day 
+      endOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+        h: 24,
+        m: 24,
+        s: 0,
+        millisecond: 0
+      }).toDate();
+    }
+
+
+    let searchObject = {
+
+      'deliveryDate': {
+        '$gte': startOfTheDay,
+        '$lte': endOfTheDay
+      }
+    };
+
+    // creating a match object
+    if (searchKey !== '')
+      searchObject = {
+        ...searchObject,
+        '$or': [{
+          'createdBy': {
+            $regex: searchKey,
+            $options: 'is'
+          }
+        }, {
+          'pickerBoyId': {
+            $regex: searchKey,
+            $options: 'is'
+          }
+        }]
+      };
+    console.log('searchObject', searchObject);
+
+
+
+    // get list
+
+
+
+ 
+
+    switch(type){
+
+    case 'salesorders':
+      orderCtrl = salesOrderCtrl;
+      break;  
+    case 'spotsales':
+      orderCtrl= spotSalesModel;
+      
+      break;
+    case 'assettransfer':
+      orderCtrl= require('../../MyTrip/assign_trip/model/spotsales.model')
+      break;
+    default:
+      orderCtrl=null
+      break;
+
+  }
+
+
+  let todaysOrderData = await orderCtrl.getOrderByDeliveryDate(searchObject);
+
+  console.log(todaysOrderData);
+
+
+
+  if (todaysOrderData.success) {
+    return this.success(req, res, this.status.HTTP_OK, {
+      results: todaysOrderData.data,
+      pageMeta: {
+        skip: parseInt(skip),
+        pageSize: pageSize,
+        total: todaysOrderData.total
+      }
+    }, this.messageTypes.todoOrderFetchedSuccessfully);
+  }
+  else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
+
+  // catch any runtime error 
+} catch (err) {
+  error(err);
+  this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+}
+  }
+  
 
 
 

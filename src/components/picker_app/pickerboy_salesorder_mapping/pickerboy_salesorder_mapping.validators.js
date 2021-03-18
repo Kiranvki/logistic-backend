@@ -17,7 +17,7 @@ const schemas = {
 
   // joi salesorder details
   joiSalesOrderDetails: Joi.object().keys({
-    saleOrderId: Joi.string().trim().label('SaleOrder Id').required(),
+    orderId: Joi.string().trim().label('Order Id').required(),
   }),
 
   // joi Scan Sales Order details
