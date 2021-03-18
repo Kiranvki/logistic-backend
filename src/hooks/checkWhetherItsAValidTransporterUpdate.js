@@ -19,7 +19,7 @@ module.exports = async (req, res, next) => {
         info('check whether the Transporter exists!');
         // creating a valid mongoose type object 
         let objectId = mongoose.Types.ObjectId;
-        let vehicleDetails = {}, // name  
+        let transporterDetails = {}, // name  
             locationDetails = {}, // transportercontactNo
             contactPersonalDetails = {}; //transporterAltContactNo
 
@@ -40,9 +40,9 @@ module.exports = async (req, res, next) => {
         //     emailID = req.body.contactPersonalDetails.emailID, //emailID
         //     altEmailID = req.body.contactPersonalDetails.altEmailID, //altEmailID
 
-        vehicleDetails = {
-            ...vehicleDetails,
-            ...req.body.vehicleDetails
+        transporterDetails = {
+            ...transporterDetails,
+            ...req.body.transporterDetails
         }; // name  
         locationDetails = {
             ...locationDetails,
@@ -69,16 +69,16 @@ module.exports = async (req, res, next) => {
                 info('VALID Transporter!');
 
                 // check whether the field values are changed or not 
-                if (vehicleDetails && vehicleDetails.name && vehicleDetails.name == gettransporterDetails.data.vehicleDetails.name) isNotChanged.push('name');
-                else if (vehicleDetails && vehicleDetails.name) toChangeObject = { ...toChangeObject, 'name': vehicleDetails.name }
-                if (vehicleDetails && vehicleDetails.contactNo && vehicleDetails.contactNo == gettransporterDetails.data.vehicleDetails.contactNo) isNotChanged.push('contactNo')
-                else if (vehicleDetails && vehicleDetails.contactNo) toChangeObject = { ...toChangeObject, 'contactNo': vehicleDetails.contactNo }
-                if (vehicleDetails && vehicleDetails.altContactNo && vehicleDetails.altContactNo == gettransporterDetails.data.vehicleDetails.altContactNo) isNotChanged.push('altContactNo')
-                else if (vehicleDetails && vehicleDetails.altContactNo) toChangeObject = { ...toChangeObject, 'altContactNo': vehicleDetails.altContactNo }
-                if (vehicleDetails && vehicleDetails.email && vehicleDetails.email == gettransporterDetails.data.vehicleDetails.email) isNotChanged.push('email');
-                else if (vehicleDetails && vehicleDetails.email) toChangeObject = { ...toChangeObject, 'email': vehicleDetails.email }
-                if (vehicleDetails && vehicleDetails.altEmail && vehicleDetails.altEmail == gettransporterDetails.data.vehicleDetails.altEmail) isNotChanged.push('altEmail')
-                else if (vehicleDetails && vehicleDetails.altEmail) toChangeObject = { ...toChangeObject, 'altEmail': vehicleDetails.altEmail }
+                if (transporterDetails && transporterDetails.name && transporterDetails.name == gettransporterDetails.data.transporterDetails.name) isNotChanged.push('name');
+                else if (transporterDetails && transporterDetails.name) toChangeObject = { ...toChangeObject, 'name': transporterDetails.name }
+                if (transporterDetails && transporterDetails.contactNo && transporterDetails.contactNo == gettransporterDetails.data.transporterDetails.contactNo) isNotChanged.push('contactNo')
+                else if (transporterDetails && transporterDetails.contactNo) toChangeObject = { ...toChangeObject, 'contactNo': transporterDetails.contactNo }
+                if (transporterDetails && transporterDetails.altContactNo && transporterDetails.altContactNo == gettransporterDetails.data.transporterDetails.altContactNo) isNotChanged.push('altContactNo')
+                else if (transporterDetails && transporterDetails.altContactNo) toChangeObject = { ...toChangeObject, 'altContactNo': transporterDetails.altContactNo }
+                if (transporterDetails && transporterDetails.email && transporterDetails.email == gettransporterDetails.data.transporterDetails.email) isNotChanged.push('email');
+                else if (transporterDetails && transporterDetails.email) toChangeObject = { ...toChangeObject, 'email': transporterDetails.email }
+                if (transporterDetails && transporterDetails.altEmail && transporterDetails.altEmail == gettransporterDetails.data.transporterDetails.altEmail) isNotChanged.push('altEmail')
+                else if (transporterDetails && transporterDetails.altEmail) toChangeObject = { ...toChangeObject, 'altEmail': transporterDetails.altEmail }
                 if (locationDetails && locationDetails.streetNo && locationDetails.streetNo == gettransporterDetails.data.locationDetails.streetNo) isNotChanged.push('streetNo')
                 else if (locationDetails && locationDetails.streetNo) toChangeObject = { ...toChangeObject, 'streetNo': locationDetails.streetNo }
                 if (locationDetails && locationDetails.address && locationDetails.address == gettransporterDetails.data.locationDetails.address) isNotChanged.push('address')
@@ -104,7 +104,7 @@ module.exports = async (req, res, next) => {
                 // including it to request body 
                 req.body.toChangeObject = toChangeObject;
                 req.body.isNotChanged = isNotChanged;
-                req.body.vehicleDetailsFromDb = gettransporterDetails.data.vehicleDetails;
+                req.body.transporterDetailsFromDb = gettransporterDetails.data.transporterDetails;
                 req.body.locationDetailsFromDb = gettransporterDetails.data.locationDetails;
                 req.body.contactPersonalDetailsFromDb = gettransporterDetails.data.contactPersonalDetails;
 

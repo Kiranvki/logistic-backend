@@ -841,17 +841,17 @@ class transporterController extends BaseController {
         locationDetails = {},
         contactPersonalDetails = {},
         toChangeObject = req.body.toChangeObject || '',
-        vehicleDetailsFromDb = req.body.vehicleDetailsFromDb || '',
+        transporterDetailsFromDb = req.body.transporterDetailsFromDb || '',
         locationDetailsFromDb = req.body.locationDetailsFromDb || '',
         contactPersonalDetailsFromDb = req.body.contactPersonalDetailsFromDb || '';
 
       // creating data to insert
       transporterDetails = {
-        'name': toChangeObject.name ? toChangeObject.name : vehicleDetailsFromDb.name,
-        'contactNo': toChangeObject.contactNo ? toChangeObject.contactNo : vehicleDetailsFromDb.contactNo,
-        'altContactNo': toChangeObject.altContactNo ? toChangeObject.altContactNo : vehicleDetailsFromDb.altContactNo,
-        'email': toChangeObject.email ? toChangeObject.email : vehicleDetailsFromDb.email,
-        'altEmail': toChangeObject.altEmail ? toChangeObject.altEmail : vehicleDetailsFromDb.altEmail,
+        'name': toChangeObject.name ? toChangeObject.name : transporterDetailsFromDb.name,
+        'contactNo': toChangeObject.contactNo ? toChangeObject.contactNo : transporterDetailsFromDb.contactNo,
+        'altContactNo': toChangeObject.altContactNo ? toChangeObject.altContactNo : transporterDetailsFromDb.altContactNo,
+        'email': toChangeObject.email ? toChangeObject.email : transporterDetailsFromDb.email,
+        'altEmail': toChangeObject.altEmail ? toChangeObject.altEmail : transporterDetailsFromDb.altEmail,
       }
 
       locationDetails = {
