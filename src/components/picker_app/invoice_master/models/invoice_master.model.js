@@ -16,10 +16,12 @@ const invoiceMaster = new Schema({
   so_deliveryDate: {
     type: Date
   },
-  'isSelected':{
-    type:Boolean,
-    default:false
+
+  isSelected: {
+    type: Boolean,
+    default: false
   },
+
   'cityId': {
     type: 'String',
     enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']

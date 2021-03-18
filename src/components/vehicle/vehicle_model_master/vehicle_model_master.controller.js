@@ -24,6 +24,18 @@ class VehicleModel extends BaseController{
   createVehicleModel = async (req, res) => {
     try {
       const data = req.body;
+      const modelAvailable = await Model.findOne({
+        $and: [{
+          $or: [
+            {name: data.name},
+            {brand: data.brand}
+          ]
+        },{isDeleted: 0}]
+           
+      })
+      if(modelAvailable){
+          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.vehicleModelAlreadyAvailable);
+      }
       const savedVehicleModel =  await Model.create(data);
        if(savedVehicleModel){
         return this.success(req, res, this.status.HTTP_OK, savedVehicleModel, this.messageTypes.vehicleModelCreated);
@@ -40,10 +52,12 @@ class VehicleModel extends BaseController{
     let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; });
       let skip = parseInt(page - 1) * pageSize;
-
+      const sortBy = req.query.sortBy || 'createdAt'
     try {
       let totalVehicleModel = await Model.countDocuments();
-       const vehicleModel =   await Model.find().limit(pageSize).skip(skip);
+       const vehicleModel =   await Model.find({
+         isDeleted:0, 
+         }).sort({sortBy: -1}).limit(pageSize).skip(skip);
      const   pageMeta={
         skip: parseInt(skip),
         pageSize: pageSize,
@@ -96,7 +110,8 @@ class VehicleModel extends BaseController{
       const vehicleModelData = await transporterModel.aggregate([
          {
         $match: {
-        _id: mongoose.Types.ObjectId(req.params.transporterId),     
+        _id: mongoose.Types.ObjectId(req.params.transporterId),
+        isDeleted: 0     
        },
       },
       {

@@ -61,7 +61,7 @@ class MyTrip extends BaseController {
                                 .populate({path: 'so_db_id', select: 'orderPK status' })
                                 .limit(limit)
                                 .skip(skipRec)
-                                .select('invoiceNo so_deliveryDate customerName cityId itemSupplied orderPK')
+                                .select('invoiceNo isSelected so_deliveryDate customerName cityId itemSupplied orderPK')
                                 .lean();
 
             let totalRec = await invoiceMasterModel.countDocuments(projection);
@@ -69,6 +69,7 @@ class MyTrip extends BaseController {
             
             getSalesOrder = getSalesOrder.map( ( v ) => {
                 items = v.itemSupplied.length;
+                v.isSelected = v.isSelected;
                 v.so_id =  v.so_db_id.orderPK;
                 v.status = v.so_db_id.status;
                 v.so_db_id = v.so_db_id._id;
@@ -355,6 +356,24 @@ class MyTrip extends BaseController {
     };
 
     //---------------------------------------------------------
+    
+    updateSelectedStatus = async (req, res) =>{
+      try {
+        
+        let selection = { _id: req.body._id }
+        let updateObj = { $set: { isSelected: req.body.isSelected } }
+        
+        if (req.body.tripType === 'spotsales') await spotModel.findOneAndUpdate(selection, updateObj)
+        if (req.body.tripType === 'assetTransfer') await assetModel.findOneAndUpdate(selection,updateObj)
+        if (req.body.tripType === 'salesOrder') await invoiceMasterModel.findOneAndUpdate(selection,updateObj)
+
+        return this.success(req, res, this.status.HTTP_OK, {messge: 'Select Status updated successfully'});
+
+      } catch (error) {
+        console.log(error)
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error)); 
+      };
+    };
 
     createSpotSales = async (req, res) => { // WithOut Trip Id
       try {
@@ -545,6 +564,54 @@ class MyTrip extends BaseController {
       };
     };
 
+    getTransporterlist = async (req, res) => {
+      try {
+
+        let cityId = req.query.cityId || req.user.region, transporterArray = [], limit = 10, page = 1, skipRec = 0;
+
+        limit = !req.query.limit ? limit = limit : limit = parseInt(req.query.limit);
+        page = !req.query.page ? page = page - 1 : page = parseInt(req.query.page) - 1; 
+    
+        skipRec = page * limit;
+        
+        let projection = { 'locationDetails.city': cityId };
+
+        if (req.query.searchText && !req.query.searchText == '') {
+
+          projection =  { ... projection, ...   {
+            '$or':  [ { 'transporterDetails.name': { $regex: req.query.searchText, $options: 'i' } }
+            // , { 'salesManCode': { $regex: req.query.searchText, $options: 'i' } }
+           ]
+        } };
+          
+      };
+        
+        let transporters = await transporterModel.find(projection).select('vehicleDetails locationDetails transporterDetails').limit(limit).skip(skipRec).sort('-createdAt').lean();;
+        let totalRec = await transporterModel.countDocuments(projection);
+
+        for (let transporter of transporters ) {
+
+          let obj = {
+            name:  transporter.vehicleDetails ? transporter.vehicleDetails.name :  transporter.transporterDetails ? transporter.transporterDetails.name : '',
+            _id: transporter._id
+          };
+
+          transporterArray.push(obj);
+
+        };
+
+        return this.success(req, res, this.status.HTTP_OK, { result: transporterArray, pageMeta: {
+          skip: parseInt(skipRec),
+          pageSize: limit,
+          total: totalRec
+          } });
+
+      } catch (error) {
+        console.log(error)
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
+      };
+    };
+
     vehicleCountAndDetails = async (req, res) => {
       try {
 
@@ -585,13 +652,25 @@ class MyTrip extends BaseController {
 
         let salesOrderTripIds = [], tripIds = [], orderArray = [], vehicleArray = [];
 
+        let options = {
+          method: 'GET',
+          uri: 'http://uat.apps.waycool.in:3001/api/v1/warehouse/'+req.user.warehouseId,
+          headers: {
+            'x-access-token': req.user.token,
+            'Content-Type': 'application/json' 
+        },
+          json: true
+        };
+
+        let response = await request(options);
+        if ( response.status != 200 ) return  this.success(req, res, this.status.HTTP_OK, { message: 'Warehouse not found' });
+        
         for (let Sotrip of req.body.salesOrder) {
           
             let salesOrderCode  = await seriesModel.findOne({ modelName: 'tripSalesOrder' }).lean();
             if (!salesOrderCode) salesOrderCode = await seriesModel.create({ modelName: 'tripSalesOrder', currentCount: 0 });
-            
-            let currentCount = salesOrderCode.currentCount + 1;
-            
+
+            let currentCount = salesOrderCode.currentCount + 1;            
             Sotrip.salesOrderCode = currentCount; 
             Sotrip.salesOrderCodeAlias = currentCount;
     
@@ -608,14 +687,10 @@ class MyTrip extends BaseController {
           if (!tripId) tripId = await seriesModel.create({ modelName: 'trip', currentCount: 0 });
           
           let currentCount = tripId.currentCount + 1;
-          
           trip.tripId = currentCount; 
           trip.tripIdAlias = currentCount;
 
-          if (trip.hasSalesOrderOrStockTransfer === true ) {
-            trip.salesOrderTripIds = salesOrderTripIds;
-          };
-
+          if (trip.hasSalesOrder === true ) trip.salesOrderTripIds = salesOrderTripIds;
           trip.deliveryDetails = req.body.deliveryDetails
 
           let tripCreated = await tripModel.create(trip);
@@ -648,6 +723,7 @@ class MyTrip extends BaseController {
                 let endOfTheDay = (DeliveryDate + " 23 59 00").toString();
                 
                 orderObj = {
+                    tripSalesOrderId:so._id,
                     customerName: so.salesOrderId.customerName,
                     customerCode: so.salesOrderId.customerCode,
                     latitude: so.salesOrderId.latitude,
@@ -699,6 +775,7 @@ class MyTrip extends BaseController {
               };
 
               vehicleObj = {
+                  tripId: v._id,
                   vehicleId: v.vehicleId._id,
                   name:  v.vehicleModel,
                   class: v.vehicleType,

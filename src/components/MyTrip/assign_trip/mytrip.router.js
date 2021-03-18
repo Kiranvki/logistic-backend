@@ -84,6 +84,16 @@ function tripsRoutes() {
     closed.route('/getAssetTransfer').get(
       verifyUserToken,
       ctrl.getAssetTransfer
+    );
+
+    closed.route('/getTransporterlist').get(
+      verifyUserToken,
+      ctrl.getTransporterlist
+    );
+
+    closed.route('/updateSelectedStatus').post(
+      verifyUserToken,
+      ctrl.updateSelectedStatus
     )
 
     };

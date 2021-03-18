@@ -64,23 +64,17 @@ let spotSalesSchema = Schema({
     cityId: {
         type: String
     },
-    crateIn:
-    {
-      type: 'Number',
-      default:0
-    },
-    crateOut:
-    {
-      type: 'Number',
-      default:0
+    isSelected: {
+        type: Boolean,
+        default: false
     },
     spotIdAlias: {
         type: String
     },
     spotId: {
-    type: Number,
-    unique: true,
-    required: true
+        type: Number,
+        unique: true,
+        required: true
     }    
 },{
     timestamps: true
