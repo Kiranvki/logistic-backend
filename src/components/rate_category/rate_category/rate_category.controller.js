@@ -686,7 +686,7 @@ class rateCategoryController extends BaseController {
       expiresOn = currentDate>rateCategoryExpiryDate?'expired':moment(rateCategoryExpiryDate).format("DD MMM YYYY")
     }
     if(rateCategory.rateCategoryDetails.rateCategoryType==='Monthly'){
-      const rateCatogaryDate = rateCategory.createdAt
+      const rateCatogaryDate = createdAt
       const rateCategoryExpiryDate = rateCatogaryDate.setDate(rateCatogaryDate.getDate() + 30);
       const currentDate = new Date();
       expiresOn = currentDate>rateCategoryExpiryDate?'expired':moment(rateCategoryExpiryDate).format("DD MMM YYYY")
