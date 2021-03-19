@@ -81,7 +81,7 @@ closed.route('/trip/order/:type/:orderId/:phoneNumber').get(
         // verifyAppToken, // verify app token
         ctrl.updateOrderStatus 
       );
-// validation Pending
+
       closed.route('/trip/generategpn/:type').post(
         generateGpnVal,
         verifyDeliveryAppToken,
