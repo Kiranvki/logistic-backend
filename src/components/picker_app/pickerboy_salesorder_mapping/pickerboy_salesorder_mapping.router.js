@@ -88,7 +88,7 @@ function userRoutes() {
     // add the salesorder in the packing stage
     closed.route('/sales-order/start-pick/:saleOrderId').patch(
       [joiStartPickSalesOrder], // joi validation
-      verifyAppToken,  // verify app token
+      // verifyAppToken,  // verify app token
       isValidSalesOrder, //check whether the valid salesOrder Id
       isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
       ctrl.pickingState // get controller 
@@ -97,7 +97,7 @@ function userRoutes() {
     // once we have started picking then get the salesorder data for adding the item.
     closed.route('/sales-order/scan-order/:pickerBoySalesOrderMappingId').get(
       [joiScanSalesOrder], //joi scan order
-      verifyAppToken,  // verify app token
+      // verifyAppToken,  // verify app token
       //  isValidSalesOrder,
       ctrl.scanState // get controller 
     );

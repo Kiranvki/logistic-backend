@@ -535,13 +535,14 @@ getOrderDetails = async (req,res,next)=>{
 
       let dataToInsert = {
         'salesOrderId': saleOrderDetails._id,
-        'pickerBoyId': req.user._id,
-        'createdBy': req.user.email,
+        // 'pickerBoyId': req.user._id,
+        'pickerBoyId': mongoose.Types.ObjectId('60227a45c9e10d6cda8c182b'),
+        'createdBy': 'admin@waycool.in',//req.user.email,
         'pickingDate': new Date()
       };
 
       // inserting data into the db 
-      let isInserted = await Model.create(dataToInsert);
+      let isInserted = await Model.startPickingOrder(dataToInsert);
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
@@ -595,6 +596,7 @@ getOrderDetails = async (req,res,next)=>{
                 'customerType': 1,
                 'orderItems': 1,
                 'deliveryDate': 1,
+              
               }
             }
           ],
@@ -612,6 +614,9 @@ getOrderDetails = async (req,res,next)=>{
           'pickerBoyId': 1,
           'customerType': 1,
           'salesOrderId': 1,
+          'isItemPicked':1,
+          'updatedAt':1,
+          'isStartedPicking':1,
           'salesOrdersDetails.deliveryDate': 1,
           'salesOrdersDetails.invoiceNo': 1,
           'salesOrdersDetails.onlineReferenceNo': 1,
@@ -1301,7 +1306,7 @@ getOrderDetails = async (req,res,next)=>{
 
 
   getTodaysOrder = async(req,res,next)=>{
-    let orderCtrl
+    let orderModel
 try{
     info('Getting the Order History!!!');
     let page = req.query.page || 1,
@@ -1349,18 +1354,24 @@ try{
     }
 
 
-    let searchObject = {
-
+    let pipeline = [{
+      $match:{
       'deliveryDate': {
         '$gte': startOfTheDay,
         '$lte': endOfTheDay
       }
-    };
+    }
+    }];
 
     // creating a match object
     if (searchKey !== '')
-      searchObject = {
-        ...searchObject,
+    pipeline = [{
+      $match:{
+        'deliveryDate': {
+          '$gte': startOfTheDay,
+          '$lte': endOfTheDay
+        }
+      ,
         '$or': [{
           'createdBy': {
             $regex: searchKey,
@@ -1372,8 +1383,10 @@ try{
             $options: 'is'
           }
         }]
-      };
-    console.log('searchObject', searchObject);
+      }
+      
+      }];
+    console.log('searchObject', pipeline);
 
 
 
@@ -1386,35 +1399,59 @@ try{
     switch(type){
 
     case 'salesorders':
-      orderCtrl = salesOrderCtrl;
+      pipeline.push(
+        {
+          $lookup: {
+              from: 'pickerboyordermappings',
+              let: {
+                'orderId': '$_id'
+              },
+              pipeline: [
+                
+
+                {
+                  $match: {
+                    'invoiceDetail.isInvoice':false,
+                    'status': 1,
+                    'isDeleted': 0,
+                    '$expr': {
+                      '$eq': ['$salesOrderId', '$$orderId']
+                    }
+                  }
+                }],
+                as:'pickingStatus'
+          }   
+        }
+      )
+      orderModel = salesOrderModel;
       break;  
     case 'spotsales':
-      orderCtrl= spotSalesModel;
+      orderModel = spotSalesModel;
       
       break;
     case 'assettransfer':
-      orderCtrl= require('../../MyTrip/assign_trip/model/spotsales.model')
+      orderModel = require('../../MyTrip/assign_trip/model/spotsales.model')
       break;
     default:
-      orderCtrl=null
+      orderModel = salesOrderModel
       break;
 
   }
 
 
-  let todaysOrderData = await orderCtrl.getOrderByDeliveryDate(searchObject);
+  let todaysOrderData = await orderModel.aggregate(pipeline)
 
   console.log(todaysOrderData);
 
 
 
-  if (todaysOrderData.success) {
+  if (todaysOrderData) {
     return this.success(req, res, this.status.HTTP_OK, {
-      results: todaysOrderData.data,
+      results: todaysOrderData,
       pageMeta: {
         skip: parseInt(skip),
         pageSize: pageSize,
-        total: todaysOrderData.total
+        // total: todaysOrderData.total
       }
     }, this.messageTypes.todoOrderFetchedSuccessfully);
   }
