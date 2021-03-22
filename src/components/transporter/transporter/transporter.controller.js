@@ -517,6 +517,9 @@ class transporterController extends BaseController {
             {
               $lookup: {
                 from: 'vehicletransporterrcmappings',
+                let: {
+                  'id': '$_id'
+                },
                 // localField: "rateCategoryId",
                 // foreignField: "rateCategoryId",
                 pipeline: [
@@ -525,7 +528,7 @@ class transporterController extends BaseController {
                       'status': 1,
                       'isDeleted': 0,
                       '$expr': {
-                        '$eq': ['$rateCategoryId', '$rateCategoryId']
+                        '$eq': ['$vehicleModelId', '$$id']
                       }
                     },
                     
