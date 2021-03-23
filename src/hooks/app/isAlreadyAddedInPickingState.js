@@ -23,7 +23,7 @@ module.exports = async (req, res, next) => {
         if (objectId.isValid(saleOrderId)) {
 
             // check whether the sale Order id is already added or not
-            let isValidSalesOrderId = await pickerSalesOrderMappingCtrl.getSalesOrderDetails(saleOrderId)
+            let isValidSalesOrderId = await pickerSalesOrderMappingCtrl.isOrderInPickingState(saleOrderId)
 
             // if sales order Id is not added
             if (!isValidSalesOrderId.success) {

@@ -149,7 +149,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       info('Internal funct to View the Order Basket !');
 
       // get the basket data
-      let salesOrderData = await Model.aggregate([{
+      let pickerboySalesOrderData = await Model.aggregate([{
         $match: {
           '_id': mongoose.Types.ObjectId(pickerBoySalesOrderMappingId)
         }
@@ -176,11 +176,12 @@ class pickerboySalesOrderMappingController extends BaseController {
                 'salePrice': 1,
                 'taxPercentage': 1,
                 'discountPercentage': 1,
+                'itemDetails':1
 
               }
             }
           ],
-          as: 'availableItemDetails'
+          as: 'cartItems'
         }
       },
       {
@@ -207,7 +208,7 @@ class pickerboySalesOrderMappingController extends BaseController {
                 'otherChargesTaxInclusive': 1,
                 'customerType': 1,
                 'deliveryDate': 1,
-                'customerId': 1,
+                'customerId': 1
               }
             }
           ],
@@ -230,19 +231,24 @@ class pickerboySalesOrderMappingController extends BaseController {
           'salesOrdersDetails.customerType': 1,
           'salesOrdersDetails.deliveryDate': 1,
           'salesOrdersDetails.customerId': 1,
+          'salesOrdersDetails.soInvoiceNumber': 1,
+          'salesOrdersDetails.paymentMode': 1,
+          'salesOrdersDetails.upcomingDeliveryDate': 1,
+          'salesOrdersDetails.deliveryNo': 1,
+          'salesOrdersDetails.orderItems': 1,
           'pickerBoyId': 1,
           'customerType': 1,
           'salesOrderId': 1,
-          'availableItemDetails': 1
+          'cartItems': 1
         }
       }
       ])
 
       // check if inserted 
-      if (salesOrderData && !_.isEmpty(salesOrderData)) {
+      if (pickerboySalesOrderData && !_.isEmpty(pickerboySalesOrderData)) {
         return {
           success: true,
-          data: salesOrderData
+          data: pickerboySalesOrderData
         }
       } else {
         error('Error Searching Data in SO DB!');
@@ -564,7 +570,7 @@ class pickerboySalesOrderMappingController extends BaseController {
               }
             }
           ],
-          as: 'availableItemDetails'
+          as: 'cartItems'
         }
       },
       {
@@ -592,6 +598,7 @@ class pickerboySalesOrderMappingController extends BaseController {
                 'customerType': 1,
                 'deliveryDate': 1,
                 'customerId': 1,
+                'orderItems':1
               }
             }
           ],
@@ -617,7 +624,8 @@ class pickerboySalesOrderMappingController extends BaseController {
           'pickerBoyId': 1,
           'customerType': 1,
           'salesOrderId': 1,
-          'availableItemDetails': 1
+          'cartItems': 1,
+          'salesOrdersDetails.orderItems':1
         }
       }
       ])
@@ -627,13 +635,13 @@ class pickerboySalesOrderMappingController extends BaseController {
         //calculating the total basket amount -- needs to moved into hook
         //calculating the total quantity supplied and demanded
 
-        await salesOrderData[0].availableItemDetails.map((v, i) => {
+        await salesOrderData[0].cartItems.map((v, i) => {
           totalQuantitySupplied = v.suppliedQty + totalQuantitySupplied
           totalQuantityDemanded = v.quantity + totalQuantityDemanded
         });
 
         //calculating the discount and tax
-        for (let item of salesOrderData[0].availableItemDetails) {
+        for (let item of salesOrderData[0].cartItems) {
           //calculating discount
 
           let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.salePrice).toFixed(2))
@@ -887,14 +895,15 @@ class pickerboySalesOrderMappingController extends BaseController {
   }
 
   // Internal Function get  sales order  details
-  getSalesOrderDetails = (saleOrderId) => {
+  isOrderInPickingState = (saleOrderId) => {
     try {
       info('Get SalesOrder  Details !');
 
       // get details 
       return Model.findOne({
         salesOrderId: mongoose.Types.ObjectId(saleOrderId),
-        isDeleted: 0
+        isDeleted: 0,
+        state:1
       }).lean().then((res) => {
         if (res && !_.isEmpty(res)) {
           return {

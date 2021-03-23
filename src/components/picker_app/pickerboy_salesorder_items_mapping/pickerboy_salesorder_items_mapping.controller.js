@@ -146,6 +146,52 @@ class pickerSalesOrderMappingController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+  // Internal Function to delete cart items when invoice is generated
+  deleteCartItems = (pickerBoySalesOrderMappingId, itemId) => {
+    try {
+      info('delete cart items after invoice is generated !');
+
+      // get details 
+      return Model.update({
+        pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId)
+        },
+       {
+         $set: { 
+           isDeleted: 1,
+           status: 0
+          } 
+        },
+       {multi: true }
+
+      ).then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching item in PickerBoy Item SalesOrder Mapping DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+
 
 
 }

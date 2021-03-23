@@ -33,7 +33,7 @@ function userRoutes() {
     closed.route('/invoice/:pickerBoySalesOrderMappingId').get(
       ///  [joiGoFrugalSync], // joi validation
       isInvoiceGenerated, // check whether the invoice is already generated
-      verifyAppToken, // verify app user token 
+      // verifyAppToken, // verify app user token 
       ctrl.generateInvoice // post controller 
     );
 
@@ -41,9 +41,9 @@ function userRoutes() {
     // getting  invoice details
     closed.route('/invoice-details/:invoiceId').get(
       ///  [joiGoFrugalSync], // joi validation
-      isInvoiceGenerated, // check whether the invoice is already generated
-      verifyAppToken, // verify app user token 
-      ctrl.generateInvoice // post controller 
+      // isInvoiceGenerated, // check whether the invoice is already generated
+      // verifyAppToken, // verify app user token 
+      ctrl.getInvoiceDetails // post controller 
     );
   };
 }

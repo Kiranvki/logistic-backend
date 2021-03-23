@@ -120,6 +120,51 @@ class areaSalesManagerController extends BaseController {
       //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+  updateSalesOrderStatus = async (saleOrderId,soStatus) => {
+    try {
+      info('Get saleOrderId  details !');
+
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          fulfillmentStatus: soStatus
+        }
+      };
+
+      // get details 
+      return await Model.findOneAndUpdate({
+        _id: mongoose.Types.ObjectId(saleOrderId)
+      }, dataToUpdate, {
+        new: true,
+        upsert: false,
+        lean: true
+      })
+        .then((res) => {
+          if (res && !_.isEmpty(res)) {
+            return {
+              success: true,
+              data: res
+            }
+          } else {
+            error('Error Searching Data in saleOrder DB!');
+            return {
+              success: false
+            }
+          }
+        }).catch(err => {
+          error(err);
+          return {
+            success: false,
+            error: err
+          }
+        });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
   // Internal Function get sales order details 
   getSalesOrderDetails = async (salesQueryDetails) => {
     try {
