@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const autopopulate = require('mongoose-autopopulate');
 const Schema = mongoose.Schema;
 // keep updating updated at on every itempicked
  //check the status of picker boy updatedAt>t time picker bot idle
@@ -31,23 +32,23 @@ const pickerBoyOrderMappingSchema = new Schema({
   },
   'salesOrderId': {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'salesorder',
+    ref: 'salesOrder',
   },
   'purchaseOrderId': {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'salesorder',
+    ref: 'salesOrder',
   },
   'stockTransferId': {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'salesorder',
+    ref: 'salesOrder',
   },
   'assetTransferId': {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'salesorder',
+    ref: 'salesOrder',
   },
   'truckSpotSalesId': {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'salesorder',
+    ref: 'salesOrder',
   },
   'state': {
     type: Number,
@@ -97,16 +98,18 @@ pickerBoyOrderMappingSchema.index({
   'salesOrderId': 1
 });
 
+pickerBoyOrderMappingSchema.plugin(autopopulate);
 
 class PickerBoyOrderMappingClass{
 
   static async startPickingOrder(orderAndPickerBoyObj) {
     console.log(orderAndPickerBoyObj)
 
-    let pickerBoyOrderMappingData = await new this(orderAndPickerBoyObj).save();
+    let pickerBoyOrderMappingData =  await new this(orderAndPickerBoyObj).save()
     console.log(pickerBoyOrderMappingData)
+    
 
-    return pickerBoyOrderMappingData.toObject();
+    return await this.find({'_id':pickerBoyOrderMappingData._id}).populate('salesOrderId');
     
 
 }

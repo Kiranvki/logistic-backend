@@ -45,6 +45,7 @@ class pickerSalesOrderMappingController extends BaseController {
 
       let dataToInsert = {
         'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
+        'itemDetail':[{
         'itemId': req.body.itemId,
         'itemName': req.body.itemName,
         'salePrice': req.body.salePrice,
@@ -53,12 +54,14 @@ class pickerSalesOrderMappingController extends BaseController {
         'taxPercentage': req.body.taxPercentage,
         'discountPercentage': req.body.discountPercentage,
         'freeQty': req.body.freeQty,
-        'itemAmount': req.body.itemAmount,
-        'createdBy': req.user.email
+        'itemAmount': req.body.itemAmount
+      }],
+        'createdBy':  'admin@waycool.in'           //req.user.email
+
       };
 
       // inserting data into the db 
-      let isInserted = await Model.create(dataToInsert);
+      let isInserted = await Model.addItem(dataToInsert);
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
@@ -83,14 +86,14 @@ class pickerSalesOrderMappingController extends BaseController {
       // creating data to insert
       let dataToUpdate = {
         $set: {
-          ...req.body.toChangeObject
+         'itemDetail.$':{...req.body.toChangeObject}
         }
       };
 
       // inserting data into the db 
       let isUpdated = await Model.findOneAndUpdate({
         pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
-        itemId: itemId,
+        'itemDetail.itemId': itemId,
         isDeleted: 0
       }, dataToUpdate, {
         new: true,
@@ -114,13 +117,14 @@ class pickerSalesOrderMappingController extends BaseController {
   getAddedItemDetails = (pickerBoySalesOrderMappingId, itemId) => {
     try {
       info('Get Added Item details !');
-
+console.log(pickerBoySalesOrderMappingId,itemId)
       // get details 
       return Model.findOne({
         pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
-        itemId: itemId,
+        'itemDetail.itemId': itemId,
         isDeleted: 0
       }).lean().then((res) => {
+        console.log(res)
         if (res && !_.isEmpty(res)) {
           return {
             success: true,

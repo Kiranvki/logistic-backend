@@ -51,7 +51,7 @@ function userRoutes() {
     closed.route('/sales-order/add-item/:pickerBoySalesOrderMappingId').patch(
       [joiAddItem], // joi add item
       isItemAlreadyAdded, // check whether the item is already added
-      verifyAppToken, // verify app token
+      // verifyAppToken, // verify app token
       ctrl.addItems // get controller 
     );
 
@@ -59,7 +59,7 @@ function userRoutes() {
     closed.route('/sales-order/edit-item/:pickerBoySalesOrderMappingId').patch(
       [joiEditAddedItem], // joi edit item
       checkWhetherItsAValidItemUpdate, // check whether the valid item update
-      verifyAppToken, // verify app token 
+      // verifyAppToken, // verify app token 
       ctrl.patchItems // get controller 
     );
 

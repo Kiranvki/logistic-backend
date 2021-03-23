@@ -86,7 +86,7 @@ function userRoutes() {
 
 
     // add the salesorder in the packing stage
-    closed.route('/sales-order/start-pick/:saleOrderId').patch(
+    closed.route('/:type/start-pick/:saleOrderId').patch(
       [joiStartPickSalesOrder], // joi validation
       // verifyAppToken,  // verify app token
       isValidSalesOrder, //check whether the valid salesOrder Id

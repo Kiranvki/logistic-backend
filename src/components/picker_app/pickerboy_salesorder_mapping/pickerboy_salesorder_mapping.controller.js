@@ -1451,7 +1451,7 @@ try{
       pageMeta: {
         skip: parseInt(skip),
         pageSize: pageSize,
-        // total: todaysOrderData.total
+        total: todaysOrderData[0]['orderItems'].length
       }
     }, this.messageTypes.todoOrderFetchedSuccessfully);
   }
