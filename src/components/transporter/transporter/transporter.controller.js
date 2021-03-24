@@ -429,7 +429,7 @@ class transporterController extends BaseController {
       if(filteredResult.length){
         return this.success(req, res, this.status.HTTP_OK, filteredResult, this.messageTypes.vehicleModelFound);
        }
-      return this.errors(req, res, this.status.HTTP_NOT_FOUND, this.messageTypes.vehicleModelNotFound);
+      return this.success(req, res, this.status.HTTP_OK,[], this.messageTypes.vehicleModelNotFound);
 
 
     }catch(err){
@@ -517,6 +517,9 @@ class transporterController extends BaseController {
             {
               $lookup: {
                 from: 'vehicletransporterrcmappings',
+                let: {
+                  'id': '$vehicleModelId'
+                },
                 // localField: "rateCategoryId",
                 // foreignField: "rateCategoryId",
                 pipeline: [
@@ -525,7 +528,7 @@ class transporterController extends BaseController {
                       'status': 1,
                       'isDeleted': 0,
                       '$expr': {
-                        '$eq': ['$rateCategoryId', '$rateCategoryId']
+                        '$eq': ['$vehicleModelId', '$$id']
                       }
                     },
                     
