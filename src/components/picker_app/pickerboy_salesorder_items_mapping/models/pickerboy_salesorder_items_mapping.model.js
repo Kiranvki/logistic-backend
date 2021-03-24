@@ -29,6 +29,8 @@ const pickerBoySalesOrderItemsMapping = new Schema({
       required: true,
       type: Number,
     },
+   
+    
     'itemAmount': {
       required: true,
       type: Number,
@@ -90,11 +92,25 @@ class PickerBoySalesOrderItemsMappingClass{
   static async addItem(orderObjItem){
     let isExist = await this.count({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId });
     if(isExist){
-      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId },{$push:{'itemDetail':orderObjItem.itemDetail}})
-    }
-    let obj = await new this(orderObjItem).save()
-    return obj.toObject()
 
+      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId },{$push:{'itemDetail':orderObjItem.itemDetail}})
+      
+    }
+    // let obj = await new this(orderObjItem).save()
+    return false
+
+
+  }
+
+  static async getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId){
+    let isExist = await this.count({ 'pickerBoySalesOrderMappingId':pickerBoySalesOrderMappingId });
+    if(isExist){
+
+      return await this.find({ 'pickerBoySalesOrderMappingId':pickerBoySalesOrderMappingId })
+      
+    }
+    // let obj = await new this(orderObjItem).save()
+    return false
 
   }
 }

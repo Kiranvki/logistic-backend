@@ -30,5 +30,6 @@ module.exports = {
   isDeliveryExecutiveCheckedIn :require('./isDeliveryExecutiveUserCheckedIn'),
   checkWhetherItsAValidDeliveryUpdate: require('./checkWhetherItsAValidDeliveryUpdate'),
   checkWhetherItsAValidSecurityUpdate: require('./checkWhetherItsAValidSecurityUpdate'),
-  isDeliveryAlreadyCheckedIn: require('./isDeliveryAlreadyCheckedIn')
+  isDeliveryAlreadyCheckedIn: require('./isDeliveryAlreadyCheckedIn'),
+  getOrderItemDetail: require('./getOrderItemDetail')
 }

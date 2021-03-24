@@ -122,6 +122,23 @@ static async getOrderPickerBoyMapping(searchObj){
 
 }
 
+static async updateIsItemPickedStatus(pickerBoySalesOrderMappingId,status){
+ 
+  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoySalesOrderMappingId},{$set:{'isItemPicked': status}});
+  return orderPickerBoyMappingData;
+
+}
+
+static async getOrderByPickerBoyId (pickerBoyOrderMappingId){
+  let isExist = await this.count({ '_id':pickerBoyOrderMappingId });
+  if(isExist){
+    let orderPickerBoyMappingData = await this.find({'_id':pickerBoyOrderMappingId}).populate('salesOrderId');
+    return orderPickerBoyMappingData;
+  }
+ return false;
+}
+
+
 
 
 }

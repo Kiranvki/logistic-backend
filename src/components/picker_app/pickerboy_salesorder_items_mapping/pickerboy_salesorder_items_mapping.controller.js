@@ -9,6 +9,7 @@ const Model = require('./models/pickerboy_salesorder_items_mapping.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const moment = require('moment');
+const pickerboySalesOrderMappingController = require('../pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
 const {
   error,
   info
@@ -41,20 +42,44 @@ class pickerSalesOrderMappingController extends BaseController {
   addItems = async (req, res) => {
     try {
       info('Add items after scanning  !');
-      let pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || ''
+      let pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || '',
+      suppliedQty = req.body.suppliedQty,
+      salesPrice = req.body.itemDetail.salePrice
+      // itemDetail {
+      //   _id: 6023d4cce4cd267f8e794637,
+      //   rowNo: 1,
+      //   id: 76600,
+      //   itemId: 3700,
+      //   itemName: 'MADHURAM  RAW RICE DELUXE',
+      //   itemReferenceCode: '3700',
+      //   salePrice: 43,
+      //   quantity: 25,
+      //   suppliedQty: '25.00',
+      //   itemAmount: 1075,
+      //   iBarU: 0,
+      //   taxPercentage: 0,
+      //   itemTaxType: '',
+      //   discountPercentage: 0,
+      //   itemRemarks: '',
+      //   itemMarketPrice: 43,
+      //   freeQty: 0,
+      //   orderPK: 168177
+      // }
+
+      
 
       let dataToInsert = {
         'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
         'itemDetail':[{
         'itemId': req.body.itemId,
-        'itemName': req.body.itemName,
-        'salePrice': req.body.salePrice,
-        'quantity': req.body.quantity,
-        'suppliedQty': req.body.suppliedQty,
-        'taxPercentage': req.body.taxPercentage,
-        'discountPercentage': req.body.discountPercentage,
-        'freeQty': req.body.freeQty,
-        'itemAmount': req.body.itemAmount
+        'itemName': req.body.itemDetail.itemName,
+        'salePrice': salesPrice,
+        'quantity': req.body.itemDetail.quantity,
+        'suppliedQty': suppliedQty,
+        'taxPercentage': req.body.itemDetail.taxPercentage,
+        'discountPercentage': req.body.itemDetail.discountPercentage,
+        'freeQty': req.body.itemDetail.freeQty,
+        'itemAmount': (salesPrice*suppliedQty)
       }],
         'createdBy':  'admin@waycool.in'           //req.user.email
 
@@ -62,10 +87,35 @@ class pickerSalesOrderMappingController extends BaseController {
 
       // inserting data into the db 
       let isInserted = await Model.addItem(dataToInsert);
+      let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
+      // getOrderByPickerBoyId
+      let orderDetail = await pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
+    //   var mergedList = orderDetail.oderDetails.map(function(item){
+    //     _.find(itemAdded, function(o) { return o.age < item.oderDetails; })
+    //     _.findWhere(a2, { id: item.id })
+    // });
+
+  
+      console.log(orderDetail)
+
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-        return this.success(req, res, this.status.HTTP_OK, isInserted, this.messageTypes.itemAddedInsalesOrderAfterScan);
+        pickerboySalesOrderMappingController.updateItemPickStatus(pickerBoySalesOrderMappingId,true)
+       
+         // changes required quadratic
+      
+        orderDetail[0]['salesOrderId']['orderItems'].forEach((x,i)=>{
+        //   console.log(x)
+        itemAdded[0]['itemDetail'].forEach((y,j)=>{
+            if(x.itemId ===y.itemId){
+              orderDetail[0]['salesOrderId']['orderItems'][i].suppliedQty=y.suppliedQty;
+              orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
+            }
+        })
+      })
+ 
+        return this.success(req, res, this.status.HTTP_OK, orderDetail, this.messageTypes.itemAddedInsalesOrderAfterScan);
       } else {
         error('Error while adding in packing collection !');
         return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToAddItemInsalesOrderAfterScan);

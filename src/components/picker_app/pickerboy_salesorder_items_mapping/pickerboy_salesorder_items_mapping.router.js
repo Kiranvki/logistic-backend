@@ -30,6 +30,7 @@ const {
   // getTheOtherDetailsFromTallyServer, // get the details from the tally server 
   // checkWhetherCustomerListIsAlreadySyncing, // check whether customer list is already syncing 
   // getAllTheInvoicesAndRefreshAsPerThePaymentReceived, // get all invoices and refresh as per the payment received
+  getOrderItemDetail
 } = require('../../../hooks/app');
 
 // auth 
@@ -48,9 +49,10 @@ function userRoutes() {
   return (open, closed) => {
 
     // add the salesorder in the packing stage
-    closed.route('/sales-order/add-item/:pickerBoySalesOrderMappingId').patch(
+    closed.route('/:type/add-item/:pickerBoySalesOrderMappingId').patch(
       [joiAddItem], // joi add item
       isItemAlreadyAdded, // check whether the item is already added
+      getOrderItemDetail,
       // verifyAppToken, // verify app token
       ctrl.addItems // get controller 
     );

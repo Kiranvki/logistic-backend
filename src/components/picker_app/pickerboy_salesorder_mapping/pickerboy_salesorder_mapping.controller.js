@@ -1463,11 +1463,46 @@ try{
   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
 }
   }
+
+   updateItemPickStatus = async (id,status)=>{
+
+    return await Model.updateIsItemPickedStatus(id,status);
+
+
+
+  }
+
+  getOrderItem = async (pickerboySalesOrderMappingId,itemId)=>{
+  let data = await Model.aggregate([{'$match':{'_id':mongoose.Types.ObjectId("605886225360353c74730a78")}},{'$lookup':
+{'from':'salesorders',
+'let':{'so_id':'$salesOrderId'},
+    'pipeline': [
+      {'$unwind': { path: '$orderItems'} },
+        { '$match': {
+          
+          '$expr': { '$and': [ {$eq:[ '$$so_id','$_id']},
+          {$eq:[ '$orderItems.itemId',3700]} ] }
+        }}
+        
+        
+      ],
+    as:"salesOrders"
+}}
+]).allowDiskUse(true)
+
+data = data[0]['salesOrders'][0]
   
+return data['orderItems']
 
-
+  }
+  
+  getOrderDetail(pickerBoyOrderMappingId){
+    return Model.getOrderByPickerBoyId (pickerBoyOrderMappingId);
+  }
 
 }
+
+
 
 // exporting the modules 
 module.exports = new pickerboySalesOrderMappingController();
