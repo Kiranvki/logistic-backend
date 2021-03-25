@@ -814,22 +814,20 @@ class MyTrip extends BaseController {
           orderWeight: 0
         };
 
-        orderArray.push(warehouseDetails);
-
-        let dc = {   "dcstart": "2020-09-10 00:00:00",
-            "loadingTime": 30,
-           "unloadingTime": 30,
-            "dock": 10
-          }
+        orderArray.push(warehouseDetails)
 
         let data = {
           order: orderArray,
           vehicles: vehicleArray,
-          dc
+          "dcstart": "2020-09-10 00:00:00",
+          "loadingTime": 30,
+         "unloadingTime": 30,
+          "dock": 10
+
         }
 
 
-        return this.success(req, res, this.status.HTTP_OK, data );
+        return this.success(req, res, this.status.HTTP_OK, data, );
           
           
         return
