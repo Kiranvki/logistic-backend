@@ -741,7 +741,7 @@ class MyTrip extends BaseController {
         };
 
         for (let v of orders) {
-
+          for (let so of v.salesOrderTripIds) {
               let vehicleObj = {}, cost = 0;
 
               /*
@@ -774,7 +774,6 @@ class MyTrip extends BaseController {
                   };
 
                 };
-
               };
 
               // {
@@ -792,10 +791,14 @@ class MyTrip extends BaseController {
                   capacity: v.tonnage,
                   fixedCost: cost,
                   ratePerKm: v.vehicleId.rateCategoryId.rateCategoryDetails.ratePerKm || 14,
-                  freeDistance: v.vehicleId.rateCategoryId.rateCategoryDetails.freeDistance || 100
+                  freeDistance: v.vehicleId.rateCategoryId.rateCategoryDetails.freeDistance || 100,
+                  tripSalesOrderId:so._id,
+                  tripId: v._id
               };
 
               vehicleArray.push(vehicleObj);
+
+            };
         };
 
         let DeliveryDate = new Date();
@@ -814,20 +817,20 @@ class MyTrip extends BaseController {
           orderWeight: 0
         };
 
-        orderArray.push(warehouseDetails)
+        orderArray.push(warehouseDetails);
+
+        vehicleArray = _.uniqBy(vehicleArray, '_id')
 
         let data = {
-          order: orderArray,
+          orders: orderArray,
           vehicles: vehicleArray,
           "dcstart": startOfTheDay,
           "loadingTime": 30,
-         "unloadingTime": 30,
+          "unloadingTime": 30,
           "dock": 10
+        };
 
-        }
-
-
-        return this.success(req, res, this.status.HTTP_OK, data, );
+        return this.success(req, res, this.status.HTTP_OK, data );
           
           
         return
