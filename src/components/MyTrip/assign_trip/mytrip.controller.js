@@ -663,6 +663,7 @@ class MyTrip extends BaseController {
         };
 
         let response = await request(options);
+
         if ( response.status != 200 ) return  this.success(req, res, this.status.HTTP_OK, { message: 'Warehouse not found' });
         
         for (let Sotrip of req.body.salesOrder) {
@@ -673,7 +674,7 @@ class MyTrip extends BaseController {
             let currentCount = salesOrderCode.currentCount + 1;            
             Sotrip.salesOrderCode = currentCount; 
             Sotrip.salesOrderCodeAlias = currentCount;
-    
+
             let soTrip = await tripSaleModel.create(Sotrip);
             await seriesModel.findOneAndUpdate({ _id: salesOrderCode._id }, { $set: { currentCount: currentCount } });
             
@@ -699,42 +700,44 @@ class MyTrip extends BaseController {
           tripIds.push(tripCreated._id);
           
         };
-
+       
         let orders = await tripModel.find({ _id: { $in: tripIds } })
                     .populate('deliveryExecutiveId transporterId')
                     .populate({ path: 'vehicleId', populate: { path: 'rateCategoryId' } })
                     .populate({ path: 'salesOrderTripIds', populate: { path: 'salesOrderId invoice_db_id'  } })
                     .lean();
-
-        for (let order of orders) {
+                   
+        for ( let order of orders ) {
 
           for (let so of order.salesOrderTripIds) {
-                
-                let orderObj = {};
+
+              let orderObj = {};
 
                 // let weight = _.find(order.invoice_db_id, { so_db_id: so._id });
                 
                 let weight = _.sumBy(order.invoice_db_id, 'totalWeight');
-
+              
                 let DeliveryDate = new Date(so.salesOrderId.deliveryDate);
                 DeliveryDate = DeliveryDate.toISOString().split('T')[0];
 
-                let startOfTheDay = (DeliveryDate + " 00 00 00").toString();
-                let endOfTheDay = (DeliveryDate + " 23 59 00").toString();
+                let startOfTheDay = (DeliveryDate + " 00:00:00").toString();
+                let endOfTheDay = (DeliveryDate + " 23:59:00").toString();
                 
                 orderObj = {
-                    tripSalesOrderId:so._id,
-                    customerName: so.salesOrderId.customerName,
                     customerCode: so.salesOrderId.customerCode,
+                    customerName: so.salesOrderId.customerName,
                     latitude: so.salesOrderId.latitude,
                     longitude: so.salesOrderId.longitude,
                     deliveryTimeStart: startOfTheDay,
                     deliveryTimeEnd: endOfTheDay,
-                    orderWeight: weight
+                    orderWeight: weight,
+                    tripSalesOrderId:so._id,
+                    tripId: order._id
                 };
 
                 orderArray.push(orderObj);
-            };
+          };
+
         };
 
         for (let v of orders) {
@@ -761,7 +764,7 @@ class MyTrip extends BaseController {
                 let additionalAmount = v.vehicleId.rateCategoryId.rateCategoryDetails.additionalAmount || 0;
                 
                 if (v.vehicleId && v.vehicleId.rateCategoryId) {
-
+                 
                   if (v.vehicleId.rateCategoryId.rateCategoryDetails.rateCategoryType === 'Monthly') {
                     cost = rentalAmount + (0 * additionalAmount) // Replace 0 with extra distance  
                   };
@@ -774,21 +777,59 @@ class MyTrip extends BaseController {
 
               };
 
+              // {
+              //   "registrationId": "KA-12345",
+              //    "model": "Tata Nano",
+              //   "capacity": 1008,
+              //   "fixedCost": 1000,
+              //    "ratePerKm": 14,
+              //   "freeDistance": 100
+              // }
+
               vehicleObj = {
-                  tripId: v._id,
-                  vehicleId: v.vehicleId._id,
-                  name:  v.vehicleModel,
-                  class: v.vehicleType,
+                  registrationId: v.vehicleId.regNumber,
+                  model:  v.vehicleModel,
                   capacity: v.tonnage,
-                  cost:  cost
+                  fixedCost: cost,
+                  ratePerKm: v.vehicleId.rateCategoryId.rateCategoryDetails.ratePerKm || 14,
+                  freeDistance: v.vehicleId.rateCategoryId.rateCategoryDetails.freeDistance || 100
               };
 
               vehicleArray.push(vehicleObj);
         };
 
-        return this.success(req, res, this.status.HTTP_OK, {
-          orderArray, vehicleArray, tripIds
-        });
+        let DeliveryDate = new Date();
+        DeliveryDate = DeliveryDate.toISOString().split('T')[0];
+
+        let startOfTheDay = (DeliveryDate + " 00:00:00").toString();
+        let endOfTheDay = (DeliveryDate + " 23:59:00").toString();
+
+        let warehouseDetails = {
+          customerCode: -1,
+          customerName: response.data.name,
+          latitude: response.data.location.latitude,
+          longitude: response.data.location.longitude,
+          deliveryTimeStart: startOfTheDay,
+          deliveryTimeEnd: endOfTheDay,
+          orderWeight: 0
+        };
+
+        orderArray.push(warehouseDetails);
+
+        let dc = {   "dcstart": "2020-09-10 00:00:00",
+            "loadingTime": 30,
+           "unloadingTime": 30,
+            "dock": 10
+          }
+
+        let data = {
+          order: orderArray,
+          vehicles: vehicleArray,
+          dc
+        }
+
+
+        return this.success(req, res, this.status.HTTP_OK, data );
           
           
         return
@@ -899,3 +940,5 @@ class MyTrip extends BaseController {
 
 module.exports = new MyTrip();
 
+
+// mongoexport --db=receivables --collection=eCustomers --type=csv --fields=id,location,aadharNumber,address1,address2,address3,allowBilling,area,birthdate,city,country,createdAt,creditDays,creditDaysLeft,creditLimit,customerAlias,customerId,customerTypeCode,email,gstNumber,gstRegType,isFree,isGstExempted,isOffer,isQty,loginId,marriageDate,mobile,name,outstanding,panNumber,pincode,priceLevelId,salesManCode,salesManMobile,state,stateCode,status,syncTS,type --out=eCustomers.csv
