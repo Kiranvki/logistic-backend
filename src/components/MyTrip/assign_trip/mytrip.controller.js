@@ -819,7 +819,7 @@ class MyTrip extends BaseController {
         let data = {
           order: orderArray,
           vehicles: vehicleArray,
-          "dcstart": "2020-09-10 00:00:00",
+          "dcstart": startOfTheDay,
           "loadingTime": 30,
          "unloadingTime": 30,
           "dock": 10
