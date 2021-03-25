@@ -21,11 +21,19 @@ const pickerBoySalesOrderItemsMapping = new Schema({
       required: true,
       type: Number,
     },
-    'quantity': {
+    'pickedQuantity': {
       required: true,
       type: Number,
     },
     'suppliedQty': {    //total_quantity-supplied_quantity
+      required: true,
+      type: Number,
+    },
+    'requireQuantity': {
+      required: true,
+      type: Number,
+    },
+    'totalQuantity': {
       required: true,
       type: Number,
     },
@@ -102,13 +110,13 @@ class PickerBoySalesOrderItemsMappingClass{
       
     }
     // let obj = await new this(orderObjItem).save()
-    return false
+     return await this(orderObjItem).save();
 
 
   }
 
   static async getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId){
-    let isExist = await this.count({ 'pickerBoySalesOrderMappingId':pickerBoySalesOrderMappingId });
+    let isExist = await this.count({ 'pickerBoySalesOrderMappingId':mongoose.Types.ObjectId(pickerBoySalesOrderMappingId) });
     if(isExist){
 
       return await this.find({ 'pickerBoySalesOrderMappingId':pickerBoySalesOrderMappingId })

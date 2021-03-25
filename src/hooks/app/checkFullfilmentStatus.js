@@ -30,19 +30,15 @@ const {
 // exporting the hooks 
 module.exports = async (req, res, next) => {
   try {
-    info('Get the item detail !');
+    info('Checking fullfilment status !');
+    let fullfilmentStatus = 2
+    let itemDetail = await pickerBoySalesOrderMappingCtrl.getOrderDetail("605ca247c959220ef062ff40");
+    console.log(itemDetail)
 
-    // get all the salesman who are not checked out 
-    let itemDetail = await pickerBoySalesOrderMappingCtrl.getOrderItem(req.params.pickerBoySalesOrderMappingId,req.body.itemId);
-    
-    // get added item detail
-    if (itemDetail) {
-      req.body.itemDetail = itemDetail;
-      if(parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty)===0 || (parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty))<req.body.quantity){
-        return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"Enter Quantity Exceed required quantity.");
-      }
-    }
-
+    // if(itemDetail[0]['salesOrderId']['orderItems']){
+    //   itemDetail[0]['salesOrderId']['orderItems']
+    // }
+   
     // move on 
     return next();
 

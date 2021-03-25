@@ -26,13 +26,17 @@ module.exports = async (req, res, next) => {
             let isValidSalesOrderId = await pickerSalesOrderMappingCtrl.getSalesOrderDetails(saleOrderId)
 
             // if sales order Id is not added
-            if (!isValidSalesOrderId.success) {
+            if (!isValidSalesOrderId.success ) {
                 info('SalesOrder  Id not added in picker state')
                 next();
 
             } else {
+               
                 error('SalesOrder Id already added in picker state');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.salesOrderAlreadyAddedInPickerState);
+                
+                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.salesOrderAlreadyAddedInPickerState);
+                
+                // 
             }
         } else {
             error('The PickerBoy SalesOrder Mapping Id is Invalid !');

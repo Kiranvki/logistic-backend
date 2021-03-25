@@ -42,30 +42,10 @@ class pickerSalesOrderMappingController extends BaseController {
   addItems = async (req, res) => {
     try {
       info('Add items after scanning  !');
-      let pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || '',
-      suppliedQty = req.body.suppliedQty,
+      let pickerBoySalesOrderMappingId = mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId) || '',
+      quantityAdded = req.body.quantity,
       salesPrice = req.body.itemDetail.salePrice
-      // itemDetail {
-      //   _id: 6023d4cce4cd267f8e794637,
-      //   rowNo: 1,
-      //   id: 76600,
-      //   itemId: 3700,
-      //   itemName: 'MADHURAM  RAW RICE DELUXE',
-      //   itemReferenceCode: '3700',
-      //   salePrice: 43,
-      //   quantity: 25,
-      //   suppliedQty: '25.00',
-      //   itemAmount: 1075,
-      //   iBarU: 0,
-      //   taxPercentage: 0,
-      //   itemTaxType: '',
-      //   discountPercentage: 0,
-      //   itemRemarks: '',
-      //   itemMarketPrice: 43,
-      //   freeQty: 0,
-      //   orderPK: 168177
-      // }
-
+   
       
 
       let dataToInsert = {
@@ -74,14 +54,16 @@ class pickerSalesOrderMappingController extends BaseController {
         'itemId': req.body.itemId,
         'itemName': req.body.itemDetail.itemName,
         'salePrice': salesPrice,
-        'quantity': req.body.itemDetail.quantity,
-        'suppliedQty': suppliedQty,
+        'pickedQuantity': quantityAdded,
+        'totalQuantity':parseInt(req.body.itemDetail.quantity),
+        'requireQuantity':(parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty)),
+        'suppliedQty': req.body.itemDetail.suppliedQty, //previous supplied
         'taxPercentage': req.body.itemDetail.taxPercentage,
         'discountPercentage': req.body.itemDetail.discountPercentage,
         'freeQty': req.body.itemDetail.freeQty,
-        'itemAmount': (salesPrice*suppliedQty)
+        'itemAmount': (salesPrice*quantityAdded)
       }],
-        'createdBy':  'admin@waycool.in'           //req.user.email
+        'createdBy':  req.user.email
 
       };
 
@@ -89,7 +71,7 @@ class pickerSalesOrderMappingController extends BaseController {
       let isInserted = await Model.addItem(dataToInsert);
   
   
-      console.log(orderDetail)
+      // console.log(orderDetail)
 
 
       // check if inserted 
@@ -106,9 +88,9 @@ class pickerSalesOrderMappingController extends BaseController {
         //   console.log(x)
         itemAdded[0]['itemDetail'].forEach((y,j)=>{
             if(x.itemId ===y.itemId){
-              orderDetail[0]['salesOrderId']['orderItems'][i].suppliedQty=y.suppliedQty;
-              orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
-              orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
+              orderDetail[0]['salesOrderId']['orderItems'][i]=y;
+              // orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
+              // orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
             }
         })
       })
@@ -205,6 +187,15 @@ console.log(pickerBoySalesOrderMappingId,itemId)
 
     info('Get Bucket Item details !');
     try{
+
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt';
+      let sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+  
       let itemId = req.body.itemId, // itemId  
     pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || '';
 
@@ -228,16 +219,25 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       //   console.log(x)
       itemAdded[0]['itemDetail'].forEach((y,j)=>{
           if(x.itemId ===y.itemId){
-            orderDetail[0]['salesOrderId']['orderItems'][i].suppliedQty=y.suppliedQty;
-            orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
             
-            orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
+            orderDetail[0]['salesOrderId']['orderItems'][i]=y;
+            // orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
+            
+            // orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
            
           }
       })
     })
  
-      return this.success(req, res, this.status.HTTP_OK, orderDetail, this.messageTypes.bucketItemListFetchSuccesfully);
+      return this.success(req, res, this.status.HTTP_OK, 
+        {
+          results: orderDetail,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: orderDetail[0]['salesOrderId']['orderItems'].length
+          }
+        }, this.messageTypes.bucketItemListFetchSuccesfully);
     } else {
       error('Error while adding in packing collection !');
       return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchBucketItemList);

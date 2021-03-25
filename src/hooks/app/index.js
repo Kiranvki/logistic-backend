@@ -31,5 +31,8 @@ module.exports = {
   checkWhetherItsAValidDeliveryUpdate: require('./checkWhetherItsAValidDeliveryUpdate'),
   checkWhetherItsAValidSecurityUpdate: require('./checkWhetherItsAValidSecurityUpdate'),
   isDeliveryAlreadyCheckedIn: require('./isDeliveryAlreadyCheckedIn'),
-  getOrderItemDetail: require('./getOrderItemDetail')
+  getOrderItemDetail: require('./getOrderItemDetail'),
+  validateOrderItemQuantity: require('./validateOrderItemQuantity'),
+  checkFullfilmentStatus: require('./checkFullfilmentStatus')
+
 }

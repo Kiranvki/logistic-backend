@@ -30,6 +30,7 @@ const {
   // getTheOtherDetailsFromTallyServer, // get the details from the tally server 
   // checkWhetherCustomerListIsAlreadySyncing, // check whether customer list is already syncing 
   // getAllTheInvoicesAndRefreshAsPerThePaymentReceived, // get all invoices and refresh as per the payment received
+  validateOrderItemQuantity,
   getOrderItemDetail
 } = require('../../../hooks/app');
 
@@ -53,7 +54,8 @@ function userRoutes() {
       [joiAddItem], // joi add item
       isItemAlreadyAdded, // check whether the item is already added
       getOrderItemDetail,
-      // verifyAppToken, // verify app token
+      // validateOrderItemQuantity,
+      verifyAppToken, // verify app token
       ctrl.addItems // get controller 
     );
 
@@ -61,15 +63,15 @@ function userRoutes() {
     closed.route('/sales-order/edit-item/:pickerBoySalesOrderMappingId').patch(
       [joiEditAddedItem], // joi edit item
       checkWhetherItsAValidItemUpdate, // check whether the valid item update
-      // verifyAppToken, // verify app token 
+      verifyAppToken, // verify app token 
       ctrl.patchItems // get controller 
     );
 
     // list the Basket item  
-    closed.route('/:type/detail/:pickerBoySalesOrderMappingId').get(
+    closed.route('/:type/picking/:pickerBoySalesOrderMappingId').get(
      
    
-      // verifyAppToken, // verify app token 
+      verifyAppToken, // verify app token 
       ctrl.getBucketDetail // get controller 
     );
     

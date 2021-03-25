@@ -12,6 +12,16 @@ const schemas = {
 
   // joi start pick salesorder
   joiStartPickSalesOrder: Joi.object().keys({
+    type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      language: {
+        string: {
+          regex: {
+            base: 'should be a valid type'
+          }
+        }
+      }
+    }).required(),
+
     saleOrderId: Joi.string().trim().label('SaleOrder Id').required(),
   }),
 
@@ -78,6 +88,15 @@ const schemas = {
 
   //  joi History SO
   joiHistoryOfSO: Joi.object().keys({
+    // type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+    //   language: {
+    //     string: {
+    //       regex: {
+    //         base: 'should be a valid type'
+    //       }
+    //     }
+    //   }
+    // }).required(),
     page: Joi.number().integer().min(1).label('Page').required(),
     search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
   }),

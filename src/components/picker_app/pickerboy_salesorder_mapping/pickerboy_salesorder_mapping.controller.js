@@ -393,7 +393,7 @@ getOrderDetails = async (req,res,next)=>{
       switch(req.params.type){
         case 'salesorders':
           Model= salesOrderInvMappingModel;
-          orderData = await salesOrderInvMappingModel.findOne({'salesOrderId':mongoose.Types.ObjectId('5ff4161a56742a7178ed445d')}).populate('salesOrderId').lean().then((res) => {
+          orderData = await salesOrderInvMappingModel.findOne({'salesOrderId':mongoose.Types.ObjectId(orderId)}).populate('salesOrderId').lean().then((res) => {
           
             if (res && !_.isEmpty(res)) {
               return {
@@ -459,7 +459,7 @@ getOrderDetails = async (req,res,next)=>{
           
           break;
         case 'assettransfer':
-          mMdel= require('../../MyTrip/assign_trip/model/spotsales.model')
+          Model= require('../../MyTrip/assign_trip/model/spotsales.model')
           break;
         default:
           Model=null
@@ -535,9 +535,9 @@ getOrderDetails = async (req,res,next)=>{
 
       let dataToInsert = {
         'salesOrderId': saleOrderDetails._id,
-        // 'pickerBoyId': req.user._id,
-        'pickerBoyId': mongoose.Types.ObjectId('60227a45c9e10d6cda8c182b'),
-        'createdBy': 'admin@waycool.in',//req.user.email,
+        'pickerBoyId': req.user._id,
+        // 'pickerBoyId': mongoose.Types.ObjectId('60227a45c9e10d6cda8c182b'),
+        'createdBy': req.user.email,
         'pickingDate': new Date()
       };
 
@@ -563,7 +563,14 @@ getOrderDetails = async (req,res,next)=>{
   scanState = async (req, res) => {
     try {
       info('Get SalesOrder details after Picking state !');
-
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'createdAt';
+      let sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+      
       // get the sale Order Details
       let salesOrderData = await Model.aggregate([{
         $match: {
@@ -633,7 +640,14 @@ getOrderDetails = async (req,res,next)=>{
 
       // check if inserted 
       if (salesOrderData && !_.isEmpty(salesOrderData)) {
-        return this.success(req, res, this.status.HTTP_OK, salesOrderData, this.messageTypes.salesOrderDetailsFetched);
+        return this.success(req, res, this.status.HTTP_OK,{
+          results: salesOrderData,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: salesOrderData[0].salesOrdersDetails.orderItems.length
+          }
+        }, this.messageTypes.salesOrderDetailsFetched);
       } else {
         error('Error while getting the sales Order data after picking state !');
         return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderDetailsNotFetched);
@@ -654,6 +668,13 @@ getOrderDetails = async (req,res,next)=>{
       let totalQuantityDemanded = 0, totalQuantitySupplied = 0,
         totalAmount = 0, totalTax = 0,
         totalDiscount = 0, totalNetValue = 0;
+
+
+        let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 10; })
+       
+      let skip = parseInt(page - 1) * pageSize;
+     
 
       // get the basket data
       let salesOrderData = await Model.aggregate([{
@@ -677,13 +698,13 @@ getOrderDetails = async (req,res,next)=>{
             }, {
               $project: {
 
-                'itemDetail.itemName': 1,
-                'itemDetail.itemId': 1,
-                'itemDetail.quantity': 1,
-                'itemDetail.suppliedQty': 1,
-                'itemDetail.salePrice': 1,
-                'itemDetail.taxPercentage': 1,
-                'itemDetail.discountPercentage': 1,
+                'itemDetail': 1,
+                // 'itemDetail.itemId': 1,
+                // 'itemDetail.quantity': 1,
+                // 'itemDetail.suppliedQty': 1,
+                // 'itemDetail.salePrice': 1,
+                // 'itemDetail.taxPercentage': 1,
+                // 'itemDetail.discountPercentage': 1,
               }
             }
           ],
@@ -797,7 +818,14 @@ getOrderDetails = async (req,res,next)=>{
         salesOrderData[0].totalTax = totalTax
         salesOrderData[0].totalDiscount = totalDiscount
         salesOrderData[0].totalNetValue = totalNetValue
-        return this.success(req, res, this.status.HTTP_OK, salesOrderData, this.messageTypes.salesOrderDetailsFetched);
+        return this.success(req, res, this.status.HTTP_OK,  {
+          results: salesOrderData,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: salesOrderData[0].availableItemDetails[0].itemDetail.length
+          }
+        }, this.messageTypes.salesOrderDetailsFetched);
       } else {
         error('Error while getting the sales Order data after picking state !');
         return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderDetailsNotFetched);
@@ -1018,7 +1046,8 @@ getOrderDetails = async (req,res,next)=>{
       // get details 
       return Model.findOne({
         salesOrderId: mongoose.Types.ObjectId(saleOrderId),
-        isDeleted: 0
+        isDeleted: 0,
+        isItemPicked:true
       }).lean().then((res) => {
         if (res && !_.isEmpty(res)) {
           return {
@@ -1474,7 +1503,7 @@ try{
   }
 
   getOrderItem = async (pickerboySalesOrderMappingId,itemId)=>{
-  let data = await Model.aggregate([{'$match':{'_id':mongoose.Types.ObjectId("605886225360353c74730a78")}},{'$lookup':
+  let data = await Model.aggregate([{'$match':{'_id':mongoose.Types.ObjectId(pickerboySalesOrderMappingId)}},{'$lookup':
 {'from':'salesorders',
 'let':{'so_id':'$salesOrderId'},
     'pipeline': [
@@ -1482,7 +1511,7 @@ try{
         { '$match': {
           
           '$expr': { '$and': [ {$eq:[ '$$so_id','$_id']},
-          {$eq:[ '$orderItems.itemId',3700]} ] }
+          {$eq:[ '$orderItems.itemId',itemId]} ] }
         }}
         
         
@@ -1490,10 +1519,13 @@ try{
     as:"salesOrders"
 }}
 ]).allowDiskUse(true)
-
+if(data){
 data = data[0]['salesOrders'][0]
   
 return data['orderItems']
+}
+// fix require
+return []
 
   }
   

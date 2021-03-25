@@ -11,6 +11,7 @@ const {
 
 // hooks 
 const {
+  checkFullfilmentStatus,
   isInvoiceGenerated, // check whether the invoice is already generated
 } = require('../../../hooks/app');
 
@@ -33,7 +34,8 @@ function userRoutes() {
     closed.route('/invoice/:pickerBoySalesOrderMappingId').get(
       ///  [joiGoFrugalSync], // joi validation
       isInvoiceGenerated, // check whether the invoice is already generated
-      verifyAppToken, // verify app user token 
+      // verifyAppToken, // verify app user token 
+      // checkFullfilmentStatus
       ctrl.generateInvoice // post controller 
     );
 

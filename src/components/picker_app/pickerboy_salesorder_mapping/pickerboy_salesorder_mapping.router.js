@@ -55,7 +55,7 @@ function userRoutes() {
     // get customer details 
     closed.route('/customer/details/:customerId/city/:cityId').get(
       [joiCustomerGetDetails], // joi validation
-      // verifyAppToken, // verify app user token 
+      verifyAppToken, // verify app user token 
       ctrl.getCustomerDetails // controller function 
     );
 
@@ -68,7 +68,7 @@ function userRoutes() {
     // );
 
     closed.route('/:type/todays-task').get(
-      // verifyAppToken,   // verify app token
+      verifyAppToken,   // verify app token
       ctrl.getTodaysOrder // get controller 
     );
 
@@ -77,7 +77,7 @@ function userRoutes() {
     // get the single sale order details
     closed.route('/:type/detail/:orderId').get(
       [joiSalesOrderDetails],
-      // verifyAppToken,   // verify app token
+      verifyAppToken,   // verify app token
       // isValidSalesOrder,
       ctrl.getOrderDetails // get controller 
     );
@@ -88,7 +88,7 @@ function userRoutes() {
     // add the salesorder in the packing stage
     closed.route('/:type/start-pick/:saleOrderId').patch(
       [joiStartPickSalesOrder], // joi validation
-      // verifyAppToken,  // verify app token
+      verifyAppToken,  // verify app token
       isValidSalesOrder, //check whether the valid salesOrder Id
       isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
       ctrl.pickingState // get controller 
@@ -97,7 +97,7 @@ function userRoutes() {
     // once we have started picking then get the salesorder data for adding the item.
     closed.route('/sales-order/scan-order/:pickerBoySalesOrderMappingId').get(
       [joiScanSalesOrder], //joi scan order
-      // verifyAppToken,  // verify app token
+      verifyAppToken,  // verify app token
       //  isValidSalesOrder,
       ctrl.scanState // get controller 
     );
@@ -105,7 +105,7 @@ function userRoutes() {
     // view order basket api
     closed.route('/sales-order/view-order-basket/:pickerBoySalesOrderMappingId').get(
       [joiViewOrderBasket],
-      // verifyAppToken,   // verify app token
+      verifyAppToken,   // verify app token
       //   isValidSalesOrder,
       ctrl.viewOrderBasket // get controller 
     );
@@ -127,7 +127,7 @@ function userRoutes() {
 // get the invoice detail by invoice mongo id
     closed.route('/invoice/:type/:invId').get(
        // joi history SO
-      // verifyAppToken,   // verify app token
+      verifyAppToken,   // verify app token
       ctrl.getInvoiceDocumentDetail // history SO/invoice status
     );
 
@@ -135,7 +135,7 @@ function userRoutes() {
     // get the history invoice status
     closed.route('/history/:type').get(
       [joiHistoryOfSO], // joi history SO
-      // verifyAppToken,   // verify app token
+      verifyAppToken,   // verify app token
       ctrl.getHistoryOfSalesOrder // history SO/invoice status
     );
   };

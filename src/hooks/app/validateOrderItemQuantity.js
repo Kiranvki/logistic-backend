@@ -32,17 +32,12 @@ module.exports = async (req, res, next) => {
   try {
     info('Get the item detail !');
 
-    // get all the salesman who are not checked out 
-    let itemDetail = await pickerBoySalesOrderMappingCtrl.getOrderItem(req.params.pickerBoySalesOrderMappingId,req.body.itemId);
-    
-    // get added item detail
-    if (itemDetail) {
-      req.body.itemDetail = itemDetail;
-      if(parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty)===0 || (parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty))<req.body.quantity){
-        return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"Enter Quantity Exceed required quantity.");
-      }
-    }
 
+    if((req.body.itemDetail.quantity - req.body.itemDetail.suppliedQty)>req.body.quantity){
+        error('Enter Quantity exceeds total quantity');
+        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.appUserOnBoard.userLoginRequestStillNotRegenerated);
+    }
+   
     // move on 
     return next();
 
