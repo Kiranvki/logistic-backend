@@ -72,6 +72,11 @@ const pickerBoyOrderMappingSchema = new Schema({
     default: 1
   },
   'invoiceDetail':{
+    'isInvoiceRequest':{
+      type:Boolean,
+      default:false  //true->restrict picker boy
+
+    },
     'isInvoice':{
       type:Boolean,
       default:false
@@ -136,6 +141,14 @@ static async getOrderByPickerBoyId (pickerBoyOrderMappingId){
     return orderPickerBoyMappingData;
   }
  return false;
+}
+
+
+static async updateFullFilmentStatus(pickerBoySalesOrderMappingId,status){
+ 
+  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':mongoose.Types.ObjectId(pickerBoySalesOrderMappingId)},{$set:{'state': status}});
+  return orderPickerBoyMappingData;
+
 }
 
 

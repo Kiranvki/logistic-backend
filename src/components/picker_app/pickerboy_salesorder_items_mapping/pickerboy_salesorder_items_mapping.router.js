@@ -65,6 +65,15 @@ function userRoutes() {
       ctrl.patchItems // get controller 
     );
 
+    // list the Basket item  
+    closed.route('/:type/detail/:pickerBoySalesOrderMappingId').get(
+     
+   
+      // verifyAppToken, // verify app token 
+      ctrl.getBucketDetail // get controller 
+    );
+    
+
   };
 }
 

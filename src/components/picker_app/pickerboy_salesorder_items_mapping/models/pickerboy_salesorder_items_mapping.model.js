@@ -47,6 +47,11 @@ const pickerBoySalesOrderItemsMapping = new Schema({
       required: true,
       type: Number,
     },
+    'isItemPicked': {
+      required: true,
+      type: Boolean,
+      default:true
+    },
   
 
   }],

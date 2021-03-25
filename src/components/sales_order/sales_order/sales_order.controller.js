@@ -1735,6 +1735,41 @@ return {
 }
 }
   }
+
+  UpdateSalesOrderFullfilmentStatus = async(salesOrderId,status)=>{
+    try {
+      info(`Updating Customer Info ! ${salesOrderId}`);
+
+      // get details 
+      return Model.findByIdAndUpdate(mongoose.Types.ObjectId(salesOrderId), { $set:{'fulfillmentStatus':status}}).lean().then((res) => {
+        if (res) {
+          return {
+            success: true,
+            data: res
+          };
+        } else {
+          error('Customer Not Updated !');
+          return {
+            success: false,
+          };
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
 }
 
 // exporting the modules 

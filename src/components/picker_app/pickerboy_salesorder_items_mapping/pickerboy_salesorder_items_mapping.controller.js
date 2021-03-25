@@ -87,14 +87,7 @@ class pickerSalesOrderMappingController extends BaseController {
 
       // inserting data into the db 
       let isInserted = await Model.addItem(dataToInsert);
-      let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
-      // getOrderByPickerBoyId
-      let orderDetail = await pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
-    //   var mergedList = orderDetail.oderDetails.map(function(item){
-    //     _.find(itemAdded, function(o) { return o.age < item.oderDetails; })
-    //     _.findWhere(a2, { id: item.id })
-    // });
-
+  
   
       console.log(orderDetail)
 
@@ -102,7 +95,11 @@ class pickerSalesOrderMappingController extends BaseController {
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
         pickerboySalesOrderMappingController.updateItemPickStatus(pickerBoySalesOrderMappingId,true)
-       
+     
+        let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
+        // getOrderByPickerBoyId
+        let orderDetail = await pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
+     
          // changes required quadratic
       
         orderDetail[0]['salesOrderId']['orderItems'].forEach((x,i)=>{
@@ -111,6 +108,7 @@ class pickerSalesOrderMappingController extends BaseController {
             if(x.itemId ===y.itemId){
               orderDetail[0]['salesOrderId']['orderItems'][i].suppliedQty=y.suppliedQty;
               orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
+              orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
             }
         })
       })
@@ -126,7 +124,7 @@ class pickerSalesOrderMappingController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
-
+// not working
   // patch the request 
   patchItems = async (req, res) => {
     try {
@@ -199,6 +197,57 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
+  }
+
+
+
+  getBucketDetail=async (req,res,next)=>{
+
+    info('Get Bucket Item details !');
+    try{
+      let itemId = req.body.itemId, // itemId  
+    pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || '';
+
+
+    let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
+    // getOrderByPickerBoyId
+    let orderDetail = await pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
+ 
+
+
+    
+
+
+    // check if inserted 
+    if (orderDetail) {
+  
+     
+       // changes required quadratic
+    
+      orderDetail[0]['salesOrderId']['orderItems'].forEach((x,i)=>{
+      //   console.log(x)
+      itemAdded[0]['itemDetail'].forEach((y,j)=>{
+          if(x.itemId ===y.itemId){
+            orderDetail[0]['salesOrderId']['orderItems'][i].suppliedQty=y.suppliedQty;
+            orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
+            
+            orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
+           
+          }
+      })
+    })
+ 
+      return this.success(req, res, this.status.HTTP_OK, orderDetail, this.messageTypes.bucketItemListFetchSuccesfully);
+    } else {
+      error('Error while adding in packing collection !');
+      return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchBucketItemList);
+    }
+    // catch any runtime error 
+  } catch (err) {
+    error(err);
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  }
+
   }
 
 

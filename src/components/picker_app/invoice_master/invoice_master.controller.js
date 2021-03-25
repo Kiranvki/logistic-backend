@@ -2,7 +2,7 @@
 //const SalesOrderSyncCtrl = require('../sales_order_sync/sales_order_sync.controller');
 const pickerBoySalesOrderMappingctrl = require('../pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
 const invoicePickerBoySalesOrderMappingctrl = require('../invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller');
-
+const salesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 const Model = require('./models/invoice_master.model');
@@ -319,6 +319,14 @@ class areaSalesManagerController extends BaseController {
         let isInserted = await Model.create(dataToInsert);
         // check if inserted 
         if (isInserted && !_.isEmpty(isInserted)) {
+          let fulfilmentStatus = 1 //assuming always partialy fullfiled
+          if(totalQuantityDemanded === totalQuantitySupplied){
+
+            fulfilmentStatus = 2 // fullfilled
+          }
+          salesOrderCtrl.UpdateSalesOrderFullfilmentStatus(basketItemData.data[0].salesOrderId,fulfilmentStatus)
+          pickerBoySalesOrderMappingctrl.updateFullFilmentStatus(pickerBoySalesOrderMappingId,fulfilmentStatus)
+
           info('Invoice Successfully Created !');
 
           // creating a invoice and picker salesOrder Mapping

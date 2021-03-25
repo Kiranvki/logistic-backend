@@ -677,13 +677,13 @@ getOrderDetails = async (req,res,next)=>{
             }, {
               $project: {
 
-                'itemName': 1,
-                'itemId': 1,
-                'quantity': 1,
-                'suppliedQty': 1,
-                'salePrice': 1,
-                'taxPercentage': 1,
-                'discountPercentage': 1,
+                'itemDetail.itemName': 1,
+                'itemDetail.itemId': 1,
+                'itemDetail.quantity': 1,
+                'itemDetail.suppliedQty': 1,
+                'itemDetail.salePrice': 1,
+                'itemDetail.taxPercentage': 1,
+                'itemDetail.discountPercentage': 1,
               }
             }
           ],
@@ -750,13 +750,14 @@ getOrderDetails = async (req,res,next)=>{
         //calculating the total basket amount -- needs to moved into hook
         //calculating the total quantity supplied and demanded
 
-        await salesOrderData[0].availableItemDetails.map((v, i) => {
+        await salesOrderData[0].availableItemDetails[0].itemDetail.map((v, i) => {
+      
           totalQuantitySupplied = v.suppliedQty + totalQuantitySupplied
           totalQuantityDemanded = v.quantity + totalQuantityDemanded
         });
 
         //calculating the discount and tax
-        for (let item of salesOrderData[0].availableItemDetails) {
+        for (let item of salesOrderData[0].availableItemDetails[0].itemDetail) {
           //calculating discount
 
           let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.salePrice).toFixed(2))
@@ -1499,6 +1500,14 @@ return data['orderItems']
   getOrderDetail(pickerBoyOrderMappingId){
     return Model.getOrderByPickerBoyId (pickerBoyOrderMappingId);
   }
+
+
+  updateFullFilmentStatus(pickerBoyOrderMappingId,status){
+    return Model.updateFullFilmentStatus (pickerBoyOrderMappingId,status);
+  }
+
+
+  
 
 }
 

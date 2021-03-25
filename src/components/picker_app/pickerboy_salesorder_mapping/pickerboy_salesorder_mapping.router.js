@@ -105,7 +105,7 @@ function userRoutes() {
     // view order basket api
     closed.route('/sales-order/view-order-basket/:pickerBoySalesOrderMappingId').get(
       [joiViewOrderBasket],
-      verifyAppToken,   // verify app token
+      // verifyAppToken,   // verify app token
       //   isValidSalesOrder,
       ctrl.viewOrderBasket // get controller 
     );
