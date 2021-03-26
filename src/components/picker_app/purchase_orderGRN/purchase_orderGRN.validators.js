@@ -9,21 +9,8 @@ const Response = require('../../../responses/response');
 // add joi schema 
 const schemas = {
   // joi zoho details 
-    // joi start pick salesorder
-  joiGenerateInvoice: Joi.object().keys({
-      pickerBoySalesOrderMappingId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('pickerboy SO mapping Id').options({
-        language: {
-          string: {
-            regex: {
-              base: 'should be a valid mongoose Id.'
-            }
-          }
-        }
-      }).required()
-    }),
-  // joi start pick salesorder
-  joiGetInvoiceDetails: Joi.object().keys({
-      invoiceId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Invoice Id').options({
+  joipoRecievingId: Joi.object().keys({
+    poRecievingId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order recieving Id').required().options({
       language: {
         string: {
           regex: {
@@ -31,9 +18,23 @@ const schemas = {
           }
         }
       }
-    }).required()
+    })
   }),
 
+  // joi asm create
+  joigrnId: Joi.object().keys({
+    grnId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order GRN Id').required().options({
+      language: {
+        string: {
+          regex: {
+            base: 'should be a valid mongoose Id.'
+          }
+        }
+      }
+    })
+  }),
+
+  
 }
 // joi options
 const options = {
@@ -57,9 +58,9 @@ const options = {
 
 module.exports = {
   // exports validate admin signin 
-  joiGetInvoiceDetails: (req, res, next) => {
+  joigrnId: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiGetInvoiceDetails;
+    let schema = schemas.joigrnId;
     let option = options.basic;
 
     // validating the schema 
@@ -78,9 +79,9 @@ module.exports = {
   },
 
   // joi asm create 
-  joiGenerateInvoice: (req, res, next) => {
+  joipoRecievingId: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiGenerateInvoice;
+    let schema = schemas.joipoRecievingId;
     let option = options.basic;
 
     // validating the schema 
@@ -96,5 +97,6 @@ module.exports = {
       // returning the response 
       Response.joierrors(req, res, err);
     });
-  }, 
+  },
+
 }

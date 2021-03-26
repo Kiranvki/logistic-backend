@@ -69,9 +69,9 @@ module.exports = async (req, res, next) => {
                 req.body.isNotChanged = isNotChanged;
 
                 // if there is nothing to change
-                if (isNotChanged.length)
-                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.itemDataIsNotChanged, req.body.isNotChanged);
-                else next(); // move on
+                // if (isNotChanged.length)
+                //     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.itemDataIsNotChanged, req.body.isNotChanged);
+                 next(); // move on
 
                 // invalid Brand
             } else {

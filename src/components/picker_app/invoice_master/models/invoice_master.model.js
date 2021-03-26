@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
+const autopopulate = require('mongoose-autopopulate');
+const autoIncrement = require('mongoose-sequence')(mongoose);
 // schema
 const invoiceMaster = new Schema({
 
@@ -269,15 +270,32 @@ const invoiceMaster = new Schema({
       'weightInKg': {
         type: Number
       },
+      'totalSuppliedQuantity': {
+        type: Number
+      },
+      'requiredQuantity': {
+        type: Number
+      },
     }
   ],
   
   'totalWeight': {
     type: Number
+  },
+  'seq': {
+    type: Number
   }
 
 }, {
   timestamps: true
+});
+
+//Populate User Name for Stage Verification
+invoiceMaster.plugin(autopopulate);
+
+// Mongoose Auto Increement 
+invoiceMaster.plugin(autoIncrement, {
+  inc_field: 'seq'
 });
 
 invoiceMaster.index({

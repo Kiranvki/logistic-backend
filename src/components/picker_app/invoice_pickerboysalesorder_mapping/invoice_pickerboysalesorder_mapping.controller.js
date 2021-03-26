@@ -160,6 +160,178 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
+   // Internal Function get invoice  details
+   getDetailsBasedOnInvoiceId = (invoiceId) => {
+    try {
+      info('Get invoice mapping based on invoice id');
+
+      // get details 
+      return Model.findOne({
+        invoiceId: mongoose.Types.ObjectId(invoiceId),
+        // status: 1,
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in Mapping DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }    }
+  }
+
+  getSuppliedItemsCount =(salesOrderId)=>{
+
+    try {
+      info('Get Added Item details !');
+
+      // get details 
+      return Model.aggregate([
+        {
+          $match: {
+            salesOrderId: mongoose.Types.ObjectId(salesOrderId),
+            status: 1,
+            isDeleted: 0,
+          },
+        },
+        {
+          $lookup: {
+            from: "invoicemasters",
+            let: { id: "$invoiceId" },
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$id"] } } },
+              { $project: { itemSupplied: 1, _id: 0 } },
+              { $unwind: "$itemSupplied" },
+            ],
+            as: "suppliedItems",
+          },
+        },
+        { $unwind: "$suppliedItems" },
+        {
+          $group: {
+            _id: "$suppliedItems.itemSupplied.itemId",
+            count: { $sum: "$suppliedItems.itemSupplied.suppliedQty" },
+            itemId: { $first: "$suppliedItems.itemSupplied.itemId" },
+          },
+        },
+      ]).then((res) => {
+          if (res) {
+            return {
+              success: true,
+              data: res,
+            };
+          }
+        })
+        .catch((err) => {
+          error(err);
+          return {
+            success: false,
+            error: err,
+          };
+        });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err,
+      };
+    }
+  }
+
+  getInvoiceMappingDetails =async(invoiceId)=>{
+
+    try {
+      info('Get invoice details !');
+      // get details 
+      let invoiceDetails = await Model.aggregate([
+        {$match:{ "invoiceId" : mongoose.Types.ObjectId(invoiceId)}},
+        {$lookup:{
+            from: 'invoicemasters',
+                let: {
+                  'id': '$invoiceId'
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      '$expr': {
+                        '$eq': ['$_id', '$$id']
+                      }
+                    }
+                  },
+                ],
+                as: 'invoice'
+              }
+            },
+             {$lookup:{
+            from: 'salesorders',
+                let: {
+                  'soId': '$salesOrderId'
+                },
+                pipeline: [
+                  {
+                    $match: {
+                      '$expr': {
+                        '$eq': ['$_id', '$$soId']
+                      }
+                    }
+                  },
+                ],
+                as: 'so'
+              }
+            },
+            {$project:
+              {_id:1,
+                invoiceId:1,
+                salesOrderId:1,
+                invoice:1,
+                so:1
+              }
+            },
+    
+          ])
+          if(invoiceDetails && !_.isEmpty(invoiceDetails)){
+            return {
+              success: true,
+              data: invoiceDetails
+            } 
+          }else{
+            return {
+              success: false,
+              error: "Invoice details not found"
+            } 
+          }
+          
+             // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err,
+      };
+    }
+  }
+
 }
 
 // exporting the modules 

@@ -1507,7 +1507,7 @@ try{
 
 
 
-  if (todaysOrderData) {
+  if (todaysOrderData.length>0) {
     return this.success(req, res, this.status.HTTP_OK, {
       results: todaysOrderData,
       pageMeta: {
