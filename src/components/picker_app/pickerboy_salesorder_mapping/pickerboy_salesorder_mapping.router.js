@@ -22,6 +22,8 @@ const {
   isValidSalesOrder,  // check is valid sales order id 
   isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
   checkWhetherItsAValidPickerUpdate, //check whether its a valid picker profile update
+
+  checkIsInPickingState
 } = require('../../../hooks/app');
 
 // auth 
@@ -69,6 +71,7 @@ function userRoutes() {
 
     closed.route('/:type/todays-task').get(
       verifyAppToken,   // verify app token
+      checkIsInPickingState,
       ctrl.getTodaysOrder // get controller 
     );
 

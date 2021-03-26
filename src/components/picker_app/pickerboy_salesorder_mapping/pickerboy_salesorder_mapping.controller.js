@@ -1565,6 +1565,30 @@ return []
     return Model.getOrderByPickerBoyId (pickerBoyOrderMappingId);
   }
 
+  async getOrderDetailByPickerBoyId(pickerBoyId){
+    return await Model.findOne({$and:[{'pickerBoyId':mongoose.Types.ObjectId(pickerBoyId)},{'isStartedPicking':true},{'isItemPicked':true},{'invoiceDetail.isInvoice':false}]}).lean().then((res) => {
+          
+      if (res && !_.isEmpty(res)) {
+        return {
+          success: true,
+          data: res
+        }
+      } else {
+        error('Error Searching Data in saleOrder DB!');
+        return {
+          success: false
+        }
+      }
+    }).catch(err => {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    });
+    
+  }
+
 
   updateFullFilmentStatus(pickerBoyOrderMappingId,status){
     return Model.updateFullFilmentStatus (pickerBoyOrderMappingId,status);

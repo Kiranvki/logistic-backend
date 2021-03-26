@@ -33,6 +33,7 @@ module.exports = {
   isDeliveryAlreadyCheckedIn: require('./isDeliveryAlreadyCheckedIn'),
   getOrderItemDetail: require('./getOrderItemDetail'),
   validateOrderItemQuantity: require('./validateOrderItemQuantity'),
-  checkFullfilmentStatus: require('./checkFullfilmentStatus')
+  checkFullfilmentStatus: require('./checkFullfilmentStatus'),
+  checkIsInPickingState: require('./checkIsInPickingState')
 
 }
