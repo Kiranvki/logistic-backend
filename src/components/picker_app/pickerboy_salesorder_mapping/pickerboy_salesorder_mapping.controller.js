@@ -447,12 +447,44 @@ getOrderDetails = async (req,res,next)=>{
   // get details 
   getSalesOrder = async (req, res) => {
     let Model;
+    info('Getting the Order Detail!!!');
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        orderId = req.params.orderId,
+        searchKey =  '', //req.query.search ||
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId =  'N/A', // cityId req.user.cityId ||
+        searchDate = req.body.searchDate || '',
+         orderData = {}
     try {
       info('SalesOrder GET DETAILS !');
       console.log(req.params.type)
       switch(req.params.type){
         case 'salesorders':
-          Model= salesOrderModel;
+         
+          orderData= await salesOrderModel.find({'_id':mongoose.Types.ObjectId('605b2b928680bb432cc033a6')}).lean().then((res) => {
+          
+            if (res && !_.isEmpty(res)) {
+              return {
+                success: true,
+                data: res
+              }
+            } else {
+              error('Error Searching Data in saleOrder DB!');
+              return {
+                success: false
+              }
+            }
+          }).catch(err => {
+            error(err);
+            return {
+              success: false,
+              error: err
+            }
+          });
+          
           break;
         case 'spotsales':
           Model= spotSalesModel;
@@ -467,10 +499,10 @@ getOrderDetails = async (req,res,next)=>{
   
       }
       // get the sale Order Details
-      let saleOrderDetails = {'type':req.params.type};
-
+   
+console.log(orderData)
       // check if inserted 
-      if (saleOrderDetails && !_.isEmpty(saleOrderDetails)) return this.success(req, res, this.status.HTTP_OK, saleOrderDetails, this.messageTypes.salesOrderDetailsFetched);
+      if (orderData && !_.isEmpty(orderData)) return this.success(req, res, this.status.HTTP_OK, orderData, this.messageTypes.salesOrderDetailsFetched);
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
 
       // catch any runtime error 

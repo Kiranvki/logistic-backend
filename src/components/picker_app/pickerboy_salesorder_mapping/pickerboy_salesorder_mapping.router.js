@@ -77,9 +77,16 @@ function userRoutes() {
     // get the single sale order details
     closed.route('/:type/detail/:orderId').get(
       [joiSalesOrderDetails],
-      verifyAppToken,   // verify app token
+      // verifyAppToken,   // verify app token
       // isValidSalesOrder,
       ctrl.getOrderDetails // get controller 
+    );
+
+    closed.route('/:type/getdetail/:orderId').get(
+      [joiSalesOrderDetails],
+      // verifyAppToken,   // verify app token
+      // isValidSalesOrder,
+      ctrl.getSalesOrder // get controller 
     );
 
     

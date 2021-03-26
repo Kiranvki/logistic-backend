@@ -210,11 +210,11 @@ console.log(pickerBoySalesOrderMappingId,itemId)
 
 
     // check if inserted 
-    if (orderDetail) {
+    if (orderDetail ) {
   
      
        // changes required quadratic
-    
+    if(itemAdded){
       orderDetail[0]['salesOrderId']['orderItems'].forEach((x,i)=>{
       //   console.log(x)
       itemAdded[0]['itemDetail'].forEach((y,j)=>{
@@ -228,7 +228,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
           }
       })
     })
- 
+  }
       return this.success(req, res, this.status.HTTP_OK, 
         {
           results: orderDetail,
