@@ -9,21 +9,14 @@ const Response = require('../../../responses/response');
 // add joi schema 
 const schemas = {
   // joi zoho details 
-    // joi start pick salesorder
-  joiGenerateInvoice: Joi.object().keys({
-      pickerBoySalesOrderMappingId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('pickerboy SO mapping Id').options({
-        language: {
-          string: {
-            regex: {
-              base: 'should be a valid mongoose Id.'
-            }
-          }
-        }
-      }).required()
-    }),
-  // joi start pick salesorder
-  joiGetInvoiceDetails: Joi.object().keys({
-      invoiceId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Invoice Id').options({
+  poList: Joi.object().keys({
+    page: Joi.number().integer().min(1).label('Page').required(),
+    poNumber:Joi.number().integer().label('Purchase order Number').optional(),
+  }),
+
+  // joi asm create
+  poDetails: Joi.object().keys({
+    id: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order Id').required().options({
       language: {
         string: {
           regex: {
@@ -31,9 +24,10 @@ const schemas = {
           }
         }
       }
-    }).required()
+    })
   }),
 
+  
 }
 // joi options
 const options = {
@@ -57,9 +51,9 @@ const options = {
 
 module.exports = {
   // exports validate admin signin 
-  joiGetInvoiceDetails: (req, res, next) => {
+  poDetails: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiGetInvoiceDetails;
+    let schema = schemas.poDetails;
     let option = options.basic;
 
     // validating the schema 
@@ -78,13 +72,13 @@ module.exports = {
   },
 
   // joi asm create 
-  joiGenerateInvoice: (req, res, next) => {
+  poList: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiGenerateInvoice;
+    let schema = schemas.poList;
     let option = options.basic;
 
     // validating the schema 
-    schema.validate(req.params, option).then(() => {
+    schema.validate(req.query, option).then(() => {
       next();
       // if error occured
     }).catch((err) => {
@@ -96,5 +90,6 @@ module.exports = {
       // returning the response 
       Response.joierrors(req, res, err);
     });
-  }, 
+  },
+
 }

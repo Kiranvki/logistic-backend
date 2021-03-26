@@ -226,7 +226,7 @@ class invoiceMasterController extends BaseController {
         let newInvoice = await Model.create(dataToInsert);
         let invoiceNo=`INV/${cityInit}/${dateToday.getFullYear()}/${pad(parseInt(dateToday.getMonth() + 1), 2)}/${pad(parseInt(newInvoice.seq % 9999999999), 10)}`
 
-        let isUpdated = await Model.update({
+        let isUpdated = await Model.updateOne({
           '_id': mongoose.Types.ObjectId(newInvoice._id)
         }, {
           'invoiceDetails.invoiceNo':invoiceNo

@@ -13,5 +13,7 @@ module.exports = {
   invoice: require('./invoice'), // invoice
   vehicleAttendance: require('./vehicleAttendance'), //vehicleAttendance
   agencies: require('./agencies'), // agencies 
-  vehicleModel: require('./vehicleModel')
+  vehicleModel: require('./vehicleModel'),
+  purchaseOrder: require('./purchaseOrder'), // invoice
+
 };
