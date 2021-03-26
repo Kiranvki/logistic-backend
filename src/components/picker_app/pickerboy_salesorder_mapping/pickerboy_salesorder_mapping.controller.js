@@ -464,7 +464,7 @@ getOrderDetails = async (req,res,next)=>{
       switch(req.params.type){
         case 'salesorders':
          
-          orderData= await salesOrderModel.find({'_id':mongoose.Types.ObjectId('605b2b928680bb432cc033a6')}).lean().then((res) => {
+          orderData= await salesOrderModel.find({'_id':mongoose.Types.ObjectId(orderId)}).lean().then((res) => {
           
             if (res && !_.isEmpty(res)) {
               return {
@@ -1492,7 +1492,31 @@ try{
       
       break;
     case 'assettransfer':
-      orderModel = require('../../MyTrip/assign_trip/model/spotsales.model')
+      pipeline.push(
+        {
+          $lookup: {
+              from: 'pickerboyordermappings',
+              let: {
+                'orderId': '$_id'
+              },
+              pipeline: [
+                
+
+                {
+                  $match: {
+                    'invoiceDetail.isInvoice':false,
+                    'status': 1,
+                    'isDeleted': 0,
+                    '$expr': {
+                      '$eq': ['$assetTransferId', '$$orderId']
+                    }
+                  }
+                }],
+                as:'pickingStatus'
+          }   
+        }
+      )
+      orderModel = require('../../MyTrip/assign_trip/model/assetTransfer.model')
       break;
     default:
       orderModel = salesOrderModel
@@ -1507,7 +1531,7 @@ try{
 
 
 
-  if (todaysOrderData) {
+  if (todaysOrderData.length>0) {
     return this.success(req, res, this.status.HTTP_OK, {
       results: todaysOrderData,
       pageMeta: {
