@@ -83,6 +83,7 @@ class purchaseController extends BaseController {
                   },
                 },
               },
+              {$limit:1},
               {
                 $project: {
                   _id: 1,
@@ -93,12 +94,17 @@ class purchaseController extends BaseController {
           },
         },
         {
+          '$unwind': {
+            'path': '$poDetails'
+          }
+        },
+        {
           $project: {
             poNo: 1,
             supplierCode: 1,
             supplierName: 1,
             itemCount: { $size: "$orderItems" },
-            poRecievingId: { $first: "$poDetails" },
+            poRecievingId: "$poDetails" ,
           },
         },
         {
