@@ -6,7 +6,8 @@ const multipartMiddleware = multer();
 
 // custom joi validation
 const {
-
+joiGenerateInvoice,
+joiGetInvoiceDetails
 } = require('./invoice_master.validators');
 
 // hooks 
@@ -26,13 +27,13 @@ const {
 } = require('../../../hooks/app/Auth');
 
 // exporting the user routes 
-function userRoutes() {
+function invoiceRoutes() {
   //open, closed
   return (open, closed) => {
 
     // generating invoice
     closed.route('/invoice/:pickerBoySalesOrderMappingId').get(
-      ///  [joiGoFrugalSync], // joi validation
+      [joiGenerateInvoice], // joi validation
       isInvoiceGenerated, // check whether the invoice is already generated
       // verifyAppToken, // verify app user token 
       // checkFullfilmentStatus
@@ -42,12 +43,12 @@ function userRoutes() {
 
     // getting  invoice details
     closed.route('/invoice-details/:invoiceId').get(
-      ///  [joiGoFrugalSync], // joi validation
-      isInvoiceGenerated, // check whether the invoice is already generated
-      verifyAppToken, // verify app user token 
-      ctrl.generateInvoice // post controller 
+      [joiGetInvoiceDetails], // joi validation
+      // isInvoiceGenerated, // check whether the invoice is already generated
+      // verifyAppToken, // verify app user token 
+      ctrl.getInvoiceDetails // post controller 
     );
   };
 }
 
-module.exports = userRoutes();
+module.exports = invoiceRoutes();
