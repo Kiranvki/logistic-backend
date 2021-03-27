@@ -1,5 +1,5 @@
 // user controller 
-const ctrl = require('./purchase_order_recieving_details.controller');
+const ctrl = require('./purchase_order_receiving_details.controller');
 const poCtrl = require('../purchase_order/purchase_order.controller');
 
 // library
@@ -8,15 +8,17 @@ const multipartMiddleware = multer();
 
 // custom joi validation
 const {
-  startRecieving,
-  joiRecievingList,
-  joiRecievingItem
-} = require('./purchase_order_recieving_details.validators');
+  startReceiving,
+  joiReceivingList,
+  joiReceivingItem
+} = require('./purchase_order_receiving_details.validators');
 
 // hooks 
 const {
   isValidPoId,
-  poRecievingInitiationValidations
+  poReceivingInitiationValidations,
+  hasOrderAlreadyInReceivingState,
+  isValidInputsForReceivedItem
 } = require('../../../hooks/app');
 // auth 
 const {
@@ -33,28 +35,29 @@ function purchaseOrderRoutes() {
 
    
     // getting  invoice details
-    closed.route('/purchaseOrder/start-recieving/:poId').get(
-      [startRecieving], // joi validation
+    closed.route('/purchaseOrder/start-receiving/:poId').get(
+      [startReceiving], // joi validation
       verifyAppToken, // verify app user token 
       isValidPoId, // check whether the poId is valid
-      poRecievingInitiationValidations,
+      poReceivingInitiationValidations,
+      hasOrderAlreadyInReceivingState,
       ctrl.startPickUP // post controller 
     );
     // getting  invoice details
-    closed.route('/purchaseOrder/recieving-list/:poRecievingId').get(
-      [joiRecievingList], // joi validation
+    closed.route('/purchaseOrder/receiving-list/:poReceivingId').get(
+      [joiReceivingList], // joi validation
       verifyAppToken, // verify app user token 
-      // isValidPoRecievingId, // check whether the poId is valid
-      ctrl.poRecievingList // post controller 
+      // isValidPoReceivingId, // check whether the poId is valid
+      ctrl.poReceivingList // post controller 
     );
-    closed.route('/purchaseOrder/recieveItem/:itemId').post(
-      [joiRecievingItem], // joi validation
+    closed.route('/purchaseOrder/receive-item/:itemId').post(
+      [joiReceivingItem], // joi validation
       verifyAppToken, // verify app user token 
-      // isValidInputs, // check whether the poId is valid
-      ctrl.recievePOItem // post controller 
+      isValidInputsForReceivedItem, // check whether the poId is valid
+      ctrl.receivePOItem // post controller 
     );
-    closed.route('/purchaseOrder/basket-List/:poRecievingId').get(
-      [joiRecievingList], // joi validation
+    closed.route('/purchaseOrder/basket-list/:poReceivingId').get(
+      [joiReceivingList], // joi validation
       verifyAppToken, // verify app user token 
       // isValidPoId, // check whether the poId is valid
       // isValidInputs, // check whether the poId is valid

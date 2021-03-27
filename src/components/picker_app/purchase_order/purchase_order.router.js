@@ -1,13 +1,10 @@
 // user controller 
 const ctrl = require('./purchase_order.controller');
-// library
-const multer = require('multer');
-const multipartMiddleware = multer();
 
 // custom joi validation
 const {
-poDetails,
-poList
+  joiPoIdValidation,
+  poList
 } = require('./purchase_order.validators');
 
 // hooks 
@@ -39,21 +36,21 @@ function purchaseOrderRoutes() {
     );
 
     // getting  invoice details
-    closed.route('/purchaseOrder/:id').get(
-    [poDetails], // joi validation
+    closed.route('/purchaseOrder/:poId').get(
+    [joiPoIdValidation], // joi validation
       // isInvoiceGenerated, // check whether the invoice is already generated
       // verifyAppToken, // verify app user token 
       ctrl.getPODetails // post controller 
     );
     // getting  invoice details
     closed.route('/purchaseOrder/startPickup/:poId').get(
-      // [joiGoFrugalSync], // joi validation
+      [joiPoIdValidation], // joi validation
       // isInvoiceGenerated, // check whether the invoice is already generated
       // verifyAppToken, // verify app user token 
       ctrl.startPickUP // post controller 
     );
     closed.route('/purchaseOrder/vendorDetails/:poId').get(
-      // [joiGoFrugalSync], // joi validation
+      [joiPoIdValidation], // joi validation
       // isInvoiceGenerated, // check whether the invoice is already generated
       // verifyAppToken, // verify app user token 
       ctrl.vendorDetails // post controller 

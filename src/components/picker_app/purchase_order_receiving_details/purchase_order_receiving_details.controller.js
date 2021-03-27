@@ -7,7 +7,7 @@
 
 const BasicCtrl = require("../../basic_config/basic_config.controller");
 const BaseController = require("../../baseController");
-const Model = require("./models/purchase_order_recieving_details.model");
+const Model = require("./models/purchase_order_receiving_details.model");
 const poCtrl = require("../purchase_order/purchase_order.controller");
 
 const mongoose = require("mongoose");
@@ -37,12 +37,14 @@ class purchaseController extends BaseController {
 
       // get the sale Order Details
       let poDetails = req.body.poDetails;
-
+      poDetails.orderItems.forEach(item => {
+        item.quantity= item.pendingQty;
+      });
       let dataToInsert = {
         poId: poDetails._id,
         pickerBoyId: req.user._id,
         createdBy: req.user.email,
-        recievingDate: new Date(),
+        receivingDate: new Date(),
         orderItems: poDetails.orderItems,
       };
 
@@ -50,7 +52,7 @@ class purchaseController extends BaseController {
       let isInserted = await Model.create(dataToInsert);
       let poUpdateDetails = await poCtrl.modifyPo(
         { _id: poDetails._id },
-        { recievingStatus: 1 }
+        { receivingStatus: 1 }
       );
 
       // check if inserted
@@ -60,7 +62,7 @@ class purchaseController extends BaseController {
           res,
           this.status.HTTP_OK,
           isInserted,
-          this.messageTypes.startedRecieving
+          this.messageTypes.startedReceiving
         );
       } else {
         error("Error while adding in packing collection !");
@@ -68,7 +70,7 @@ class purchaseController extends BaseController {
           req,
           res,
           this.status.HTTP_CONFLICT,
-          this.messageTypes.startedNotRecieving
+          this.messageTypes.startedNotReceiving
         );
       }
       // catch any runtime error
@@ -83,17 +85,17 @@ class purchaseController extends BaseController {
     }
   };
 
-  poRecievingList = async (req, res) => {
+  poReceivingList = async (req, res) => {
     try {
-      var poRecievingId = req.params.poRecievingId;
+      var poReceivingId = req.params.poReceivingId;
       info(
-        "Get Purchase order  recieving details !",
+        "Get Purchase order  receiving details !",
         req.body,
         req.query,
         req.params
       );
       let query = {
-        _id: mongoose.Types.ObjectId(poRecievingId),
+        _id: mongoose.Types.ObjectId(poReceivingId),
         isDeleted: 0,
       };
       var poList = await Model.findOne(query).populate({
@@ -121,20 +123,24 @@ class purchaseController extends BaseController {
     }
   };
 
-  recievePOItem = async (req, res) => {
+  receivePOItem = async (req, res) => {
     try {
       var itemId = req.params.itemId;
-      var poRecievingId = req.body.poRecievingId;
-      var recievedQty = req.body.recievedQty;
+      var poReceivingId = req.body.poReceivingId;
+      var receivedQty = req.body.receivedQty;
+      var remarks =req.body.remarks;
 
-      info("Recieving PO item!", req.body, req.query, req.params);
+      info("Receiving PO item!", req.body, req.query, req.params);
       let query = {
-        _id: mongoose.Types.ObjectId(poRecievingId),
+        _id: mongoose.Types.ObjectId(poReceivingId),
         "orderItems._id": mongoose.Types.ObjectId(itemId),
       };
       let updateData = {
-        "orderItems.$.recievedQty": recievedQty,
+        "orderItems.$.receivedQty": receivedQty,
       };
+      if(remarks){
+        updateData["orderItems.$.remarks"] =remarks;
+      }
       var updatedPO = await Model.findOneAndUpdate(query, updateData, {
         newValue: true,
         useFindAndModify: false,
@@ -144,7 +150,7 @@ class purchaseController extends BaseController {
         req,
         res,
         this.status.HTTP_OK,
-        this.messageTypes.recievePOItem
+        this.messageTypes.receivePOItem
       );
 
       // catch any runtime error
@@ -159,9 +165,9 @@ class purchaseController extends BaseController {
     }
   };
 
-  getPORecievingDetails = async (poId) => {
+  getPOReceivingDetails = async (poId) => {
     try {
-      info("Get PORecieving details !");
+      info("Get POReceiving details !");
 
       // get details
       return Model.find({
@@ -201,17 +207,17 @@ class purchaseController extends BaseController {
   };
   basketList = async (req, res) => {
     try {
-      var poRecievingId = req.params.poRecievingId;
+      var poReceivingId = req.params.poReceivingId;
       info(
-        "Get Purchase order  recieving details !",
+        "Get Purchase order  receiving details !",
         req.body,
         req.query,
         req.params
       );
       let query = {
-        _id: mongoose.Types.ObjectId(poRecievingId),
+        _id: mongoose.Types.ObjectId(poReceivingId),
         isDeleted: 0,
-        'orderItems.recievedQty':{$gt:0}
+        'orderItems.receivedQty':{$gt:0}
       };
       var bucketList = await Model.aggregate(
         [{$match:query},
@@ -224,7 +230,7 @@ class purchaseController extends BaseController {
                     as: "item",
                     in: {
                       $round: [
-                        { $multiply: ["$$item.cost", "$$item.recievedQty"] },
+                        { $multiply: ["$$item.cost", "$$item.receivedQty"] },
                         4,
                       ],
                     },
@@ -242,7 +248,7 @@ class purchaseController extends BaseController {
                         {
                           $multiply: [
                             { $divide: ["$$item.itemTax", "$$item.quantity"] },
-                            "$$item.recievedQty",
+                            "$$item.receivedQty",
                           ],
                         },
                         4,
@@ -266,7 +272,7 @@ class purchaseController extends BaseController {
                                 "$$item.quantity",
                               ],
                             },
-                            "$$item.recievedQty",
+                            "$$item.receivedQty",
                           ],
                         },
                         4,
@@ -285,7 +291,7 @@ class purchaseController extends BaseController {
               "orderItems.quantity": 1,
               "orderItems.cost": 1,
               "orderItems.mrp": 1,
-              "orderItems.recievedQty": 1,
+              "orderItems.receivedQty": 1,
               "orderItems.itemAmount": 1,
               totalDiscount:1,
               totalTax:1,
@@ -325,17 +331,17 @@ class purchaseController extends BaseController {
   };
   generateGRN = async (req, res) => {
     try {
-      var poRecievingId = req.params.poRecievingId;
+      var poReceivingId = req.params.poReceivingId;
       info(
-        "Get Purchase order  recieving details !",
+        "Get Purchase order  receiving details !",
         req.body,
         req.query,
         req.params
       );
-      var poRecievingId= req.params.poRecievingId;
+      var poReceivingId= req.params.poReceivingId;
       var vendorInvoiceNo = req.body.vendorInvoiceNo;
       let query = {
-        _id: mongoose.Types.ObjectId(poRecievingId),
+        _id: mongoose.Types.ObjectId(poReceivingId),
         isDeleted: 0,
       };
       var bucketList = await Model.aggregate(
@@ -349,7 +355,7 @@ class purchaseController extends BaseController {
                     as: "item",
                     in: {
                       $round: [
-                        { $multiply: ["$$item.cost", "$$item.recievedQty"] },
+                        { $multiply: ["$$item.cost", "$$item.receivedQty"] },
                         4,
                       ],
                     },
@@ -367,7 +373,7 @@ class purchaseController extends BaseController {
                         {
                           $multiply: [
                             { $divide: ["$$item.itemTax", "$$item.quantity"] },
-                            "$$item.recievedQty",
+                            "$$item.receivedQty",
                           ],
                         },
                         4,
@@ -391,7 +397,7 @@ class purchaseController extends BaseController {
                                 "$$item.quantity",
                               ],
                             },
-                            "$$item.recievedQty",
+                            "$$item.receivedQty",
                           ],
                         },
                         4,
@@ -410,7 +416,7 @@ class purchaseController extends BaseController {
               "orderItems.quantity": 1,
               "orderItems.cost": 1,
               "orderItems.mrp": 1,
-              "orderItems.recievedQty": 1,
+              "orderItems.receivedQty": 1,
               "orderItems.itemAmount": 1,
               totalDiscount:1,
               totalTax:1,
@@ -444,26 +450,21 @@ class purchaseController extends BaseController {
       );
     }
   };
-  get =async (poRecievingId) =>{
+  get =async (query) =>{
     try{
-      var poRecievingDetails= await  Model.aggregate([{
-        $match:{
-          status:1,
-          isDeleted: 0,
-          _id:mongoose.Types.ObjectId(poRecievingId) 
-        }
+      var poReceivingDetails= await  Model.aggregate([{
+        $match:query
       },{
         $project: {
           poId:1,
           'orderItems':1,
           'pickerBoyId':1,
-          'recievingStatus':1,
-          'netWeight':1
+          'receivingStatus':1,
       }}
       ]);
       return {
         success: true,
-        data: poRecievingDetails
+        data: poReceivingDetails
       }
     }catch(err){
       error(err);
@@ -474,15 +475,15 @@ class purchaseController extends BaseController {
     }
   }
 
- getForGrnGeneration = async(poRecievingId)=>{
+ getForGrnGeneration = async(poReceivingId)=>{
   try{
     let query = {
-      _id: mongoose.Types.ObjectId(poRecievingId),
+      _id: mongoose.Types.ObjectId(poReceivingId),
       isDeleted: 0,
-      'orderItems.recievedQty':{$gt:0}
+      'orderItems.receivedQty':{$gt:0}
     };
     //calculate net value also when 
-    var poRecievingDetails= await  Model.aggregate( [{$match:query},
+    var poReceivingDetails= await  Model.aggregate( [{$match:query},
       {
         $addFields: {
           total: {
@@ -492,7 +493,7 @@ class purchaseController extends BaseController {
                 as: "item",
                 in: {
                   $round: [
-                    { $multiply: ["$$item.cost", "$$item.recievedQty"] },
+                    { $multiply: ["$$item.cost", "$$item.receivedQty"] },
                     4,
                   ],
                 },
@@ -510,7 +511,7 @@ class purchaseController extends BaseController {
                     {
                       $multiply: [
                         { $divide: ["$$item.itemTax", "$$item.quantity"] },
-                        "$$item.recievedQty",
+                        "$$item.receivedQty",
                       ],
                     },
                     4,
@@ -534,7 +535,7 @@ class purchaseController extends BaseController {
                             "$$item.quantity",
                           ],
                         },
-                        "$$item.recievedQty",
+                        "$$item.receivedQty",
                       ],
                     },
                     4,
@@ -555,10 +556,10 @@ class purchaseController extends BaseController {
         },
       }
     ]);
-    poRecievingDetails[0].netValue=poRecievingDetails[0].total+ poRecievingDetails[0].totalDiscount-poRecievingDetails[0].totalTax;
+    poReceivingDetails[0].netValue=poReceivingDetails[0].total+ poReceivingDetails[0].totalDiscount-poReceivingDetails[0].totalTax;
     return {
       success: true,
-      data: poRecievingDetails
+      data: poReceivingDetails
     }
   }catch(err){
     error(err);

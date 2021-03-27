@@ -8,11 +8,14 @@ const purchaseOrderGRN = new Schema({
   "poNo":{
     type: Number
   },
-  poRecievingId:{
+  poReceivingId:{
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'purchaseorderrecievingdetails',
+    ref: 'purchaseorderreceivingdetails',
   },
+  sapGrnNo:{
+    type: String
+  }, 
   "grnNo": {
     type: String
   }, 
@@ -23,10 +26,16 @@ const purchaseOrderGRN = new Schema({
     type: Number,
     default:1
   }, 
-  "recievingStatus": {
+  "receivingStatus": {
     type: Number,
     default:0
   },
+  "fulfilmentStatus": {
+    type: Number,
+    default:0
+  },
+  //1 partially fulfilled
+  //2 fullfilled
   'sequence': {
       type: Number
   },
@@ -133,7 +142,7 @@ const purchaseOrderGRN = new Schema({
       "pendingQty": {
       type: Number
     }, 
-      "recievedQty": {
+      "receivedQty": {
       type: Number
     }, 
       "grnQty": {

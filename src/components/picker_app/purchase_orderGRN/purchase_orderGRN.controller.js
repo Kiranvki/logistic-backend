@@ -8,7 +8,7 @@
 const BasicCtrl = require("../../basic_config/basic_config.controller");
 const BaseController = require("../../baseController");
 const Model = require("./models/purchase_orderGRN.model");
-const poRecievingCtrl = require("../purchase_order_recieving_details/purchase_order_recieving_details.controller");
+const poReceivingCtrl = require("../purchase_order_receiving_details/purchase_order_receiving_details.controller");
 const poCtrl = require("../purchase_order/purchase_order.controller");
 
 const mongoose = require("mongoose");
@@ -59,35 +59,46 @@ class purchaseController extends BaseController {
 
   generateGRN = async (req, res) => {
     try {
-      let poRecievingDetails = req.body.poRecievingDetails;
-      let poDetails = await poCtrl.get(poRecievingDetails.poId);
+      let poReceivingDetails = req.body.poReceivingDetails;
+      let poDetails = await poCtrl.get(poReceivingDetails.poId);
       var dateToday = new Date();
       poDetails = poDetails.data[0];
-      for (let i = 0; i < poRecievingDetails.orderItems.length; i++) {
-        let item = poRecievingDetails.orderItems[i];
-        if (item.quantity != item.recievedQty) {
-          this.errors(
-            req,
-            res,
-            this.status.HTTP_CONFLICT,
-            this.messageTypes.grnGenerateQuantityMismatch
-          );
+      vendorInvoiceNo= req.body.vendorInvoiceNumber;
+      try{
+         let sapGrnResponse= await this.hitSapApiOfGRN(poReceivingDetails,poDetails,vendorInvoiceNo);
+          info(sapGrnResponse)
+        }catch(err){
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.invoiceNotCreated
+        );
+        
+      }
+      let fulfilmentStatus=4;
+      for(let i = 0; i < poReceivingDetails.orderItems.length; i++) {
+        let item = poReceivingDetails.orderItems[i];
+        if (item.quantity != item.receivedQty) {
+          fulfilmentStatus=3
           return;
         }
+        poReceivingDetails.orderItems.pendingQty=item.quantity- item.receivedQty;
       }
 
       let grnData = {
-        poRecievingId:poRecievingDetails._id,
+        poReceivingId:poReceivingDetails._id,
         poNo: poDetails.poNo,
-        recievingStatus: 3,
+        receivingStatus: fulfilmentStatus==2?4:3,
+        fulfilmentStatus:fulfilmentStatus,
         poDate: poDetails.poDate,
         deliveryDate: poDetails.deliveryDate,
-        poAmount: poRecievingDetails.total,
-        netTotal: poRecievingDetails.netValue,
-        totalTaxAmount: poRecievingDetails.totalTax,
-        discount: poRecievingDetails.totalDiscount,
+        poAmount: poReceivingDetails.total,
+        netTotal: poReceivingDetails.netValue,
+        totalTaxAmount: poReceivingDetails.totalTax,
+        discount: poReceivingDetails.totalDiscount,
         generatedBy: req.user.email,
-        orderItems: poRecievingDetails.orderItems,
+        orderItems: poReceivingDetails.orderItems,
         supplierDetails: {
           supplierCode: poDetails.supplierCode,
           supplierName: poDetails.supplierName,
@@ -130,14 +141,18 @@ class purchaseController extends BaseController {
           _id:poDetails._id,
           poStatus :1
         },{
-          recievingStatus:3
+          receivingStatus:fulfilmentStatus==2?4:3,
+          fulfilmentStatus:fulfilmentStatus,
+          orderDetails:poReceivingDetails.orderItems
         })
 
-        await poRecievingCtrl.modifyPo({
-            _id:poRecievingDetails._id,
+        await poReceivingCtrl.modifyPo({
+            _id:poReceivingDetails._id,
             status:1
         },{
-          recievingStatus:3
+          receivingStatus:fulfilmentStatus==2?4:3,
+          fulfilmentStatus:fulfilmentStatus,
+          orderDetails:poReceivingDetails.orderItems
         })
         return this.success(
           req,
@@ -186,6 +201,52 @@ class purchaseController extends BaseController {
       };
     }
   };
+  hitSapApiOfGRN = async(poReceivingDetails,poDetails,vendorInvoiceNo)=>{
+    let options = {
+      method: 'GET',
+      uri: 'http://uat.apps.waycool.in:3001/api/v1/warehouse/'+req.user.warehouseId,
+      headers: {
+        'x-access-token': req.user.token,
+        'Content-Type': 'application/json' 
+    },
+      json: true
+    };
+    createRequestObject(poReceivingDetails,poDetails,vendorInvoiceNo)
+    let response = await request(options);
+
+ 
+  }
+  createRequestObject = (poReceivingDetails,poDetails,vendorInvoiceNo)=>{
+    let itemArray=[]
+    let todaysDate  = moment().set({
+      h: 0,
+      m: 0,
+      s: 0,
+      millisecond: 0
+    }).format('YYYY-MM-DD')
+    poReceivingDetails.orderItems.forEach(item => {
+      itemArray.push({
+        "material_no": item.material_no,
+        "movement_type": [101],
+        "quantity": item.quantity,
+        "po_number": poDetails.poNo,
+        "po_item": item.receivedQty,
+        "plant": item.plant,
+        "storage_location": item.storage_location
+    })
+    }); 
+    return {
+      "request": {
+          "posting_date": todaysDate,
+          "document_date": todaysDate,
+          "referance_document_no":poDetails.poNo ,
+          "delivery_note":vendorInvoiceNo,
+          "bill_of_lading": vendorInvoiceNo,
+          "header_txt": [],
+          "item":itemArray
+      }
+  }
+  }
 }
 
 // exporting the modules

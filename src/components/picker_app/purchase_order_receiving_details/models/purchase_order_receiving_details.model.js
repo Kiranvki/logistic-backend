@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 // schema
-const purchaseOrderRecievingDetails = new Schema({
+const purchaseOrderReceivingDetails = new Schema({
   'pickerBoyId': {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
@@ -10,13 +10,19 @@ const purchaseOrderRecievingDetails = new Schema({
       select: ['fullName', 'employeeId']
     }
   },
-  "recievingStatus": {
+  "receivingStatus": {
     type: Number,
     default:1
   }, 
-  // 1 initiated Recieving
-  // 2 added itms to recieving cart
+  // 1 initiated Receiving
+  // 2 added itms to receiving cart
   //3 grn generated
+  "fulfilmentStatus": {
+    type: Number,
+    default:0
+  },
+  //1 partially fulfilled
+  //2 fullfilled
   "status": {
     type: Number,
     default:1
@@ -31,7 +37,7 @@ const purchaseOrderRecievingDetails = new Schema({
     ref: 'purchaseorder',
 
   },
-  "recievingDate" : {
+  "receivingDate" : {
     type: Date
   },
   "netWeight": {
@@ -90,7 +96,7 @@ const purchaseOrderRecievingDetails = new Schema({
       "pendingQty": {
       type: Number
     }, 
-      "recievedQty": {
+      "receivedQty": {
       type: Number
     }, 
       "grnQty": {
@@ -99,6 +105,12 @@ const purchaseOrderRecievingDetails = new Schema({
     "rejectedQty": {
       type: Number
     }, 
+    "remarks":{
+      type: String
+    }, 
+    "dateOfManufacturing":{
+      type: String
+    },
   }
   ]
   }, 
@@ -108,9 +120,9 @@ const purchaseOrderRecievingDetails = new Schema({
 
 
 
-purchaseOrderRecievingDetails.index({
+purchaseOrderReceivingDetails.index({
 
 });
 
 // exporting the entire module
-module.exports = mongoose.model('purchaseorderrecievingdetails', purchaseOrderRecievingDetails);
+module.exports = mongoose.model('purchaseorderreceivingdetails', purchaseOrderReceivingDetails);

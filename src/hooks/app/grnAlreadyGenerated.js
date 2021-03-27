@@ -17,13 +17,13 @@ module.exports = async (req, res, next) => {
     try {
         info('Check whether the GRN already generated for PO');
         let objectId = mongoose.Types.ObjectId; // object id
-        let poRecievingId = req.params.poRecievingId; // get the sale order id 
+        let poReceivingId = req.params.poReceivingId; // get the sale order id 
 
         // mongoose valid id 
-        if (objectId.isValid(poRecievingId)) {
+        if (objectId.isValid(poReceivingId)) {
 
             // check whether the sale Order id is already added or not
-            let poGrnDetails = await poGrnController.get({poRecievingId:poRecievingId})
+            let poGrnDetails = await poGrnController.get({poReceivingId:poReceivingId})
 
             // if sales order Id is not added
             if (poGrnDetails.success && !poGrnDetails.recordNotFound) {
@@ -34,12 +34,12 @@ module.exports = async (req, res, next) => {
                 next();
             }else {
                 info('Something went wrong');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.invalidPurchaseOrderRecievingId);
+                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.invalidPurchaseOrderReceivingId);
 
             }
         } else {
             error('The PickerBoy SalesOrder Mapping Id is Invalid !');
-            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.invalidPurchaseOrderRecievingId);
+            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.invalidPurchaseOrderReceivingId);
         }
 
         // catch any runtime error 

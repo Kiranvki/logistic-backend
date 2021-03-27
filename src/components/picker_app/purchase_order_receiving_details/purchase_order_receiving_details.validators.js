@@ -10,8 +10,8 @@ const Response = require('../../../responses/response');
 const schemas = {
   
 
-  // joi apicker boy start recieving
-  startRecieving: Joi.object().keys({
+  // joi apicker boy start receiving
+  startReceiving: Joi.object().keys({
     poId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order Id').required().options({
       language: {
         string: {
@@ -22,9 +22,9 @@ const schemas = {
       }
     })
   }),
-  // joi recieving list after doing start pick or for resuming reciving po
-  joiRecievingList: Joi.object().keys({
-    poRecievingId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order  recieving Id').required().options({
+  // joi receiving list after doing start pick or for resuming reciving po
+  joiReceivingList: Joi.object().keys({
+    poReceivingId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order  receiving Id').required().options({
       language: {
         string: {
           regex: {
@@ -34,10 +34,10 @@ const schemas = {
       }
     })
   }),
-  // joi add recieved item to cart
-  joiRecievingItem: Joi.object().keys({
+  // joi add received item to cart
+  joiReceivingItem: Joi.object().keys({
     params:{
-      itemId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order recieving item Id').required().options({
+      itemId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order receiving item Id').required().options({
       language: {
         string: {
           regex: {
@@ -48,7 +48,7 @@ const schemas = {
     })
   },
   body:{
-    poRecievingId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order recieving Id').required().options({
+    poReceivingId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order receiving Id').required().options({
       language: {
         string: {
           regex: {
@@ -57,7 +57,16 @@ const schemas = {
         }
       }
     }),
-    recievedQty:Joi.number().integer().min(0).label('Recieved quantity').required()
+    receivedQty:Joi.number().integer().min(0).label('Received quantity').required(),
+    remarks:Joi.string().trim().label('remarks').valid('Stock Quantity supplied is less', 'Stock Quality not upto the mark').options({
+      language: {
+        string: {
+          regex: {
+            base: 'should be a valid remark'
+          }
+        }
+      }
+    }).required()
   },
 }),
   
@@ -84,9 +93,9 @@ const options = {
 
 module.exports = {
   // exports validate admin signin 
-  startRecieving: (req, res, next) => {
+  startReceiving: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.startRecieving;
+    let schema = schemas.startReceiving;
     let option = options.basic;
 
     // validating the schema 
@@ -104,9 +113,9 @@ module.exports = {
     });
   },
 
-  joiRecievingList: (req, res, next) => {
+  joiReceivingList: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiRecievingList;
+    let schema = schemas.joiReceivingList;
     let option = options.basic;
 
     // validating the schema 
@@ -123,9 +132,9 @@ module.exports = {
       Response.joierrors(req, res, err);
     });
   },
-  joiRecievingItem: (req, res, next) => {
+  joiReceivingItem: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joiRecievingItem;
+    let schema = schemas.joiReceivingItem;
     let option = options.basic;
 
     // validating the schema 

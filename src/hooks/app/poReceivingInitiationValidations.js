@@ -1,5 +1,5 @@
 // Controller
-const poRecievingDetailsCtrl = require('../../components/picker_app/purchase_order_recieving_details/purchase_order_recieving_details.controller');
+const poReceivingDetailsCtrl = require('../../components/picker_app/purchase_order_receiving_details/purchase_order_receiving_details.controller');
 
 // Responses & others utils 
 const Response = require('../../responses/response');
@@ -23,15 +23,15 @@ module.exports = async (req, res, next) => {
         if (objectId.isValid(poId)) {
 
             // check whether the sale Order id is already added or not
-            let poDetails = await poRecievingDetailsCtrl.getPORecievingDetails(poId);
+            let poDetails = await poReceivingDetailsCtrl.getPOReceivingDetails(poId);
             //send error based on record
             // if purchase order Id is not added
             if (poDetails.success, poDetails.data && poDetails.data.length) {
-                if(poDetails.data[0].recievingStatus=='1'||poDetails.data[0].recievingStatus=='2'){
-                    error('Purchase Order already added to recieving state');
-                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.purchaseOrderAlreadyAddedInRecievingState);
+                if(poDetails.data[0].receivingStatus=='1'||poDetails.data[0].receivingStatus=='2'){
+                    error('Purchase Order already added to receiving state');
+                    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.purchaseOrderAlreadyAddedInReceivingState);
                 }
-                error('Purchase Order already added to recieving state');
+                error('Purchase Order already added to receiving state');
                 return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.purchaseOrderGRNalreadygenerated);
             } else {
                 next();

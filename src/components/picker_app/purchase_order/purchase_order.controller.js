@@ -51,7 +51,7 @@ class purchaseController extends BaseController {
       let query ={
         poStatus: 1,
         isDeleted: 0,
-        // recievingStatus:{$ne:3}//to-do
+        // receivingStatus:{$ne:3}//to-do
         // expiryDate:{$gt:todaysDate}
       }
       if(req.query.poNumber){
@@ -67,10 +67,10 @@ class purchaseController extends BaseController {
         },
         {
           $lookup: {
-            from: "purchaseorderrecievingdetails",
+            from: "purchaseorderreceivingdetails",
             let: {
               id: "$_id",
-              poRecStatus: "$recievingStatus",
+              poRecStatus: "$receivingStatus",
             },
             pipeline: [
               {
@@ -95,7 +95,8 @@ class purchaseController extends BaseController {
         },
         {
           '$unwind': {
-            'path': '$poDetails'
+            'path': '$poDetails',
+            preserveNullAndEmptyArrays: true
           }
         },
         {
@@ -104,7 +105,7 @@ class purchaseController extends BaseController {
             supplierCode: 1,
             supplierName: 1,
             itemCount: { $size: "$orderItems" },
-            poRecievingId: "$poDetails" ,
+            poReceivingId: "$poDetails" ,
           },
         },
         {
@@ -142,7 +143,7 @@ class purchaseController extends BaseController {
         $match:{
           poStatus: 1,
           isDeleted: 0,
-          _id:mongoose.Types.ObjectId(req.params.id) 
+          _id:mongoose.Types.ObjectId(req.params.poId) 
         }
       },{
         $project: {
@@ -156,7 +157,7 @@ class purchaseController extends BaseController {
           'orderItems.cost':1,
           'orderItems.mrp':1,
           "pendingQty":1,
-          "recievedQty":1,
+          "receivedQty":1,
           "grnQty":1,
           "rejectedQty":1,
           deliveryDate:1
@@ -224,7 +225,7 @@ class purchaseController extends BaseController {
           supplierPhone:1,
           'orderItems':1,
           "pendingQty":1,
-          "recievedQty":1,
+          "receivedQty":1,
           "grnQty":1,
           "rejectedQty":1,
           deliveryDate:1
