@@ -96,6 +96,12 @@ function tripsRoutes() {
       ctrl.updateSelectedStatus
     )
 
+    // List all trips
+    closed.route('/getTripList').get(
+      verifyUserToken,
+      ctrl.getTripAndSalseOrderListing
+    )
+
     };
 };
 
