@@ -315,7 +315,7 @@ class invoiceMasterController extends BaseController {
             let InvoiceDetailsResponse={
               invoiceId:invoiceDetails._id,
               invoiceNo:invoiceDetails.invoiceDetails.invoiceNo,
-              invoiceDate:invoiceDetails.invoiceDetails.invoiceDate,
+              invoiceDate:invoiceDetails.invoiceDate,
               paymentMode:salesOrderDetails.paymentMode,
               totalWeight:'NA',
               invoiceStatus:'Order Packed',
