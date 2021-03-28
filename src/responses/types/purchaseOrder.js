@@ -8,6 +8,7 @@ module.exports = {
     salesOrderNotFound: 'salesOrder Not Fetched !',
     poListFetched: 'Purchase order fetched Successfully !',
     purchaseOrderIdInvalidEitherDeletedOrDeactivated: 'Purchase Order Id is either deleted or deactivated !',
+    purchaseOrderReceivingIdEitherDeletedOrDeactivated: 'Purchase Order Receiving Id is either deleted or deactivated !',
     invalidPurchaseOrderId: 'The Purchase Order id is Invalid !',
     purchaseOrderAlreadyAddedInReceivingState: 'Purchase Order  Already Added in Receiving State!',
     invalidPickerBoyPurchaseOrderMappingId: 'The Picker Boy Purchase Order Mapping Id is Invalid !',

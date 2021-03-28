@@ -27,7 +27,7 @@ module.exports = async (req, res, next) => {
             //send error based on record
             // if purchase order Id is not added
             if (poDetails.success, poDetails.data && poDetails.data.length) {
-                if(poDetails.data[0].receivingStatus=='1'||poDetails.data[0].receivingStatus=='2'){
+                if(poDetails.data[0].receivingStatus==4||poDetails.data[0].receivingStatus==3){
                     error('Purchase Order already added to receiving state');
                     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.purchaseOrderAlreadyAddedInReceivingState);
                 }

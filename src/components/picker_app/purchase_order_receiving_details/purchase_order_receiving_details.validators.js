@@ -66,7 +66,7 @@ const schemas = {
           }
         }
       }
-    }).required()
+    }).optional()
   },
 }),
   

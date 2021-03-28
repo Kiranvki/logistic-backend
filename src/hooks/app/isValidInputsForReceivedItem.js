@@ -20,6 +20,7 @@ module.exports = async (req, res, next) => {
         let poReceivingId = req.body.poReceivingId; // get the sale order id 
         var itemId = req.params.itemId;
         var receivedQty = req.body.receivedQty;
+        var remarks = req.body.remarks;
 
         // mongoose valid id 
         if (objectId.isValid(itemId)) {
@@ -28,7 +29,7 @@ module.exports = async (req, res, next) => {
             let poReceivingItemDetails = await poReceivingController.get({
                 _id: mongoose.Types.ObjectId(poReceivingId),
                 "orderItems._id": mongoose.Types.ObjectId(itemId),
-                receivingStatus:1
+                receivingStatus:4
               })
 
             // if sales order Id is not added
@@ -42,7 +43,7 @@ module.exports = async (req, res, next) => {
                     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.receivedQuantityGreaterThanQty);
                 }
                req.body.poReceivingItemDetails = poReceivingItemDetails.data[0];
-               
+               next()
             } else {
                 info('Invalid item id');
                 return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.invalidItemId);

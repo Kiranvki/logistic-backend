@@ -63,10 +63,11 @@ class purchaseController extends BaseController {
       let poDetails = await poCtrl.get(poReceivingDetails.poId);
       var dateToday = new Date();
       poDetails = poDetails.data[0];
-      vendorInvoiceNo= req.body.vendorInvoiceNumber;
+      var vendorInvoiceNo= req.body.vendorInvoiceNumber;
+      
       try{
-         let sapGrnResponse= await this.hitSapApiOfGRN(poReceivingDetails,poDetails,vendorInvoiceNo);
-          info(sapGrnResponse)
+        //  let sapGrnResponse= await this.hitSapApiOfGRN(poReceivingDetails,poDetails,vendorInvoiceNo);
+        //   info(sapGrnResponse)
         }catch(err){
         return this.errors(
           req,
@@ -76,20 +77,33 @@ class purchaseController extends BaseController {
         );
         
       }
-      let fulfilmentStatus=4;
+      let fulfilmentStatus=1;
+      for(let i = 0; i < poDetails.orderItems.length; i++) {// adding recieved quantity in po order and gettinf fullfilment status
+        let item = poDetails.orderItems[i];
+        let recievingItem= poReceivingDetails.orderItems.filter((Ritem)=>{
+          return item.itemId== Ritem.itemId
+        });
+        if(recievingItem && recievingItem[0]){
+          item.receivedQty = (item.receivedQty?item.receivedQty:0)+recievingItem[0].receivedQty
+
+        }else{
+          item.receivedQty =item.receivedQty?item.receivedQty:0
+        }
+        if (item.quantity != item.receivedQty) {
+          fulfilmentStatus=2
+        }
+        poDetails.orderItems[i].pendingQty=item.quantity- (item.receivedQty?item.receivedQty:0);
+      
+      }
       for(let i = 0; i < poReceivingDetails.orderItems.length; i++) {
         let item = poReceivingDetails.orderItems[i];
-        if (item.quantity != item.receivedQty) {
-          fulfilmentStatus=3
-          return;
-        }
-        poReceivingDetails.orderItems.pendingQty=item.quantity- item.receivedQty;
+        poReceivingDetails.orderItems[i].pendingQty=item.quantity- (item.receivedQty?item.receivedQty:0);
       }
 
       let grnData = {
         poReceivingId:poReceivingDetails._id,
         poNo: poDetails.poNo,
-        receivingStatus: fulfilmentStatus==2?4:3,
+        receivingStatus: fulfilmentStatus==1?1:2,
         fulfilmentStatus:fulfilmentStatus,
         poDate: poDetails.poDate,
         deliveryDate: poDetails.deliveryDate,
@@ -99,6 +113,7 @@ class purchaseController extends BaseController {
         discount: poReceivingDetails.totalDiscount,
         generatedBy: req.user.email,
         orderItems: poReceivingDetails.orderItems,
+        vendorInvoiceNo:vendorInvoiceNo,
         supplierDetails: {
           supplierCode: poDetails.supplierCode,
           supplierName: poDetails.supplierName,
@@ -141,18 +156,19 @@ class purchaseController extends BaseController {
           _id:poDetails._id,
           poStatus :1
         },{
-          receivingStatus:fulfilmentStatus==2?4:3,
+          receivingStatus:fulfilmentStatus==1?1:2,
           fulfilmentStatus:fulfilmentStatus,
-          orderDetails:poReceivingDetails.orderItems
+          orderItems:poDetails.orderItems
         })
 
         await poReceivingCtrl.modifyPo({
             _id:poReceivingDetails._id,
             status:1
         },{
-          receivingStatus:fulfilmentStatus==2?4:3,
+          receivingStatus:fulfilmentStatus==1?1:2,
           fulfilmentStatus:fulfilmentStatus,
-          orderDetails:poReceivingDetails.orderItems
+          orderItems:poReceivingDetails.orderItems,
+          isDeleted:1
         })
         return this.success(
           req,

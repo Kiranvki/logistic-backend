@@ -12,17 +12,18 @@ const purchaseOrderReceivingDetails = new Schema({
   },
   "receivingStatus": {
     type: Number,
-    default:1
+    default:4
   }, 
-  // 1 initiated Receiving
-  // 2 added itms to receiving cart
-  //3 grn generated
+  // 4 initiated Receiving
+  // 3 added itms to receiving cart
+  //2 if fullfillment status is partially fulfilled and  grn is generated 
+    //1 if fullfillment status is  fulfilled and  grn is generated
   "fulfilmentStatus": {
     type: Number,
     default:0
   },
-  //1 partially fulfilled
-  //2 fullfilled
+  //2 partially fulfilled
+  //1 fullfilled
   "status": {
     type: Number,
     default:1
@@ -97,7 +98,8 @@ const purchaseOrderReceivingDetails = new Schema({
       type: Number
     }, 
       "receivedQty": {
-      type: Number
+      type: Number,
+      default:0
     }, 
       "grnQty": {
       type: Number

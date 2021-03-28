@@ -22,6 +22,9 @@ const purchaseOrderGRN = new Schema({
   "poDate": {
     type: String
   },
+  "vendorInvoiceNo": {
+    type: String
+  },
   "status": {
     type: Number,
     default:1
@@ -30,12 +33,16 @@ const purchaseOrderGRN = new Schema({
     type: Number,
     default:0
   },
+    // 4 initiated Receiving
+  // 3 added itms to receiving cart
+  //2 if fullfillment status is partially fulfilled and  grn is generated 
+    //1 if fullfillment status is  fulfilled and  grn is generated
   "fulfilmentStatus": {
     type: Number,
     default:0
   },
-  //1 partially fulfilled
-  //2 fullfilled
+  //2 partially fulfilled
+  //1 fullfilled
   'sequence': {
       type: Number
   },
@@ -142,8 +149,9 @@ const purchaseOrderGRN = new Schema({
       "pendingQty": {
       type: Number
     }, 
-      "receivedQty": {
-      type: Number
+    "receivedQty": {
+      type: Number,
+      default:0
     }, 
       "grnQty": {
       type: Number

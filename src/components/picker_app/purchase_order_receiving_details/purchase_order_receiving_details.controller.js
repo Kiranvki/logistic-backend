@@ -37,9 +37,14 @@ class purchaseController extends BaseController {
 
       // get the sale Order Details
       let poDetails = req.body.poDetails;
-      poDetails.orderItems.forEach(item => {
-        item.quantity= item.pendingQty;
+      poDetails.orderItems = poDetails.orderItems.filter(item => {
+        return item.quantity!=item.receivedQty
       });
+      poDetails.orderItems.forEach(item => {
+        item.quantity= (item.pendingQty?item.pendingQty:item.quantity);
+        item.receivedQty=0;
+      });
+
       let dataToInsert = {
         poId: poDetails._id,
         pickerBoyId: req.user._id,
@@ -52,7 +57,7 @@ class purchaseController extends BaseController {
       let isInserted = await Model.create(dataToInsert);
       let poUpdateDetails = await poCtrl.modifyPo(
         { _id: poDetails._id },
-        { receivingStatus: 1 }
+        { receivingStatus: 4 }
       );
 
       // check if inserted
@@ -217,7 +222,7 @@ class purchaseController extends BaseController {
       let query = {
         _id: mongoose.Types.ObjectId(poReceivingId),
         isDeleted: 0,
-        'orderItems.receivedQty':{$gt:0}
+        'orderItems.receivedQty': {$gt:0}//to-do not workinfg properlu
       };
       var bucketList = await Model.aggregate(
         [{$match:query},
@@ -285,14 +290,7 @@ class purchaseController extends BaseController {
           },
           {
             $project: {
-              "orderItems._id": 1,
-              "orderItems.itemId": 1,
-              "orderItems.itemName": 1,
-              "orderItems.quantity": 1,
-              "orderItems.cost": 1,
-              "orderItems.mrp": 1,
-              "orderItems.receivedQty": 1,
-              "orderItems.itemAmount": 1,
+              "orderItems":1,
               totalDiscount:1,
               totalTax:1,
               total:1
@@ -300,8 +298,11 @@ class purchaseController extends BaseController {
           }
         ]
       );
-
       if(bucketList && bucketList[0] && bucketList[0].orderItems && bucketList[0].orderItems.length){
+        let orderItems= bucketList[0].orderItems.filter(item=>{
+          return item.receivedQty>0
+        })
+        bucketList[0].orderItems=orderItems;
         bucketList[0].basketTotal = bucketList[0].total+bucketList[0].totalDiscount-bucketList[0].totalTax
         bucketList[0].netWeight = 0;
         bucketList[0].vendorInvoiceNo = 'NA'
@@ -315,7 +316,7 @@ class purchaseController extends BaseController {
           this.messageTypes.bucketListFetchedSuccessfully
         );
       }else{
-        return this.errors(req, res, StatusCodes.HTTP_CONFLICT, this.messageTypes.emptyBucketList);
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.emptyBucketList);
       }
 
       // catch any runtime error
@@ -437,7 +438,7 @@ class purchaseController extends BaseController {
           this.messageTypes.bucketListFetchedSuccessfully
         );
       }else{
-        return this.errors(req, res, StatusCodes.HTTP_CONFLICT, this.messageTypes.emptyBucketList);
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.emptyBucketList);
       }
       // catch any runtime error
     } catch (err) {
@@ -459,7 +460,7 @@ class purchaseController extends BaseController {
           poId:1,
           'orderItems':1,
           'pickerBoyId':1,
-          'receivingStatus':1,
+          'receivingStatus':4,
       }}
       ]);
       return {
@@ -480,7 +481,7 @@ class purchaseController extends BaseController {
     let query = {
       _id: mongoose.Types.ObjectId(poReceivingId),
       isDeleted: 0,
-      'orderItems.receivedQty':{$gt:0}
+      // 'orderItems.receivedQty':{$gt:0}// not adding this as we need filtered and unfiltered both list
     };
     //calculate net value also when 
     var poReceivingDetails= await  Model.aggregate( [{$match:query},
@@ -556,7 +557,13 @@ class purchaseController extends BaseController {
         },
       }
     ]);
+    if(poReceivingDetails&& poReceivingDetails.length){
+      let orderItems= poReceivingDetails[0].orderItems.filter(item=>{
+      return item.receivedQty>0
+    })
+    poReceivingDetails[0].orderItems=orderItems;
     poReceivingDetails[0].netValue=poReceivingDetails[0].total+ poReceivingDetails[0].totalDiscount-poReceivingDetails[0].totalTax;
+  }
     return {
       success: true,
       data: poReceivingDetails

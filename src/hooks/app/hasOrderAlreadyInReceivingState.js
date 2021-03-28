@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
 
             // check whether the sale Order id is already added or not
             let poReceivingDetails = await poReceivingController.get({pickerBoyId:receiverId,
-                receivingStatus:1})
+                receivingStatus:4})
 
             // if sales order Id is not added
             if (poReceivingDetails.success && poReceivingDetails.data&& poReceivingDetails.data.length) {

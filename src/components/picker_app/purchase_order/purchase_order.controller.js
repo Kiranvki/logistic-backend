@@ -15,6 +15,7 @@ const {
   info
 } = require('../../../utils').logging;
 const moment = require('moment');
+const { forEach } = require('lodash');
 // self apis
 
 // padding the numbers
@@ -40,6 +41,7 @@ class purchaseController extends BaseController {
       sortingArray = {},
       pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 10; });
       let skip = parseInt(page - 1) * pageSize;
+      sortingArray['receivingStatus'] = -1;
       sortingArray['deliveryDate'] = -1;
       let todaysDate  = moment().set({
         h: 0,
@@ -51,7 +53,7 @@ class purchaseController extends BaseController {
       let query ={
         poStatus: 1,
         isDeleted: 0,
-        // receivingStatus:{$ne:3}//to-do
+        receivingStatus:{$ne:1}//to-do
         // expiryDate:{$gt:todaysDate}
       }
       if(req.query.poNumber){
@@ -78,7 +80,8 @@ class purchaseController extends BaseController {
                   $expr: {
                     $and: [
                       { $eq: ["$poId", "$$id"] },
-                      { $eq: ["$$poRecStatus", 1] },
+                      { $eq: ["$$poRecStatus", 4] },
+                      // { $gt: ["$orderItems.quantity", "$orderItems.receivedQty"] },//not working need to check later //to-do
                     ],
                   },
                 },
@@ -106,7 +109,13 @@ class purchaseController extends BaseController {
             supplierName: 1,
             itemCount: { $size: "$orderItems" },
             poReceivingId: "$poDetails" ,
+            receivingStatus:1,
+            orderItems:1
           },
+        }
+        ,
+        {
+          $sort: sortingArray,
         },
         {
           $skip: skip,
@@ -115,6 +124,19 @@ class purchaseController extends BaseController {
           $limit: pageSize,
         },
       ]);
+      poList.forEach(order => {
+        let count=0;
+        order.orderItems.forEach(item => {
+          if(!item.receivedQty){
+            count++
+
+          }else if(item.receivedQty && item.receivedQty<item.quantity){
+            count++
+          }
+        });
+        order.itemCount=count;
+        delete order.orderItems
+      });
       // success 
       return this.success(req, res, this.status.HTTP_OK,
          {result: poList,

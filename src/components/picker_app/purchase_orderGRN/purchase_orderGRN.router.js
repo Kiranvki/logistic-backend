@@ -36,7 +36,7 @@ function purchaseOrderRoutes() {
     closed.route('/purchaseOrder/generate-grn/:poReceivingId').get(
       [joipoReceivingId], // joi validation
       verifyAppToken,
-      // grnAlreadyGenerated,
+      // grnAlreadyGenerated,//to-do
       isValidPORecIdForGrnGetDetails,
       // verifyAppToken, // verify app user token 
       ctrl.generateGRN // post controller 

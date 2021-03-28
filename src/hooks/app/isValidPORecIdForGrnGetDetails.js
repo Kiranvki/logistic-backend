@@ -26,14 +26,14 @@ module.exports = async (req, res, next) => {
             let poReceivingDetails = await poReceivingCtrl.getForGrnGeneration(poReceivingId)
 
             // if email is unique
-            if (poReceivingDetails.success) {
+            if (poReceivingDetails.success && poReceivingDetails.data &&poReceivingDetails.data.length) {
                 info('Valid SaleOrder')
                 req.body.poReceivingDetails = poReceivingDetails.data[0]
 
                 next();
             } else {
                 error('INVALID Purchase Order receiving ID!');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.purchaseOrderIdInvalidEitherDeletedOrDeactivated);
+                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.purchaseOrderReceivingIdEitherDeletedOrDeactivated);
             }
         } else {
             error('The PurchaseOrder receiving ID is Invalid !');
