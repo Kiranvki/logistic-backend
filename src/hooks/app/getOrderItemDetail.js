@@ -36,8 +36,9 @@ module.exports = async (req, res, next) => {
     let itemDetail = await pickerBoySalesOrderMappingCtrl.getOrderItem(req.params.pickerBoySalesOrderMappingId,req.body.itemId);
     
     // get added item detail
-    if (itemDetail) {
-      req.body.itemDetail = itemDetail;
+    if (itemDetail.success) {
+      req.body.itemDetail = itemDetail.data;
+      // console.log('item detail',itemDetail)
       if(parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty)===0 || (parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty))<req.body.quantity){
         return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"Enter Quantity Exceed required quantity.");
       }

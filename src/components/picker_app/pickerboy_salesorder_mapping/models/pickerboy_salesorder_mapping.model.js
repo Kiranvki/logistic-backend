@@ -30,6 +30,27 @@ const pickerBoyOrderMappingSchema = new Schema({
   'createdBy': {
     type: String,
   },
+  'delivery_type':{  //SAP fields
+    type:String
+  },
+  'shipping_point':{  //SAP fields
+    type:String
+  },
+  'delivery_no':{  //SAP fields
+    type:String
+  },
+  'picking_date':{  //SAP fields
+    type:String
+  },
+  'picking_time':{  //SAP fields
+    type:String
+  },
+  'picking_time':{  //SAP fields
+    type:String
+  },
+  'sales_order_no':{  //SAP fields
+    type:Number
+  },
   'salesOrderId': {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'salesOrder',

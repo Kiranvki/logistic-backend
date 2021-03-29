@@ -28,6 +28,7 @@ module.exports = {
     pickerBoySalesOrderIdInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id is either deleted or deactivated !',
     pickerBoyDetailsUpdated: 'PickerBoy Details Updated Successfully  !',
     pickerBoyDetailsNotUpdated: 'Error! Updating PickerBoy details !',
+    pickerBoyAlreadyInPickingState:'Already in picking State',
     // pending sales order details
     pendingSalesOrderFetchedSuccessfully: 'Pending SalesOrder Details Fetched Successfully !',
     todoOrderFetchedSuccessfully: 'Todo Order Details Fetched Successfully !',
