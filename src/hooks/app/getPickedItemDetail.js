@@ -37,7 +37,6 @@ module.exports = async (req, res, next) => {
     
     // get added item detail
     if (itemDetail.success) {
-      console.log('itemDetail',itemDetail)
       req.body.itemDetail = itemDetail.data;
       // console.log('item detail',itemDetail)
       if(parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty)===0 || (parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty))<req.body.quantity){

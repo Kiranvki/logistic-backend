@@ -23,12 +23,12 @@ const pickerBoySalesOrderItemsMapping = new Schema({
 
 
   'itemDetail':[{
-    'itemNo':{
+    'item_no':{
       type:String
     },
-    'itemId': {   //material  //SAP Field
+    'material_no': {   //material  //SAP Field
       required: true,
-      type: Number,
+      type: String,
     },
     'itemName': {
       type: String,
@@ -38,8 +38,8 @@ const pickerBoySalesOrderItemsMapping = new Schema({
     },
 
   
-    'salePrice': {
-      required: true,
+    'salePrice': { //old field
+    
       type: Number,
     },
     'pickedQuantity': { //delivery_quantity //SAP Field
@@ -66,17 +66,33 @@ const pickerBoySalesOrderItemsMapping = new Schema({
     },
    
     
-    'itemAmount': {
+    'mrp_amount': { //sap
       required: true,
+      type: String,
+    },
+    'discount_amount': { //sap
+      required: true,
+      type: String,
+    },
+    'taxPercentage': { //old field
+      
       type: Number,
     },
-    'taxPercentage': {
-      required: true,
-      type: Number,
+    'cgst-pr':{   //SAP Field
+      type:String
+    },
+    'sgst_pr':{   //SAP Field
+      type:String
+    },
+    'igst_pr':{   //SAP Field
+      type:String
+    },
+    'ugst_pr':{   //SAP Field
+      type:String
     },
     'discountPercentage': {
       required: true,
-      type: Number,
+      type: String,
     },
     'freeQty': {
       required: true,
@@ -87,6 +103,10 @@ const pickerBoySalesOrderItemsMapping = new Schema({
       type: Boolean,
       default:true
     },
+    'total_amount':{
+      required: true,
+      type: String,
+    }
   
 
   }],
@@ -146,7 +166,7 @@ class PickerBoySalesOrderItemsMappingClass{
     let isExist = await this.count({ 'pickerBoySalesOrderMappingId':mongoose.Types.ObjectId(pickerBoySalesOrderMappingId) });
     if(isExist){
 
-      return await this.find({ 'pickerBoySalesOrderMappingId':pickerBoySalesOrderMappingId })
+      return await this.find({ 'pickerBoySalesOrderMappingId':pickerBoySalesOrderMappingId }).lean()
       
     }
     // let obj = await new this(orderObjItem).save()
