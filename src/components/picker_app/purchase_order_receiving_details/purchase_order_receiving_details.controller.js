@@ -37,12 +37,12 @@ class purchaseController extends BaseController {
 
       // get the sale Order Details
       let poDetails = req.body.poDetails;
-      poDetails.orderItems = poDetails.orderItems.filter(item => {
-        return item.quantity!=item.receivedQty
+      poDetails.item = poDetails.item.filter(item => {
+        return item.quantity!=item.received_qty
       });
-      poDetails.orderItems.forEach(item => {
-        item.quantity= (item.pendingQty?item.pendingQty:item.quantity);
-        item.receivedQty=0;
+      poDetails.item.forEach(item => {
+        item.quantity= (item.pending_qty?item.pending_qty:item.quantity);
+        item.received_qty=0;
       });
 
       let dataToInsert = {
@@ -50,7 +50,7 @@ class purchaseController extends BaseController {
         pickerBoyId: req.user._id,
         createdBy: req.user.email,
         receivingDate: new Date(),
-        orderItems: poDetails.orderItems,
+        item: poDetails.item,
       };
 
       // inserting data into the db
@@ -105,7 +105,7 @@ class purchaseController extends BaseController {
       };
       var poList = await Model.findOne(query).populate({
         path: "poId",
-        select: { poNo: 1, supplierCode: 1, supplierName: 1, deliveryDate: 1 },
+        select: { po_number: 1, vendor_no: 1, supplierName: 1, delivery_date: 1 },
       });
       // success
       return this.success(
@@ -130,21 +130,32 @@ class purchaseController extends BaseController {
 
   receivePOItem = async (req, res) => {
     try {
-      var itemId = req.params.itemId;
+      var material_no = req.params.material_no;
       var poReceivingId = req.body.poReceivingId;
-      var receivedQty = req.body.receivedQty;
+      var received_qty = req.body.received_qty;
       var remarks =req.body.remarks;
+      var date_of_manufacturing= req.body.date_of_manufacturing||new Date();
+      if(date_of_manufacturing){
+        date_of_manufacturing  = moment(new Date(date_of_manufacturing)).set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).format('YYYY-MM-DD hh:mm:ss')
+      }
 
       info("Receiving PO item!", req.body, req.query, req.params);
       let query = {
         _id: mongoose.Types.ObjectId(poReceivingId),
-        "orderItems._id": mongoose.Types.ObjectId(itemId),
+        "item._id": mongoose.Types.ObjectId(material_no),
       };
       let updateData = {
-        "orderItems.$.receivedQty": receivedQty,
+        "item.$.received_qty": received_qty,
+        "item.$.date_of_manufacturing": date_of_manufacturing,
+
       };
       if(remarks){
-        updateData["orderItems.$.remarks"] =remarks;
+        updateData["item.$.remarks"] =remarks;
       }
       var updatedPO = await Model.findOneAndUpdate(query, updateData, {
         newValue: true,
@@ -222,7 +233,7 @@ class purchaseController extends BaseController {
       let query = {
         _id: mongoose.Types.ObjectId(poReceivingId),
         isDeleted: 0,
-        'orderItems.receivedQty': {$gt:0}//to-do not workinfg properlu
+        'item.received_qty': {$gt:0}//to-do not workinfg properlu
       };
       var bucketList = await Model.aggregate(
         [{$match:query},
@@ -231,11 +242,11 @@ class purchaseController extends BaseController {
               total: {
                 $sum: {
                   $map: {
-                    input: "$orderItems",
+                    input: "$item",
                     as: "item",
                     in: {
                       $round: [
-                        { $multiply: ["$$item.cost", "$$item.receivedQty"] },
+                        { $multiply: ["$$item.net_price", "$$item.received_qty"] },
                         4,
                       ],
                     },
@@ -246,14 +257,14 @@ class purchaseController extends BaseController {
               totalTax: {
                 $sum: {
                   $map: {
-                    input: "$orderItems",
+                    input: "$item",
                     as: "item",
                     in: {
                       $round: [
                         {
                           $multiply: [
                             { $divide: ["$$item.itemTax", "$$item.quantity"] },
-                            "$$item.receivedQty",
+                            "$$item.received_qty",
                           ],
                         },
                         4,
@@ -265,7 +276,7 @@ class purchaseController extends BaseController {
               totalDiscount: {
                 $sum: {
                   $map: {
-                    input: "$orderItems",
+                    input: "$item",
                     as: "item",
                     in: {
                       $round: [
@@ -273,11 +284,11 @@ class purchaseController extends BaseController {
                           $multiply: [
                             {
                               $divide: [
-                                "$$item.itemDiscount",
+                                "$$item.discount_amount",
                                 "$$item.quantity",
                               ],
                             },
-                            "$$item.receivedQty",
+                            "$$item.received_qty",
                           ],
                         },
                         4,
@@ -290,7 +301,7 @@ class purchaseController extends BaseController {
           },
           {
             $project: {
-              "orderItems":1,
+              "item":1,
               totalDiscount:1,
               totalTax:1,
               total:1
@@ -298,11 +309,11 @@ class purchaseController extends BaseController {
           }
         ]
       );
-      if(bucketList && bucketList[0] && bucketList[0].orderItems && bucketList[0].orderItems.length){
-        let orderItems= bucketList[0].orderItems.filter(item=>{
-          return item.receivedQty>0
+      if(bucketList && bucketList[0] && bucketList[0].item && bucketList[0].item.length){
+        let item= bucketList[0].item.filter(item=>{
+          return item.received_qty>0
         })
-        bucketList[0].orderItems=orderItems;
+        bucketList[0].item=item;
         bucketList[0].basketTotal = bucketList[0].total+bucketList[0].totalDiscount-bucketList[0].totalTax
         bucketList[0].netWeight = 0;
         bucketList[0].vendorInvoiceNo = 'NA'
@@ -352,11 +363,11 @@ class purchaseController extends BaseController {
               total: {
                 $sum: {
                   $map: {
-                    input: "$orderItems",
+                    input: "$item",
                     as: "item",
                     in: {
                       $round: [
-                        { $multiply: ["$$item.cost", "$$item.receivedQty"] },
+                        { $multiply: ["$$item.net_price", "$$item.received_qty"] },
                         4,
                       ],
                     },
@@ -367,14 +378,14 @@ class purchaseController extends BaseController {
               totalTax: {
                 $sum: {
                   $map: {
-                    input: "$orderItems",
+                    input: "$item",
                     as: "item",
                     in: {
                       $round: [
                         {
                           $multiply: [
                             { $divide: ["$$item.itemTax", "$$item.quantity"] },
-                            "$$item.receivedQty",
+                            "$$item.received_qty",
                           ],
                         },
                         4,
@@ -386,7 +397,7 @@ class purchaseController extends BaseController {
               totalDiscount: {
                 $sum: {
                   $map: {
-                    input: "$orderItems",
+                    input: "$item",
                     as: "item",
                     in: {
                       $round: [
@@ -394,11 +405,11 @@ class purchaseController extends BaseController {
                           $multiply: [
                             {
                               $divide: [
-                                "$$item.itemDiscount",
+                                "$$item.discount_amount",
                                 "$$item.quantity",
                               ],
                             },
-                            "$$item.receivedQty",
+                            "$$item.received_qty",
                           ],
                         },
                         4,
@@ -411,14 +422,14 @@ class purchaseController extends BaseController {
           },
           {
             $project: {
-              "orderItems._id": 1,
-              "orderItems.itemId": 1,
-              "orderItems.itemName": 1,
-              "orderItems.quantity": 1,
-              "orderItems.cost": 1,
-              "orderItems.mrp": 1,
-              "orderItems.receivedQty": 1,
-              "orderItems.itemAmount": 1,
+              "item._id": 1,
+              "item.material_no": 1,
+              "item.item_name": 1,
+              "item.quantity": 1,
+              "item.net_price": 1,
+              "item.mrp": 1,
+              "item.received_qty": 1,
+              "item.mrp_amount": 1,
               totalDiscount:1,
               totalTax:1,
               total:1
@@ -427,7 +438,7 @@ class purchaseController extends BaseController {
         ]
       );
 
-      if(bucketList && bucketList[0] && bucketList[0].orderItems && bucketList[0].orderItems.length){
+      if(bucketList && bucketList[0] && bucketList[0].item && bucketList[0].item.length){
         bucketList[0].basketTotal = bucketList[0].total+bucketList[0].totalDiscount-bucketList[0].totalTax
         // success
         return this.success(
@@ -458,7 +469,7 @@ class purchaseController extends BaseController {
       },{
         $project: {
           poId:1,
-          'orderItems':1,
+          'item':1,
           'pickerBoyId':1,
           'receivingStatus':4,
       }}
@@ -481,7 +492,7 @@ class purchaseController extends BaseController {
     let query = {
       _id: mongoose.Types.ObjectId(poReceivingId),
       isDeleted: 0,
-      // 'orderItems.receivedQty':{$gt:0}// not adding this as we need filtered and unfiltered both list
+      // 'item.received_qty':{$gt:0}// not adding this as we need filtered and unfiltered both list
     };
     //calculate net value also when 
     var poReceivingDetails= await  Model.aggregate( [{$match:query},
@@ -490,11 +501,11 @@ class purchaseController extends BaseController {
           total: {
             $sum: {
               $map: {
-                input: "$orderItems",
+                input: "$item",
                 as: "item",
                 in: {
                   $round: [
-                    { $multiply: ["$$item.cost", "$$item.receivedQty"] },
+                    { $multiply: ["$$item.net_price", "$$item.received_qty"] },
                     4,
                   ],
                 },
@@ -505,14 +516,14 @@ class purchaseController extends BaseController {
           totalTax: {
             $sum: {
               $map: {
-                input: "$orderItems",
+                input: "$item",
                 as: "item",
                 in: {
                   $round: [
                     {
                       $multiply: [
                         { $divide: ["$$item.itemTax", "$$item.quantity"] },
-                        "$$item.receivedQty",
+                        "$$item.received_qty",
                       ],
                     },
                     4,
@@ -524,7 +535,7 @@ class purchaseController extends BaseController {
           totalDiscount: {
             $sum: {
               $map: {
-                input: "$orderItems",
+                input: "$item",
                 as: "item",
                 in: {
                   $round: [
@@ -532,11 +543,11 @@ class purchaseController extends BaseController {
                       $multiply: [
                         {
                           $divide: [
-                            "$$item.itemDiscount",
+                            "$$item.discount_amount",
                             "$$item.quantity",
                           ],
                         },
-                        "$$item.receivedQty",
+                        "$$item.received_qty",
                       ],
                     },
                     4,
@@ -549,7 +560,7 @@ class purchaseController extends BaseController {
       },
       {
         $project: {
-          "orderItems":1,
+          "item":1,
           totalDiscount:1,
           totalTax:1,
           total:1,
@@ -558,10 +569,10 @@ class purchaseController extends BaseController {
       }
     ]);
     if(poReceivingDetails&& poReceivingDetails.length){
-      let orderItems= poReceivingDetails[0].orderItems.filter(item=>{
-      return item.receivedQty>0
+      let item= poReceivingDetails[0].item.filter(item=>{
+      return item.received_qty>0
     })
-    poReceivingDetails[0].orderItems=orderItems;
+    poReceivingDetails[0].item=item;
     poReceivingDetails[0].netValue=poReceivingDetails[0].total+ poReceivingDetails[0].totalDiscount-poReceivingDetails[0].totalTax;
   }
     return {

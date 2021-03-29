@@ -33,7 +33,7 @@ function purchaseOrderRoutes() {
   return (open, closed) => {
 
     // generating invoice
-    closed.route('/purchaseOrder/generate-grn/:poReceivingId').get(
+    closed.route('/purchaseOrder/generate-grn/:poReceivingId').post(
       [joipoReceivingId], // joi validation
       verifyAppToken,
       // grnAlreadyGenerated,//to-do

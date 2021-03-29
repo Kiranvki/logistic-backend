@@ -2,15 +2,42 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 // schema
 const purchaseOrder = new Schema({
-  "poNo":{
+  "po_number":{
     type: Number
   },
-  "poDate": {
-    type: Date
+  "po_document_type": {
+    type: String
   },
-  "poAmount": {
-    type: Number
+  sapGrnNo:[{
+    date:{
+      type: String
+    },
+    sapGrnNo:{
+      type: String
+    }
+  }], 
+  "company_code": {
+    type: String
   }, 
+  "vendor_no": {
+    type: String
+  },  
+  "purchase_organisation": {
+    type: String
+  },
+  "purchase_group": {
+    type: String
+  },
+  "plant": {
+    type: String
+  },
+  "document_date": {
+    type: String
+  },
+  "start_of_validity_period": {
+    type: String
+  },
+ 
   "status": {
     type: String
   }, 
@@ -31,111 +58,89 @@ const purchaseOrder = new Schema({
   },
   //2 partially fulfilled
   //1 fullfilled
-  "supplierCode":{
-    type: String
-  }, 
-  "netWeight":{
-    type: Number,
-    default:0
-  }, 
+
   "vendorInvoiceNo":{
     type: String
   }, 
-  "supplierName":{
+   "delivery_date":{
     type: String
   },
-  "supplierPhone":{
-    type: Date
-  },
-   "deliveryDate":{
-    type: Date
-  },
-  "expiryDate":{
-      type: Date
-  }, 
-  "cashDiscount": {
-    type: Number
-  }, 
-  "totalTaxAmount": {
-    type: Number
-  }, 
-  "remarks":{
+  "delivery_date_array":[{
     type: String
-  },
-  "timeStamp":{
-    type: String
+  }],
+  "end_of_validity_period":{
+      type: String
   }, 
-  "locationId": {
-  type: Number
+"referance_no":{
+  type: String
 },
   "grnNo":{
     type: String
   }, 
-  "orderItems":[{
-    "rowNo": {
-      type: Number
-    }, 
-    "itemId":{
+  "item":[
+    {
+    "item_no": {
       type: String
     }, 
-    "itemName":{
+    "plant": {
+      type: String
+    }, 
+    "material_group": {
+      type: String
+    }, 
+    "material_group": {
+      type: String
+    },
+    "storage_location": {
+      type: String
+    },  
+    "tax_code": {
+      type: String
+    },  
+    "conversion_factor_status": {
+      type: String
+    }, 
+    "material_no":{
+      type: String
+    }, 
+    "item_name":{
       type: String
     }, 
     "quantity": {
       type: Number
     }, 
-    "freeQty": {
+    "net_price": {
       type: Number
     }, 
-    "uomType": {
-      type: String
-    }, 
-    "convFactor": {
+    "selling_price": {
       type: Number
     }, 
-    "cost": {
+    "mrp_amount": {
       type: Number
     }, 
-    "sellingPrice": {
+    "taxable_value": {
       type: Number
     }, 
-    "itemAmount": {
+    "discount_amount": {
       type: Number
     }, 
-    "taxAmount": {
+    "discount_perc": {
       type: Number
     }, 
-    "mrp": {
+    "pending_qty": {
       type: Number
     }, 
-    "hsnCode":{
-      type: String
-    }, 
-    "eanCode":{
-      type: String
-    }, 
-    "itemDiscount": {
-      type: Number
-    }, 
-    "itemDiscountPerc": {
-      type: Number
-    }, 
-      "pendingQty": {
-      type: Number
-    }, 
-      "receivedQty": {
+    "received_qty": {
       type: Number,
       default:0
     }, 
-      "grnQty": {
+      "grn_qty": {
       type: Number
     }, 
-    "rejectedQty": {
+    "rejected_qty": {
       type: Number
     }, 
-    "isDeleted": {
-      type: Number
-    }
+
   }
   ]
   }, 
@@ -150,4 +155,4 @@ purchaseOrder.index({
 });
 
 // exporting the entire module
-module.exports = mongoose.model('purchaseorder', purchaseOrder);
+module.exports = mongoose.model('purchaseorder', purchaseOrder,'purchase_order');
