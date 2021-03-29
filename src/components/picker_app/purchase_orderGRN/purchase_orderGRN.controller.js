@@ -78,23 +78,23 @@ class purchaseController extends BaseController {
          if(sapGrnResponse &&sapGrnResponse.response &&sapGrnResponse.response.flag=='S'){
            req.body.sapGrnNo=sapGrnResponse.response.material_document_no
          }else{//to-do remove comment
-           // return this.errors(
-        //   req,
-        //   res,
-        //   this.status.HTTP_CONFLICT,
-        //   this.messageTypes.grnNotGenerated
-        // );
+          info(sapGrnResponse,"sapGrnResponse-------")
+           return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.grnNotGeneratedinSAP
+        );
          }
-         info(sapGrnResponse,"sapGrnResponse-------")
 
         }catch(err){
 //remove comment
-        // return this.errors(
-        //   req,
-        //   res,
-        //   this.status.HTTP_CONFLICT,
-        //   this.messageTypes.grnNotGenerated
-        // );
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.grnNotGeneratedinSAP
+        );
         
       }
       let fulfilmentStatus=1;

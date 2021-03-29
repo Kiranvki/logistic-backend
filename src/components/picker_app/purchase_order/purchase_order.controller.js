@@ -52,8 +52,8 @@ class purchaseController extends BaseController {
       info('Get Purchase order  details !',req.body,req.query,req.params);
       let query ={
         
-        receivingStatus:{$ne:1}//to-do
-        // end_of_validity_period:{$gt:todaysDate}
+        receivingStatus:{$ne:1},//to-do// check if qury working properly
+        end_of_validity_period:{$gt:todaysDate}
       }
       if(req.query.poNumber){
         query.po_number = Number(req.query.poNumber);
