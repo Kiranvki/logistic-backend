@@ -1,6 +1,6 @@
 // controller function
-const UserAttendanceCtrl = require('../../components/picker_app/onBoard/app_picker_user_attendance/app_picker_user_attendance.controller'); // app user attendance
-const pickerBoySalesOrderMappingCtrl = require('../../components/picker_app/pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller'); // pickerboy SO mapping collection  
+
+const pickerBoySalesOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model'); // pickerboy SO mapping ctrl
 
 // Responses & others utils 
 const Response = require('../../responses/response');
@@ -31,23 +31,22 @@ const {
 module.exports = async (req, res, next) => {
   try {
     info('Get the item detail !');
-  
-    let pickStatus = await pickerBoySalesOrderMappingCtrl.getOrderDetailByPickerBoyId(req.user._id)
-  
-    if(pickStatus.success){
-        let responseObj = {
-            'isPicking':true,
-            'pickBoySalesOrderMappingId':pickStatus.data._id,
-            'salesOrderId':pickStatus.data.salesOrderId
 
-        }
-        error('IN PICKING STATE !');
-        return Response.errors(req, res, StatusCodes.HTTP_FOUND, MessageTypes.salesOrder.pickerBoyAlreadyInPickingState,responseObj);
-
-    }else{
-    // move on 
-next()
+    // get all the salesman who are not checked out 
+    let itemDetail = await pickerBoySalesOrderMappingModel.getOrderItem(req.params.pickerBoySalesOrderMappingId,req.body.itemId);
+    
+    // get added item detail
+    if (itemDetail.success) {
+      console.log('itemDetail',itemDetail)
+      req.body.itemDetail = itemDetail.data;
+      // console.log('item detail',itemDetail)
+      if(parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty)===0 || (parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty))<req.body.quantity){
+        return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"Enter Quantity Exceed required quantity.");
+      }
     }
+
+    // move on 
+    return next();
 
     // catch any runtime error 
   } catch (e) {

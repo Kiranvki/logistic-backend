@@ -41,6 +41,7 @@ module.exports = {
   isValidPogrnId:require('./isValidPogrnId'),
   isValidPORecIdForGrnGetDetails:require('./isValidPORecIdForGrnGetDetails'),
   grnAlreadyGenerated:require('./grnAlreadyGenerated'),
+  getPickedItemDetail:require('./getPickedItemDetail'),
   hasOrderAlreadyInReceivingState:require('./hasOrderAlreadyInReceivingState'),
   isValidInputsForReceivedItem:require('./isValidInputsForReceivedItem'),
 

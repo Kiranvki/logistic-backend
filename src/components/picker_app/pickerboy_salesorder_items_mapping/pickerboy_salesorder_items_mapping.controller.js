@@ -2,14 +2,15 @@
 const SalesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
 const PockerBoyCtrl = require('../../employee/picker_boy/picker_boy.controller');
 const AttendanceCtrl = require('../onBoard/app_picker_user_attendance/app_picker_user_attendance.controller');
-
+const pickerboySalesOrderMappingController = require('../pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
 const BasicCtrl = require('../../basic_config/basic_config.controller');
+const pickerBoySalesOrderModel = require('../pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model');
 const BaseController = require('../../baseController');
 const Model = require('./models/pickerboy_salesorder_items_mapping.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const moment = require('moment');
-const pickerboySalesOrderMappingController = require('../pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
+
 const {
   error,
   info
@@ -46,12 +47,12 @@ class pickerSalesOrderMappingController extends BaseController {
       quantityAdded = req.body.quantity,
       salesPrice = req.body.itemDetail.salePrice
    
-      
+      //itemID->material
 
       let dataToInsert = {
         'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
         'itemDetail':[{
-        'itemId': req.body.itemId,
+        'itmemId': req.body.itemId,
         'itemName': req.body.itemDetail.itemName,
         'salePrice': salesPrice,
         'pickedQuantity': quantityAdded,
@@ -76,14 +77,14 @@ class pickerSalesOrderMappingController extends BaseController {
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-        pickerboySalesOrderMappingController.updateItemPickStatus(pickerBoySalesOrderMappingId,true)
+        await pickerBoySalesOrderModel.updateIsItemPickedStatus(pickerBoySalesOrderMappingId,true)
      
         let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
         // getOrderByPickerBoyId
-        let orderDetail = await pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
+        let orderDetail = await pickerBoySalesOrderModel.getOrderByPickerBoyId(pickerBoySalesOrderMappingId)
      
          // changes required quadratic
-      
+      if(orderDetail.length>0 && itemAdded.length>0){
         orderDetail[0]['salesOrderId']['orderItems'].forEach((x,i)=>{
         //   console.log(x)
         itemAdded[0]['itemDetail'].forEach((y,j)=>{
@@ -93,7 +94,7 @@ class pickerSalesOrderMappingController extends BaseController {
               // orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
             }
         })
-      })
+      })}
  
         return this.success(req, res, this.status.HTTP_OK, orderDetail, this.messageTypes.itemAddedInsalesOrderAfterScan);
       } else {
@@ -248,7 +249,8 @@ console.log(pickerBoySalesOrderMappingId,itemId)
 
     let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
     // getOrderByPickerBoyId
-    let orderDetail = await pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
+    let orderDetail = await pickerBoySalesOrderModel.getOrderByPickerBoyId (pickerBoySalesOrderMappingId); 
+    // pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
  
 
 
@@ -295,6 +297,87 @@ console.log(pickerBoySalesOrderMappingId,itemId)
   }
 
   }
+
+
+  getPickedItemByPickerOrderId = async (pickerBoyOrderMappingId)=>{
+    
+    try {
+      info('test !');
+
+      // get details 
+      return Model.find({
+        pickerBoySalesOrderMappingId: mongoose.Types.ObjectId('605f6d904a28e55420b4fe5d')
+        }
+     
+
+      ).populate({path:'pickerBoySalesOrderMappingId',populate:{path:'salesOrderId'},select:{
+        'salesOrderId':0,
+        'invoiceDetail': 0,
+        'isDeleted': 0,
+        'status': 0,
+        '_id': 0,
+        'pickerBoySalesOrderMappingId.invoiceDetail': 0,
+        'pickerBoySalesOrderMappingId.isDeleted':0,
+        'pickerBoySalesOrderMappingId.pickerBoyId':0,
+        'pickerBoySalesOrderMappingId.createdAt':0,
+        'pickerBoySalesOrderMappingId.updatedAt':0,
+        'pickerBoySalesOrderMappingId.__v':0,
+        // {
+        //   invoiceDetail: [Object],
+        //   isStartedPicking: true,
+        //   isItemPicked: false,
+        //   state: 0,
+        //   isDeleted: 0,
+        //   status: 1,
+        //   _id: 605f6d904a28e55420b4fe5d,
+        //   pickerBoyId: [Object],
+        //   createdBy: 'krishna.agrawal@waycool.in',
+        //   pickingDate: 2021-03-27T17:38:24.284Z,
+        //   createdAt: 2021-03-27T17:38:24.296Z,
+        //   updatedAt: 2021-03-27T19:12:52.293Z,
+        //   __v: 0
+        // },
+        // itemDetail: [ [Object] ],
+        // createdBy: 'krishna.agrawal@waycool.in',
+        // createdAt: 2021-03-27T18:20:06.706Z,
+        // updatedAt: 2021-03-27T19:12:52.263Z,
+      
+      }}).then((res) => {
+        if (res && !_.isEmpty(res)) {
+          console.log('test',res)
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching item in PickerBoy Item SalesOrder Mapping DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+
+
+
+
+  // generateDelivery = async (req,res,next)=>{
+
+  // }
 
 
 }

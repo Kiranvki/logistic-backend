@@ -31,7 +31,8 @@ const {
   // checkWhetherCustomerListIsAlreadySyncing, // check whether customer list is already syncing 
   // getAllTheInvoicesAndRefreshAsPerThePaymentReceived, // get all invoices and refresh as per the payment received
   validateOrderItemQuantity,
-  getOrderItemDetail
+  getOrderItemDetail,
+  getPickedItemDetail
 } = require('../../../hooks/app');
 
 // auth 
@@ -59,6 +60,11 @@ function userRoutes() {
       ctrl.addItems // get controller 
     );
 
+    closed.route('/test').get(
+      // getPickedItemDetail,
+      ctrl.getPickedItemByPickerOrderId
+      
+    );
     // edit the item quantity 
     closed.route('/sales-order/edit-item/:pickerBoySalesOrderMappingId').patch(
       [joiEditAddedItem], // joi edit item

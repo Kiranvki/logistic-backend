@@ -464,7 +464,7 @@ getOrderDetails = async (req,res,next)=>{
       switch(req.params.type){
         case 'salesorders':
          
-          orderData= await salesOrderModel.find({'_id':mongoose.Types.ObjectId('605b2b928680bb432cc033a6')}).lean().then((res) => {
+          orderData= await salesOrderModel.find({'_id':mongoose.Types.ObjectId(orderId)}).lean().then((res) => {
           
             if (res && !_.isEmpty(res)) {
               return {
@@ -1492,7 +1492,31 @@ try{
       
       break;
     case 'assettransfer':
-      orderModel = require('../../MyTrip/assign_trip/model/spotsales.model')
+      pipeline.push(
+        {
+          $lookup: {
+              from: 'pickerboyordermappings',
+              let: {
+                'orderId': '$_id'
+              },
+              pipeline: [
+                
+
+                {
+                  $match: {
+                    'invoiceDetail.isInvoice':false,
+                    'status': 1,
+                    'isDeleted': 0,
+                    '$expr': {
+                      '$eq': ['$assetTransferId', '$$orderId']
+                    }
+                  }
+                }],
+                as:'pickingStatus'
+          }   
+        }
+      )
+      orderModel = require('../../MyTrip/assign_trip/model/assetTransfer.model')
       break;
     default:
       orderModel = salesOrderModel
@@ -1535,7 +1559,7 @@ try{
   }
 
   getOrderItem = async (pickerboySalesOrderMappingId,itemId)=>{
-  let data = await Model.aggregate([{'$match':{'_id':mongoose.Types.ObjectId(pickerboySalesOrderMappingId)}},{'$lookup':
+  return Model.aggregate([{'$match':{'_id':mongoose.Types.ObjectId(pickerboySalesOrderMappingId)}},{'$lookup':
 {'from':'salesorders',
 'let':{'so_id':'$salesOrderId'},
     'pipeline': [
@@ -1550,22 +1574,42 @@ try{
       ],
     as:"salesOrders"
 }}
-]).allowDiskUse(true)
-if(data){
-data = data[0]['salesOrders'][0]
+]).allowDiskUse(true).then((res) => {
   
-return data['orderItems']
+  if (res && !_.isEmpty(res)) {
+    return {
+      success: true,
+      data: res[0]['salesOrders'][0]['orderItems']
+  
+      
+    }
+  } else {
+    error('Error Searching item in PickerBoy Item SalesOrder Mapping DB!');
+    return {
+      success: false
+    }
+  }
+}).catch(err => {
+  error(err);
+  return {
+    success: false,
+    error: err
+  }
+});
+
+// catch any runtime error 
+ 
+
+
 }
 // fix require
-return []
 
-  }
   
-  getOrderDetail(pickerBoyOrderMappingId){
+  getOrderDetail = async (pickerBoyOrderMappingId)=>{
     return Model.getOrderByPickerBoyId (pickerBoyOrderMappingId);
   }
 
-  async getOrderDetailByPickerBoyId(pickerBoyId){
+  getOrderDetailByPickerBoyId = async (pickerBoyId)=>{
     return await Model.findOne({$and:[{'pickerBoyId':mongoose.Types.ObjectId(pickerBoyId)},{'isStartedPicking':true},{'isItemPicked':true},{'invoiceDetail.isInvoice':false}]}).lean().then((res) => {
           
       if (res && !_.isEmpty(res)) {
@@ -1590,7 +1634,7 @@ return []
   }
 
 
-  updateFullFilmentStatus(pickerBoyOrderMappingId,status){
+  updateFullFilmentStatus = (pickerBoyOrderMappingId,status)=>{
     return Model.updateFullFilmentStatus (pickerBoyOrderMappingId,status);
   }
 

@@ -1,31 +1,52 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
+// "delivery_type": "Y001",
+// "delivery_no": "0080000000",
+// "picking_date": "2020-07-16",
+// "picking_time": 111749,
+// "item": [
+//     {
+//         "material": 800001000102200001,
+//         "delivery_quantity": "3.000 ",
+//         "storage_location": 306,
+//         "plant": 3001,
+//         "uom": "EA"
+
 // schema
 const pickerBoySalesOrderItemsMapping = new Schema({
   'pickerBoySalesOrderMappingId': {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'pickerBoySalesOrderMapping',
+    ref: 'pickerBoyOrderMapping',
   },
+
+
   'itemDetail':[{
-    'itemId': {
+    'itemNo':{
+      type:String
+    },
+    'itemId': {   //material  //SAP Field
       required: true,
       type: Number,
     },
     'itemName': {
       type: String,
     },
+    'uom':{   //SAP Field
+      type:String
+    },
+
   
     'salePrice': {
       required: true,
       type: Number,
     },
-    'pickedQuantity': {
+    'pickedQuantity': { //delivery_quantity //SAP Field
       required: true,
       type: Number,
     },
-    'suppliedQty': {    //total_quantity-supplied_quantity
+    'suppliedQty': {    //total_quantity-supplied_quantity 
       required: true,
       type: Number,
     },
@@ -36,6 +57,12 @@ const pickerBoySalesOrderItemsMapping = new Schema({
     'totalQuantity': {
       required: true,
       type: Number,
+    },
+    'storage_location':{ //SAP Field
+      type:String
+    },
+    'plant':{   //SAP Field
+      type:String
     },
    
     

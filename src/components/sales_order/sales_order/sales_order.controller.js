@@ -185,7 +185,7 @@ class areaSalesManagerController extends BaseController {
         'locationId': parseInt(locationId),
         'cityId': cityId,
 
-        'deliveryDate': {
+        'req_del_date': {
           '$gte': startOfTheDay,
           '$lte': endOfTheDay
         }
@@ -279,7 +279,7 @@ class areaSalesManagerController extends BaseController {
         'locationId': parseInt(locationId),
         'cityId': cityId,
 
-        'deliveryDate': {
+        'req_del_date': {
           '$gte': startOfTheDay,
           '$lte': endOfTheDay
         }
@@ -376,7 +376,7 @@ class areaSalesManagerController extends BaseController {
           // 'locationId': parseInt(locationId),
           // 'cityId': cityId,
   
-          'deliveryDate': {
+          'req_del_date': {
           
             '$lte': startOfTheDay
           }
@@ -437,7 +437,7 @@ class areaSalesManagerController extends BaseController {
             'cityId':1,
             'status':1,
             'invoiceNo': 1,
-            'deliveryDate':1,
+            'req_del_date':1,
             'fulfillmentStatus': 1,
             'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
           }

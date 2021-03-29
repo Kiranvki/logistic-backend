@@ -70,7 +70,7 @@ const invoiceMaster = new Schema({
     },
   },
 
-  'payerDetails':
+  'payerDetails': //payers
   {
     'name': {
       type: 'String',
@@ -93,7 +93,7 @@ const invoiceMaster = new Schema({
     },
   },
 
-  'shippingDetails':
+  'shippingDetails':  //sold_to_party  //bill_to_party
   {
     'name': {
       type: 'String',
@@ -118,34 +118,34 @@ const invoiceMaster = new Schema({
 
   'invoiceDetails':
   {
-    'invoiceNo': {
+    'invoiceNo': { //invoice no
       type: 'String',
     },
-    'invoiceDate': {
+    'invoiceDate': {  //billing_date in sap
       type: 'Date',
     },
-    'legacyInvoiceNo': {
+    'legacyInvoiceNo': {  //not in sap
       type: 'String',
     },
-    'sapID': {
+    'sapID': { //invoice no
       type: 'String',
     },
-    'erpId': {
+    'erpId': { //not reqwuirreed
       type: 'String',
     },
-    'customerPoNo': {
+    'customerPoNo': { //not in sap
       type: 'String',
     },
-    'customerPoDate': {
+    'customerPoDate': { //not in sap
       type: 'Date',
     },
-    'deliveryNo': {
+    'deliveryNo': {  //delivery_doc_no
       type: 'String',
     },
-    'paymentTerms': {
+    'paymentTerms': { //payment_terms
       type: 'String',
     },
-    'deliveryFrom': {
+    'deliveryFrom': { //shipping_point
       type: 'String',
     },
   },
