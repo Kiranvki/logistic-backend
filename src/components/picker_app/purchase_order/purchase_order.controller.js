@@ -164,8 +164,8 @@ class purchaseController extends BaseController {
 
       var poDetails= await  Model.aggregate([{
         $match:{
-          poStatus: 1,
-          isDeleted: 0,
+          // poStatus: 1,
+          // isDeleted: 0,
           _id:mongoose.Types.ObjectId(req.params.poId) 
         }
       },{
