@@ -50,7 +50,7 @@ function purchaseOrderRoutes() {
       // isValidPoReceivingId, // check whether the poId is valid
       ctrl.poReceivingList // post controller 
     );
-    closed.route('/purchaseOrder/receive-item/:itemId').post(
+    closed.route('/purchaseOrder/receive-item/:material_no').post(
       [joiReceivingItem], // joi validation
       verifyAppToken, // verify app user token 
       isValidInputsForReceivedItem, // check whether the poId is valid

@@ -37,7 +37,7 @@ const schemas = {
   // joi add received item to cart
   joiReceivingItem: Joi.object().keys({
     params:{
-      itemId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order receiving item Id').required().options({
+      material_no: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order receiving item Id').required().options({
       language: {
         string: {
           regex: {
@@ -57,7 +57,8 @@ const schemas = {
         }
       }
     }),
-    receivedQty:Joi.number().integer().min(0).label('Received quantity').required(),
+    date_of_manufacturing:Joi.date().label('Manufacturing date').optional(),//to-do
+    received_qty:Joi.number().integer().min(0).label('Received quantity').required(),
     remarks:Joi.string().trim().label('remarks').valid('Stock Quantity supplied is less', 'Stock Quality not upto the mark').options({
       language: {
         string: {

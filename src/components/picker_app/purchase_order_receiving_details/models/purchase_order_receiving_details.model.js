@@ -41,79 +41,77 @@ const purchaseOrderReceivingDetails = new Schema({
   "receivingDate" : {
     type: Date
   },
-  "netWeight": {
-    type: Number,
-    default:0
-  },
-  "orderItems":[{
-    "rowNo": {
-      type: Number
-    }, 
-  "itemId":{
-      type: String
-    }, 
-    "itemName":{
-      type: String
-    }, 
-    "quantity": {
-      type: Number
-    }, 
-    "freeQty": {
-      type: Number
-    }, 
-    "uomType": {
-      type: String
-    }, 
-    "convFactor": {
-      type: Number
-    }, 
-    "cost": {
-      type: Number
-    }, 
-    "sellingPrice": {
-      type: Number
-    }, 
-    "itemAmount": {
-      type: Number
-    }, 
-    "taxAmount": {
-      type: Number
-    }, 
-    "mrp": {
-      type: Number
-    }, 
-    "hsnCode":{
-      type: String
-    }, 
-    "eanCode":{
-      type: String
-    }, 
-    "itemDiscount": {
-      type: Number
-    }, 
-    "itemDiscountPerc": {
-      type: Number
-    }, 
-      "pendingQty": {
-      type: Number
-    }, 
-      "receivedQty": {
-      type: Number,
-      default:0
-    }, 
-      "grnQty": {
-      type: Number
-    }, 
-    "rejectedQty": {
-      type: Number
-    }, 
-    "remarks":{
-      type: String
-    }, 
-    "dateOfManufacturing":{
-      type: String
-    },
-  }
+  "item":[
+    {
+      "item_no": {
+        type: String
+      }, 
+      "plant": {
+        type: String
+      }, 
+      "material_group": {
+        type: String
+      }, 
+      "material_group": {
+        type: String
+      },
+      "storage_location": {
+        type: String
+      },  
+      "tax_code": {
+        type: String
+      },  
+      "conversion_factor_status": {
+        type: String
+      }, 
+      "material_no":{
+        type: String
+      }, 
+      "item_name":{
+        type: String
+      }, 
+      "quantity": {
+        type: Number
+      }, 
+      "net_price": {
+        type: Number
+      }, 
+      "selling_price": {
+        type: Number
+      }, 
+      "mrp_amount": {
+        type: Number
+      }, 
+      "taxable_value": {
+        type: Number
+      }, 
+      "discount_amount": {
+        type: Number
+      }, 
+      "discount_perc": {
+        type: Number
+      }, 
+      "pending_qty": {
+        type: Number
+      }, 
+      "received_qty": {
+        type: Number,
+        default:0
+      }, 
+        "grn_qty": {
+        type: Number
+      }, 
+      "rejected_qty": {
+        type: Number
+      }, 
+      "remarks":{
+        type: String
+      }, 
+      "date_of_manufacturing":{
+        type: String
+      },
+  
+    }
   ]
   }, 
   {

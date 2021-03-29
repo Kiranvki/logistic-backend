@@ -42,7 +42,7 @@ class purchaseController extends BaseController {
       pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 10; });
       let skip = parseInt(page - 1) * pageSize;
       sortingArray['receivingStatus'] = -1;
-      sortingArray['deliveryDate'] = -1;
+      sortingArray['delivery_date'] = -1;
       let todaysDate  = moment().set({
         h: 0,
         m: 0,
@@ -51,13 +51,12 @@ class purchaseController extends BaseController {
       }).format('YYYY-MM-DD hh:mm:ss')
       info('Get Purchase order  details !',req.body,req.query,req.params);
       let query ={
-        poStatus: 1,
-        isDeleted: 0,
+        
         receivingStatus:{$ne:1}//to-do
-        // expiryDate:{$gt:todaysDate}
+        // end_of_validity_period:{$gt:todaysDate}
       }
       if(req.query.poNumber){
-        query.poNo = Number(req.query.poNumber);
+        query.po_number = Number(req.query.poNumber);
       }
       // get the total PO
       let totalPO = await Model.countDocuments({
@@ -81,7 +80,9 @@ class purchaseController extends BaseController {
                     $and: [
                       { $eq: ["$poId", "$$id"] },
                       { $eq: ["$$poRecStatus", 4] },
-                      // { $gt: ["$orderItems.quantity", "$orderItems.receivedQty"] },//not working need to check later //to-do
+                      { $eq: ["$isDeleted", 0] },
+
+                      // { $gt: ["$item.quantity", "$item.received_qty"] },//not working need to check later //to-do
                     ],
                   },
                 },
@@ -104,13 +105,13 @@ class purchaseController extends BaseController {
         },
         {
           $project: {
-            poNo: 1,
-            supplierCode: 1,
+            po_number: 1,
+            vendor_no: 1,
             supplierName: 1,
-            itemCount: { $size: "$orderItems" },
+            itemCount: { $size: "$item" },
             poReceivingId: "$poDetails" ,
             receivingStatus:1,
-            orderItems:1
+            item:1
           },
         }
         ,
@@ -126,16 +127,16 @@ class purchaseController extends BaseController {
       ]);
       poList.forEach(order => {
         let count=0;
-        order.orderItems.forEach(item => {
-          if(!item.receivedQty){
+        order.item.forEach(item => {
+          if(!item.received_qty){
             count++
 
-          }else if(item.receivedQty && item.receivedQty<item.quantity){
+          }else if(item.received_qty && item.received_qty<item.quantity){
             count++
           }
         });
         order.itemCount=count;
-        delete order.orderItems
+        delete order.item
       });
       // success 
       return this.success(req, res, this.status.HTTP_OK,
@@ -163,26 +164,24 @@ class purchaseController extends BaseController {
 
       var poDetails= await  Model.aggregate([{
         $match:{
-          poStatus: 1,
-          isDeleted: 0,
+          // poStatus: 1,
+          // isDeleted: 0,
           _id:mongoose.Types.ObjectId(req.params.poId) 
         }
       },{
         $project: {
-          poNo:1,
-          supplierCode:1,
+          po_number:1,
+          vendor_no:1,
           supplierName:1,
-          'orderItems._id':1,
-          'orderItems.itemId':1,
-          'orderItems.itemName':1,
-          'orderItems.quantity':1,
-          'orderItems.cost':1,
-          'orderItems.mrp':1,
-          "pendingQty":1,
-          "receivedQty":1,
-          "grnQty":1,
-          "rejectedQty":1,
-          deliveryDate:1
+          'item._id':1,
+          'item.material_no':1,
+          'item.item_name':1,
+          'item.quantity':1,
+          'item.net_price':1,
+          'item.mrp':1,
+          "pending_qty":1,
+          "received_qty":1,
+          delivery_date:1
       }}
       ]);
       // success 
@@ -235,22 +234,20 @@ class purchaseController extends BaseController {
     try{
       var poDetails= await  Model.aggregate([{
         $match:{
-          isDeleted: 0,
+          // isDeleted: 0, //to-do
           _id:mongoose.Types.ObjectId(poId) 
         }
       },{
         $project: {
-          poNo:1,
-          poDate:1,
-          supplierCode:1,
+          po_number:1,
+          document_date:1,
+          vendor_no:1,
           supplierName:1,
           supplierPhone:1,
-          'orderItems':1,
-          "pendingQty":1,
-          "receivedQty":1,
-          "grnQty":1,
-          "rejectedQty":1,
-          deliveryDate:1
+          'item':1,
+          "pending_qty":1,
+          "received_qty":1,
+          delivery_date:1
       }}
       ]);
       return {
@@ -273,13 +270,13 @@ class purchaseController extends BaseController {
 
 
       var sellerDetails= await  Model.findOne({
-          poStatus: 1,
-          isDeleted: 0,
+          // poStatus: 1,//to-do
+          // isDeleted: 0,
           _id:mongoose.Types.ObjectId(req.params.poId) 
         }
      , {
-          poNo:1,
-          supplierCode:1,
+          po_number:1,
+          vendor_no:1,
           supplierName:1,
           supplierPhone:1
       }

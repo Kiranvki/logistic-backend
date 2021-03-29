@@ -18,27 +18,27 @@ module.exports = async (req, res, next) => {
         info('Check whether quantity entered has valid value');
         let objectId = mongoose.Types.ObjectId; // object id
         let poReceivingId = req.body.poReceivingId; // get the sale order id 
-        var itemId = req.params.itemId;
-        var receivedQty = req.body.receivedQty;
+        var material_no = req.params.material_no;
+        var received_qty = req.body.received_qty;
         var remarks = req.body.remarks;
 
         // mongoose valid id 
-        if (objectId.isValid(itemId)) {
+        if (objectId.isValid(material_no)) {
 
             // check whether the sale Order id is already added or not
             let poReceivingItemDetails = await poReceivingController.get({
                 _id: mongoose.Types.ObjectId(poReceivingId),
-                "orderItems._id": mongoose.Types.ObjectId(itemId),
+                "item._id": mongoose.Types.ObjectId(material_no),
                 receivingStatus:4
               })
 
             // if sales order Id is not added
             if (poReceivingItemDetails.success && poReceivingItemDetails.data&& poReceivingItemDetails.data.length) {
-                if(poReceivingItemDetails.data[0].orderItems[0].quantity!=receivedQty && !remarks){
+                if(poReceivingItemDetails.data[0].item[0].quantity!=received_qty && !remarks){
                     info('Remarks required');
                     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.requiredRemark);
                 }
-                if(poReceivingItemDetails.data[0].orderItems[0].quantity <receivedQty){
+                if(poReceivingItemDetails.data[0].item[0].quantity <received_qty){
                     info('Remarks required');
                     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.receivedQuantityGreaterThanQty);
                 }
