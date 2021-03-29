@@ -45,24 +45,34 @@ class pickerSalesOrderMappingController extends BaseController {
       info('Add items after scanning  !');
       let pickerBoySalesOrderMappingId = mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId) || '',
       quantityAdded = req.body.quantity,
-      salesPrice = req.body.itemDetail.salePrice
+      mrp_amount = parseInt(req.body.itemDetail.mrp_amount)
    
       //itemID->material
 
       let dataToInsert = {
         'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
         'itemDetail':[{
-        'itmemId': req.body.itemId,
-        'itemName': req.body.itemDetail.itemName,
-        'salePrice': salesPrice,
+        'item_no': req.body.item_no,
+        'material_no':req.body.itemDetail.material_no,
+        'itemName': req.body.itemDetail.itemName?req.body.itemDetail.itemName:'N/A',
+        
+        'mrp_amount':mrp_amount,
+        
+        'discount_amount': req.body.itemDetail.discount_amount?req.body.itemDetail.discount_amount:0,
+        'plant':req.body.plant,
+        'cgst-pr':req.body.itemDetail.cgst_pr,
+        'sgst_pr':req.body.itemDetail.sgst_pr,
+        'igst_pr':req.body.itemDetail.igst_pr,
+        'ugst_pr':req.body.itemDetail.ugst_pr,
         'pickedQuantity': quantityAdded,
-        'totalQuantity':parseInt(req.body.itemDetail.quantity),
-        'requireQuantity':(parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty)),
-        'suppliedQty': req.body.itemDetail.suppliedQty, //previous supplied
-        'taxPercentage': req.body.itemDetail.taxPercentage,
-        'discountPercentage': req.body.itemDetail.discountPercentage,
-        'freeQty': req.body.itemDetail.freeQty,
-        'itemAmount': (salesPrice*quantityAdded)
+        'total_amount':req.body.itemDetail.total_amount,
+        'totalQuantity':parseInt(req.body.itemDetail.order_quantity),
+        'requireQuantity':(parseInt(req.body.itemDetail.order_quantity)), //- parseInt(req.body.itemDetail.suppliedQty)),
+        'suppliedQty':  0, //req.body.itemDetail.suppliedQty, //previous supplied
+        // 'taxPercentage': req.body.itemDetail.taxPercentage,
+        'discountPercentage': req.body.itemDetail.discountPercentage?req.body.itemDetail.discountPercentage:0,
+        'freeQty': req.body.itemDetail.freeQty?req.body.itemDetail.freeQty:0,
+        'itemAmount': (mrp_amount*quantityAdded)  
       }],
         'createdBy':  req.user.email
 
@@ -83,13 +93,15 @@ class pickerSalesOrderMappingController extends BaseController {
         // getOrderByPickerBoyId
         let orderDetail = await pickerBoySalesOrderModel.getOrderByPickerBoyId(pickerBoySalesOrderMappingId)
      
+    
+        console.log('orderItemsssss',Object.keys(orderDetail[0]['salesOrderId']))
          // changes required quadratic
       if(orderDetail.length>0 && itemAdded.length>0){
-        orderDetail[0]['salesOrderId']['orderItems'].forEach((x,i)=>{
+        orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
         //   console.log(x)
         itemAdded[0]['itemDetail'].forEach((y,j)=>{
-            if(x.itemId ===y.itemId){
-              orderDetail[0]['salesOrderId']['orderItems'][i]=y;
+            if(x.item_no ===y.item_no){
+              orderDetail[0]['salesOrderId']['item'][i]=y;
               // orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
               // orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
             }
@@ -249,13 +261,13 @@ console.log(pickerBoySalesOrderMappingId,itemId)
 
     let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
     // getOrderByPickerBoyId
-    let orderDetail = await pickerBoySalesOrderModel.getOrderByPickerBoyId (pickerBoySalesOrderMappingId); 
+    let orderDetail = await pickerBoySalesOrderModel.getOrderByPickerBoyId(pickerBoySalesOrderMappingId); 
     // pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
  
 
 
     
-
+    console.log('Sales order',orderDetail[0]['salesOrderId']['item'])
 
     // check if inserted 
     if (orderDetail ) {
@@ -263,12 +275,13 @@ console.log(pickerBoySalesOrderMappingId,itemId)
      
        // changes required quadratic
     if(itemAdded){
-      orderDetail[0]['salesOrderId']['orderItems'].forEach((x,i)=>{
+      
+      orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
       //   console.log(x)
       itemAdded[0]['itemDetail'].forEach((y,j)=>{
-          if(x.itemId ===y.itemId){
+          if(x.item_no ===y.item_no){
             
-            orderDetail[0]['salesOrderId']['orderItems'][i]=y;
+            orderDetail[0]['salesOrderId']['item'][i]=y;
             // orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
             
             // orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
@@ -283,7 +296,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
           pageMeta: {
             skip: parseInt(skip),
             pageSize: pageSize,
-            total: orderDetail[0]['salesOrderId']['orderItems'].length
+            total: orderDetail[0]['salesOrderId']['item'].length
           }
         }, this.messageTypes.bucketItemListFetchSuccesfully);
     } else {

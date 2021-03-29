@@ -235,8 +235,13 @@ getInvoiceDocumentDetail = async (req,res)=>{
                 'orderItems': 1,
                 'otherChargesTaxInclusive': 1,
                 'customerType': 1,
-                'deliveryDate': 1,
+                'req_del_date': 1,
                 'customerId': 1,
+                'sales_order_no':1,
+                'ship_to_party':1,
+                'sold_to_party':1,
+                'plant':1,
+                'item':1
               }
             }
           ],
@@ -257,7 +262,8 @@ getInvoiceDocumentDetail = async (req,res)=>{
           'salesOrdersDetails.orderItems': 1,
           'salesOrdersDetails.otherChargesTaxInclusive': 1,
           'salesOrdersDetails.customerType': 1,
-          'salesOrdersDetails.deliveryDate': 1,
+          'salesOrdersDetails.req_del_date': 1,
+          'salesOrdersDetails.item_no': 1,
           'salesOrdersDetails.customerId': 1,
           'pickerBoyId': 1,
           'customerType': 1,
@@ -500,7 +506,7 @@ getOrderDetails = async (req,res,next)=>{
       }
       // get the sale Order Details
    
-console.log(orderData)
+
       // check if inserted 
       if (orderData && !_.isEmpty(orderData)) return this.success(req, res, this.status.HTTP_OK, orderData, this.messageTypes.salesOrderDetailsFetched);
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
@@ -566,6 +572,13 @@ console.log(orderData)
       let saleOrderDetails = req.body.saleOrderDetails;
 
       let dataToInsert = {
+        'delivery_type':'N/A',
+        'shipping_point':saleOrderDetails.plant,
+        'delivery_no':'N/A',
+        'picking_date':moment(new Date()).format('YYYY-MM-DD'),
+      
+        'picking_time':moment(new Date()).format('hh:mm:ss'),
+        'sales_order_no':saleOrderDetails.sales_order_no,
         'salesOrderId': saleOrderDetails._id,
         'pickerBoyId': req.user._id,
         // 'pickerBoyId': mongoose.Types.ObjectId('60227a45c9e10d6cda8c182b'),
@@ -1370,7 +1383,7 @@ console.log(orderData)
   getTodaysOrder = async(req,res,next)=>{
     let orderModel
 try{
-    info('Getting the Order History!!!');
+    info('Getting the todays Order !!!');
     let page = req.query.page || 1,
       pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
       searchKey =  '', //req.query.search ||
@@ -1380,47 +1393,38 @@ try{
       cityId =  'N/A', // cityId req.user.cityId ||
       searchDate = req.body.searchDate || '',
       type = req.params.type;
+      // 2021-03-29
+    let startOfTheDay =  moment(new Date()).format('YYYY-MM-DD');
+    // moment().set({
+    //   h: 0,
+    //   m: 0,
+    //   s: 0,
+    //   millisecond: 0
+    // }).toDate();
 
-    let startOfTheDay = moment().set({
-      h: 0,
-      m: 0,
-      s: 0,
-      millisecond: 0
-    }).toDate();
-
-    let endOfTheDay = moment().set({
-      h: 24,
-      m: 24,
-      s: 0,
-      millisecond: 0
-    }).toDate();
+    let endOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+    //  moment().set({
+    //   h: 24,
+    //   m: 24,
+    //   s: 0,
+    //   millisecond: 0
+    // }).toDate();
 
     
     if (searchDate && !_.isEmpty(searchDate)) {
       
 
-      startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0
-      }).toDate();
+      startOfTheDay = moment(searchDate).format('YYYY-MM-DD')
 
       // getting the end of the day 
-      endOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
-        h: 24,
-        m: 24,
-        s: 0,
-        millisecond: 0
-      }).toDate();
+      endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
     }
-
+console.log(startOfTheDay)
 
     let pipeline = [{
       $match:{
-      'deliveryDate': {
-        '$gte': startOfTheDay,
-        '$lte': endOfTheDay
+      'req_del_date': {
+        '$eq': startOfTheDay
       }
     }
     }];
@@ -1429,9 +1433,9 @@ try{
     if (searchKey !== '')
     pipeline = [{
       $match:{
-        'deliveryDate': {
-          '$gte': startOfTheDay,
-          '$lte': endOfTheDay
+        'req_del_date': {
+      '$eq': startOfTheDay
+       
         }
       ,
         '$or': [{
@@ -1526,6 +1530,7 @@ try{
 
 
   let todaysOrderData = await orderModel.aggregate(pipeline)
+  // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
 
   console.log(todaysOrderData);
 
@@ -1537,7 +1542,7 @@ try{
       pageMeta: {
         skip: parseInt(skip),
         pageSize: pageSize,
-        total: todaysOrderData[0]['orderItems'].length
+        total: todaysOrderData[0]['item'].length
       }
     }, this.messageTypes.todoOrderFetchedSuccessfully);
   }
@@ -1558,16 +1563,16 @@ try{
 
   }
 
-  getOrderItem = async (pickerboySalesOrderMappingId,itemId)=>{
+  getOrderItem = async (pickerboySalesOrderMappingId,item_no)=>{
   return Model.aggregate([{'$match':{'_id':mongoose.Types.ObjectId(pickerboySalesOrderMappingId)}},{'$lookup':
 {'from':'salesorders',
 'let':{'so_id':'$salesOrderId'},
     'pipeline': [
-      {'$unwind': { path: '$orderItems'} },
+      {'$unwind': { path: '$item'} },
         { '$match': {
           
           '$expr': { '$and': [ {$eq:[ '$$so_id','$_id']},
-          {$eq:[ '$orderItems.itemId',itemId]} ] }
+          {$eq:[ '$item.item_no',item_no]} ] }
         }}
         
         
@@ -1579,9 +1584,9 @@ try{
   if (res && !_.isEmpty(res)) {
     return {
       success: true,
-      data: res[0]['salesOrders'][0]['orderItems']
+      data: {'salesOrder':res[0]['salesOrders'][0]['item'],'plant':res[0]['salesOrders'][0]['plant']}
   
-      
+  
     }
   } else {
     error('Error Searching item in PickerBoy Item SalesOrder Mapping DB!');

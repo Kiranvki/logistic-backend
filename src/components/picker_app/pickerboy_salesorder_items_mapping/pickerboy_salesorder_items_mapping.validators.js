@@ -30,7 +30,7 @@ const schemas = {
       pickerBoySalesOrderMappingId: Joi.string().trim().label('PickerBoy SalesOrder Mapping Id').required(),
     },
     body: Joi.object({
-      itemId: Joi.number().label('itemId').required(),
+      item_no: Joi.number().label('item_no').required(),
       itemName: Joi.string().trim().label('itemName').required(),
       salePrice: Joi.number().label('salePrice').required(),
       quantity: Joi.number().label('quantity').required(),
