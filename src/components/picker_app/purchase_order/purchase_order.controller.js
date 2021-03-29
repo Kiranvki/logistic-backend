@@ -49,11 +49,18 @@ class purchaseController extends BaseController {
         s: 0,
         millisecond: 0
       }).format('YYYY-MM-DD hh:mm:ss')
+      let todaysEndDate  = moment().set({
+        h: 23,
+        m: 59,
+        s: 59,
+        millisecond: 999
+      }).format('YYYY-MM-DD hh:mm:ss')
       info('Get Purchase order  details !',req.body,req.query,req.params);
       let query ={
         
         receivingStatus:{$ne:1},//to-do// check if qury working properly
-        end_of_validity_period:{$gt:todaysDate}
+        end_of_validity_period:{$gt:todaysDate},
+        delivery_date:{$lte:todaysEndDate}
       }
       if(req.query.poNumber){
         query.po_number = Number(req.query.poNumber);
@@ -81,6 +88,8 @@ class purchaseController extends BaseController {
                       { $eq: ["$poId", "$$id"] },
                       { $eq: ["$$poRecStatus", 4] },
                       { $eq: ["$isDeleted", 0] },
+                      { $eq: ["$pickerBoyId", mongoose.Types.ObjectId(req.user._id)] },
+
 
                       // { $gt: ["$item.quantity", "$item.received_qty"] },//not working need to check later //to-do
                     ],

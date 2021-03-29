@@ -39,8 +39,11 @@ module.exports = async (req, res, next) => {
                     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.requiredRemark);
                 }
                 if(poReceivingItemDetails.data[0].item[0].quantity <received_qty){
-                    info('Remarks required');
+                    info('Received quantity greter than required quantity');
                     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.receivedQuantityGreaterThanQty);
+                }
+                if(poReceivingItemDetails.data[0].item[0].quantity=received_qty){
+                    req.body.remarks=''
                 }
                req.body.poReceivingItemDetails = poReceivingItemDetails.data[0];
                next()
