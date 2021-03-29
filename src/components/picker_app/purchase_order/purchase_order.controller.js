@@ -234,7 +234,7 @@ class purchaseController extends BaseController {
     try{
       var poDetails= await  Model.aggregate([{
         $match:{
-          isDeleted: 0,
+          // isDeleted: 0, //to-do
           _id:mongoose.Types.ObjectId(poId) 
         }
       },{
@@ -270,8 +270,8 @@ class purchaseController extends BaseController {
 
 
       var sellerDetails= await  Model.findOne({
-          poStatus: 1,
-          isDeleted: 0,
+          // poStatus: 1,//to-do
+          // isDeleted: 0,
           _id:mongoose.Types.ObjectId(req.params.poId) 
         }
      , {
