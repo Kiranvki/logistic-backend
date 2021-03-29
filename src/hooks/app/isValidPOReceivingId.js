@@ -1,5 +1,5 @@
 // Controller
-const poRecievingCtrl = require('../../components/picker_app/purchase_order_recieving_details/purchase_order_recieving_details.controller');
+const poReceivingCtrl = require('../../components/picker_app/purchase_order_receiving_details/purchase_order_receiving_details.controller');
 
 // Responses & others utils 
 const Response = require('../../responses/response');
@@ -15,29 +15,33 @@ const {
 // exporting the hooks 
 module.exports = async (req, res, next) => {
     try {
-        info('Check whether PO Recieving Id is valid or not');
+        info('Check whether PO Receiving Id is valid or not');
         let objectId = mongoose.Types.ObjectId; // object id
-        let poRecievingId = req.params.poRecievingId; // get the sale order id 
+        let poReceivingId = req.params.poReceivingId; // get the sale order id 
 
         // mongoose valid id 
-        if (objectId.isValid(poRecievingId)) {
+        if (objectId.isValid(poReceivingId)) {
 
             // check whether the sale Order id is unique or not
-            let poRecievingDetails = await poRecievingCtrl.get(poRecievingId)
+            let poReceivingDetails = await poReceivingCtrl.get({
+                status:1,
+                isDeleted: 0,
+                _id:mongoose.Types.ObjectId(poReceivingId) 
+              })
 
             // if email is unique
-            if (poRecievingDetails.success) {
+            if (poReceivingDetails.success) {
                 info('Valid SaleOrder')
-                req.body.poRecievingDetails = poRecievingDetails.data[0]
+                req.body.poReceivingDetails = poReceivingDetails.data[0]
 
                 next();
             } else {
-                error('INVALID Purchase Order recieving ID!');
+                error('INVALID Purchase Order receiving ID!');
                 return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.purchaseOrderIdInvalidEitherDeletedOrDeactivated);
             }
         } else {
-            error('The PurchaseOrder recieving ID is Invalid !');
-            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.invalidPurchaseOrderRecievingId);
+            error('The PurchaseOrder receiving ID is Invalid !');
+            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.invalidPurchaseOrderReceivingId);
         }
 
         // catch any runtime error 

@@ -9,8 +9,8 @@ const Response = require('../../../responses/response');
 // add joi schema 
 const schemas = {
   // joi zoho details 
-  joipoRecievingId: Joi.object().keys({
-    poRecievingId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order recieving Id').required().options({
+  joipoReceivingId: Joi.object().keys({
+    poReceivingId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order receiving Id').required().options({
       language: {
         string: {
           regex: {
@@ -79,9 +79,9 @@ module.exports = {
   },
 
   // joi asm create 
-  joipoRecievingId: (req, res, next) => {
+  joipoReceivingId: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.joipoRecievingId;
+    let schema = schemas.joipoReceivingId;
     let option = options.basic;
 
     // validating the schema 

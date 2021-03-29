@@ -17,7 +17,10 @@ const seriesModel = require('./model/incremental.model');
 const tripSaleModel = require('./model/salesOrder.model')
 const _ = require('lodash');
 const request = require('request-promise');
-
+const tripSalesOrderModel = require('./model/salesOrder.model');
+const { pipe } = require('ramda');
+const mongoose = require('mongoose');
+const pickerBoyOrderMappingModel = require('../../picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model');
 class MyTrip extends BaseController {
 
     // constructor 
@@ -937,6 +940,84 @@ class MyTrip extends BaseController {
           this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
       }
     };
+
+    getTripAndSalseOrderListing = async (req, res) => {
+      try {
+        let page = req.query.page || 1,
+          pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 10; }),
+          sortBy = req.query.sortBy || 'createdAt',
+          sortingArray = {};
+        sortingArray[sortBy] = -1;
+        let skip = parseInt(page - 1) * pageSize;
+          // get the total customer
+        const totalAgencies = await pickerBoyOrderMappingModel.countDocuments({});
+
+        const getAllTripsWithSalesOrder = await pickerBoyOrderMappingModel.aggregate([
+          {
+            $lookup: {
+              from: 'salesorders',
+              let: {
+                'id': '$salesOrderId'
+              },
+              pipeline: [
+                {
+                  $match: {
+                    '$expr': {
+                      '$eq': ['$_id', '$$id']
+                    }
+                  }
+                }, {
+                  $project: {
+                    'status': 1,
+                    'orderItems': 1,
+                    'customerType': 1,
+                    'deliveryDate': 1,
+                    'customerId': 1,
+                    "fulfillmentStatus": 1,
+                    "location": 1,
+                    "customerName": 1,
+                    "pickerBoyId": 1
+                  }
+                }
+              ],
+              as: 'salesOrdersDetails'
+            }
+          },{
+            "$lookup": {
+              from : "pickerboys",
+              let: {'id': "$pickerBoyId"},
+              pipeline :[{
+                $match : {
+                  '$expr' : {'$eq' : ['$_id','$$id']}
+                }
+              },{
+                $project: {
+                  "employerName": 1,
+                  "firstName": 1
+                }
+              }],
+              "as": "pickerBoyName"
+            }
+          },{
+            $sort: sortingArray
+            }, {
+              $skip: skip
+            }, {
+              $limit: pageSize
+            }]).allowDiskUse(true);
+
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: getAllTripsWithSalesOrder,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalAgencies
+          }
+        });
+      } catch(error) {
+        this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
+      }
+    }
 };
 
 module.exports = new MyTrip();

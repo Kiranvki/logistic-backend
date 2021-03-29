@@ -36,12 +36,15 @@ module.exports = {
   checkFullfilmentStatus: require('./checkFullfilmentStatus'),
   checkIsInPickingState: require('./checkIsInPickingState'),
   isValidPoId: require('./isValidPoId'),
-  poRecievingInitiationValidations:require('./poRecievingInitiationValidations'),
-  isValidPORecievingId:require('./isValidPORecievingId'),
+  poReceivingInitiationValidations:require('./poReceivingInitiationValidations'),
+  isValidPOReceivingId:require('./isValidPOReceivingId'),
   isValidPogrnId:require('./isValidPogrnId'),
   isValidPORecIdForGrnGetDetails:require('./isValidPORecIdForGrnGetDetails'),
   grnAlreadyGenerated:require('./grnAlreadyGenerated'),
-  getPickedItemDetail:require('./getPickedItemDetail')
+  getPickedItemDetail:require('./getPickedItemDetail'),
+  hasOrderAlreadyInReceivingState:require('./hasOrderAlreadyInReceivingState'),
+  isValidInputsForReceivedItem:require('./isValidInputsForReceivedItem'),
+
 
 
 }

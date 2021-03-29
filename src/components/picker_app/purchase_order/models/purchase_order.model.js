@@ -17,13 +17,20 @@ const purchaseOrder = new Schema({
   "poStatus": {
     type: Number
   },
-  "recievingStatus": {
+  "receivingStatus": {
     type: Number,
     default:0
   },
-  // 1 initiated Recieving
-  // 2 added itms to recieving cart
-  //3 grn generated
+  // 4 initiated Receiving
+  // 3 added itms to receiving cart
+  //2 if fullfillment status is partially fulfilled and  grn is generated 
+    //1 if fullfillment status is  fulfilled and  grn is generated 
+  "fulfilmentStatus": {
+    type: Number,
+    default:0
+  },
+  //2 partially fulfilled
+  //1 fullfilled
   "supplierCode":{
     type: String
   }, 
@@ -116,8 +123,9 @@ const purchaseOrder = new Schema({
       "pendingQty": {
       type: Number
     }, 
-      "recievedQty": {
-      type: Number
+      "receivedQty": {
+      type: Number,
+      default:0
     }, 
       "grnQty": {
       type: Number

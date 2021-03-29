@@ -15,8 +15,8 @@ const schemas = {
   }),
 
   // joi asm create
-  poDetails: Joi.object().keys({
-    id: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order Id').required().options({
+  joiPoIdValidation: Joi.object().keys({
+    poId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order Id').required().options({
       language: {
         string: {
           regex: {
@@ -51,9 +51,9 @@ const options = {
 
 module.exports = {
   // exports validate admin signin 
-  poDetails: (req, res, next) => {
+  joiPoIdValidation: (req, res, next) => {
     // getting the schemas 
-    let schema = schemas.poDetails;
+    let schema = schemas.joiPoIdValidation;
     let option = options.basic;
 
     // validating the schema 

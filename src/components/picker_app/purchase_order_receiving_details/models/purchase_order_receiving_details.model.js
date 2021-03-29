@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 // schema
-const purchaseOrderRecievingDetails = new Schema({
+const purchaseOrderReceivingDetails = new Schema({
   'pickerBoyId': {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
@@ -10,13 +10,20 @@ const purchaseOrderRecievingDetails = new Schema({
       select: ['fullName', 'employeeId']
     }
   },
-  "recievingStatus": {
+  "receivingStatus": {
     type: Number,
-    default:1
+    default:4
   }, 
-  // 1 initiated Recieving
-  // 2 added itms to recieving cart
-  //3 grn generated
+  // 4 initiated Receiving
+  // 3 added itms to receiving cart
+  //2 if fullfillment status is partially fulfilled and  grn is generated 
+    //1 if fullfillment status is  fulfilled and  grn is generated
+  "fulfilmentStatus": {
+    type: Number,
+    default:0
+  },
+  //2 partially fulfilled
+  //1 fullfilled
   "status": {
     type: Number,
     default:1
@@ -31,7 +38,7 @@ const purchaseOrderRecievingDetails = new Schema({
     ref: 'purchaseorder',
 
   },
-  "recievingDate" : {
+  "receivingDate" : {
     type: Date
   },
   "netWeight": {
@@ -90,8 +97,9 @@ const purchaseOrderRecievingDetails = new Schema({
       "pendingQty": {
       type: Number
     }, 
-      "recievedQty": {
-      type: Number
+      "receivedQty": {
+      type: Number,
+      default:0
     }, 
       "grnQty": {
       type: Number
@@ -99,6 +107,12 @@ const purchaseOrderRecievingDetails = new Schema({
     "rejectedQty": {
       type: Number
     }, 
+    "remarks":{
+      type: String
+    }, 
+    "dateOfManufacturing":{
+      type: String
+    },
   }
   ]
   }, 
@@ -108,9 +122,9 @@ const purchaseOrderRecievingDetails = new Schema({
 
 
 
-purchaseOrderRecievingDetails.index({
+purchaseOrderReceivingDetails.index({
 
 });
 
 // exporting the entire module
-module.exports = mongoose.model('purchaseorderrecievingdetails', purchaseOrderRecievingDetails);
+module.exports = mongoose.model('purchaseorderreceivingdetails', purchaseOrderReceivingDetails);

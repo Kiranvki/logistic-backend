@@ -15,6 +15,7 @@ const {
   info
 } = require('../../../utils').logging;
 const moment = require('moment');
+const { forEach } = require('lodash');
 // self apis
 
 // padding the numbers
@@ -40,6 +41,7 @@ class purchaseController extends BaseController {
       sortingArray = {},
       pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 10; });
       let skip = parseInt(page - 1) * pageSize;
+      sortingArray['receivingStatus'] = -1;
       sortingArray['deliveryDate'] = -1;
       let todaysDate  = moment().set({
         h: 0,
@@ -51,7 +53,7 @@ class purchaseController extends BaseController {
       let query ={
         poStatus: 1,
         isDeleted: 0,
-        // recievingStatus:{$ne:3}//to-do
+        receivingStatus:{$ne:1}//to-do
         // expiryDate:{$gt:todaysDate}
       }
       if(req.query.poNumber){
@@ -67,10 +69,10 @@ class purchaseController extends BaseController {
         },
         {
           $lookup: {
-            from: "purchaseorderrecievingdetails",
+            from: "purchaseorderreceivingdetails",
             let: {
               id: "$_id",
-              poRecStatus: "$recievingStatus",
+              poRecStatus: "$receivingStatus",
             },
             pipeline: [
               {
@@ -78,7 +80,8 @@ class purchaseController extends BaseController {
                   $expr: {
                     $and: [
                       { $eq: ["$poId", "$$id"] },
-                      { $eq: ["$$poRecStatus", 1] },
+                      { $eq: ["$$poRecStatus", 4] },
+                      // { $gt: ["$orderItems.quantity", "$orderItems.receivedQty"] },//not working need to check later //to-do
                     ],
                   },
                 },
@@ -95,7 +98,8 @@ class purchaseController extends BaseController {
         },
         {
           '$unwind': {
-            'path': '$poDetails'
+            'path': '$poDetails',
+            preserveNullAndEmptyArrays: true
           }
         },
         {
@@ -104,8 +108,14 @@ class purchaseController extends BaseController {
             supplierCode: 1,
             supplierName: 1,
             itemCount: { $size: "$orderItems" },
-            poRecievingId: "$poDetails" ,
+            poReceivingId: "$poDetails" ,
+            receivingStatus:1,
+            orderItems:1
           },
+        }
+        ,
+        {
+          $sort: sortingArray,
         },
         {
           $skip: skip,
@@ -114,6 +124,19 @@ class purchaseController extends BaseController {
           $limit: pageSize,
         },
       ]);
+      poList.forEach(order => {
+        let count=0;
+        order.orderItems.forEach(item => {
+          if(!item.receivedQty){
+            count++
+
+          }else if(item.receivedQty && item.receivedQty<item.quantity){
+            count++
+          }
+        });
+        order.itemCount=count;
+        delete order.orderItems
+      });
       // success 
       return this.success(req, res, this.status.HTTP_OK,
          {result: poList,
@@ -142,7 +165,7 @@ class purchaseController extends BaseController {
         $match:{
           poStatus: 1,
           isDeleted: 0,
-          _id:mongoose.Types.ObjectId(req.params.id) 
+          _id:mongoose.Types.ObjectId(req.params.poId) 
         }
       },{
         $project: {
@@ -156,7 +179,7 @@ class purchaseController extends BaseController {
           'orderItems.cost':1,
           'orderItems.mrp':1,
           "pendingQty":1,
-          "recievedQty":1,
+          "receivedQty":1,
           "grnQty":1,
           "rejectedQty":1,
           deliveryDate:1
@@ -224,7 +247,7 @@ class purchaseController extends BaseController {
           supplierPhone:1,
           'orderItems':1,
           "pendingQty":1,
-          "recievedQty":1,
+          "receivedQty":1,
           "grnQty":1,
           "rejectedQty":1,
           deliveryDate:1

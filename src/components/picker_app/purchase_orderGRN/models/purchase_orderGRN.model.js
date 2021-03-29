@@ -8,25 +8,41 @@ const purchaseOrderGRN = new Schema({
   "poNo":{
     type: Number
   },
-  poRecievingId:{
+  poReceivingId:{
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'purchaseorderrecievingdetails',
+    ref: 'purchaseorderreceivingdetails',
   },
+  sapGrnNo:{
+    type: String
+  }, 
   "grnNo": {
     type: String
   }, 
   "poDate": {
     type: String
   },
+  "vendorInvoiceNo": {
+    type: String
+  },
   "status": {
     type: Number,
     default:1
   }, 
-  "recievingStatus": {
+  "receivingStatus": {
     type: Number,
     default:0
   },
+    // 4 initiated Receiving
+  // 3 added itms to receiving cart
+  //2 if fullfillment status is partially fulfilled and  grn is generated 
+    //1 if fullfillment status is  fulfilled and  grn is generated
+  "fulfilmentStatus": {
+    type: Number,
+    default:0
+  },
+  //2 partially fulfilled
+  //1 fullfilled
   'sequence': {
       type: Number
   },
@@ -133,8 +149,9 @@ const purchaseOrderGRN = new Schema({
       "pendingQty": {
       type: Number
     }, 
-      "recievedQty": {
-      type: Number
+    "receivedQty": {
+      type: Number,
+      default:0
     }, 
       "grnQty": {
       type: Number
