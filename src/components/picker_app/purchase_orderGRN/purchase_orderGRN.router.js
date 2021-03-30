@@ -6,7 +6,7 @@ const multer = require('multer');
 // custom joi validation
 const {
   joigrnId,
-  joipoReceivingId
+  joipoGenerateGRN
 } = require('./purchase_orderGRN.validators');
 
 // hooks 
@@ -34,7 +34,7 @@ function purchaseOrderRoutes() {
 
     // generating invoice
     closed.route('/purchaseOrder/generate-grn/:poReceivingId').post(
-      [joipoReceivingId], // joi validation
+      [joipoGenerateGRN], // joi validation
       verifyAppToken,
       grnAlreadyGenerated,
       isValidPORecIdForGrnGetDetails,

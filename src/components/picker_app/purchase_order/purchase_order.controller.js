@@ -43,7 +43,7 @@ class purchaseController extends BaseController {
       let skip = parseInt(page - 1) * pageSize;
       sortingArray['receivingStatus'] = -1;
       sortingArray['delivery_date'] = -1;
-      let todaysDate  = moment().format('YYYY-MM-DD hh:mm:ss')
+      let todaysDate  = moment().format('YYYY-MM-DD')
       let todaysEndDate  = moment().format('YYYY-MM-DD')
       info('Get Purchase order  details !',req.body,req.query,req.params);
       let query ={

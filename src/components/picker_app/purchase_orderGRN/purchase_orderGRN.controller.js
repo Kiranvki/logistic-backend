@@ -201,7 +201,7 @@ class purchaseController extends BaseController {
          poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate}]
         await poCtrl.modifyPo({
           _id:poDetails._id,
-          poStatus :1
+          //poStatus ://to-do
         },{
           receivingStatus:fulfilmentStatus==1?1:2,
           fulfilmentStatus:fulfilmentStatus,
