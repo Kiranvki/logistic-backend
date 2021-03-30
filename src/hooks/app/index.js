@@ -44,6 +44,10 @@ module.exports = {
   getPickedItemDetail:require('./getPickedItemDetail'),
   hasOrderAlreadyInReceivingState:require('./hasOrderAlreadyInReceivingState'),
   isValidInputsForReceivedItem:require('./isValidInputsForReceivedItem'),
+  generateDelivery:require('./generateDelivery'),
+  updateSapDeliveryDetail:require('./updateSapDeliveryDetail'),
+  generateInvoice:require('./generateInvoice'),
+  updateInvoiceSAPDataToDB:require('./updateInvoiceSAPDataToDB')
 
 
 

@@ -39,6 +39,12 @@ const pickerBoyOrderMappingSchema = new Schema({
   'delivery_no':{  //SAP fields
     type:String
   },
+  'plant':{
+    type:String
+  },
+  'delivery_date':{
+    type:String
+  },
   'picking_date':{  //SAP fields
     type:String
   },
@@ -85,6 +91,10 @@ const pickerBoyOrderMappingSchema = new Schema({
     
     default: 0
   },
+  'remarks':[{
+    type:String,
+    default:'N/A'
+  }],
   'status': {
     type: Number,
     
@@ -153,6 +163,13 @@ static async updateIsItemPickedStatus(pickerBoySalesOrderMappingId,status){
 
 }
 
+static async updateDeliveryStatus(pickerBoyOrderMappingId,delivery_no,remarks){
+ 
+  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoyOrderMappingId},{$set:{'delivery_no': delivery_no,'remarks':remarks}});
+  return orderPickerBoyMappingData;
+
+}
+
 static async getOrderByPickerBoyId (pickerBoyOrderMappingId){
   let isExist = await this.count({ '_id': pickerBoyOrderMappingId });
   if(isExist){
@@ -162,6 +179,8 @@ static async getOrderByPickerBoyId (pickerBoyOrderMappingId){
   }
  return false;
 }
+
+
 
 
 static async updateFullFilmentStatus(pickerBoySalesOrderMappingId,status){

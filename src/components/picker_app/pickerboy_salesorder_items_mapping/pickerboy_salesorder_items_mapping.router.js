@@ -32,7 +32,11 @@ const {
   // getAllTheInvoicesAndRefreshAsPerThePaymentReceived, // get all invoices and refresh as per the payment received
   validateOrderItemQuantity,
   getOrderItemDetail,
-  getPickedItemDetail
+  getPickedItemDetail,
+  generateDelivery,
+  updateSapDeliveryDetail,
+  generateInvoice,
+  updateInvoiceSAPDataToDB
 } = require('../../../hooks/app');
 
 // auth 
@@ -60,9 +64,14 @@ function userRoutes() {
       ctrl.addItems // get controller 
     );
 
-    closed.route('/test').get(
-      // getPickedItemDetail,
-      ctrl.getPickedItemByPickerOrderId
+    closed.route('/generate/invoice/:pickerBoyOrderMappingId').get(
+      getPickedItemDetail,
+      generateDelivery,
+      updateSapDeliveryDetail,
+      generateInvoice,
+      updateInvoiceSAPDataToDB,
+      ctrl.generateInv
+      // ctrl.getPickedItemByPickerOrderId
       
     );
     // edit the item quantity 

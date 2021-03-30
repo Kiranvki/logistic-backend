@@ -5,7 +5,7 @@ const autoIncrement = require('mongoose-sequence')(mongoose);
 // schema
 const invoiceMaster = new Schema({
 
-  soId: {
+  soId: {  //sales_order_no
     type: Number
   },
   
@@ -14,7 +14,7 @@ const invoiceMaster = new Schema({
     ref: 'salesOrder'
   },
 
-  so_deliveryDate: {
+  so_deliveryDate: {  //sap delivery_date
     type: Date
   },
 
@@ -25,7 +25,7 @@ const invoiceMaster = new Schema({
 
   'cityId': {
     type: 'String',
-    enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
+    // enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
   },
 
   customerName: {
@@ -66,7 +66,7 @@ const invoiceMaster = new Schema({
     },
     'cityId': {
       type: 'String',
-      enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
+      // enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
     },
   },
 
@@ -89,7 +89,7 @@ const invoiceMaster = new Schema({
     },
     'cityId': {
       type: 'String',
-      enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
+      // enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
     },
   },
 
@@ -112,16 +112,16 @@ const invoiceMaster = new Schema({
     },
     'cityId': {
       type: 'String',
-      enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
+      // enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
     },
   },
 
   'invoiceDetails':
   {
-    'invoiceNo': { //invoice no
+    'invoiceNo': { //invoice_no
       type: 'String',
     },
-    'invoiceDate': {  //billing_date in sap
+    'invoiceDate': {  //billing_date in sap billing_date
       type: 'Date',
     },
     'legacyInvoiceNo': {  //not in sap
@@ -130,6 +130,49 @@ const invoiceMaster = new Schema({
     'sapID': { //invoice no
       type: 'String',
     },
+  
+    'billing_type':{ //sap field
+      type:String
+    },
+    'sales_Org': { //sap field
+      type:String
+    },
+    'distribution_channel':{ //sap field
+      type:String
+    },
+    'division': { //sap field
+      type:Number
+    },
+   
+    'customer_price_group': { //sap field
+      type:String
+    },
+    'customer_group': {  //sap field
+      type:String
+    },
+    'inco_terms': { //sap field
+      type:String
+    },
+    'payment_terms': {  //sap field
+      type:String
+    },
+    'company_code': {  //sap field
+      type:String
+    },
+    'account_assignment_group': { //sap field
+      type:String
+    },
+    'sold_to_party': {// SAP sold_to_party customer id
+      type:String
+    },
+  
+    'bill_to_party':{  //sap field
+      type:String
+    },
+    'payer':{  //sap payer
+      type:String
+    },
+
     'erpId': { //not reqwuirreed
       type: 'String',
     },
@@ -139,7 +182,7 @@ const invoiceMaster = new Schema({
     'customerPoDate': { //not in sap
       type: 'Date',
     },
-    'deliveryNo': {  //delivery_doc_no
+    'deliveryNo': {  //delivery_no
       type: 'String',
     },
     'paymentTerms': { //payment_terms
@@ -192,26 +235,26 @@ const invoiceMaster = new Schema({
       },
     }],
     */
-  'invoiceDate': {
+  'invoiceDate': {  //billing_date
     type: 'Date',
   },
 
-  'totalQuantitySupplied': {
+  'totalQuantitySupplied': {  //calculate
     type: 'Number',
   },
-  'totalQuantityDemanded': {
+  'totalQuantityDemanded': {  //calculate
     type: 'Number',
   },
-  'totalAmount': {
+  'totalAmount': {        //calculate
     type: 'Number',
   },
-  'totalTax': {
+  'totalTax': {           //calculate
     type: 'Number',
   },
-  'totalDiscount': {
+  'totalDiscount': {      //calculate
     type: 'Number',
   },
-  'totalNetValue': {
+  'totalNetValue': {     //calculate
     type: 'Number',
   },
   'isDelivered': {
@@ -221,23 +264,37 @@ const invoiceMaster = new Schema({
   'itemSupplied': [
     {
 
-      'itemId': {
-        type: 'Number'
+      'item_no':{ //sap field row number
+        type:String
       },
-      'itemName': {
+      'itemId': { //material
+        type: String
+      },
+      'item_category':{
+        type:String
+      },
+      'plant':{
+        type:String
+      },
+      'uom':{
+        type:String
+      },
+
+
+      'itemName': { //not available
         type: 'String'
       },
 
-      'salePrice': {
+      'salePrice': {  // sap mrp_amount
         type: 'Number'
       },
-      'quantity': {
+      'quantity': {  
         type: 'Number'
       },
-      'suppliedQty': {
+      'suppliedQty': { //sap  qty
         type: 'Number'
       },
-      'itemAmount': {
+      'itemAmount': {  //net_price
         type: 'Number'
       },
 
@@ -245,8 +302,28 @@ const invoiceMaster = new Schema({
         type: 'Number'
       },
 
-      'discountPercentage': {
-        type: 'Number'
+      'discountAmount': { //discount_amount
+        type: 'String'
+      },
+      'taxable_value':{  //taxable_value sap
+        type:String
+      },
+      'cgst_pr': {
+        type:String
+      },
+      'sgst_pr': {
+        type:String
+      },
+      'igst_pr':{
+        type:String
+      },
+      'ugst_pr': {
+        type:String
+      },
+
+
+      'total_amount':{ //sap total_amount
+        type:String
       },
       'freeQty': {
         type: 'Number'
@@ -302,5 +379,20 @@ invoiceMaster.index({
 
 });
 
+class invoiceMasterClass{
+  static async addInvoice(obj){
+    let isExist = this.count({'invoiceDetails.invoice_no':obj.invoice_no})
+    console.log('from db',obj)
+    let invoiceDetail =  await new this(obj).save()
+    
+    return invoiceDetail.toObject()
+    
+
+    // return await this.find({'_id':pickerBoyOrderMappingData._id}).populate('salesOrderId');
+    
+
+  }
+}
+invoiceMaster.loadClass(invoiceMasterClass)
 // exporting the entire module
 module.exports = mongoose.model('invoiceMaster', invoiceMaster);

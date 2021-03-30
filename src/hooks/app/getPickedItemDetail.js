@@ -1,6 +1,6 @@
 // controller function
 
-const pickerBoySalesOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model'); // pickerboy SO mapping ctrl
+const pickerBoySalesOrderItemMappingModel = require('../../components/picker_app/pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller'); // pickerboy SO mapping ctrl
 
 // Responses & others utils 
 const Response = require('../../responses/response');
@@ -30,22 +30,25 @@ const {
 // exporting the hooks 
 module.exports = async (req, res, next) => {
   try {
-    info('Get the item detail !');
+    info('Getting the item detail !');
 
     // get all the salesman who are not checked out 
-    let itemDetail = await pickerBoySalesOrderMappingModel.getOrderItem(req.params.pickerBoySalesOrderMappingId,req.body.itemId);
-    
+    let orderDetail = await pickerBoySalesOrderItemMappingModel.getPickedItemByPickerOrderId(req.params.pickerBoyOrderMappingId);
+    // console.log()
     // get added item detail
-    if (itemDetail.success) {
-      req.body.itemDetail = itemDetail.data;
-      // console.log('item detail',itemDetail)
-      if(parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty)===0 || (parseInt(req.body.itemDetail.quantity) - parseInt(req.body.itemDetail.suppliedQty))<req.body.quantity){
-        return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"Enter Quantity Exceed required quantity.");
-      }
+    if (orderDetail.success) {
+      req.body.orderDetail = orderDetail.data[0];
+      // console.log('item detail',orderDetail)
+   
+        return next()
+      
+    }else{
+error('Order not found.')
+      return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"Order Not Found.");
     }
 
     // move on 
-    return next();
+  
 
     // catch any runtime error 
   } catch (e) {

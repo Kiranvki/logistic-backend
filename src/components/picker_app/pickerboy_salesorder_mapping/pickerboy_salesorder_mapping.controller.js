@@ -576,7 +576,7 @@ getOrderDetails = async (req,res,next)=>{
         'shipping_point':saleOrderDetails.plant,
         'delivery_no':'N/A',
         'picking_date':moment(new Date()).format('YYYY-MM-DD'),
-      
+        'delivery_date':saleOrderDetails.req_del_date||moment(new Date()).format('YYYY-MM-DD'),
         'picking_time':moment(new Date()).format('hh:mm:ss'),
         'sales_order_no':saleOrderDetails.sales_order_no,
         'salesOrderId': saleOrderDetails._id,

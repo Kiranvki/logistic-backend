@@ -57,7 +57,7 @@ class pickerSalesOrderMappingController extends BaseController {
         'itemName': req.body.itemDetail.itemName?req.body.itemDetail.itemName:'N/A',
         
         'mrp_amount':mrp_amount,
-        
+        'uom':req.body.itemDetail.uom,
         'discount_amount': req.body.itemDetail.discount_amount?req.body.itemDetail.discount_amount:0,
         'plant':req.body.plant,
         'cgst-pr':req.body.itemDetail.cgst_pr,
@@ -319,7 +319,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
 
       // get details 
       return Model.find({
-        pickerBoySalesOrderMappingId: mongoose.Types.ObjectId('605f6d904a28e55420b4fe5d')
+        pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoyOrderMappingId)
         }
      
 
@@ -383,6 +383,30 @@ console.log(pickerBoySalesOrderMappingId,itemId)
     }
   }
 
+
+
+  generateInv = async (req,res,next)=>{
+    try {
+      info('Invoice Generated and updated to DB !');
+      if(req.body.invDetail){
+        return  this.success(req, res, this.status.HTTP_OK, 
+          {
+            results: req.body.invDetail,
+        
+          }, this.messageTypes.InvoiceGeneratedSuccesfully);
+      }
+
+      
+    
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.InvoiceUpdateFailed);
+
+      
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
 
 
 
