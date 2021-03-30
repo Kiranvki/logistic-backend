@@ -14,6 +14,8 @@ module.exports = {
     salesOrderAddedInPackingStage: ' Sales Order added in packing step Successfully !',
     itemAddedInsalesOrderAfterScan: 'Item added in SalesOrder Details after scan Successfully !.',
     bucketItemListFetchSuccesfully: 'Bucket item Details fetched Successfully !.',
+    InvoiceGeneratedSuccesfully: 'Invoice Generated Successfully !.',
+    InvoiceUpdateFailed: 'Invoice Update Failed !.',
     unableToAddItemInsalesOrderAfterScan: 'Unable to add Item  in SalesOrder Details after scan !.',
     unableToFetchBucketItemList: 'Unable To Fetch Bucket Details !.',
     customerDetailsFetchedSuccessfully: 'Customer Details Fetched Successfully !',

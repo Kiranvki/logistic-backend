@@ -42,7 +42,7 @@ module.exports = async (req, res, next) => {
 
         }
         error('IN PICKING STATE !');
-        return Response.errors(req, res, StatusCodes.HTTP_FOUND, MessageTypes.salesOrder.pickerBoyAlreadyInPickingState,responseObj);
+        return Response.errors(req, res, StatusCodes.HTTP_FOUND, `{'message':MessageTypes.salesOrder.pickerBoyAlreadyInPickingState,'data':responseObj}`);
 
     }else{
     // move on 
