@@ -151,7 +151,8 @@ class purchaseController extends BaseController {
         fulfilmentStatus:fulfilmentStatus,
         document_date: poDetails.document_date,
         delivery_date:poDetails.delivery_date,
-        delivery_date_array:poDetails.delivery_date_array,        poAmount: poReceivingDetails.total,
+        delivery_date_array:poDetails.delivery_date_array,        
+        poAmount: poReceivingDetails.total,
         netTotal: poReceivingDetails.netValue,
         totalTaxAmount: poReceivingDetails.totalTax,
         discount: poReceivingDetails.totalDiscount,
@@ -196,9 +197,9 @@ class purchaseController extends BaseController {
         grnDetails.poVendorNumber = "NA";
         grnDetails.poVendorDate = "NA";
         if(poDetails.sapGrnNo &&poDetails.sapGrnNo.length)
-         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate})
+         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length})
          else
-         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate}]
+         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length}]
         await poCtrl.modifyPo({
           _id:poDetails._id,
           //poStatus ://to-do
