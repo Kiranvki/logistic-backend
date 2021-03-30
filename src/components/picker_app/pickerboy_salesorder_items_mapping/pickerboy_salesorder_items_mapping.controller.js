@@ -66,8 +66,8 @@ class pickerSalesOrderMappingController extends BaseController {
         'ugst_pr':req.body.itemDetail.ugst_pr,
         'pickedQuantity': quantityAdded,
         'total_amount':req.body.itemDetail.total_amount,
-        'totalQuantity':parseInt(req.body.itemDetail.order_quantity),
-        'requireQuantity':(parseInt(req.body.itemDetail.order_quantity)), //- parseInt(req.body.itemDetail.suppliedQty)),
+        'totalQuantity':parseInt(req.body.itemDetail.qty),
+        'requireQuantity':(parseInt(req.body.itemDetail.qty)), //- parseInt(req.body.itemDetail.suppliedQty)),
         'suppliedQty':  0, //req.body.itemDetail.suppliedQty, //previous supplied
         // 'taxPercentage': req.body.itemDetail.taxPercentage,
         'discountPercentage': req.body.itemDetail.discountPercentage?req.body.itemDetail.discountPercentage:0,
