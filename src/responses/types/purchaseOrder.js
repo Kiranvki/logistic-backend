@@ -2,6 +2,7 @@ module.exports = {
     grnCreated: 'Grn generated Successfully !',
     grnAlreadyGenerated: 'Grn already generated !',
     grnNotGenerated: 'Grn not generated !',
+    grnNotGeneratedinSAP: 'Error in posting GRN into the system',
     invoicesDetailsFetched: 'invoice Details Fetched Successfully !.',
     invoicesDetailsNotFound: 'invoice Details Not Fetched !',
     invoicesMappingNotFound: 'invoice mapping Not Fetched !',

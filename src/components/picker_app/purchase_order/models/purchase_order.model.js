@@ -12,10 +12,10 @@ const purchaseOrder = new Schema({
     date:{
       type: String
     },
-    sapGrnNo:{
-      type: String
-    }
-  }], 
+    sapGrnNo:{required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'purchaseorderGRN'
+  }}], 
   "company_code": {
     type: String
   }, 

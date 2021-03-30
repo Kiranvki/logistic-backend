@@ -31,7 +31,7 @@ function purchaseOrderRoutes() {
     closed.route('/purchaseOrder').get(
       [poList], // joi validation
       
-      // verifyAppToken, // verify app user token 
+      verifyAppToken, // verify app user token 
       ctrl.getPOList // post controller 
     );
 
