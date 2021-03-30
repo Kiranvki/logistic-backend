@@ -59,47 +59,47 @@ module.exports = async (req,res,next) => {
       
 
     // get the data from SAP
-    // req.body.delivery_detail = await request.post(url)
-    //   .send(obj)
-    //   .timeout({
-    //     response: 5000, // Wait 10 seconds for the server to start sending,
-    //     deadline: 5000, // but allow 1 minute for the file to finish loading.
-    //   })
-    //   .retry(1)
-    //   .then((res,body) => {
+    req.body.delivery_detail = await request.post(url)
+      .send(obj)
+      .timeout({
+        response: 5000, // Wait 10 seconds for the server to start sending,
+        deadline: 5000, // but allow 1 minute for the file to finish loading.
+      })
+      .retry(1)
+      .then((res,body) => {
         
-    //     // checking whether the user is authentic
-    //     if (res.status === 200) {
-    //       info('Document Generated Successfully !');
-    //       return {
-    //         success: true,
-    //         data: res.body.response,
-    //       };
-    //     } else {
-    //       error('Error Updating Server !');
-    //       return {
-    //         success: false,
-    //         error:'Error Updating Server !'
-    //       };
-    //     }
-    //     // catch any runtime error
-    //   }, (err) => {
-    //     error(err);
-    //     if (err.timeout) {
-    //       return {
-    //         success: false,
-    //         error: 'API timeout'
-    //       };
-    //     } else {
-    //       return {
-    //         success: false,
-    //         error: err
-    //       };
-    //     }
-    //   });
+        // checking whether the user is authentic
+        if (res.status === 200) {
+          info('Document Generated Successfully !');
+          return {
+            success: true,
+            data: res.body.response,
+          };
+        } else {
+          error('Error Updating Server !');
+          return {
+            success: false,
+            error:'Error Updating Server !'
+          };
+        }
+        // catch any runtime error
+      }, (err) => {
+        error(err);
+        if (err.timeout) {
+          return {
+            success: false,
+            error: 'API timeout'
+          };
+        } else {
+          return {
+            success: false,
+            error: err
+          };
+        }
+      });
     // 300000442
    
-    req.body.delivery_detail = {"data":{"delivery_no":"0800000469","flag":"S","remarks":["800000469  has been saved"]}}
+    // req.body.delivery_detail = {"data":{"delivery_no":"0800000469","flag":"S","remarks":["800000469  has been saved"]}}
     // catch any runtime error 
   } catch (e) {
     error(e);

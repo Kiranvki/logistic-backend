@@ -1542,7 +1542,7 @@ console.log(startOfTheDay)
       pageMeta: {
         skip: parseInt(skip),
         pageSize: pageSize,
-        total: todaysOrderData[0]['item'].length
+        total: todaysOrderData[0]['item'].length  //item
       }
     }, this.messageTypes.todoOrderFetchedSuccessfully);
   }
