@@ -156,6 +156,9 @@ class purchaseController extends BaseController {
       };
       if(remarks){
         updateData["item.$.remarks"] =remarks;
+      }else{
+        updateData["item.$.remarks"] ='';
+
       }
       var updatedPO = await Model.findOneAndUpdate(query, updateData, {
         newValue: true,
