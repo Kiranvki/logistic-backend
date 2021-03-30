@@ -50,7 +50,7 @@ class purchaseController extends BaseController {
         
         receivingStatus:{$ne:1},//to-do// check if qury working properly
         end_of_validity_period:{$gt:todaysDate},
-        delivery_date:{$lte:todaysEndDate}//to-do
+        // delivery_date:{$lte:todaysEndDate}//to-do
       }
       if(req.query.poNumber){
         query.po_number = Number(req.query.poNumber);
@@ -177,6 +177,7 @@ class purchaseController extends BaseController {
           'item.item_name':1,
           'item.quantity':1,
           'item.net_price':1,
+          'item.pending_qty':1,
           'item.mrp':1,
           "pending_qty":1,
           "received_qty":1,
@@ -184,6 +185,10 @@ class purchaseController extends BaseController {
       }}
       ]);
       // success 
+      for(let i = 0; i < poDetails[0].item.length; i++) {// adding recieved quantity in po order and gettinf fullfilment status
+        poDetails[0].item[i].quantity=(poDetails[0].item[i].pending_qty?poDetails[0].item[i].pending_qty:poDetails[0].item[i].quantity)
+      }
+
       return this.success(req, res, this.status.HTTP_OK, poDetails, this.messageTypes.poListFetched);
 
       // catch any runtime error 
