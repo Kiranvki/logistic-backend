@@ -1564,15 +1564,20 @@ console.log(startOfTheDay)
   }
 
   getOrderItem = async (pickerboySalesOrderMappingId,item_no)=>{
-  return Model.aggregate([{'$match':{'_id':mongoose.Types.ObjectId(pickerboySalesOrderMappingId)}},{'$lookup':
-{'from':'salesorders',
-'let':{'so_id':'$salesOrderId'},
+  return Model.aggregate([
+    {'$match':{'_id':mongoose.Types.ObjectId(pickerboySalesOrderMappingId)}},
+    {'$lookup':{
+      'from':'salesorders',
+      'let':{'so_id':'$salesOrderId'},
     'pipeline': [
-      {'$unwind': { path: '$item'} },
+      // {'$unwind': { path: '$item'} },
         { '$match': {
           
-          '$expr': { '$and': [ {$eq:[ '$$so_id','$_id']},
-          {$eq:[ '$item.item_no',item_no]} ] }
+          '$expr': { '$and': [ 
+            {$eq:['$_id','$$so_id']},
+          // {$eq:[ '$item.item_no',item_no]}
+         ] 
+        }
         }}
         
         
@@ -1580,11 +1585,14 @@ console.log(startOfTheDay)
     as:"salesOrders"
 }}
 ]).allowDiskUse(true).then((res) => {
-  
-  if (res && !_.isEmpty(res)) {
+  let plant = res[0]['salesOrders'][0]['plant'];
+  // console.log(res[0])
+  let item = res[0]['salesOrders'][0]['item'].filter(item => item['item_no'] ===item_no);
+  // console.log('item',_.isEmpty(item))
+  if (item && !_.isEmpty(item)) {
     return {
       success: true,
-      data: {'salesOrder':res[0]['salesOrders'][0]['item'],'plant':res[0]['salesOrders'][0]['plant']}
+      data: {'salesOrder':item[0],'plant':res[0]['salesOrders'][0]['plant']}
   
   
     }

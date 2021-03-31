@@ -2,6 +2,9 @@
 //const pickerBoyCtrl = require('../../components/picker_app/employee/picker_boy/picker_boy.controller');
 const invoiceMasterModel = require('../../components/picker_app/invoice_master/models/invoice_master.model');
 // Responses & others utils 
+
+const pickerBoyOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model')
+const invoicePickerBoySalesOrderMappingctrl = require('../../components/picker_app/invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller')
 const Response = require('../../responses/response');
 const _ = require('lodash');
 const StatusCodes = require('../../facades/response');
@@ -16,35 +19,106 @@ const {
 module.exports = async (req, res, next) => {
     try {
         info('Updating SAP Invoice Detail to DB !');
-
+console.log('inv upload',req.body.invoice_detail)
         let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
             deliveryDetail = req.body.delivery_detail || undefined, // getting the SAP delivery Detail
-            invoiceDetail = req.body.invoice_detail || undefined,
+            invoiceDetail = req.body.invoice_detail['data'][0] || undefined,
             OrderData = req.body.orderDetail,
            total_quantity = 0,
             total_quantity_demanded = 0,
            total_amount = 0,
            total_tax = 0,
           total_discount = 0,
-            total_net_value = 0,
-         
-            
-           total_weight = 0;
-            
+          total_net_value = 0,
+          total_weight = 0;
+        
+        const invoiceItemSuppliedArr = []
         //    console.log('delivery',deliveryDetail,'invoiceDetail',invoiceDetail,'OrderData',OrderData)
+        invoiceDetail['item'].forEach((data)=>{
+          total_quantity = total_weight = total_quantity_demanded += data['qty'];
+          total_amount += data['total_amount'];
+          total_tax += data['taxable_value'];
+          total_discount += data['discount_amount'];
+          total_net_value += data['total_amount'];
+
+          invoiceItemSuppliedArr.push({
+      
+              'item_no':data['item_no'],
+              'itemId':data['material'],  //material
+              
+              'item_category':data['item_category'],
+              
+              'plant':data['plant'],
             
+              'uom':data['uom'],
+            
+        
+        
+              'itemName': 'N/A', //not available
+          
+        
+              'salePrice':data['mrp_amount'],   // sap mrp_amount
+        
+              'quantity': data['qty'],  
+        
+              'suppliedQty':data['qty'],  //sap  qty
+        
+              'itemAmount':data['net_price'],   //net_price
+          
+        
+              'taxPercentage': 0,
+        
+        
+              'discountAmount':data['discount_amount'],  //discount_amount
+        
+              'taxable_value':data['taxable_value'],  //taxable_value sap
+        
+              'cgst_pr': data['cgst_pr'],
+          
+              'sgst_pr': data['sgst_pr'],
+        
+              'igst_pr':data['igst_pr'],
+          
+              'ugst_pr': data['ugst_pr'],
+        
+        
+        
+              'total_amount':data['total_amount'], //sap total_amount
+          
+              'freeQty': 0,
+              
+              'discountForSingleItem': data['mrp_amount'] - data['discount_amount'],
+            
+        
+            
+          
+              'amountAfterTaxForSingle': 0,
+          
+              'taxValueForSingleItem': 0,
+      
+              'netValueForSingleItem': 0,
+        
+              'weightInKg': 1,
+            
+              'totalSuppliedQuantity': data['qty'],
+            
+              'requiredQuantity': data['qty']
+            
+            })
+        })  
+
             let invoiceObj = {
              'soId': OrderData['pickerBoySalesOrderMappingId']['sales_order_no'],
             //  OrderData['pickerBoySalesOrderMappingId']['delivery_date']
-              
-              'so_db_id': deliveryDetail['salesOrderId'],
+            
+              'so_db_id': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
             
               so_deliveryDate: OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
               'shipping_point':OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
            
-            
+              
               'cityId': OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
-              customerName: 'N/A',
+              'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
             
               'companyDetails':
               {
@@ -108,7 +182,7 @@ module.exports = async (req, res, next) => {
              
                 'sapID': invoiceDetail['invoice_no'], //invoice no
          
-              
+                
                 'billing_type':invoiceDetail['billing_type'], //sap field
         
                 'sales_Org': invoiceDetail['sales_Org'], //sap field
@@ -159,82 +233,12 @@ module.exports = async (req, res, next) => {
               'totalDiscount': total_discount,
               'totalNetValue': total_net_value,
               
-              'itemSupplied': [
-               
-              ],
+              'itemSupplied': invoiceItemSuppliedArr,
               
               'totalWeight': total_weight
             
             }
-            invoiceDetail['item'].forEach((data)=>{
-                invoiceObj['itemSupplied'].push(
-                    {
             
-                        'item_no':data['item_no'],
-                        'itemId':data['material'],  //material
-                         
-                        'item_category':data['item_category'],
-                         
-                        'plant':data['plant'],
-                      
-                        'uom':data['uom'],
-                      
-                  
-                  
-                        'itemName': 'N/A', //not available
-                     
-                  
-                        'salePrice':data['mrp_amount'],   // sap mrp_amount
-                   
-                        'quantity': data['qty'],  
-                   
-                        'suppliedQty':data['qty'],  //sap  qty
-                   
-                        'itemAmount':data['total_amount'],   //net_price
-                     
-                  
-                        'taxPercentage': 0,
-                   
-                  
-                        'discountAmount':data['discount_amount'],  //discount_amount
-                   
-                        'taxable_value':data['taxable_value'],  //taxable_value sap
-                   
-                        'cgst_pr': data['cgst_pr'],
-                     
-                        'sgst_pr': data['sgst_pr'],
-                  
-                        'igst_pr':data['igst_pr'],
-                     
-                        'ugst_pr': data['ugst_pr'],
-                  
-                  
-                  
-                        'total_amount':data['total_amount'], //sap total_amount
-                     
-                        'freeQty': 0,
-                        
-                        'discountForSingleItem': data['mrp_amount'] - data['discount_amount'],
-                      
-                  
-                      
-                    
-                        'amountAfterTaxForSingle': 0,
-                     
-                        'taxValueForSingleItem': 0,
-                 
-                        'netValueForSingleItem': 0,
-                   
-                        'weightInKg': 1,
-                       
-                        'totalSuppliedQuantity': data['qty'],
-                      
-                        'requiredQuantity': data['qty']
-                      
-                      }
-                )
-
-            })
 
           
             
@@ -281,6 +285,8 @@ module.exports = async (req, res, next) => {
         //     }
 
 
+        // create invoice and pickersalesorder mapping
+        
 
 
 
@@ -289,6 +295,27 @@ module.exports = async (req, res, next) => {
             info('Invoice Detail Updated Succesfully.')
             // invoice update here query
             let data = await invoiceMasterModel.addInvoice(invoiceObj)
+           
+           
+        let invoiceSalesOrderMappingObject = {
+          pickerBoyOrderMappingId,
+          invoiceId: data._id,
+          salesOrderId:deliveryDetail['salesOrderId']       //basketItemData.data[0].salesOrderId
+          // createdBy: req.user.email||'aks'
+        }
+
+
+        let UpdatePickerBoyOrderMappingInvDetail = {
+          
+          'isInvoice':true,
+          'invoiceId':data['_id'],
+            'invoiceId':invoiceDetail['invoice_no']
+          }
+          await pickerBoyOrderMappingModel.updateInvoiceDetail(pickerBoyOrderMappingId,UpdatePickerBoyOrderMappingInvDetail)
+
+        await invoicePickerBoySalesOrderMappingctrl.create(invoiceSalesOrderMappingObject);
+           
+           
             if (data && !_.isEmpty(data)) 
           req.body.invDetail = data;
             // console.log(data)
@@ -297,7 +324,7 @@ module.exports = async (req, res, next) => {
             return next();
         } else {
             error('Failed to update !');
-            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, 'Failed To update invoice.');
+            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.InvoiceUpdateFailed);
         }
 
         // catch any runtime error 

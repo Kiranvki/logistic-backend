@@ -37,6 +37,16 @@ module.exports = {
     unableToFetchedPendingSalesOrder: 'Unable to fetch Pending SalesOrder Details!',
     //pickerboy salesorder mapping id or item code is invalid
     pickerBoySalesOrderIdOrItemCodeInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id or Item Code is either deleted or deactivated !',
+    pickerBoySalesOrderInvoiceGeneratedSuccesfully:'SalesOrder Invoice Generated Succesfully!',
+    pickerBoySalesOrderInvoiceGeneratedFailed:'Failed To generate SalesOrder Invoice!',
+    pickerBoySalesOrdereDeliverySuccesfully:'Succesfully Generated Sales Order Delivery Number!',
+    pickerBoySalesOrdereDeliveryNumberFailed:'Failed To Generate Sales Order Delivery Number!',
+    pickerBoySalesOrderInvoiceGeneratedAndUpdatedSuccesfully:'SalesOrder Invoice Generated And Updated Succesfully!',
+    pickerBoySalesOrderInvoiceUploadFailed:'Failed To Upload SalesOrder Invoice!',
+    pickerBoySalesOrdereDeliveryAndUpdatedSuccesfully:'Succesfully Generated Sales Order Delivery Number And Updated!',
+    pickerBoySalesOrdereDeliveryNumberUploadFailed:'Failed To Upload Sales Order Delivery Number!',
+    pickerBoySalesOrderDeliveryNumberAlreadyGenerated: "This item already being updated.",
+    pickerBoySalesOrderFetchingInvoiceFailed:"Error Fetching Invoice!"
 
 
 };

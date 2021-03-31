@@ -47,7 +47,9 @@ module.exports = {
   generateDelivery:require('./generateDelivery'),
   updateSapDeliveryDetail:require('./updateSapDeliveryDetail'),
   generateInvoice:require('./generateInvoice'),
-  updateInvoiceSAPDataToDB:require('./updateInvoiceSAPDataToDB')
+  updateInvoiceSAPDataToDB:require('./updateInvoiceSAPDataToDB'),
+  fetchInvoice:require('./fetchInvoice'),
+ 
 
 
 

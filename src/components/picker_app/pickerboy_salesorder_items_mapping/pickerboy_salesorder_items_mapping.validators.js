@@ -31,16 +31,44 @@ const schemas = {
     },
     body: Joi.object({
       item_no: Joi.number().label('item_no').required(),
-      itemName: Joi.string().trim().label('itemName').required(),
-      salePrice: Joi.number().label('salePrice').required(),
+      // itemName: Joi.string().trim().label('itemName').required(),
+      // salePrice: Joi.number().label('salePrice').required(),
       quantity: Joi.number().label('quantity').required(),
-      suppliedQty: Joi.number().label('suppliedQty').required(),
-      itemAmount: Joi.number().label('itemAmount').required(),
-      taxPercentage: Joi.number().label('taxPercentage').required(),
-      discountPercentage: Joi.number().label('discountPercentage').required(),
-      freeQty: Joi.number().label('freeQty').required(),
+      // suppliedQty: Joi.number().label('suppliedQty').required(),
+      // itemAmount: Joi.number().label('itemAmount').required(),
+      // taxPercentage: Joi.number().label('taxPercentage').required(),
+      // discountPercentage: Joi.number().label('discountPercentage').required(),
+      // freeQty: Joi.number().label('freeQty').required(),
     }).min(1)
   }),
+
+
+    // joi picking validation
+    joiPickingValidate: Joi.object().keys({
+      params: {
+           
+           type:  Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+            language: {
+              string: {
+                regex: {
+                  base: 'should be a valid type'
+                }
+              }
+            }
+          }).required(),
+           pickerBoySalesOrderMappingId: Joi.string().trim().label('PickerBoy SalesOrder Mapping Id').required()
+      }
+  
+    }),
+
+  // generate invoice
+
+  joiGenerateInvoice: Joi.object().keys({
+    params: {
+      pickerBoyOrderMappingId: Joi.string().trim().label('PickerBoy Order Mapping Id').required(),
+    }
+  }),
+
 
 
   // joi edit item details
@@ -126,6 +154,8 @@ module.exports = {
     });
   },
 
+  
+
 
   // joi get customer other 
   joiAddItem: (req, res, next) => {
@@ -147,7 +177,50 @@ module.exports = {
       Response.joierrors(req, res, err);
     });
   },
+//joi invoice validation
+  joiInvValidate: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiInvValidate;
+    let option = options.basic;
 
+    // validating the schema 
+    schema.validate({ params: req.params }, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+
+  //joi picking validation
+  joiPickingValidate: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiPickingValidate;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate({ params: req.params }, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+  // joiGenerateInvoice
 
   // joi get customer other 
   joiEditAddedItem: (req, res, next) => {

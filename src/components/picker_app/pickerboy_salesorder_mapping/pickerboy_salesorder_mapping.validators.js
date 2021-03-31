@@ -25,6 +25,23 @@ const schemas = {
     saleOrderId: Joi.string().trim().label('SaleOrder Id').required(),
   }),
 
+  joiGetInvValidate: Joi.object().keys({
+    type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      language: {
+        string: {
+          regex: {
+            base: 'should be a valid type'
+          }
+        }
+      }
+    }).required(),
+
+    invId: Joi.string().trim().label('Inv Id').required(),
+  }),
+
+
+  
+
   // joi salesorder details
   joiSalesOrderDetails: Joi.object().keys({
     orderId: Joi.string().trim().label('Order Id').required(),
@@ -165,6 +182,28 @@ module.exports = {
       Response.joierrors(req, res, err);
     });
   },
+
+
+  joiGetInvValidate:(req,res,next)=> {
+    // getting the schemas 
+    let schema = schemas.joiGetInvValidate;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate(req.params, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
 
   // joi Scan SalesOrder
   joiScanSalesOrder: (req, res, next) => {

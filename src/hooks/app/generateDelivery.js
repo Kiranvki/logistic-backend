@@ -59,48 +59,48 @@ module.exports = async (req,res,next) => {
       
 
     // get the data from SAP
-    // req.body.delivery_detail = await request.post(url)
-    //   .send(obj)
-    //   .timeout({
-    //     response: 5000, // Wait 10 seconds for the server to start sending,
-    //     deadline: 5000, // but allow 1 minute for the file to finish loading.
-    //   })
-    //   .retry(1)
-    //   .then((res,body) => {
+    req.body.delivery_detail = await request.post(url)
+      .send(obj)
+      .timeout({
+        response: 5000, // Wait 10 seconds for the server to start sending,
+        deadline: 5000, // but allow 1 minute for the file to finish loading.
+      })
+      .retry(1)
+      .then((res,body) => {
         
-    //     // checking whether the user is authentic
-    //     if (res.status === 200) {
-    //       info('Document Generated Successfully !');
-    //       return {
-    //         success: true,
-    //         data: res.body.response,
-    //       };
-    //     } else {
-    //       error('Error Updating Server !');
-    //       return {
-    //         success: false,
-    //         error:'Error Updating Server !'
-    //       };
-    //     }
-    //     // catch any runtime error
-    //   }, (err) => {
-    //     error(err);
-    //     if (err.timeout) {
-    //       return {
-    //         success: false,
-    //         error: 'API timeout'
-    //       };
-    //     } else {
-    //       return {
-    //         success: false,
-    //         error: err
-    //       };
-    //     }
-    //   });
+        // checking whether the user is authentic
+        if (res.status === 200) {
+          info('Document Generated Successfully !');
+          return {
+            success: true,
+            data: res.body.response,
+          };
+        } else {
+          error('Error Updating Server !');
+          return {
+            success: false,
+            error:'Error Updating Server !'
+          };
+        }
+        // catch any runtime error
+      }, (err) => {
+        error(err);
+        if (err.timeout) {
+          return {
+            success: false,
+            error: 'API timeout'
+          };
+        } else {
+          return {
+            success: false,
+            error: err
+          };
+        }
+      });
     // 300000442
     //800000515
    
-    req.body.delivery_detail = {"data":{"delivery_no":"800000521","flag":"S","remarks":["800000469  has been saved"]}}
+    // req.body.delivery_detail = {"data":{"delivery_no":"800000521","flag":"S","remarks":["800000469  has been saved"]}}
     // catch any runtime error 
   } catch (e) {
     error(e);
@@ -118,7 +118,7 @@ console.log('sap',req.body.delivery_detail['success'],req.body.delivery_detail['
   }else{
 if(req.body.delivery_detail['data']['flag']==='E'){
   info('Failed to generate delivery NO.')
-return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"This item already being updated.");
+return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,MessageTypes.salesOrder.pickerBoySalesOrderDeliveryNumberAlreadyGenerated);
 }else{
     //  Message pending
     info('some error generate delivery NO.')

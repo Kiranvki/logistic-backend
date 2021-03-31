@@ -99,6 +99,7 @@ class pickerSalesOrderMappingController extends BaseController {
       if(orderDetail.length>0 && itemAdded.length>0){
         orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
         //   console.log(x)
+        orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
         itemAdded[0]['itemDetail'].forEach((y,j)=>{
             if(x.item_no ===y.item_no){
               orderDetail[0]['salesOrderId']['item'][i]=y;
@@ -164,7 +165,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       // get details 
       return Model.findOne({
         pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
-        'itemDetail.itemId': itemId,
+        'itemDetail.item_no': itemId,
         isDeleted: 0
       }).lean().then((res) => {
         console.log(res)
@@ -278,6 +279,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       
       orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
       //   console.log(x)
+      orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
       itemAdded[0]['itemDetail'].forEach((y,j)=>{
           if(x.item_no ===y.item_no){
             
@@ -323,12 +325,12 @@ console.log(pickerBoySalesOrderMappingId,itemId)
         }
      
 
-      ).populate({path:'pickerBoySalesOrderMappingId',populate:{path:'salesOrderId'},select:{
-        'salesOrderId':0,
+      ).lean().populate({path:'pickerBoySalesOrderMappingId',populate:{path:'salesOrderId'},select:{
+        
         'invoiceDetail': 0,
         'isDeleted': 0,
         'status': 0,
-        '_id': 0,
+        
         'pickerBoySalesOrderMappingId.invoiceDetail': 0,
         'pickerBoySalesOrderMappingId.isDeleted':0,
         'pickerBoySalesOrderMappingId.pickerBoyId':0,
@@ -355,9 +357,9 @@ console.log(pickerBoySalesOrderMappingId,itemId)
         // createdAt: 2021-03-27T18:20:06.706Z,
         // updatedAt: 2021-03-27T19:12:52.263Z,
       
-      }}).then((res) => {
+      }}).lean().then((res) => {
         if (res && !_.isEmpty(res)) {
-          console.log('test',res)
+          // console.log('test',res['pickerBoySalesOrderMappingId'])
           return {
             success: true,
             data: res

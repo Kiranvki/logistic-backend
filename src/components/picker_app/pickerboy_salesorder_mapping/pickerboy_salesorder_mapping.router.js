@@ -136,6 +136,7 @@ function userRoutes() {
     
 // get the invoice detail by invoice mongo id
     closed.route('/invoice/:type/:invId').get(
+      // [joiGetInvValidate]
        // joi history SO
       verifyAppToken,   // verify app token
       ctrl.getInvoiceDocumentDetail // history SO/invoice status
