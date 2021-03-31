@@ -356,7 +356,50 @@ class purchaseController extends BaseController {
         this.exceptions.internalServerErr(req, err)
       );
     }
-  };
+  }
+
+  insertPurchaseOrderData = async (sapRawData) => {
+    try{
+      if(sapRawData && sapRawData.length > 0) {
+        const poNumberArrayFromSap = sapRawData.map( el => {
+          if(el) {
+            return el.po_number
+          }
+        });
+  
+        const poDataFromDb = await Model.find({
+          'po_number':{
+            '$in':poNumberArrayFromSap
+          }
+        },{
+          "po_number":1
+        });
+  
+        
+        if(poDataFromDb.length > 0) {
+          const poNumberArrayFromdb = poDataFromDb.map( el => {
+            if(el) {
+              return el.po_number
+            }
+          });
+          const finalPOArray = sapRawData.filter((val) => {
+            return poNumberArrayFromdb.indexOf(val.po_number) == -1;
+          });
+  
+         return await Model.insertMany(finalPOArray);
+        } else {
+          return await Model.insertMany(sapRawData);
+        }
+      }
+
+    } catch(err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      };
+    }
+  } 
 }
 
 // exporting the modules

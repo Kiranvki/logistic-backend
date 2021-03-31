@@ -26,6 +26,7 @@
   "dependencies": {
     "@hapi/joi": "^16.1.8",
     "agentkeepalive": "^4.1.3",
+    "axios": "^0.21.1",
     "azure-storage": "^2.10.3",
     "babel-polyfill": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",

@@ -969,14 +969,16 @@ class MyTrip extends BaseController {
                 }, {
                   $project: {
                     'status': 1,
-                    'orderItems': 1,
                     'customerType': 1,
                     'deliveryDate': 1,
                     'customerId': 1,
                     "fulfillmentStatus": 1,
                     "location": 1,
                     "customerName": 1,
-                    "pickerBoyId": 1
+                    "pickerBoyId": 1,
+                    "sales_order_no": 1,
+                    "req_del_date": 1,
+                    "item": 1
                   }
                 }
               ],
