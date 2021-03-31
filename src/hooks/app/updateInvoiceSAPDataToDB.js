@@ -29,13 +29,84 @@ console.log('inv upload',req.body.invoice_detail)
            total_amount = 0,
            total_tax = 0,
           total_discount = 0,
-            total_net_value = 0,
-         
-            
-           total_weight = 0;
-            
+          total_net_value = 0,
+          total_weight = 0;
+        
+        const invoiceItemSuppliedArr = []
         //    console.log('delivery',deliveryDetail,'invoiceDetail',invoiceDetail,'OrderData',OrderData)
+        invoiceDetail['item'].forEach((data)=>{
+          total_quantity = total_weight = total_quantity_demanded += data['qty'];
+          total_amount += data['total_amount'];
+          total_tax += data['taxable_value'];
+          total_discount += data['discount_amount'];
+          total_net_value += data['total_amount'];
+
+          invoiceItemSuppliedArr.push({
+      
+              'item_no':data['item_no'],
+              'itemId':data['material'],  //material
+              
+              'item_category':data['item_category'],
+              
+              'plant':data['plant'],
             
+              'uom':data['uom'],
+            
+        
+        
+              'itemName': 'N/A', //not available
+          
+        
+              'salePrice':data['mrp_amount'],   // sap mrp_amount
+        
+              'quantity': data['qty'],  
+        
+              'suppliedQty':data['qty'],  //sap  qty
+        
+              'itemAmount':data['net_price'],   //net_price
+          
+        
+              'taxPercentage': 0,
+        
+        
+              'discountAmount':data['discount_amount'],  //discount_amount
+        
+              'taxable_value':data['taxable_value'],  //taxable_value sap
+        
+              'cgst_pr': data['cgst_pr'],
+          
+              'sgst_pr': data['sgst_pr'],
+        
+              'igst_pr':data['igst_pr'],
+          
+              'ugst_pr': data['ugst_pr'],
+        
+        
+        
+              'total_amount':data['total_amount'], //sap total_amount
+          
+              'freeQty': 0,
+              
+              'discountForSingleItem': data['mrp_amount'] - data['discount_amount'],
+            
+        
+            
+          
+              'amountAfterTaxForSingle': 0,
+          
+              'taxValueForSingleItem': 0,
+      
+              'netValueForSingleItem': 0,
+        
+              'weightInKg': 1,
+            
+              'totalSuppliedQuantity': data['qty'],
+            
+              'requiredQuantity': data['qty']
+            
+            })
+        })  
+
             let invoiceObj = {
              'soId': OrderData['pickerBoySalesOrderMappingId']['sales_order_no'],
             //  OrderData['pickerBoySalesOrderMappingId']['delivery_date']
@@ -162,82 +233,12 @@ console.log('inv upload',req.body.invoice_detail)
               'totalDiscount': total_discount,
               'totalNetValue': total_net_value,
               
-              'itemSupplied': [
-               
-              ],
+              'itemSupplied': invoiceItemSuppliedArr,
               
               'totalWeight': total_weight
             
             }
-            invoiceDetail['item'].forEach((data)=>{
-                invoiceObj['itemSupplied'].push(
-                    {
             
-                        'item_no':data['item_no'],
-                        'itemId':data['material'],  //material
-                         
-                        'item_category':data['item_category'],
-                         
-                        'plant':data['plant'],
-                      
-                        'uom':data['uom'],
-                      
-                  
-                  
-                        'itemName': 'N/A', //not available
-                     
-                  
-                        'salePrice':data['mrp_amount'],   // sap mrp_amount
-                   
-                        'quantity': data['qty'],  
-                   
-                        'suppliedQty':data['qty'],  //sap  qty
-                   
-                        'itemAmount':data['total_amount'],   //net_price
-                     
-                  
-                        'taxPercentage': 0,
-                   
-                  
-                        'discountAmount':data['discount_amount'],  //discount_amount
-                   
-                        'taxable_value':data['taxable_value'],  //taxable_value sap
-                   
-                        'cgst_pr': data['cgst_pr'],
-                     
-                        'sgst_pr': data['sgst_pr'],
-                  
-                        'igst_pr':data['igst_pr'],
-                     
-                        'ugst_pr': data['ugst_pr'],
-                  
-                  
-                  
-                        'total_amount':data['total_amount'], //sap total_amount
-                     
-                        'freeQty': 0,
-                        
-                        'discountForSingleItem': data['mrp_amount'] - data['discount_amount'],
-                      
-                  
-                      
-                    
-                        'amountAfterTaxForSingle': 0,
-                     
-                        'taxValueForSingleItem': 0,
-                 
-                        'netValueForSingleItem': 0,
-                   
-                        'weightInKg': 1,
-                       
-                        'totalSuppliedQuantity': data['qty'],
-                      
-                        'requiredQuantity': data['qty']
-                      
-                      }
-                )
-
-            })
 
           
             
