@@ -16,21 +16,21 @@ module.exports = async () => {
     info(`CRON FOR SYNC SALES ORDER!`);
 
     // getting the url 
-    let baseUrl = process.env.SAP_BASE_URL,
+    let baseUrl = process.env.WAYCOOL_SAP_BASE_URL,
       salesOrderGetEndPoint = process.env.SALES_ORDER_GET_ENDPOINT;
 
     let currentDate = moment().format('YYYY-MM-DD')
 
     
-    var data = JSON.stringify({
-      "request":{
-        "from_date":[],
-        "to_date":[],
-        "delivery_from_date": currentDate,
-        "delivery_to_date": currentDate,
-        "sales_org":[]
-      }
-    });
+    // var data = JSON.stringify({
+    //   "request":{
+    //     "from_date":[],
+    //     "to_date":[],
+    //     "delivery_from_date": currentDate,
+    //     "delivery_to_date": currentDate,
+    //     "sales_org":[]
+    //   }
+    // });
 
     
     const config = {
@@ -38,8 +38,7 @@ module.exports = async () => {
       url: `${baseUrl}${salesOrderGetEndPoint}`,
       headers: { 
         'Content-Type': 'application/json'
-      },
-      data : data
+      }
     };
 
     return await axios(config)

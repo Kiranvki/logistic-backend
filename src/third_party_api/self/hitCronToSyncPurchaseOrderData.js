@@ -16,7 +16,7 @@ module.exports = async () => {
     info(`CRON FOR SYNC PURCHASE ORDER!`);
 
     // getting the url 
-    let baseUrl = process.env.SAP_BASE_URL,
+    let baseUrl = process.env.WAYCOOL_SAP_BASE_URL,
     purchaseOrderGetEndPoint = process.env.PURCHASE_ORDER_END_POINT;
 
     let currentDate = moment().format('YYYY-MM-DD');
