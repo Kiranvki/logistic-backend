@@ -32,7 +32,6 @@ module.exports = async (req, res, next) => {
         const invoiceItemSuppliedArr = []
         //    console.log('delivery',deliveryDetail,'invoiceDetail',invoiceDetail,'OrderData',OrderData)
         invoiceDetail['item'].forEach((data)=>{
-          console.log('total data', data['total_amount']);
           total_quantity = total_weight = total_quantity_demanded += data['qty'];
           total_amount += data['total_amount'];
           total_tax += data['taxable_value'];
