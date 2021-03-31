@@ -99,6 +99,7 @@ class pickerSalesOrderMappingController extends BaseController {
       if(orderDetail.length>0 && itemAdded.length>0){
         orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
         //   console.log(x)
+        orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
         itemAdded[0]['itemDetail'].forEach((y,j)=>{
             if(x.item_no ===y.item_no){
               orderDetail[0]['salesOrderId']['item'][i]=y;
@@ -278,6 +279,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       
       orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
       //   console.log(x)
+      orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
       itemAdded[0]['itemDetail'].forEach((y,j)=>{
           if(x.item_no ===y.item_no){
             
