@@ -161,6 +161,6 @@ req.body.invoice_detail['success'] =true;
   }else{
     //  Message pending
     //req.body.delivery_detail['error']
-    return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, 'Error generating Invoice!');
+    return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, MessageTypes.salesOrder.pickerBoySalesOrderInvoiceGeneratedFailed);
   }
 };

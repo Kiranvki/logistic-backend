@@ -118,7 +118,7 @@ console.log('sap',req.body.delivery_detail['success'],req.body.delivery_detail['
   }else{
 if(req.body.delivery_detail['data']['flag']==='E'){
   info('Failed to generate delivery NO.')
-return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"This item already being updated.");
+return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,MessageTypes.salesOrder.pickerBoySalesOrderDeliveryNumberAlreadyGenerated);
 }else{
     //  Message pending
     info('some error generate delivery NO.')

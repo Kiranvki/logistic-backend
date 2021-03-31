@@ -33,7 +33,7 @@ module.exports = async (req, res, next) => {
             return next();
         } else {
             error('Failed to update !');
-            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, 'Failed To update delivery.');
+            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.pickerBoySalesOrdereDeliveryNumberUploadFailed);
         }
 
         // catch any runtime error 
