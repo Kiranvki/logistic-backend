@@ -17,6 +17,10 @@ const purchaseOrder = new Schema({
     },
     itemCount:{
       type:Number
+    },
+    grnId:{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'purchaseorderGRN',
     }
   }], 
   "company_code": {
@@ -74,12 +78,9 @@ const purchaseOrder = new Schema({
   "end_of_validity_period":{
       type: String
   }, 
-"referance_no":{
-  type: String
-},
-  "grnNo":{
+  "referance_no":{
     type: String
-  }, 
+  },
   "item":[
     {
     "item_no": {
