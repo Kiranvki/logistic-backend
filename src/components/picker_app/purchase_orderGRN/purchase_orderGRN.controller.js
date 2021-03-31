@@ -65,6 +65,7 @@ class purchaseController extends BaseController {
       let poDetails = await poCtrl.get(poReceivingDetails.poId);
       var dateToday = new Date();
       poDetails = poDetails.data[0];
+      var poDeliveryDate= poDetails.delivery_date;
       var vendorInvoiceNo= req.body.vendorInvoiceNumber;
       let todaysDate  = moment().set({
         h: 0,
@@ -161,7 +162,7 @@ class purchaseController extends BaseController {
         receivingStatus: fulfilmentStatus==1?1:2,
         fulfilmentStatus:fulfilmentStatus,
         document_date: poDetails.document_date,
-        delivery_date:poDetails.delivery_date,
+        delivery_date:poDeliveryDate,
         delivery_date_array:poDetails.delivery_date_array,        
         poAmount: poReceivingDetails.total,
         netTotal: poReceivingDetails.netValue,
