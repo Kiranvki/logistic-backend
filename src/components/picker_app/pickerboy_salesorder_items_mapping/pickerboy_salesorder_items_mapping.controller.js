@@ -165,7 +165,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       // get details 
       return Model.findOne({
         pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
-        'itemDetail.itemId': itemId,
+        'itemDetail.item_no': itemId,
         isDeleted: 0
       }).lean().then((res) => {
         console.log(res)
