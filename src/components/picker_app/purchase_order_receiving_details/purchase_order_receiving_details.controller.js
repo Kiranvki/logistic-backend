@@ -47,7 +47,7 @@ class purchaseController extends BaseController {
 
       let dataToInsert = {
         poId: poDetails._id,
-        pickerBoyId: req.user._id,
+        pickerBoyId: mongoose.Types.ObjectId(req.user._id),
         createdBy: req.user.email,
         receivingDate: new Date(),
         item: poDetails.item,

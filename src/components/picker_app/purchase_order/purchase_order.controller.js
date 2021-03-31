@@ -45,6 +45,8 @@ class purchaseController extends BaseController {
       let todaysEndDate = moment().format("YYYY-MM-DD");
       info("Get Purchase order  details !", req.body, req.query, req.params);
       let query = {
+        company_code:1000,
+        plant:req.user.plant_code,
         receivingStatus: { $ne: 1 }, //to-do// check if qury working properly
         end_of_validity_period: { $gt: todaysDate },
         // delivery_date:{$lte:todaysEndDate}//to-do
@@ -114,7 +116,7 @@ class purchaseController extends BaseController {
           $match: {
             $or: [
               {
-                "poReceivingId.pickerBoyId": req.user._id
+                "poReceivingId.pickerBoyId": mongoose.Types.ObjectId(req.user._id)
                 ,
               },
               { "poReceivingId.pickerBoyId": { $exists: false } },

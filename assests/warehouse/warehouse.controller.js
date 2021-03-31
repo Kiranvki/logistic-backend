@@ -296,11 +296,10 @@ class userController extends BaseController {
       info('Get Warehouse  !');
 
       // get warehouse
-    let plantDetails = await Model.findOne({_id:plant_id})
+    let plantDetails = await Model.findOne({_id:plant_id}).lean()
 
       // is inserted 
-      return this.success(req, res, this.status.HTTP_OK, plantDetails, this.messageTypes.updated);
-
+    return plantDetails;
       // catch any runtime error 
     } catch (err) {
       error(err);
