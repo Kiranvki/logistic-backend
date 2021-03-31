@@ -66,7 +66,6 @@ class purchaseController extends BaseController {
             let: {
               id: "$_id",
               poRecStatus: "$receivingStatus",
-              pickerBoyId: 1,
             },
             pipeline: [
               {
@@ -82,23 +81,12 @@ class purchaseController extends BaseController {
                   },
                 },
               },
-              {
-                $match: {
-                  $or: [
-                    {
-                      "poReceivingId.pickerBoyId": mongoose.Types.ObjectId(
-                        req.user._id
-                      ),
-                    },
-                    { "poReceivingId.pickerBoyId": { $exists: false } },
-                  ],
-                },
-              },
 
               { $limit: 1 },
               {
                 $project: {
                   _id: 1,
+                  pickerBoyId:1
                 },
               },
             ],
@@ -120,6 +108,17 @@ class purchaseController extends BaseController {
             poReceivingId: "$poDetails",
             receivingStatus: 1,
             item: 1,
+          },
+        },
+        {
+          $match: {
+            $or: [
+              {
+                "poReceivingId.pickerBoyId": req.user._id
+                ,
+              },
+              { "poReceivingId.pickerBoyId": { $exists: false } },
+            ],
           },
         },
         {
@@ -357,6 +356,94 @@ class purchaseController extends BaseController {
       );
     }
   };
+  poFilteredList =async(req,res)=>{
+    try {
+      info("Get Purchase order  filtered list !", req.body, req.query, req.params);
+
+      var page = req.query.page || 1,
+        sortingArray = {},
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
+          if (res.success) return res.data;
+          else return 10;
+        });
+      let skip = parseInt(page - 1) * pageSize;
+      sortingArray["receivingStatus"] = -1;
+      sortingArray["delivery_date"] = -1;
+      let todaysDate = moment().format("YYYY-MM-DD");
+      let todaysEndDate = moment().format("YYYY-MM-DD");
+      let query = {
+        
+      };
+      if (req.query.poNumber) {
+        query.po_number = Number(req.query.poNumber);
+      }
+      if(req.query.type=='history'){
+        req.query.receivingStatus=1
+      }else if(req.query.type=='pending'){
+        req.query.receivingStatus=2;
+        // req.query['item.quantity']={$ne:''};
+
+      }else if(req.query.type=='ongoing'){
+        req.query.receivingStatus=4
+      }
+      // get the total PO
+      let totalPO = await Model.countDocuments({
+        ...query,
+      });
+      var poList = await Model.aggregate([
+        {
+          $match: query,
+        },
+        {
+          $project: {
+            po_number: 1,
+            vendor_no: 1,
+            supplierName: 1,
+            itemCount: { $size: "$item" },
+            poReceivingId: "$poDetails",
+            receivingStatus: 1,
+            updatedAt:1,
+            item: 1,
+            sapGrnNo:1
+          },
+        },
+        {
+          $sort: sortingArray,
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: pageSize,
+        },
+      ]);
+    
+      return this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        {
+          result: poList,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalPO,
+          },
+        },
+        this.messageTypes.poListFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  }
 }
 
 // exporting the modules

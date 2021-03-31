@@ -152,6 +152,7 @@ class purchaseController extends BaseController {
       let updateData = {
         "item.$.received_qty": received_qty,
         "item.$.date_of_manufacturing": date_of_manufacturing,
+        // "item.$.is_edited":1
 
       };
       if(remarks){
@@ -237,6 +238,7 @@ class purchaseController extends BaseController {
         _id: mongoose.Types.ObjectId(poReceivingId),
         isDeleted: 0,
         'item.received_qty': {$gt:0}//to-do not workinfg properlu
+        // 'item.is_edited': 1//to-do not workinfg properlu
       };
       var bucketList = await Model.aggregate(
         [{$match:query},
@@ -315,6 +317,8 @@ class purchaseController extends BaseController {
       if(bucketList && bucketList[0] && bucketList[0].item && bucketList[0].item.length){
         let item= bucketList[0].item.filter(item=>{
           return item.received_qty>0
+
+          // return item.is_edited>0
         })
         bucketList[0].item=item;
         bucketList[0].basketTotal = bucketList[0].total+bucketList[0].totalDiscount-bucketList[0].totalTax
@@ -573,7 +577,9 @@ class purchaseController extends BaseController {
     ]);
     if(poReceivingDetails&& poReceivingDetails.length){
       let item= poReceivingDetails[0].item.filter(item=>{
-      return item.received_qty>0
+        return item.received_qty>0
+
+        // return item.is_edited>0
     })
     poReceivingDetails[0].item=item;
     poReceivingDetails[0].netValue=poReceivingDetails[0].total+ poReceivingDetails[0].totalDiscount-poReceivingDetails[0].totalTax;

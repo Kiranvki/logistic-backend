@@ -43,6 +43,9 @@ const purchaseOrderReceivingDetails = new Schema({
   },
   "item":[
     {
+      "is_edited":{
+        type: Number
+      },
       "item_no": {
         type: String
       }, 
