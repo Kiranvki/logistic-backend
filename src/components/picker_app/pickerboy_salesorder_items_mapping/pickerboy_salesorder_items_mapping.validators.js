@@ -42,6 +42,25 @@ const schemas = {
     }).min(1)
   }),
 
+
+    // joi picking validation
+    joiPickingValidate: Joi.object().keys({
+      params: {
+           
+           type:  Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+            language: {
+              string: {
+                regex: {
+                  base: 'should be a valid type'
+                }
+              }
+            }
+          }).required(),
+           pickerBoySalesOrderMappingId: Joi.string().trim().label('PickerBoy SalesOrder Mapping Id').required()
+      }
+  
+    }),
+
   // generate invoice
 
   joiGenerateInvoice: Joi.object().keys({
@@ -162,6 +181,28 @@ module.exports = {
   joiInvValidate: (req, res, next) => {
     // getting the schemas 
     let schema = schemas.joiInvValidate;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate({ params: req.params }, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+
+
+  //joi picking validation
+  joiPickingValidate: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiPickingValidate;
     let option = options.basic;
 
     // validating the schema 

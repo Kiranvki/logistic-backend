@@ -38,7 +38,7 @@ module.exports = async (req, res, next) => {
     // get added item detail
     if (orderDetail.success) {
       req.body.orderDetail = orderDetail.data[0];
-      // console.log('item detail',orderDetail)
+      // console.log('item detail',req.body.orderDetail)
    
         return next()
       

@@ -116,9 +116,9 @@ console.log('inv upload',req.body.invoice_detail)
               so_deliveryDate: OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
               'shipping_point':OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
            
-            
+              
               'cityId': OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
-              customerName: 'N/A',
+              'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
             
               'companyDetails':
               {
@@ -182,7 +182,7 @@ console.log('inv upload',req.body.invoice_detail)
              
                 'sapID': invoiceDetail['invoice_no'], //invoice no
          
-              
+                
                 'billing_type':invoiceDetail['billing_type'], //sap field
         
                 'sales_Org': invoiceDetail['sales_Org'], //sap field

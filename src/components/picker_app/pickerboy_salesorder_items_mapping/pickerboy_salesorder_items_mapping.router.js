@@ -12,6 +12,7 @@ const {
   joiTallyUpload, // joi tally upload 
   joiCustomerGet, // joi customer get 
   joiGoFrugalSync, // sync data with gofrugal 
+  joiInvValidate,
   joiCustomersList, // get the list of customers in db
 
 
@@ -37,7 +38,8 @@ const {
   updateSapDeliveryDetail,
   generateInvoice,
   fetchInvoice,
-  updateInvoiceSAPDataToDB
+  updateInvoiceSAPDataToDB,
+  
 } = require('../../../hooks/app');
 
 // auth 
@@ -67,6 +69,7 @@ function userRoutes() {
     );
 
     closed.route('/generate/invoice/:pickerBoyOrderMappingId').get(
+      // [joiInvValidate],
       getPickedItemDetail,
       generateDelivery,
       updateSapDeliveryDetail,
@@ -86,8 +89,9 @@ function userRoutes() {
     );
 
     // list the Basket item  
+    
     closed.route('/:type/picking/:pickerBoySalesOrderMappingId').get(
-     
+    //  [joiPickingValidate]
    
       verifyAppToken, // verify app token 
       ctrl.getBucketDetail // get controller 

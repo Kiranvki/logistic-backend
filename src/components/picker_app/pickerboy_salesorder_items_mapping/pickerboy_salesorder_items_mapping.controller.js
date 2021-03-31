@@ -323,7 +323,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
         }
      
 
-      ).populate({path:'pickerBoySalesOrderMappingId',populate:{path:'salesOrderId'},select:{
+      ).lean().populate({path:'pickerBoySalesOrderMappingId',populate:{path:'salesOrderId'},select:{
         
         'invoiceDetail': 0,
         'isDeleted': 0,
@@ -355,9 +355,9 @@ console.log(pickerBoySalesOrderMappingId,itemId)
         // createdAt: 2021-03-27T18:20:06.706Z,
         // updatedAt: 2021-03-27T19:12:52.263Z,
       
-      }}).then((res) => {
+      }}).lean().then((res) => {
         if (res && !_.isEmpty(res)) {
-          console.log('test',res)
+          // console.log('test',res['pickerBoySalesOrderMappingId'])
           return {
             success: true,
             data: res
