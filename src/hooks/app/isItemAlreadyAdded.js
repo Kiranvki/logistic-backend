@@ -18,12 +18,12 @@ module.exports = async (req, res, next) => {
         info('Check whether the item alread added for the saleOrderId or not');
         let objectId = mongoose.Types.ObjectId; // object id
         let pickerBoySalesOrderMappingId = req.body.pickerBoySalesOrderMappingId || req.params.pickerBoySalesOrderMappingId; // get the pickerBoySalesOrderMappingId
-        let itemId = req.body.itemId; //get the itemId
+        let item_no = req.body.item_no; //get the itemId
         // mongoose valid id 
         if (objectId.isValid(pickerBoySalesOrderMappingId)) {
 
             // check whether the sale Order id is unique or not
-            let isValidItemAdded = await pickerSalesOrderItemMappingCtrl.getAddedItemDetails(pickerBoySalesOrderMappingId, itemId)
+            let isValidItemAdded = await pickerSalesOrderItemMappingCtrl.getAddedItemDetails(pickerBoySalesOrderMappingId, item_no)
 
             // if Item added or not
             if (!isValidItemAdded.success) {

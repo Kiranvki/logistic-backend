@@ -58,10 +58,11 @@ function userRoutes() {
     // add the salesorder in the packing stage
     closed.route('/:type/add-item/:pickerBoySalesOrderMappingId').patch(
       // [joiAddItem], // joi add item
+      verifyAppToken,
       isItemAlreadyAdded, // check whether the item is already added
       getOrderItemDetail,
       // validateOrderItemQuantity,
-      verifyAppToken, // verify app token
+      // verifyAppToken, // verify app token
       ctrl.addItems // get controller 
     );
 
