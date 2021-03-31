@@ -16,10 +16,10 @@ const {
 module.exports = async (req, res, next) => {
     try {
         info('Updating SAP Invoice Detail to DB !');
-
+console.log('inv upload',req.body.invoice_detail)
         let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
             deliveryDetail = req.body.delivery_detail || undefined, // getting the SAP delivery Detail
-            invoiceDetail = req.body.invoice_detail || undefined,
+            invoiceDetail = req.body.invoice_detail['data'][0] || undefined,
             OrderData = req.body.orderDetail,
            total_quantity = 0,
             total_quantity_demanded = 0,

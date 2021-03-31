@@ -17,9 +17,9 @@ const {
 module.exports = async (req,res,next) => {
     let obj;
   try {
-    info(`Hitting the SAP for Generating Invoice !`);
-    let data = req.body.data;
-    let OrderData = req.body.delivery_detail
+    info(`Getting Invoice from SAP!`);
+    console.log(req.body.invoice_detail['data']['invoice_no'])
+
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
     let sapBaseUrl = 'http://52.172.31.130:50100/RESTAdapter/';
@@ -32,7 +32,7 @@ console.log('delivery info',req.body.delivery_detail['delivery_no'])
      obj = {
         "request": {
           
-          "invoice_no":"0900000239",
+          "invoice_no":req.body.invoice_detail['data']['invoice_no'],
           
         }
      }
@@ -144,10 +144,10 @@ console.log('delivery info',req.body.delivery_detail['delivery_no'])
     
 // }
 console.log('sap invoice',obj)
-req.body.invoice_detail['success'] =true;
+// req.body.invoice_detail['success'] =true;
 // && req.body.invoice_detail['data']['flag']==='S'
 
-  if(req.body.invoice_detail['success'] && req.body.invoice_detail['data']['flag']==='S'){
+  if(req.body.invoice_detail['success']){
     return next()
 
   }else{

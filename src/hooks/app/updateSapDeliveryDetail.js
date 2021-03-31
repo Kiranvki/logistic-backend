@@ -27,8 +27,9 @@ module.exports = async (req, res, next) => {
         console.log('success',deliveryDetail,pickerBoyOrderMappingId)
         if (deliveryDetail) {
             info('Delivery Detail Updated Succesfully.')
-            req.body.delivery_detail =  await pickerBoyOrderMappingModel.updateDeliveryStatus(pickerBoyOrderMappingId,deliveryDetail.delivery_no,deliveryDetail.remarks)
-           console.log('sucess',req.body.delivery_detail)
+            await pickerBoyOrderMappingModel.updateDeliveryStatus(pickerBoyOrderMappingId,deliveryDetail.delivery_no,deliveryDetail.remarks)
+            
+            console.log('sucess',req.body.delivery_detail)
             return next();
         } else {
             error('Failed to update !');
