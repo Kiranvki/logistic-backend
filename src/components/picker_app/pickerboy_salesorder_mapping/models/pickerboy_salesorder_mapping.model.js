@@ -111,7 +111,7 @@ const pickerBoyOrderMappingSchema = new Schema({
       default:false
 
     },
-    'invoiceId':{
+    'invoice':{
       'invoiceDbId':{
         type:mongoose.Types.ObjectId,
 
@@ -186,6 +186,18 @@ static async getOrderByPickerBoyId (pickerBoyOrderMappingId){
 static async updateFullFilmentStatus(pickerBoySalesOrderMappingId,status){
  
   let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':mongoose.Types.ObjectId(pickerBoySalesOrderMappingId)},{$set:{'state': status}});
+  return orderPickerBoyMappingData;
+
+}
+
+
+static async updateInvoiceDetail(pickerBoyOrderMappingId,invObject){
+  // 'pickerBoyOrderMappingId':pickerBoyOrderMappingId,
+  //         'isInvoice':true,
+  //         'invoiceId':data['_id'],
+  //           'invoice_no':invoiceDetail['invoice_no']
+  //         }
+  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoyOrderMappingId},{$set:{'invoiceDetail.isInvoice': invObject.isInvoice,'invoiceDetail.invoice.invoiceId':invObject.invoice_no,'invoiceDetail.invoice.invoiceDbId':invObject.invoiceId}});
   return orderPickerBoyMappingData;
 
 }

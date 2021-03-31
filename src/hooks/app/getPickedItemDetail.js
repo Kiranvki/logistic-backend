@@ -34,7 +34,7 @@ module.exports = async (req, res, next) => {
 
     // get all the salesman who are not checked out 
     let orderDetail = await pickerBoySalesOrderItemMappingModel.getPickedItemByPickerOrderId(req.params.pickerBoyOrderMappingId);
-    // console.log()
+    // console.log(orderDetail.data[0]['pickerBoySalesOrderMappingId']['salesOrderId']['_id'])
     // get added item detail
     if (orderDetail.success) {
       req.body.orderDetail = orderDetail.data[0];

@@ -2,6 +2,9 @@
 //const pickerBoyCtrl = require('../../components/picker_app/employee/picker_boy/picker_boy.controller');
 const invoiceMasterModel = require('../../components/picker_app/invoice_master/models/invoice_master.model');
 // Responses & others utils 
+
+const pickerBoyOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model')
+const invoicePickerBoySalesOrderMappingctrl = require('../../components/picker_app/invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller')
 const Response = require('../../responses/response');
 const _ = require('lodash');
 const StatusCodes = require('../../facades/response');
@@ -36,8 +39,8 @@ console.log('inv upload',req.body.invoice_detail)
             let invoiceObj = {
              'soId': OrderData['pickerBoySalesOrderMappingId']['sales_order_no'],
             //  OrderData['pickerBoySalesOrderMappingId']['delivery_date']
-              
-              'so_db_id': deliveryDetail['salesOrderId'],
+            
+              'so_db_id': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
             
               so_deliveryDate: OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
               'shipping_point':OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
@@ -281,6 +284,8 @@ console.log('inv upload',req.body.invoice_detail)
         //     }
 
 
+        // create invoice and pickersalesorder mapping
+        
 
 
 
@@ -289,6 +294,27 @@ console.log('inv upload',req.body.invoice_detail)
             info('Invoice Detail Updated Succesfully.')
             // invoice update here query
             let data = await invoiceMasterModel.addInvoice(invoiceObj)
+           
+           
+        let invoiceSalesOrderMappingObject = {
+          pickerBoyOrderMappingId,
+          invoiceId: data._id,
+          salesOrderId:deliveryDetail['salesOrderId']       //basketItemData.data[0].salesOrderId
+          // createdBy: req.user.email||'aks'
+        }
+
+
+        let UpdatePickerBoyOrderMappingInvDetail = {
+          
+          'isInvoice':true,
+          'invoiceId':data['_id'],
+            'invoiceId':invoiceDetail['invoice_no']
+          }
+          await pickerBoyOrderMappingModel.updateInvoiceDetail(pickerBoyOrderMappingId,UpdatePickerBoyOrderMappingInvDetail)
+
+        await invoicePickerBoySalesOrderMappingctrl.create(invoiceSalesOrderMappingObject);
+           
+           
             if (data && !_.isEmpty(data)) 
           req.body.invDetail = data;
             // console.log(data)
@@ -297,7 +323,7 @@ console.log('inv upload',req.body.invoice_detail)
             return next();
         } else {
             error('Failed to update !');
-            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, 'Failed To update invoice.');
+            return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.InvoiceUpdateFailed);
         }
 
         // catch any runtime error 

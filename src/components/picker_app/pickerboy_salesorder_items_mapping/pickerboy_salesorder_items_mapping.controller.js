@@ -324,11 +324,11 @@ console.log(pickerBoySalesOrderMappingId,itemId)
      
 
       ).populate({path:'pickerBoySalesOrderMappingId',populate:{path:'salesOrderId'},select:{
-        'salesOrderId':0,
+        
         'invoiceDetail': 0,
         'isDeleted': 0,
         'status': 0,
-        '_id': 0,
+        
         'pickerBoySalesOrderMappingId.invoiceDetail': 0,
         'pickerBoySalesOrderMappingId.isDeleted':0,
         'pickerBoySalesOrderMappingId.pickerBoyId':0,
