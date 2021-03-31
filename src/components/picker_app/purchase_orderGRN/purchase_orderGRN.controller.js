@@ -118,7 +118,7 @@ class purchaseController extends BaseController {
         poDetails.item[i].pending_qty=item.quantity- (item.received_qty?item.received_qty:0);
       
       }
-      var upcoming_delivery_date =req.body.upcoming_delivery_date
+      var upcoming_delivery_date =req.body.upcoming_delivery_date;//format received 'yyyy-mm-dd'
       
       if(fulfilmentStatus==2&& !upcoming_delivery_date){
           return this.errors(
@@ -134,6 +134,14 @@ class purchaseController extends BaseController {
           s: 0,
           millisecond: 0
         }).format('YYYY-MM-DD')
+        if(upcoming_delivery_date<todaysDate){
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.pastDateNotAllowedforUDD
+          );
+        }
         if(poDetails.delivery_date_array && isArray(poDetails.delivery_date_array)){
           poDetails.delivery_date_array.push(upcoming_delivery_date)
         }else{
