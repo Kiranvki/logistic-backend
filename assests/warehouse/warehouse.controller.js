@@ -1,13 +1,13 @@
-const BasicCtrl = require('../../basic_config/basic_config.controller');
+const BasicCtrl = require('../../src/components/basic_config/basic_config.controller');
 
 const mongoose = require('mongoose'); // mongoose
-const BaseController = require('../../baseController');
+const BaseController = require('../../src/components/baseController');
 const Model = require('./models/warehouse.model');
 const camelCase = require('camelcase');
 const {
   error,
   info
-} = require('../../../utils').logging;
+} = require('../../src/utils').logging;
 const _ = require('lodash');
 
 // getting the model 
@@ -284,6 +284,22 @@ class userController extends BaseController {
 
       // is inserted 
       return this.success(req, res, this.status.HTTP_OK, updatedWarehouse, this.messageTypes.updated);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+  get =async(plant_id)=>{
+    try {
+      info('Get Warehouse  !');
+
+      // get warehouse
+    let plantDetails = await Model.findOne({_id:plant_id})
+
+      // is inserted 
+      return this.success(req, res, this.status.HTTP_OK, plantDetails, this.messageTypes.updated);
 
       // catch any runtime error 
     } catch (err) {

@@ -16,7 +16,7 @@ const {
 // auth 
 const {
   verifyUserToken
-} = require('../../../hooks/Auth');
+} = require('../../src/hooks/Auth');
 
 // exporting the user routes 
 function userRoutes() {
