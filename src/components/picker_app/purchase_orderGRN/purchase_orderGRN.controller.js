@@ -65,6 +65,7 @@ class purchaseController extends BaseController {
       let poDetails = await poCtrl.get(poReceivingDetails.poId);
       var dateToday = new Date();
       poDetails = poDetails.data[0];
+      var poDeliveryDate= poDetails.delivery_date;
       var vendorInvoiceNo= req.body.vendorInvoiceNumber;
       let todaysDate  = moment().set({
         h: 0,
@@ -103,6 +104,7 @@ class purchaseController extends BaseController {
         let recievingItem= poReceivingDetails.item.filter((Ritem)=>{
           return item.material_no== Ritem.material_no
         });
+        console.log("recievingItem---------------",recievingItem,item,recievingItem,item,(item.received_qty?item.received_qty:0),"(item.received_qty?item.received_qty:0)-------")
         if(recievingItem && recievingItem[0]){
           item.received_qty = (item.received_qty?item.received_qty:0)+recievingItem[0].received_qty
 
@@ -112,10 +114,12 @@ class purchaseController extends BaseController {
         if (item.quantity != item.received_qty) {
           fulfilmentStatus=2
         }
+        console.log("recievingItem---------------",recievingItem,item,recievingItem,item,(item.received_qty?item.received_qty:0),"(item.received_qty?item.received_qty:0)-------")
+
         poDetails.item[i].pending_qty=item.quantity- (item.received_qty?item.received_qty:0);
       
       }
-      var upcoming_delivery_date =req.body.upcoming_delivery_date
+      var upcoming_delivery_date =req.body.upcoming_delivery_date;//format received 'yyyy-mm-dd'
       
       if(fulfilmentStatus==2&& !upcoming_delivery_date){
           return this.errors(
@@ -131,6 +135,14 @@ class purchaseController extends BaseController {
           s: 0,
           millisecond: 0
         }).format('YYYY-MM-DD')
+        if(upcoming_delivery_date<todaysDate){
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.pastDateNotAllowedforUDD
+          );
+        }
         if(poDetails.delivery_date_array && isArray(poDetails.delivery_date_array)){
           poDetails.delivery_date_array.push(upcoming_delivery_date)
         }else{
@@ -150,7 +162,7 @@ class purchaseController extends BaseController {
         receivingStatus: fulfilmentStatus==1?1:2,
         fulfilmentStatus:fulfilmentStatus,
         document_date: poDetails.document_date,
-        delivery_date:poDetails.delivery_date,
+        delivery_date:poDeliveryDate,
         delivery_date_array:poDetails.delivery_date_array,        
         poAmount: poReceivingDetails.total,
         netTotal: poReceivingDetails.netValue,
@@ -197,9 +209,9 @@ class purchaseController extends BaseController {
         grnDetails.poVendorNumber = "NA";
         grnDetails.poVendorDate = "NA";
         if(poDetails.sapGrnNo &&poDetails.sapGrnNo.length)
-         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length})
+         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id})
          else
-         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length}]
+         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id}]
         await poCtrl.modifyPo({
           _id:poDetails._id,
           //poStatus ://to-do

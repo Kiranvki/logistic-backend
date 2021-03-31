@@ -98,8 +98,9 @@ module.exports = async (req,res,next) => {
         }
       });
     // 300000442
+    //800000515
    
-    // req.body.delivery_detail = {"data":{"delivery_no":"0800000469","flag":"S","remarks":["800000469  has been saved"]}}
+    // req.body.delivery_detail = {"data":{"delivery_no":"800000521","flag":"S","remarks":["800000469  has been saved"]}}
     // catch any runtime error 
   } catch (e) {
     error(e);

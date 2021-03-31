@@ -17,27 +17,28 @@ const {
 module.exports = async (req,res,next) => {
     let obj;
   try {
-    info(`Hitting the SAP for Generating Invoice !`);
-    let data = req.body.data;
-    let OrderData = req.body.delivery_detail
+    info(`Getting Invoice from SAP!`);
+    console.log(req.body.invoice_detail['data']['invoice_no'])
+
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
     let sapBaseUrl = 'http://52.172.31.130:50100/RESTAdapter/';
 
     
-console.log('delivery info',req.body.delivery_detail['data']['delivery_no'])
-    let url = sapBaseUrl + 'waycool/invoice_sto_create';
+console.log('delivery info',req.body.delivery_detail['delivery_no'])
+    let url = sapBaseUrl + 'waycool/invoice_sto_get';
 
     console.log('Hitting SAP server for Generating the Invoice *> ', url);
      obj = {
         "request": {
-           "delivery_no": req.body.delivery_detail['data']['delivery_no'],
-           "reference_key": "1234"
+          
+          "invoice_no":req.body.invoice_detail['data']['invoice_no'],
+          
         }
      }
 
 
-console.log(obj)
+
       
 
     // get the data from SAP
@@ -119,7 +120,7 @@ console.log(obj)
         }
       });
 
-// //     // catch any runtime error 
+//     // catch any runtime error 
   } catch (e) {
     error(e);
     return {
@@ -142,20 +143,11 @@ console.log(obj)
 //         ]
     
 // }
-// req.body.invoice_detail = {}
-console.log('sap invoice',req.body.invoice_detail)
-req.body.invoice_detail['success'] =true;
+console.log('sap invoice',obj)
+// req.body.invoice_detail['success'] =true;
 // && req.body.invoice_detail['data']['flag']==='S'
 
-// req.body.invoice_detail['data']={
-//   invoice_no: '0900000239',
-//   reference_key: 1234,
-//   flag: 'E',
-//   remarks: [ 'G/L account 12100001 is not defined in chart of accounts 1000' ]
-// }
-
-
-  if(req.body.invoice_detail['success'] && req.body.invoice_detail['data']['invoice_no']){
+  if(req.body.invoice_detail['success']){
     return next()
 
   }else{

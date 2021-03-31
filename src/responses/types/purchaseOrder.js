@@ -29,7 +29,8 @@ module.exports = {
     receiverBoyIdInvalid:"Receiver Boy Id is Invalid",
     itemNotFound:"Item not found for this purchase order",
     invalidItemId:"Invalid Item Id",
-    upcomingDeliverDateMissing:"Upcoming Deliver Date is Missing",
+    upcomingDeliverDateMissing:"Upcoming Delivery Date is Missing",
+    pastDateNotAllowedforUDD:"For Upcoming Deliver Date past date is not allowed",
     requiredRemark:"Remarks is required as entered quantity is not equal to quantity to be received",
     alreadyHasOngoinOrder:"you already Have one Ongoing receiving Order.Please generate grn for that first.",
 

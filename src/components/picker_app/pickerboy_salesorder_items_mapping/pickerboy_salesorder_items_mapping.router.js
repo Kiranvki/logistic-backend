@@ -36,6 +36,7 @@ const {
   generateDelivery,
   updateSapDeliveryDetail,
   generateInvoice,
+  fetchInvoice,
   updateInvoiceSAPDataToDB
 } = require('../../../hooks/app');
 
@@ -69,6 +70,7 @@ function userRoutes() {
       generateDelivery,
       updateSapDeliveryDetail,
       generateInvoice,
+      fetchInvoice,
       updateInvoiceSAPDataToDB,
       ctrl.generateInv
       // ctrl.getPickedItemByPickerOrderId
