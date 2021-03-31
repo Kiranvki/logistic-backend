@@ -179,7 +179,7 @@ module.exports = {
     });
   },
 
-  joiGenerateInvoice
+  // joiGenerateInvoice
 
   // joi get customer other 
   joiEditAddedItem: (req, res, next) => {
