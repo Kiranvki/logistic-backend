@@ -103,6 +103,7 @@ class purchaseController extends BaseController {
         let recievingItem= poReceivingDetails.item.filter((Ritem)=>{
           return item.material_no== Ritem.material_no
         });
+        console.log("recievingItem---------------",recievingItem,item,recievingItem,item,(item.received_qty?item.received_qty:0),"(item.received_qty?item.received_qty:0)-------")
         if(recievingItem && recievingItem[0]){
           item.received_qty = (item.received_qty?item.received_qty:0)+recievingItem[0].received_qty
 
@@ -112,6 +113,8 @@ class purchaseController extends BaseController {
         if (item.quantity != item.received_qty) {
           fulfilmentStatus=2
         }
+        console.log("recievingItem---------------",recievingItem,item,recievingItem,item,(item.received_qty?item.received_qty:0),"(item.received_qty?item.received_qty:0)-------")
+
         poDetails.item[i].pending_qty=item.quantity- (item.received_qty?item.received_qty:0);
       
       }
@@ -197,9 +200,9 @@ class purchaseController extends BaseController {
         grnDetails.poVendorNumber = "NA";
         grnDetails.poVendorDate = "NA";
         if(poDetails.sapGrnNo &&poDetails.sapGrnNo.length)
-         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length})
+         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id})
          else
-         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length}]
+         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id}]
         await poCtrl.modifyPo({
           _id:poDetails._id,
           //poStatus ://to-do

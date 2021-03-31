@@ -202,12 +202,15 @@ class purchaseController extends BaseController {
           },
         },
       ]);
+
       // success
-      for (let i = 0; i < poDetails[0].item.length; i++) {
-        // adding recieved quantity in po order and gettinf fullfilment status
-        poDetails[0].item[i].quantity = poDetails[0].item[i].pending_qty
-          ? poDetails[0].item[i].pending_qty
-          : poDetails[0].item[i].quantity;
+      if(poDetails && poDetails[0] && poDetails[0].item){
+        for (let i = 0; i < poDetails[0].item.length; i++) {
+          // adding recieved quantity in po order and gettinf fullfilment status
+          poDetails[0].item[i].quantity = poDetails[0].item[i].pending_qty
+            ? poDetails[0].item[i].pending_qty
+            : poDetails[0].item[i].quantity;
+        }
       }
 
       return this.success(
@@ -289,12 +292,11 @@ class purchaseController extends BaseController {
             po_number: 1,
             document_date: 1,
             vendor_no: 1,
-            supplierName: 1,
-            supplierPhone: 1,
             item: 1,
-            pending_qty: 1,
-            received_qty: 1,
             delivery_date: 1,
+            sapGrnNo:1,
+            delivery_date_array:1,
+
           },
         },
       ]);
