@@ -377,7 +377,10 @@ class purchaseController extends BaseController {
         
       };
       if (req.query.poNumber) {
-        query.po_number = Number(req.query.poNumber);
+        query.po_number = {
+          $regex: req.query.poNumber,
+          $options: 'is'
+        };
       }
       if(req.query.type=='history'){
         req.query.receivingStatus=1
