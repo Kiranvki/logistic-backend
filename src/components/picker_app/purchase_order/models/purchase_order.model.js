@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 // schema
 const purchaseOrder = new Schema({
   "po_number":{
-    type: Number
+    type: String
   },
   "po_document_type": {
     type: String
