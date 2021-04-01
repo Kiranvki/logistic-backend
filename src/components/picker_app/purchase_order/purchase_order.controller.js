@@ -45,10 +45,10 @@ class purchaseController extends BaseController {
       let todaysEndDate = moment().format("YYYY-MM-DD");
       info("Get Purchase order  details !", req.body, req.query, req.params);
       let query = {
-        company_code:1000,
-        plant:req.user.plant_code,
+        company_code:"1000",
+        // plant:req.user.plant_code,//consider data type
         receivingStatus: { $ne: 1 }, //to-do// check if qury working properly
-        end_of_validity_period: { $gt: todaysDate },
+        end_of_validity_period: { $gte: todaysDate },
         // delivery_date:{$lte:todaysEndDate}//to-do
       };
       if (req.query.poNumber) {
@@ -58,9 +58,7 @@ class purchaseController extends BaseController {
         };
       }
       // get the total PO
-      let totalPO = await Model.countDocuments({
-        ...query,
-      });
+      let totalPO = await Model.countDocuments(query);
       var poList = await Model.aggregate([
         {
           $match: query,

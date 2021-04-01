@@ -48,6 +48,7 @@ module.exports = {
       'IV': '5183666c72eec9e4',
       'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
       'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
+      'grnGenerateUrl':'http://52.172.31.130:50100/RESTAdapter/waycool/goods_receipt_note_creation'
     },
     env_staging: {
       'watch': false,
@@ -93,7 +94,7 @@ module.exports = {
       'IV': '5183666c72eec9e4',
       'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
       'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
-
+      'grnGenerateUrl':'http://52.172.31.130:50100/RESTAdapter/waycool_qua/goods_receipt_note_creation'
     },
     env_production: {
       'watch': false,
