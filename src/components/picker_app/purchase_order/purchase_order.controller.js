@@ -54,7 +54,7 @@ class purchaseController extends BaseController {
       if (req.query.poNumber) {
         query.po_number = {
           $regex: req.query.poNumber,
-          $options: 'is'
+          $options: 'i'
         };
       }
       // get the total PO
