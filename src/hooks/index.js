@@ -24,4 +24,8 @@ module.exports = {
   getDetailsFromZohoUsingEmpID: require('./getDetailsFromZohoUsingEmpID'), // get the details from zoho  
   checkWhetherItsAValidEmployeeUpdate: require('./checkWhetherItsAValidEmployeeUpdate'), //check whether its A Valid Employee Update
   isEmployeeAlreadyActiveOrInactive: require('./isEmployeeAlreadyActiveOrInactive'),  // check whether the employee is already active or deactive
+  getDecryptedImageBuffer: require('./getDecryptedImageBuffer'), // get decrypted image buffer
+  checkWhetherTheFileIdIsValid: require('./checkWhetherTheFileIdIsValid'), // check whether the file id is valid or not 
+  encryptTheFileInorderToStoreItInDb: require('./encryptTheFileInorderToStoreItInDb'), // encrypt the file inorder to store the file in the db
+
 }

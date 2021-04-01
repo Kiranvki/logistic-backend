@@ -76,6 +76,16 @@ const vehicleAPIRouter = express.Router(); // Protected routes
 const tripRouter = express.Router(); // Open routes
 const tripAPIRouter = express.Router(); // Protected routes
 
+// file handler 
+const fileOpenRouter = express.Router(); // Open routes
+const fileApiRouter = express.Router(); // Protected routes
+const fileAppApiRouter = express.Router(); // Protected routes
+const fileAppOpenRouter = express.Router(); // Open routes
+
+// assests
+const assestsOpenRouter = express.Router(); // Open routes
+const assestsApiRouter = express.Router(); // Protected routes
+
 /* Fetch router files and apply them to our routers */
 glob('./src/components/picker_app/onBoard/*', null, (err, items) => {
   items.forEach(component => {
@@ -227,7 +237,38 @@ glob('./src/components/MyTrip/*', null, (err, items) => {
     );
   });
 });
+/* Fetch router files and apply them to our routers */
+glob('./src/components/file_handler/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      fileOpenRouter,
+      fileApiRouter,
+      fileAppOpenRouter,
+      fileAppApiRouter
+    );
+  });
+});
+/* Fetch router files and apply them to our routers */
+glob('./src/components/file_handler/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      fileOpenRouter,
+      fileApiRouter,
+      fileAppOpenRouter,
+      fileAppApiRouter
+    );
+  });
+});
 
+/* Fetch router files and apply them to our routers */
+glob('./src/components/assests/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      assestsOpenRouter,
+      assestsApiRouter,
+    );
+  });
+});
 
 // Picker Boy Routes
 app.use('/v1/picker', onBoardPickerOpenRouter);
@@ -285,6 +326,17 @@ app.use('/api/v1/delivery-executive', deliveryExecutiveApiRouter);
 //My Trip 
 app.use('/v1/trip', tripRouter)
 app.use('/api/v1/trip', tripAPIRouter);
+
+// file handler 
+app.use('/v1/file', fileOpenRouter);
+app.use('/api/v1/file', fileApiRouter);
+app.use('/app/api/v1/file', fileAppApiRouter);
+app.use('/app/v1/file', fileAppOpenRouter);
+
+// Assests Routes
+app.use('/v1/assests', assestsOpenRouter);
+app.use('/api/v1/assests', assestsApiRouter);
+
 
 // handle 404
 app.use(function (req, res, next) {

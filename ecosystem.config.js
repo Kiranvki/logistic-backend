@@ -44,7 +44,10 @@ module.exports = {
       'createNewAgencyForPickerAndDelivery': '/v1/agency?city=',
       'dmsCheckAgencyIdPartOne': '/v1/agency/',
       'dmsCheckAgencyIdPartTwo': '?city=',
-
+      'ENC_KEY': '5suaj62hjlfjahs623ijfk23asd23343',
+      'IV': '5183666c72eec9e4',
+      'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
+      'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
     },
     env_staging: {
       'watch': false,
@@ -86,6 +89,11 @@ module.exports = {
       'createNewAgencyForPickerAndDelivery': '/v1/agency?city =',
       'dmsCheckAgencyIdPartOne': '/v1/agency/',
       'dmsCheckAgencyIdPartTwo': '?city=',
+      'ENC_KEY': '5suaj62hjlfjahs623ijfk23asd23343',
+      'IV': '5183666c72eec9e4',
+      'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
+      'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
+
     },
     env_production: {
       'watch': false,
@@ -127,6 +135,11 @@ module.exports = {
       'createNewAgencyForPickerAndDelivery': '/v1/agency?city =',
       'dmsCheckAgencyIdPartOne': '/v1/agency/',
       'dmsCheckAgencyIdPartTwo': '?city=',
+      'ENC_KEY': '5suaj62hjlfjahs623ijfk23asd23343',
+      'IV': '5183666c72eec9e4',
+      'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
+      'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
+      
     }
   }]
 };

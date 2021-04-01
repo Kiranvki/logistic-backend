@@ -13,7 +13,11 @@ const schemas = {
     page: Joi.number().integer().min(1).label('Page').required(),
     poNumber:Joi.number().integer().label('Purchase order Number').optional(),
   }),
-
+  joiPurchaseOrderFilter: Joi.object().keys({
+    page: Joi.number().integer().min(1).label('Page').required(),
+    poNumber:Joi.number().integer().label('Purchase order Number').optional(),
+    type:Joi.string().trim().label('Type for filter ').valid('ongoing', 'pending','history')
+  }),
   // joi asm create
   joiPoIdValidation: Joi.object().keys({
     poId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Purchase order Id').required().options({
@@ -70,7 +74,25 @@ module.exports = {
       Response.joierrors(req, res, err);
     });
   },
+  joiPurchaseOrderFilter: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiPurchaseOrderFilter;
+    let option = options.basic;
 
+    // validating the schema 
+    schema.validate(req.query, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
   // joi asm create 
   poList: (req, res, next) => {
     // getting the schemas 
