@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 // schema
+// collection: purchase_order
 const purchaseOrder = new Schema({
   "po_number":{
     type: String
@@ -24,7 +25,7 @@ const purchaseOrder = new Schema({
     }
   }], 
   "company_code": {
-    type: Number
+    type: String
   }, 
   "vendor_no": {
     type: String
@@ -38,6 +39,9 @@ const purchaseOrder = new Schema({
   "plant": {
     type: String
   },
+  "shiping_plant": {
+    type: String
+  },
   "document_date": {
     type: String
   },
@@ -48,9 +52,6 @@ const purchaseOrder = new Schema({
   "status": {
     type: String
   }, 
-  "poStatus": {
-    type: Number
-  },
   "receivingStatus": {
     type: Number,
     default:0
@@ -92,9 +93,6 @@ const purchaseOrder = new Schema({
     "material_group": {
       type: String
     }, 
-    "material_group": {
-      type: String
-    },
     "storage_location": {
       type: String
     },  
@@ -151,7 +149,6 @@ const purchaseOrder = new Schema({
   {
   timestamps: true
 });
-
 
 
 purchaseOrder.index({
