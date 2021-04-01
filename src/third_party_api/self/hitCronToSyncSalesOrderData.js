@@ -1,65 +1,32 @@
 // Controller
-const axios = require('axios');
-const moment = require('moment');
-// Responses & others utils 
+const request = require('superagent');
 
-// Import Sales order coltroller
-const SOController = require('../../components/sales_order/sales_order/sales_order.controller')
+// Responses & others utils 
 const {
   error,
   info
 } = require('../../utils').logging;
 
 // exporting the hooks 
-module.exports = async () => {
+module.exports = async (reqId) => {
   try {
-    info(`CRON FOR SYNC SALES ORDER!`);
+    info(`Sync sales order from master!`);
 
     // getting the url 
-    let baseUrl = process.env.WAYCOOL_SAP_BASE_URL,
-      salesOrderGetEndPoint = process.env.SALES_ORDER_GET_ENDPOINT;
+    let baseUrl = process.env.WAYCOOL_SAP_UAT_BASE_URL,
+      salseOrderFormMasterEndpoint = process.env.SALES_ORDER_GET_ENDPOINT;
 
-    let currentDate = moment().format('YYYY-MM-DD')
-
-    
-    // var data = JSON.stringify({
-    //   "request":{
-    //     "from_date":[],
-    //     "to_date":[],
-    //     "delivery_from_date": currentDate,
-    //     "delivery_to_date": currentDate,
-    //     "sales_org":[]
-    //   }
-    // });
-
-    
-    const config = {
-      method: 'get',
-      url: `${baseUrl}${salesOrderGetEndPoint}`,
-      headers: { 
-        'Content-Type': 'application/json'
-      }
-    };
-
-    return await axios(config)
-      .then(async function (response) {
-        if(response && response.status == 200 && response.data.response.length > 0) {
-          const isSalesOrderUpdated =  await SOController.insertSalesOrderData(response.data.response);
-          if(isSalesOrderUpdated.length > 0) {
-            return { 
-              success: true, 
-              data: response.body
-            };
-          } else {
-            return { 
-              success: true, 
-              data: "No new record found!"
-            };
-          }
-        }
+    // hit the API to sync data from master to Salse order
+    return request.get(`${baseUrl}${salseOrderFormMasterEndpoint}`)
+      .timeout({
+        response: 99999, // Wait mins for the server to start sending,
+        deadline: 99999, // but allow  minute for the file to finish loading.
       })
-      .catch(function (err) {
-        console.log(err);
+      .retry(1)
+      .then((res) => {
+        return { success: true, data: res.text };
+        // catch any runtime error
+      }, (err) => {
         error(err);
         if (err.timeout) {
           return {
@@ -73,6 +40,7 @@ module.exports = async () => {
           };
         }
       });
+
     // catch any runtime error 
   } catch (e) {
     error(e);
