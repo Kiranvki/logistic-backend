@@ -24,7 +24,7 @@ const purchaseOrder = new Schema({
     }
   }], 
   "company_code": {
-    type: String
+    type: Number
   }, 
   "vendor_no": {
     type: String
