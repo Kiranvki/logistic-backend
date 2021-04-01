@@ -361,10 +361,17 @@ class purchaseController extends BaseController {
   insertPurchaseOrderData = async (sapRawData) => {
     try{
       if(sapRawData && sapRawData.length > 0) {
-        const poNumberArrayFromSap = sapRawData.map( el => {
+        var poNumberArrayFromSap = []
+        sapRawData=sapRawData.map( el => {
           if(el) {
-            return el.po_number
+            poNumberArrayFromSap.push(el.po_number) 
+            if(el.po_number){
+              el.po_number=el.po_number.toString();
+              el.isDeleted=0;
+              el.status=1;
+            }
           }
+          return el
         });
   
         const poDataFromDb = await Model.find({
