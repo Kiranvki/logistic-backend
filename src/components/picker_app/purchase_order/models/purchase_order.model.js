@@ -22,7 +22,10 @@ const purchaseOrder = new Schema({
     grnId:{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'purchaseorderGRN',
-    }
+    },
+    'pickerBoyId': {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'pickerBoy',}
   }], 
   "company_code": {
     type: String
@@ -30,6 +33,9 @@ const purchaseOrder = new Schema({
   "vendor_no": {
     type: String
   },  
+  "vendor_name": {
+    type: String
+  }, 
   "purchase_organisation": {
     type: String
   },
@@ -105,9 +111,9 @@ const purchaseOrder = new Schema({
     "material_no":{
       type: String
     }, 
-    "item_name":{
+    "material_description":{
       type: String
-    }, 
+    },
     "quantity": {
       type: Number
     }, 

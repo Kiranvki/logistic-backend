@@ -56,11 +56,11 @@ function purchaseOrderRoutes() {
       // verifyAppToken, // verify app user token 
       ctrl.vendorDetails // post controller 
     );
-    closed.route('/purchaseOrder/filterList').get(
+    closed.route('/purchaseOrder/filteredList/:type').get(
       [joiPurchaseOrderFilter], // joi validation
       // isInvoiceGenerated, // check whether the invoice is already generated
       // verifyAppToken, // verify app user token 
-      ctrl.vendorDetails // post controller 
+      ctrl.poFilteredList // post controller 
     );
   };
 }

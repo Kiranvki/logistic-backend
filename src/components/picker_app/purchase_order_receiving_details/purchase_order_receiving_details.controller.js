@@ -105,7 +105,7 @@ class purchaseController extends BaseController {
       };
       var poList = await Model.findOne(query).populate({
         path: "poId",
-        select: { po_number: 1, vendor_no: 1, supplierName: 1, delivery_date: 1 },
+        select: { po_number: 1, vendor_no: 1, vendor_name: 1, delivery_date: 1 },
       });
       // success
       return this.success(
@@ -431,7 +431,7 @@ class purchaseController extends BaseController {
             $project: {
               "item._id": 1,
               "item.material_no": 1,
-              "item.item_name": 1,
+              "item.material_description": 1,
               "item.quantity": 1,
               "item.net_price": 1,
               "item.mrp": 1,
