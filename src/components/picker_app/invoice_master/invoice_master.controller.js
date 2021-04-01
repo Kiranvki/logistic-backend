@@ -311,6 +311,16 @@ class invoiceMasterController extends BaseController {
           var salesOrderDetails = invoiceMappingDetails.data[0].so[0];
           var invoiceDetails = invoiceMappingDetails.data[0].invoice[0];
 
+console.log(salesOrderDetails,invoiceDetails)
+salesOrderDetails['item'].forEach((item,i)=>{
+  invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
+    if(item.item_no==invItem.item_no){
+      invoiceDetails['itemSupplied'][j].itemName=item.material_description
+    }
+
+  })
+  item['material_description']
+})
 
             let InvoiceDetailsResponse={
               invoiceId:invoiceDetails._id,
@@ -318,7 +328,7 @@ class invoiceMasterController extends BaseController {
               invoiceNo:invoiceDetails.invoiceDetails.invoiceNo,
               invoiceDate:invoiceDetails.invoiceDate,
               paymentMode:salesOrderDetails.paymentMode,
-              totalWeight:'NA',
+              // totalWeight:'NA',
               invoiceStatus:'Order Packed',
               soInvoiceNumber:salesOrderDetails.invoiceNo,
               soOrderDate:salesOrderDetails.createdAt,
@@ -330,12 +340,14 @@ class invoiceMasterController extends BaseController {
               customerPONumber:'NA',
               customerPODate:'NA',
               deliveryExecutiveName:'NA',
-              cgst:invoiceDetails.totalTax/2,
-              sgst:invoiceDetails.totalTax/2,
-              totalDiscount:invoiceDetails.totalDiscount,
-              totalAmount:invoiceDetails.totalAmount,
-              totalNetValue:invoiceDetails.totalNetValue,
-              itemsOrdered:invoiceDetails.itemSupplied,
+              // cgst:invoiceDetails.totalTax/2,
+              // sgst:invoiceDetails.totalTax/2,
+              // totalDiscount:invoiceDetails.totalDiscount,
+              // totalAmount:invoiceDetails.totalAmount,
+              // totalNetValue:invoiceDetails.totalNetValue,
+              // itemsOrdered:invoiceDetails.itemSupplied,
+              invoiceDetail:invoiceDetails
+              
               
 
             }
