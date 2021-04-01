@@ -48,6 +48,9 @@ module.exports = {
       'IV': '5183666c72eec9e4',
       'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
       'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
+      'WAYCOOL_SAP_UAT_BASE_URL':'http://uat-waycoolmaster.waycool.in/index.php/',
+      'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
+      'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
       'grnGenerateUrl':'http://52.172.31.130:50100/RESTAdapter/waycool/goods_receipt_note_creation'
     },
     env_staging: {
@@ -94,6 +97,9 @@ module.exports = {
       'IV': '5183666c72eec9e4',
       'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
       'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
+      'WAYCOOL_SAP_UAT_BASE_URL':'http://uat-waycoolmaster.waycool.in/index.php/',
+      'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
+      'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
       'grnGenerateUrl':'http://52.172.31.130:50100/RESTAdapter/waycool_qua/goods_receipt_note_creation'
     },
     env_production: {
@@ -140,8 +146,10 @@ module.exports = {
       'IV': '5183666c72eec9e4',
       'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
       'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
-      'grnGenerateUrl':'http://13.71.71.184:50100/RESTAdapter/waycool/goods_receipt_note_creation'
-
+      'grnGenerateUrl':'http://13.71.71.184:50100/RESTAdapter/waycool/goods_receipt_note_creation',
+      'WAYCOOL_SAP_UAT_BASE_URL':'http://uat-waycoolmaster.waycool.in/index.php/',
+      'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
+      'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
     }
   }]
 };

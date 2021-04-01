@@ -240,22 +240,22 @@ const invoiceMaster = new Schema({
   },
 
   'totalQuantitySupplied': {  //calculate
-    type: 'Number',
+    type: 'String',
   },
   'totalQuantityDemanded': {  //calculate
-    type: 'Number',
+    type: 'String',
   },
   'totalAmount': {        //calculate
-    type: 'Number',
+    type: 'String',
   },
   'totalTax': {           //calculate
-    type: 'Number',
+    type: 'String',
   },
   'totalDiscount': {      //calculate
-    type: 'Number',
+    type: 'String',
   },
   'totalNetValue': {     //calculate
-    type: 'Number',
+    type: 'String',
   },
   'isDelivered': {
     type: 'Number',
@@ -357,7 +357,7 @@ const invoiceMaster = new Schema({
   ],
   
   'totalWeight': {
-    type: Number
+    type: String
   },
   'seq': {
     type: Number

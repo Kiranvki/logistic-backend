@@ -182,6 +182,19 @@ static async getOrderByPickerBoyId (pickerBoyOrderMappingId){
 
 
 
+static async getOrderHistoryByPickerBoyId (pickerBoyId){
+  let isExist = await this.count({ 'pickerBoyId': pickerBoyId });
+  if(isExist){
+    // let todaysDate = moment(new Date()).format('YYYY-MM-DD');
+    let orderPickerBoyMappingData = await this.find({'pickerBoyId':pickerBoyId},{'invoiceDetail.isInvoice':true}).lean().populate('salesOrderId').lean();
+   
+    return orderPickerBoyMappingData;
+  }
+ return false;
+}
+
+
+
 
 static async updateFullFilmentStatus(pickerBoySalesOrderMappingId,status){
  
@@ -197,7 +210,7 @@ static async updateInvoiceDetail(pickerBoyOrderMappingId,invObject){
   //         'invoiceId':data['_id'],
   //           'invoice_no':invoiceDetail['invoice_no']
   //         }
-  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoyOrderMappingId},{$set:{'invoiceDetail.isInvoice': invObject.isInvoice,'invoiceDetail.invoice.invoiceId':invObject.invoice_no,'invoiceDetail.invoice.invoiceDbId':invObject.invoiceId}});
+  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoyOrderMappingId},{$set:{'invoiceDetail.isInvoice': invObject.isInvoice,'invoiceDetail.invoice.invoiceId':invObject.invoice_no,'invoiceDetail.invoice.invoiceDbId':invObject.invoiceId,'isItemPicked':false,'isStartedPicking':false,'customerName':invObject.customerName}});
   return orderPickerBoyMappingData;
 
 }

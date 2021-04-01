@@ -54,7 +54,7 @@ console.log('inv upload',req.body.invoice_detail)
             
         
         
-              'itemName': 'N/A', //not available
+              'itemName': data['material_description'], //not available
           
         
               'salePrice':data['mrp_amount'],   // sap mrp_amount
@@ -298,23 +298,26 @@ console.log('inv upload',req.body.invoice_detail)
            
            
         let invoiceSalesOrderMappingObject = {
-          pickerBoyOrderMappingId,
+          'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId,
+           'salesOrderId':OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
           invoiceId: data._id,
-          salesOrderId:deliveryDetail['salesOrderId']       //basketItemData.data[0].salesOrderId
+          // salesOrderId:deliveryDetail['salesOrderId']       //basketItemData.data[0].salesOrderId
           // createdBy: req.user.email||'aks'
         }
 
 
         let UpdatePickerBoyOrderMappingInvDetail = {
-          
+          'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
+          'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId,
+           'salesOrderId':OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
           'isInvoice':true,
           'invoiceId':data['_id'],
-            'invoiceId':invoiceDetail['invoice_no']
+            'invoice_no':invoiceDetail['invoice_no']
           }
           await pickerBoyOrderMappingModel.updateInvoiceDetail(pickerBoyOrderMappingId,UpdatePickerBoyOrderMappingInvDetail)
 
         await invoicePickerBoySalesOrderMappingctrl.create(invoiceSalesOrderMappingObject);
-           
+          
            
             if (data && !_.isEmpty(data)) 
           req.body.invDetail = data;

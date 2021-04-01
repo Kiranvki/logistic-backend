@@ -98,7 +98,7 @@ function tripsRoutes() {
 
     // List all trips
     closed.route('/getTripList').get(
-      verifyUserToken,
+      // verifyUserToken,
       ctrl.getTripAndSalseOrderListing
     )
 

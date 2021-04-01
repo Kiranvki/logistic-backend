@@ -710,9 +710,13 @@ getOrderDetails = async (req,res,next)=>{
       info('View the Order Basket !');
 
       // initializing the value
-      let totalQuantityDemanded = 0, totalQuantitySupplied = 0,
-        totalAmount = 0, totalTax = 0,
-        totalDiscount = 0, totalNetValue = 0;
+      let totalQuantityDemanded = 0, 
+        totalQuantitySupplied = 0,
+        totalAmount = 0,
+        totalCgstTax = 0,
+        totalSgstTax = 0,
+        totalDiscount = 0,
+        totalNetValue = 0;
 
 
         let page = req.query.page || 1,
@@ -818,49 +822,57 @@ getOrderDetails = async (req,res,next)=>{
 
         await salesOrderData[0].availableItemDetails[0].itemDetail.map((v, i) => {
       
-          totalQuantitySupplied = v.suppliedQty + totalQuantitySupplied
-          totalQuantityDemanded = v.quantity + totalQuantityDemanded
+          totalQuantitySupplied = v.pickedQuantity + totalQuantitySupplied
+          totalQuantityDemanded = v.requireQuantity + totalQuantityDemanded
         });
 
         //calculating the discount and tax
         for (let item of salesOrderData[0].availableItemDetails[0].itemDetail) {
           //calculating discount
 
-          let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.salePrice).toFixed(2))
-          let discountForSupliedItem = discountForSingleItem * item.suppliedQty
+          let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.mrp_amount).toFixed(2))
+          let discountForSupliedItem = discountForSingleItem * item.pickedQuantity
           totalDiscount = totalDiscount + discountForSupliedItem;
 
           //calculating selling price after discount
 
-          let amountAfterDiscountForSingle = item.salePrice - discountForSingleItem;
-          let amountAfterDiscountForSuppliedItem = amountAfterDiscountForSingle * item.suppliedQty
-          totalAmount = totalAmount + amountAfterDiscountForSuppliedItem;
+          let amountAfterDiscountForSingle = item.total_amount - discountForSingleItem;
+          // let amountAfterDiscountForSuppliedItem = amountAfterDiscountForSingle * item.pickedQuantity
+          totalAmount = totalAmount + item.total_amount;
 
           // calculating the tax amount 
 
-          let taxValueForSingleItem = parseFloat((amountAfterDiscountForSingle * item.taxPercentage / 100).toFixed(2))
-          let amountAfterTaxForSingle = amountAfterDiscountForSingle + taxValueForSingleItem;
-          let taxValueForSuppliedItem = taxValueForSingleItem * item.suppliedQty
-          totalTax = totalTax + taxValueForSuppliedItem;
+          let taxValueForSingleItemCGST = parseFloat((amountAfterDiscountForSingle * item['cgst-pr'] / 100).toFixed(2))
+          let amountAfterCgstTaxForSingle = amountAfterDiscountForSingle + taxValueForSingleItemCGST;
+          let CgstTaxValueForSuppliedItem = taxValueForSingleItemCGST * item.suppliedQty
+          totalCgstTax = totalCgstTax + CgstTaxValueForSuppliedItem;
 
-          //calculating net amount 
-          let netValueForSingleItem = amountAfterDiscountForSingle - taxValueForSingleItem;
+          // calculating the tax amount for SGST
+          let taxValueForSingleItemSGST = parseFloat((amountAfterDiscountForSingle * item['sgst_pr'] / 100).toFixed(2))
+          let amountAfterSgstTaxForSingle = amountAfterDiscountForSingle + taxValueForSingleItemSGST;
+          let SgstTaxValueForSuppliedItem = taxValueForSingleItemSGST * item.suppliedQty
+          totalSgstTax = totalSgstTax + SgstTaxValueForSuppliedItem;
+
+          // calculating net amount 
+          let netValueForSingleItem = amountAfterDiscountForSingle - taxValueForSingleItemCGST - taxValueForSingleItemSGST;
           let netValueForSuppliedItem = netValueForSingleItem * item.suppliedQty
           totalNetValue = totalNetValue + netValueForSuppliedItem;
 
           //adding all the values in item object
           item.discountForSingleItem = discountForSingleItem;
           item.amountAfterDiscountForSingle = amountAfterDiscountForSingle;
-          item.amountAfterTaxForSingle = amountAfterTaxForSingle;
-          item.taxValueForSingleItem = taxValueForSingleItem;
-          item.netValueForSingleItem = netValueForSingleItem;
+          item.amountAfterCgstTaxForSingle = amountAfterCgstTaxForSingle;
+          item.amountAfterSgstTaxForSingle = amountAfterSgstTaxForSingle;
+
+          item.netValueForSingleItem = netValueForSuppliedItem;
 
         }
 
         salesOrderData[0].totalQuantitySupplied = totalQuantitySupplied
         salesOrderData[0].totalQuantityDemanded = totalQuantityDemanded
         salesOrderData[0].totalAmount = totalAmount
-        salesOrderData[0].totalTax = totalTax
+        salesOrderData[0].totalCgstTax = totalCgstTax
+        salesOrderData[0].totalSgstTax = totalSgstTax
         salesOrderData[0].totalDiscount = totalDiscount
         salesOrderData[0].totalNetValue = totalNetValue
         return this.success(req, res, this.status.HTTP_OK,  {
@@ -1269,6 +1281,7 @@ getOrderDetails = async (req,res,next)=>{
       console.log('salesQueryDetails', salesQueryDetails);
 
       // finding the  data from the db 
+      
       let hisoryData = await SalesOrderCtrl.getHistorySalesOrder(salesQueryDetails);
       console.log(hisoryData)
       // success 
@@ -1288,6 +1301,108 @@ getOrderDetails = async (req,res,next)=>{
     } catch (err) {
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  // getOrderHistoryByPickerBoyID
+  getOrderHistoryByPickerBoyID = async (req,res,next) => {
+    try {
+      info('Get History  Order details !');
+      // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
+      let sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+
+      let searchObject = {
+        'pickerBoyId':req.user._id,
+        'invoiceDetail.isInvoice':true
+        // 'isPacked': 0,
+        // 'fulfillmentStatus': 0,
+        // 'locationId': parseInt(locationId),
+        // 'cityId': cityId,
+
+        // 'req_del_date': {
+        
+        //   '$lte': startOfTheDay
+        // }
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'customerName': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customerCode': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+        console.log(...searchObject)
+      let totalCount = await Model.aggregate([{
+        $match: 
+          searchObject
+        
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let salesOrderList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'onlineReferenceNo': 1,
+          'customerCode': 1,
+          'customerName': 1,
+          'customerType': 1,
+          'shippingId':1,
+          'cityId':1,
+          'status':1,
+          'invoiceNo': 1,
+          'req_del_date':1,
+          'salesOrderId':1,
+          'fulfillmentStatus': 1,
+          'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
+        }
+      }
+      ]).allowDiskUse(true)
+      console.log(salesOrderList)
+      return {
+        success: true,
+        data: salesOrderList,
+        total: totalCount
+      };
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+      }
     }
   }
   // get the last picker time from pickerboy

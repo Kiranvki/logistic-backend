@@ -1815,6 +1815,48 @@ return {
       }
     }
   }
+
+  insertSalesOrderData = async (sapRawData) => {
+    try{
+      if(sapRawData && sapRawData.length > 0) {
+        const soNumberArrayFromSap = sapRawData.map( el => {
+          if(el) {
+            return el.sales_order_no
+          }
+        });
+  
+        const soDataFromDb = await Model.find({
+          'sales_order_no':{
+            '$in':soNumberArrayFromSap
+          }
+        },{
+          "sales_order_no": 1
+        });
+  
+        if(soDataFromDb.length > 0) {
+          const coNumberArrayFromdb = soDataFromDb.map( el => {
+            if(el) {
+              return el.po_number
+            }
+          });
+          const finalSOArray = sapRawData.filter((val) => {
+            return coNumberArrayFromdb.indexOf(val.sales_order_no) == -1;
+          });
+  
+          return await Model.insertMany(finalSOArray);
+        } else {
+          return await Model.insertMany(sapRawData);
+        }
+      }
+
+    } catch(err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      };;
+    }
+  }
 }
 
 // exporting the modules 
