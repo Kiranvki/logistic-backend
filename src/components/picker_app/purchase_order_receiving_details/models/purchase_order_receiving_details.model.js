@@ -55,7 +55,7 @@ const purchaseOrderReceivingDetails = new Schema({
       "material_group": {
         type: String
       }, 
-      "material_group": {
+      "material_description":{
         type: String
       },
       "storage_location": {
@@ -69,10 +69,7 @@ const purchaseOrderReceivingDetails = new Schema({
       }, 
       "material_no":{
         type: String
-      }, 
-      "item_name":{
-        type: String
-      }, 
+      },
       "quantity": {
         type: Number
       }, 

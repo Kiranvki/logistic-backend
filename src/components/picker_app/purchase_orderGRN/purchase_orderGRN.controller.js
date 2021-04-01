@@ -64,6 +64,7 @@ class purchaseController extends BaseController {
     try {
       let poReceivingDetails = req.body.poReceivingDetails;
       let poDetails = await poCtrl.get(poReceivingDetails.poId);
+      let pickerBoyId= mongoose.Types.ObjectId(req.user._id)  
       var dateToday = new Date();
       poDetails = poDetails.data[0];
       var poDeliveryDate= poDetails.delivery_date;
@@ -169,13 +170,12 @@ class purchaseController extends BaseController {
         netTotal: poReceivingDetails.netValue,
         totalTaxAmount: poReceivingDetails.totalTax,
         discount: poReceivingDetails.totalDiscount,
-        generatedBy: req.user.email,
+        generatedBy:pickerBoyId,
         item: poReceivingDetails.item,
         vendorInvoiceNo:vendorInvoiceNo,
         supplierDetails: {
           vendor_no: poDetails.vendor_no,
-          supplierName: poDetails.supplierName,
-          supplierPhone: poDetails.supplierPhone,
+          vendor_name: poDetails.vendor_name,
         },
       };
       var grnDetails = await Model.create(grnData);
@@ -210,9 +210,9 @@ class purchaseController extends BaseController {
         grnDetails.poVendorNumber = "NA";
         grnDetails.poVendorDate = "NA";
         if(poDetails.sapGrnNo &&poDetails.sapGrnNo.length)
-         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id})
+         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id,pickerBoyId:pickerBoyId})
          else
-         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id}]
+         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id,pickerBoyId:pickerBoyId}]
         await poCtrl.modifyPo({
           _id:poDetails._id,
           //poStatus ://to-do

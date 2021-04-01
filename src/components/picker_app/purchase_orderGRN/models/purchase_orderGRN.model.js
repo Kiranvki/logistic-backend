@@ -50,12 +50,9 @@ const purchaseOrderGRN = new Schema({
     "vendor_no":{
       type: String
     }, 
-    "supplierName":{
+    "vendor_name": {
       type: String
-    },
-    "supplierPhone":{
-      type: Date
-    },
+    }
   },
    "delivery_date":{
     type: String
@@ -94,7 +91,7 @@ const purchaseOrderGRN = new Schema({
     type: Number
   },
   "generatedBy": {
-    type: String
+    type: mongoose.Schema.Types.ObjectId,
   },
   "isDeleted":{
     type: Number,
@@ -106,9 +103,6 @@ const purchaseOrderGRN = new Schema({
         type: String
       }, 
       "plant": {
-        type: String
-      }, 
-      "material_group": {
         type: String
       }, 
       "material_group": {
@@ -126,7 +120,7 @@ const purchaseOrderGRN = new Schema({
       "material_no":{
         type: String
       }, 
-      "item_name":{
+      "material_description":{
         type: String
       }, 
       "quantity": {

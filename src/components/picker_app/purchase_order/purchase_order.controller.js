@@ -46,7 +46,7 @@ class purchaseController extends BaseController {
       info("Get Purchase order  details !", req.body, req.query, req.params);
       let query = {
         company_code:"1000",
-        // plant:req.user.plant_code,//consider data type
+        plant:req.user.plant?req.user.plant.toString():'',//consider data type
         receivingStatus: { $ne: 1 }, //to-do// check if qury working properly
         end_of_validity_period: { $gte: todaysDate },
         // delivery_date:{$lte:todaysEndDate}//to-do
@@ -106,7 +106,7 @@ class purchaseController extends BaseController {
           $project: {
             po_number: 1,
             vendor_no: 1,
-            supplierName: 1,
+            vendor_name: 1,
             itemCount: { $size: "$item" },
             poReceivingId: "$poDetails",
             receivingStatus: 1,
@@ -190,10 +190,10 @@ class purchaseController extends BaseController {
           $project: {
             po_number: 1,
             vendor_no: 1,
-            supplierName: 1,
+            vendor_name: 1,
             "item._id": 1,
             "item.material_no": 1,
-            "item.item_name": 1,
+            "item.material_description": 1,
             "item.quantity": 1,
             "item.net_price": 1,
             "item.pending_qty": 1,
@@ -328,7 +328,7 @@ class purchaseController extends BaseController {
         {
           po_number: 1,
           vendor_no: 1,
-          supplierName: 1,
+          vendor_name: 1,
           supplierPhone: 1,
         }
       ).lean();
@@ -362,7 +362,7 @@ class purchaseController extends BaseController {
   poFilteredList =async(req,res)=>{
     try {
       info("Get Purchase order  filtered list !", req.body, req.query, req.params);
-
+      let pickerBoyId=mongoose.Types.ObjectId(req.user._id)
       var page = req.query.page || 1,
         sortingArray = {},
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
@@ -383,15 +383,19 @@ class purchaseController extends BaseController {
           $options: 'is'
         };
       }
-      if(req.query.type=='history'){
-        req.query.receivingStatus=1
-      }else if(req.query.type=='pending'){
-        req.query.receivingStatus=2;
+      if(req.params.type=='history'){
+        query.receivingStatus=1
+        query['sapGrnNo.pickerBoyId'] =pickerBoyId
+      }else if(req.params.type=='pending'){
+        query.receivingStatus=2;
+        query['sapGrnNo.pickerBoyId'] =pickerBoyId
+
         // req.query['item.quantity']={$ne:''};
 
-      }else if(req.query.type=='ongoing'){
-        req.query.receivingStatus=4
+      }else if(req.params.type=='ongoing'){
+        query.receivingStatus=4
       }
+
       // get the total PO
       let totalPO = await Model.countDocuments({
         ...query,
@@ -404,7 +408,7 @@ class purchaseController extends BaseController {
           $project: {
             po_number: 1,
             vendor_no: 1,
-            supplierName: 1,
+            vendor_name: 1,
             itemCount: { $size: "$item" },
             poReceivingId: "$poDetails",
             receivingStatus: 1,
