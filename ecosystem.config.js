@@ -140,7 +140,8 @@ module.exports = {
       'IV': '5183666c72eec9e4',
       'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
       'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
-      
+      'grnGenerateUrl':'http://13.71.71.184:50100/RESTAdapter/waycool/goods_receipt_note_creation'
+
     }
   }]
 };
