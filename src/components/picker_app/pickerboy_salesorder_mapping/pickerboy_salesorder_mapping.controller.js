@@ -1269,6 +1269,7 @@ getOrderDetails = async (req,res,next)=>{
       console.log('salesQueryDetails', salesQueryDetails);
 
       // finding the  data from the db 
+      
       let hisoryData = await SalesOrderCtrl.getHistorySalesOrder(salesQueryDetails);
       console.log(hisoryData)
       // success 
@@ -1288,6 +1289,108 @@ getOrderDetails = async (req,res,next)=>{
     } catch (err) {
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  // getOrderHistoryByPickerBoyID
+  getOrderHistoryByPickerBoyID = async (req,res,next) => {
+    try {
+      info('Get History  Order details !');
+      // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
+      let sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+
+      let searchObject = {
+        'pickerBoyId':req.user._id,
+        'invoiceDetail.isInvoice':true
+        // 'isPacked': 0,
+        // 'fulfillmentStatus': 0,
+        // 'locationId': parseInt(locationId),
+        // 'cityId': cityId,
+
+        // 'req_del_date': {
+        
+        //   '$lte': startOfTheDay
+        // }
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'customerName': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customerCode': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+        console.log(...searchObject)
+      let totalCount = await Model.aggregate([{
+        $match: 
+          searchObject
+        
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let salesOrderList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'onlineReferenceNo': 1,
+          'customerCode': 1,
+          'customerName': 1,
+          'customerType': 1,
+          'shippingId':1,
+          'cityId':1,
+          'status':1,
+          'invoiceNo': 1,
+          'req_del_date':1,
+          'salesOrderId':1,
+          'fulfillmentStatus': 1,
+          'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
+        }
+      }
+      ]).allowDiskUse(true)
+      console.log(salesOrderList)
+      return {
+        success: true,
+        data: salesOrderList,
+        total: totalCount
+      };
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+      }
     }
   }
   // get the last picker time from pickerboy
