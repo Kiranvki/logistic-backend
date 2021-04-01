@@ -14,9 +14,12 @@ const schemas = {
     poNumber:Joi.number().integer().label('Purchase order Number').optional(),
   }),
   joiPurchaseOrderFilter: Joi.object().keys({
-    page: Joi.number().integer().min(1).label('Page').required(),
-    poNumber:Joi.number().integer().label('Purchase order Number').optional(),
-    type:Joi.string().trim().label('Type for filter ').valid('ongoing', 'pending','history')
+    params:{
+      type:Joi.string().trim().label('Type for filter ').valid('ongoing', 'pending','history')
+    },
+    query:{
+      page: Joi.number().integer().min(1).label('Page').required(),
+    }
   }),
   // joi asm create
   joiPoIdValidation: Joi.object().keys({
@@ -80,7 +83,7 @@ module.exports = {
     let option = options.basic;
 
     // validating the schema 
-    schema.validate(req.query, option).then(() => {
+    schema.validate({params:req.params,query:req.query}, option).then(() => {
       next();
       // if error occured
     }).catch((err) => {

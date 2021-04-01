@@ -26,7 +26,7 @@ module.exports = async (req,res,next) => {
 
     
 console.log('delivery info',req.body.delivery_detail['data']['delivery_no'])
-    let url = sapBaseUrl + 'waycool/invoice_sto_create';
+    let url = sapBaseUrl + 'waycool_qua/invoice_sto_create';
 
     console.log('Hitting SAP server for Generating the Invoice *> ', url);
      obj = {

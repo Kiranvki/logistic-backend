@@ -1395,6 +1395,7 @@ getOrderDetails = async (req,res,next)=>{
   getTodaysOrder = async(req,res,next)=>{
     let orderModel
 try{
+  console.log(req.user.plant)
     info('Getting the todays Order !!!');
     let page = req.query.page || 1,
       pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
@@ -1404,7 +1405,8 @@ try{
       locationId = 0, // locationId req.user.locationId || 
       cityId =  'N/A', // cityId req.user.cityId ||
       searchDate = req.body.searchDate || '',
-      type = req.params.type;
+      type = req.params.type,
+      plant = req.user.plant;
       // 2021-03-29
     let startOfTheDay =  moment(new Date()).format('YYYY-MM-DD');
     // moment().set({
@@ -1437,7 +1439,8 @@ console.log(startOfTheDay)
       $match:{
       'req_del_date': {
         '$eq': startOfTheDay
-      }
+      },
+      'plant':{'$eq':plant.toString()}
     }
     }];
 

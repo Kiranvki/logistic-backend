@@ -24,7 +24,7 @@ module.exports = async (req,res,next) => {
     let sapBaseUrl = 'http://52.172.31.130:50100/RESTAdapter/';
     
 
-    let url = sapBaseUrl + 'waycool/Picking_Allocation_Creation';
+    let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';
 
     console.log('Hitting SAP server for Generating the delivery Number *> ', url);
     let obj = { 'request':{
@@ -47,7 +47,7 @@ module.exports = async (req,res,next) => {
       OrderData['itemDetail'].forEach(item => {
         obj['request']['item'].push({
           'sales_order_item_no':item['item_no'],
-          'delivery_quantity':item['pickedQuantity'],
+          'delivery_quantity':(item['pickedQuantity']).toString() ,
           'uom':item['uom']
 
 
@@ -55,7 +55,7 @@ module.exports = async (req,res,next) => {
         })
       });
 
-
+console.log('OrderData',JSON.stringify(obj))
       
 
     // get the data from SAP
@@ -97,10 +97,12 @@ module.exports = async (req,res,next) => {
           };
         }
       });
+   
     // 300000442
     //800000515
+    
    
-    // req.body.delivery_detail = {"data":{"delivery_no":"800000521","flag":"S","remarks":["800000469  has been saved"]}}
+    // req.body.delivery_detail = {"data":{"delivery_no":"0800000056","flag":"S","remarks":["0800000056  has been saved"]}}
     // catch any runtime error 
   } catch (e) {
     error(e);
@@ -110,6 +112,7 @@ module.exports = async (req,res,next) => {
     };
   }
   // req.body.delivery_detail['success']
+  console.log('delivery_data',req.body.delivery_detail)
 console.log('sap',req.body.delivery_detail['success'],req.body.delivery_detail['data']['flag']==='S')
   if(true && req.body.delivery_detail['data']['flag']==='S'){
     info('Order number generating sucessfully !')

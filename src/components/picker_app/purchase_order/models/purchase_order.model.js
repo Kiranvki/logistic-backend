@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 // schema
+// collection: purchase_order
 const purchaseOrder = new Schema({
   "po_number":{
     type: String
@@ -21,7 +22,10 @@ const purchaseOrder = new Schema({
     grnId:{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'purchaseorderGRN',
-    }
+    },
+    'pickerBoyId': {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'pickerBoy',}
   }], 
   "company_code": {
     type: String
@@ -29,6 +33,9 @@ const purchaseOrder = new Schema({
   "vendor_no": {
     type: String
   },  
+  "vendor_name": {
+    type: String
+  }, 
   "purchase_organisation": {
     type: String
   },
@@ -36,6 +43,9 @@ const purchaseOrder = new Schema({
     type: String
   },
   "plant": {
+    type: String
+  },
+  "shiping_plant": {
     type: String
   },
   "document_date": {
@@ -46,7 +56,7 @@ const purchaseOrder = new Schema({
   },
  
   "status": {
-    type: Number
+    type: String
   }, 
   "receivingStatus": {
     type: Number,
@@ -89,9 +99,6 @@ const purchaseOrder = new Schema({
     "material_group": {
       type: String
     }, 
-    "material_group": {
-      type: String
-    },
     "storage_location": {
       type: String
     },  
@@ -104,9 +111,9 @@ const purchaseOrder = new Schema({
     "material_no":{
       type: String
     }, 
-    "item_name":{
+    "material_description":{
       type: String
-    }, 
+    },
     "quantity": {
       type: Number
     }, 
@@ -151,7 +158,6 @@ const purchaseOrder = new Schema({
   {
   timestamps: true
 });
-
 
 
 purchaseOrder.index({

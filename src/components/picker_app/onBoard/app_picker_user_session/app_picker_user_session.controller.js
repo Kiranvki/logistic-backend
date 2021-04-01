@@ -182,7 +182,8 @@ class pickerUserSessionController extends BaseController {
             name: pickerBoyDetails.fullName,
             profilePic: pickerBoyDetails.profilePic,
             employeeId: pickerBoyDetails.employeeId,
-            city: pickerBoyDetails.cityId
+            city: pickerBoyDetails.cityId,
+            plant:pickerBoyDetails.plant
           }
         }, this.messageTypes.userLoggedInSuccessfully);
 

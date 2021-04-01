@@ -17,7 +17,7 @@ module.exports = async (req, res, next) => {
     try {
         info('Check whether the rreceiving bos already has pending order assigned to him');
         let objectId = mongoose.Types.ObjectId; // object id
-        let receiverId = mongoose.Types.objectId(req.user._id); // get the sale order id 
+        let receiverId = mongoose.Types.ObjectId(req.user._id); // get the sale order id 
 
         // mongoose valid id 
         if (objectId.isValid(receiverId)) {
