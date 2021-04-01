@@ -18,6 +18,7 @@ const { error, info } = require("../../../utils").logging;
 const moment = require("moment");
 const { isArray } = require('lodash');
 // self apis
+const grnGenerateUrl = process.env.grnGenerateUrl || '';
 
 // padding the numbers
 const pad = (n, width, z) => {
@@ -286,7 +287,7 @@ class purchaseController extends BaseController {
       let body=this.createRequestObject(poReceivingDetails,poDetails,vendorInvoiceNo)
       let options = {
         method: 'POST',
-        uri: 'http://52.172.31.130:50100/RESTAdapter/waycool/goods_receipt_note_creation',
+        uri: grnGenerateUrl,
         headers: {
           'Content-Type': 'application/json' 
       },
