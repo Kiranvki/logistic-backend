@@ -311,7 +311,7 @@ class invoiceMasterController extends BaseController {
           var salesOrderDetails = invoiceMappingDetails.data[0].so[0];
           var invoiceDetails = invoiceMappingDetails.data[0].invoice[0];
 
-console.log(salesOrderDetails,invoiceDetails)
+console.log(salesOrderDetails.created_at,invoiceDetails)
 salesOrderDetails['item'].forEach((item,i)=>{
   invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
     if(item.item_no==invItem.item_no){
@@ -331,7 +331,7 @@ salesOrderDetails['item'].forEach((item,i)=>{
               // totalWeight:'NA',
               invoiceStatus:'Order Packed',
               soInvoiceNumber:salesOrderDetails.invoiceNo,
-              soOrderDate:salesOrderDetails.createdAt,
+              soOrderDate:salesOrderDetails.created_at,
               deliveryDate:salesOrderDetails.delivery_date,
               deliveryNumber:'NA',
               legacyInvoiceNo:'NA',
