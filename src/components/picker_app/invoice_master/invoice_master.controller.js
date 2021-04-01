@@ -321,7 +321,7 @@ class invoiceMasterController extends BaseController {
               invoiceStatus:'Order Packed',
               soInvoiceNumber:salesOrderDetails.invoiceNo,
               soOrderDate:salesOrderDetails.createdAt,
-              deliveryDate:'NA',
+              deliveryDate:salesOrderDetails.delivery_date,
               deliveryNumber:'NA',
               legacyInvoiceNo:'NA',
               sapId:'NA',

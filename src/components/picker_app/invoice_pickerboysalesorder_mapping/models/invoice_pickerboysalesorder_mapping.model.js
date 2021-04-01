@@ -17,7 +17,7 @@ const invoicePickerBoySalesOrderMapping = new Schema({
   'salesOrderId': {
     required: true,
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'invoiceMaster',
+    ref: 'salesOrder',
   },
   'createdBy': {
     type: String,

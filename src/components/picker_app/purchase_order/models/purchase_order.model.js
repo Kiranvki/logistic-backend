@@ -147,7 +147,10 @@ const purchaseOrder = new Schema({
     }, 
     "rejected_qty": {
       type: Number
-    }, 
+    },
+    "isDeleted": {
+      type: Number
+    },
 
   }
   ]
