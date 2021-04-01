@@ -314,6 +314,7 @@ class invoiceMasterController extends BaseController {
 
             let InvoiceDetailsResponse={
               invoiceId:invoiceDetails._id,
+              customerName:invoiceDetails.customerName,
               invoiceNo:invoiceDetails.invoiceDetails.invoiceNo,
               invoiceDate:invoiceDetails.invoiceDate,
               paymentMode:salesOrderDetails.paymentMode,
