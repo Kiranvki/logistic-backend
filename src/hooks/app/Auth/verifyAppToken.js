@@ -1,5 +1,5 @@
 const userSessionCtrl = require('../../../components/picker_app/onBoard/app_picker_user_session/app_picker_user_session.controller'); // user controller 
-
+const mongoose = require('mongoose');
 // Responses & others utils 
 const Response = require('../../../responses/response');
 const StatusCodes = require('../../../facades/response');
@@ -16,7 +16,7 @@ const {
 module.exports = async (req, res, next) => {
   try {
     info('Verifying the app user token');
-
+    
     // checking the token
     if (req.headers['x-access-token'] === undefined) {
       error('x-access-token header not present');

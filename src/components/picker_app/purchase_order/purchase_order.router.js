@@ -4,7 +4,8 @@ const ctrl = require('./purchase_order.controller');
 // custom joi validation
 const {
   joiPoIdValidation,
-  poList
+  poList,
+  joiPurchaseOrderFilter
 } = require('./purchase_order.validators');
 
 // hooks 
@@ -51,6 +52,12 @@ function purchaseOrderRoutes() {
     );
     closed.route('/purchaseOrder/vendorDetails/:poId').get(
       [joiPoIdValidation], // joi validation
+      // isInvoiceGenerated, // check whether the invoice is already generated
+      // verifyAppToken, // verify app user token 
+      ctrl.vendorDetails // post controller 
+    );
+    closed.route('/purchaseOrder/filterList').get(
+      [joiPurchaseOrderFilter], // joi validation
       // isInvoiceGenerated, // check whether the invoice is already generated
       // verifyAppToken, // verify app user token 
       ctrl.vendorDetails // post controller 

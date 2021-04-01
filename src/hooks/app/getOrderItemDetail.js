@@ -34,7 +34,7 @@ module.exports = async (req, res, next) => {
 
     // get all the salesman who are not checked out 
     let itemDetail = await pickerBoySalesOrderMappingCtrl.getOrderItem(req.params.pickerBoySalesOrderMappingId,req.body.item_no);
-    console.log(itemDetail)
+    console.log('item detail',itemDetail)
     // get added item detail
     if (itemDetail.success) {
       req.body.itemDetail = itemDetail.data.salesOrder
@@ -44,10 +44,13 @@ module.exports = async (req, res, next) => {
       if(parseInt(req.body.itemDetail.order_quantity) - parseInt(req.body.itemDetail.suppliedQty)===0 || (parseInt(req.body.itemDetail.order_quantity) - parseInt(req.body.itemDetail.suppliedQty))<req.body.quantity){
         return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"Enter Quantity Exceed required quantity.");
       }
+      return next();
+    }else{
+      return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"Please Check The Item No.Unable To Fetch Item Detail");
     }
 
     // move on 
-    return next();
+    
 
     // catch any runtime error 
   } catch (e) {

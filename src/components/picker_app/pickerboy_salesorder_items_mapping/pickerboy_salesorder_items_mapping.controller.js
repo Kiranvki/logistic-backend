@@ -165,7 +165,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       // get details 
       return Model.findOne({
         pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
-        'itemDetail.itemId': itemId,
+        'itemDetail.item_no': itemId,
         isDeleted: 0
       }).lean().then((res) => {
         console.log(res)
@@ -275,12 +275,14 @@ console.log(pickerBoySalesOrderMappingId,itemId)
   
      
        // changes required quadratic
-    if(itemAdded){
+    if(orderDetail){
       
       orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
       //   console.log(x)
       orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
-      itemAdded[0]['itemDetail'].forEach((y,j)=>{
+      if(itemAdded )
+      {
+        itemAdded[0]['itemDetail'].forEach((y,j)=>{
           if(x.item_no ===y.item_no){
             
             orderDetail[0]['salesOrderId']['item'][i]=y;
@@ -290,6 +292,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
            
           }
       })
+    }
     })
   }
       return this.success(req, res, this.status.HTTP_OK, 
@@ -392,10 +395,9 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       info('Invoice Generated and updated to DB !');
       if(req.body.invDetail){
         return  this.success(req, res, this.status.HTTP_OK, 
-          {
-            results: req.body.invDetail,
-        
-          }, this.messageTypes.InvoiceGeneratedSuccesfully);
+          
+           req.body.invDetail,
+         this.messageTypes.InvoiceGeneratedSuccesfully);
       }
 
       

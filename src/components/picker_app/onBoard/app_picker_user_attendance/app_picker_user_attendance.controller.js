@@ -304,14 +304,14 @@ class userController extends BaseController {
               totalTimeTaken: isAttended.attendanceLog[j].totalWorkingInMins
             })
           }
-
+          let totalWorkingForTheDayInMins=_.sumBy(attendanceLogArray, 'totalTimeTaken')
           // push into the attendance sheet
           attendanceSheet.push({
             isAttended: 1,
             date: date,
             week: moment(date, "DD-MM-YYYY").week(),
             attendanceLogArray: attendanceLogArray,
-            totalWorkingForTheDayInMins: _.sumBy(attendanceLogArray, 'totalTimeTaken')
+            totalWorkingForTheDayInMins: totalWorkingForTheDayInMins?totalWorkingForTheDayInMins:0
           })
         } else {
           let isAfter = moment(date, "DD-MM-YYYY").isAfter(new Date())
