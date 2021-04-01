@@ -52,7 +52,10 @@ class purchaseController extends BaseController {
         // delivery_date:{$lte:todaysEndDate}//to-do
       };
       if (req.query.poNumber) {
-        query.po_number = Number(req.query.poNumber);
+        query.po_number = {
+          $regex: req.query.poNumber,
+          $options: 'is'
+        };
       }
       // get the total PO
       let totalPO = await Model.countDocuments({
