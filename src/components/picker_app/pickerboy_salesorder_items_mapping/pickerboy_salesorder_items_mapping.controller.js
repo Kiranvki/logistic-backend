@@ -395,10 +395,9 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       info('Invoice Generated and updated to DB !');
       if(req.body.invDetail){
         return  this.success(req, res, this.status.HTTP_OK, 
-          {
-            results: req.body.invDetail,
-        
-          }, this.messageTypes.InvoiceGeneratedSuccesfully);
+          
+           req.body.invDetail,
+         this.messageTypes.InvoiceGeneratedSuccesfully);
       }
 
       
