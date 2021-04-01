@@ -210,7 +210,7 @@ static async updateInvoiceDetail(pickerBoyOrderMappingId,invObject){
   //         'invoiceId':data['_id'],
   //           'invoice_no':invoiceDetail['invoice_no']
   //         }
-  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoyOrderMappingId},{$set:{'invoiceDetail.isInvoice': invObject.isInvoice,'invoiceDetail.invoice.invoiceId':invObject.invoice_no,'invoiceDetail.invoice.invoiceDbId':invObject.invoiceId,'isItemPicked':false,'isStartedPicking':false}});
+  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoyOrderMappingId},{$set:{'invoiceDetail.isInvoice': invObject.isInvoice,'invoiceDetail.invoice.invoiceId':invObject.invoice_no,'invoiceDetail.invoice.invoiceDbId':invObject.invoiceId,'isItemPicked':false,'isStartedPicking':false,'customerName':invObject.customerName}});
   return orderPickerBoyMappingData;
 
 }

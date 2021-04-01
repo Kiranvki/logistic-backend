@@ -307,6 +307,7 @@ console.log('inv upload',req.body.invoice_detail)
 
 
         let UpdatePickerBoyOrderMappingInvDetail = {
+          'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
           'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId,
            'salesOrderId':OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
           'isInvoice':true,
