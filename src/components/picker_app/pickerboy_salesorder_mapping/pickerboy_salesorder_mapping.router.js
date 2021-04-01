@@ -147,7 +147,8 @@ function userRoutes() {
     closed.route('/history/:type').get(
       [joiHistoryOfSO], // joi history SO
       verifyAppToken,   // verify app token
-      ctrl.getHistoryOfSalesOrder // history SO/invoice status
+      ctrl.getOrderHistoryByPickerBoyID
+      // getHistoryOfSalesOrder // history SO/invoice status
     );
   };
 }
