@@ -46,11 +46,8 @@ const purchaseOrder = new Schema({
   },
  
   "status": {
-    type: String
-  }, 
-  "poStatus": {
     type: Number
-  },
+  }, 
   "receivingStatus": {
     type: Number,
     default:0
@@ -143,7 +140,10 @@ const purchaseOrder = new Schema({
     }, 
     "rejected_qty": {
       type: Number
-    }, 
+    },
+    "isDeleted": {
+      type: Number
+    },
 
   }
   ]
