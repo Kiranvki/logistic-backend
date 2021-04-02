@@ -113,10 +113,10 @@ console.log('inv upload',req.body.invoice_detail)
             
               'so_db_id': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
             
-              so_deliveryDate: OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
+              'so_deliveryDate': OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
               'shipping_point':OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
            
-              'deliveryNo': deliveryDetail.delivery_no,
+              'deliveryNo':req.body.delivery_detail['data']['delivery_no'],
               'cityId': OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
               'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
             
@@ -214,7 +214,7 @@ console.log('inv upload',req.body.invoice_detail)
             
              
          
-                'deliveryNo': deliveryDetail.delivery_no,
+                // 'deliveryNo': deliveryDetail.delivery_no,
           
                 'paymentTerms': invoiceDetail['payment_terms'], //payment_terms
           
