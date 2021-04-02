@@ -26,23 +26,20 @@ module.exports = async (req, res, next) => {
         if (objectId.isValid(material_no)) {
 
             // check whether the sale Order id is already added or not
-            let poReceivingItemDetails = await poReceivingController.get({
-                _id: mongoose.Types.ObjectId(poReceivingId),
-                "item._id": mongoose.Types.ObjectId(material_no),
-                receivingStatus:4
-              })
+            let poReceivingItemDetails = await poReceivingController.getReceivingItem(poReceivingId,material_no);
+           
 
             // if sales order Id is not added
             if (poReceivingItemDetails.success && poReceivingItemDetails.data&& poReceivingItemDetails.data.length) {
-                if(poReceivingItemDetails.data[0].item[0].quantity!=received_qty && !remarks){
+                if(poReceivingItemDetails.data[0].item.quantity!=received_qty && !remarks){
                     info('Remarks required');
                     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.requiredRemark);
                 }
-                if(poReceivingItemDetails.data[0].item[0].quantity <received_qty){
+                if(poReceivingItemDetails.data[0].item.quantity <received_qty){
                     info('Received quantity greter than required quantity');
                     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.purchaseOrder.receivedQuantityGreaterThanQty);
                 }
-                if(poReceivingItemDetails.data[0].item[0].quantity==received_qty){
+                if(poReceivingItemDetails.data[0].item.quantity==received_qty){
                     req.body.remarks=''
                 }
                req.body.poReceivingItemDetails = poReceivingItemDetails.data[0];

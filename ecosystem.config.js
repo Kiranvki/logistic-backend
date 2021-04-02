@@ -51,7 +51,7 @@ module.exports = {
       'WAYCOOL_SAP_UAT_BASE_URL':'http://uat-waycoolmaster.waycool.in/index.php/',
       'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
       'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
-      'grnGenerateUrl':'http://52.172.31.130:50100/RESTAdapter/waycool/goods_receipt_note_creation'
+      'grnGenerateUrl':'http://52.172.31.130:50100/RESTAdapter/waycool_qua/goods_receipt_note_creation'
     },
     env_staging: {
       'watch': false,
@@ -147,9 +147,10 @@ module.exports = {
       'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
       'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
       'grnGenerateUrl':'http://13.71.71.184:50100/RESTAdapter/waycool/goods_receipt_note_creation',
-      'WAYCOOL_SAP_UAT_BASE_URL':'http://uat-waycoolmaster.waycool.in/index.php/',
+      'WAYCOOL_SAP_UAT_BASE_URL':'http://api-waycoolmaster.waycool.in/index.php/',
       'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
       'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
+      'isClusterRequired':1
     }
   }]
 };
