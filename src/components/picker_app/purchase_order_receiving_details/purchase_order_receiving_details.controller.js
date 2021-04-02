@@ -493,6 +493,39 @@ class purchaseController extends BaseController {
       }
     }
   }
+  getReceivingItem =async (poReceivingId,itemId) =>{
+    try{
+      var poReceivingDetails= await  Model.aggregate([{
+        $match:{ 
+          _id: mongoose.Types.ObjectId(poReceivingId),
+          "item._id": mongoose.Types.ObjectId(itemId),
+          receivingStatus:4
+        }
+      },
+      { $unwind : "$item" },
+      { $match : {
+        "item._id": mongoose.Types.ObjectId(itemId)
+      }},
+      {
+        $project: {
+          poId:1,
+          'item':1,
+          'pickerBoyId':1,
+          'receivingStatus':4,
+      }}
+      ]);
+      return {
+        success: true,
+        data: poReceivingDetails
+      }
+    }catch(err){
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
 
  getForGrnGeneration = async(poReceivingId)=>{
   try{
