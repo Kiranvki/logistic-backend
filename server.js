@@ -49,14 +49,17 @@ process.on('uncaughtException', (err, origin) => {
 
 let server;
 let sslServer;
-if (NODE_ENV == 'staging') {
-
+if (process.env.NODE_ENV == 'production') {
+  const sslServer = https.createServer({
+    key: fs.readFileSync('/etc/letsencrypt/live/api-dms.waycool.in/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/api-dms.waycool.in/fullchain.pem')
+  }, app);
+  sslServer.listen(process.env.SECURE_PORT, () => { console.log(' Secure Server [ ✓ ] Running on port : ' + process.env.SECURE_PORT) });
+} else if (NODE_ENV == 'staging') {
   sslServer = https.createServer({
     key: fs.readFileSync('/etc/letsencrypt/live/dev.dms.waycool.in/privkey.pem'),
     cert: fs.readFileSync('/etc/letsencrypt/live/dev.dms.waycool.in/fullchain.pem')
   }, app);
-
-
   console.log('securePort', securePort);
   sslServer.listen(securePort, () => {
     console.log(chalk.blue(` Secure Server [ ✓ ] Running on port : ' + ${securePort}`))
