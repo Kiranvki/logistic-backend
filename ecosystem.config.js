@@ -150,6 +150,7 @@ module.exports = {
       'WAYCOOL_SAP_UAT_BASE_URL':'http://api-waycoolmaster.waycool.in/index.php/',
       'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
       'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
+      'isClusterRequired':1
     }
   }]
 };
