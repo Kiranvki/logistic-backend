@@ -54,7 +54,7 @@ console.log('inv upload',req.body.invoice_detail)
             
         
         
-              'itemName': data['material_description'], //not available
+              'itemName': 'N/A', //not available
           
         
               'salePrice':data['mrp_amount'],   // sap mrp_amount

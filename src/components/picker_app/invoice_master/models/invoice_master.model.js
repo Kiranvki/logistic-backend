@@ -17,6 +17,9 @@ const invoiceMaster = new Schema({
   so_deliveryDate: {  //sap delivery_date
     type: Date
   },
+  deliveryNo:{
+    type:String
+  },
 
   isSelected: {
     type: Boolean,
@@ -382,9 +385,9 @@ invoiceMaster.index({
 class invoiceMasterClass{
   static async addInvoice(obj){
     let isExist = this.count({'invoiceDetails.invoice_no':obj.invoice_no})
-    console.log('from db',obj)
-    let invoiceDetail =  await new this(obj).save()
     
+    let invoiceDetail =  await new this(obj).save()
+    console.log('from db',invoiceDetail)
     return invoiceDetail.toObject()
     
 

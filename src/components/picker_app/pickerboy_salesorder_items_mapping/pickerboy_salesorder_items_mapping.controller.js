@@ -396,11 +396,12 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       let OrderData = req.body.orderDetail,
       invoiceDetail = req.body.invoice_detail['data'][0]
 
-      req.body.invoice_detail['data'][0]['item'].forEach((data,i)=>{
+      req.body.invDetail['itemSupplied'].forEach((data,i)=>{
       OrderData['itemDetail'].forEach((item,j) => {
-        console.log(     req.body.invoice_detail['data'][0]['item'][i]['material_description'] , item['itemName'])
+        console.log('item_no',data.item_no,item.item_no)
         if(data.item_no==item.item_no){
-          req.body.invoice_detail['data'][0]['item'][i]['material_description'] = item['itemName']
+          
+          req.body.invDetail['itemSupplied'][i]['material_description'] = item['itemName']
         }
         
 
@@ -408,6 +409,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       })
 
     })
+    console.log(req.body.invDetail['itemSupplied'])
 
       info('Invoice Generated and updated to DB !');
       if(req.body.invDetail){
