@@ -116,7 +116,7 @@ console.log('inv upload',req.body.invoice_detail)
               so_deliveryDate: OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
               'shipping_point':OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
            
-              
+              'deliveryNo': deliveryDetail.delivery_no,
               'cityId': OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
               'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
             

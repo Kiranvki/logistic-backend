@@ -157,8 +157,10 @@ static async getOrderPickerBoyMapping(searchObj){
 }
 
 static async updateIsItemPickedStatus(pickerBoySalesOrderMappingId,status){
+
  
-  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoySalesOrderMappingId},{$set:{'isItemPicked': status}});
+ 
+  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoySalesOrderMappingId},{$set:{'isItemPicked': status,state:1}});
   return orderPickerBoyMappingData;
 
 }
@@ -210,7 +212,9 @@ static async updateInvoiceDetail(pickerBoyOrderMappingId,invObject){
   //         'invoiceId':data['_id'],
   //           'invoice_no':invoiceDetail['invoice_no']
   //         }
-  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoyOrderMappingId},{$set:{'invoiceDetail.isInvoice': invObject.isInvoice,'invoiceDetail.invoice.invoiceId':invObject.invoice_no,'invoiceDetail.invoice.invoiceDbId':invObject.invoiceId,'isItemPicked':false,'isStartedPicking':false,'customerName':invObject.customerName}});
+   
+  
+  let orderPickerBoyMappingData = await this.findOneAndUpdate({'_id':pickerBoyOrderMappingId},{$set:{'invoiceDetail.isInvoice': invObject.isInvoice,'invoiceDetail.invoice.invoiceId':invObject.invoice_no,'invoiceDetail.invoice.invoiceDbId':invObject.invoiceId,'isItemPicked':false,'isStartedPicking':false,'customerName':invObject.customerName,'state':2}});
   return orderPickerBoyMappingData;
 
 }

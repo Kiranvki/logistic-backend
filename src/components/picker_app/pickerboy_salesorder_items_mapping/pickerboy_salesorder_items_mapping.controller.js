@@ -48,13 +48,14 @@ class pickerSalesOrderMappingController extends BaseController {
       mrp_amount = parseInt(req.body.itemDetail.mrp_amount)
    
       //itemID->material
-
+// console.log('name',req.body.itemDetail.sold_to_party_description)
       let dataToInsert = {
         'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
         'itemDetail':[{
         'item_no': req.body.item_no,
+        // 'itemName': req.body.sold_to_party_description,
         'material_no':req.body.itemDetail.material_no,
-        'itemName': req.body.itemDetail.itemName?req.body.itemDetail.itemName:'N/A',
+        'itemName': req.body.itemDetail.material_description?req.body.itemDetail.material_description:'N/A',
         
         'mrp_amount':mrp_amount,
         'uom':req.body.itemDetail.uom,
@@ -392,6 +393,22 @@ console.log(pickerBoySalesOrderMappingId,itemId)
 
   generateInv = async (req,res,next)=>{
     try {
+      let OrderData = req.body.orderDetail,
+      invoiceDetail = req.body.invoice_detail['data'][0]
+
+      req.body.invoice_detail['data'][0]['item'].forEach((data,i)=>{
+      OrderData['itemDetail'].forEach((item,j) => {
+        console.log(     req.body.invoice_detail['data'][0]['item'][i]['material_description'] , item['itemName'])
+        if(data.item_no==item.item_no){
+          req.body.invoice_detail['data'][0]['item'][i]['material_description'] = item['itemName']
+        }
+        
+
+
+      })
+
+    })
+
       info('Invoice Generated and updated to DB !');
       if(req.body.invDetail){
         return  this.success(req, res, this.status.HTTP_OK, 

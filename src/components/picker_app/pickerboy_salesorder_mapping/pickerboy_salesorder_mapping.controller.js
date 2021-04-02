@@ -814,7 +814,7 @@ getOrderDetails = async (req,res,next)=>{
         }
       }
       ])
-
+console.log(salesOrderData)
       // check if inserted 
       if (salesOrderData && !_.isEmpty(salesOrderData)) {
         //calculating the total basket amount -- needs to moved into hook
@@ -1308,14 +1308,23 @@ getOrderDetails = async (req,res,next)=>{
   getOrderHistoryByPickerBoyID = async (req,res,next) => {
     try {
       info('Get History  Order details !');
-      // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
-      let sortingArray = {};
-      sortingArray[sortBy] = -1;
-      let skip = parseInt(page - 1) * pageSize;
+      
+      // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = req.query
+      // let sortingArray = {};
+      // sortingArray[sortBy] = -1;
+      // let skip = parseInt(page - 1) * pageSize;
+         // get the query params
+         let page = req.query.page || 1,
+         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+         searchKey = req.query.search || '',
+         sortBy = req.query.sortBy || 'req_del_date',
+         sortingArray = {};
+         sortingArray[sortBy] = -1;
+       let skip = parseInt(page - 1) * pageSize;
 
-
+// item count missing
       let searchObject = {
-        'pickerBoyId':req.user._id,
+        'pickerBoyId':mongoose.Types.ObjectId(req.user._id), //req.user._id,
         'invoiceDetail.isInvoice':true
         // 'isPacked': 0,
         // 'fulfillmentStatus': 0,
@@ -1381,6 +1390,8 @@ getOrderDetails = async (req,res,next)=>{
           'customerType': 1,
           'shippingId':1,
           'cityId':1,
+          'plant':1,
+          'sales_order_no':1,
           'status':1,
           'invoiceNo': 1,
           'req_del_date':1,
@@ -1391,11 +1402,23 @@ getOrderDetails = async (req,res,next)=>{
       }
       ]).allowDiskUse(true)
       console.log(salesOrderList)
-      return {
-        success: true,
-        data: salesOrderList,
-        total: totalCount
-      };
+      // return {
+      //   success: true,
+      //   data: salesOrderList,
+      //   total: totalCount
+      // };
+      if (salesOrderList.length>0) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: salesOrderList,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: salesOrderList.length  //item
+          }
+        }, this.messageTypes.todoOrderFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
+    
 
       // catch any runtime error 
     } catch (err) {
