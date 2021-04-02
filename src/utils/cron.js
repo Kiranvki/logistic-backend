@@ -52,8 +52,7 @@ module.exports = () => {
     info('CRON TAB RUNNING STARTED', time);
     cronLogger.info(`CRON-${requestdId} | ${time} | STARTED FOR SYNC PURCHASE ORDER`);
     let isPurchaseOrderUpdated = await hitCronToSyncPurchaseOrderData(requestdId);
-  
-    if (isPurchaseOrderUpdated) {
+    if (isPurchaseOrderUpdated.success) {
       cronLogger.info(`CRON-${requestdId} | ${time} | COMPLETED SUCCESSFULLY - `, JSON.stringify(isPurchaseOrderUpdated.data));
       info('CRON TAB SUCCESSFULLY FINISHED ', time);
     } else {
