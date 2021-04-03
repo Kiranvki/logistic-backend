@@ -93,7 +93,6 @@ const setupWorkerProcesses = () => {
 if (parseInt(process.env.isClusterRequired) && cluster.isMaster) {
   setupWorkerProcesses();
   if (NODE_ENV == 'production') {
-    console.log(securePort,"securePort---")
     const sslServer = https.createServer({
       key: fs.readFileSync('/etc/letsencrypt/live/api-dms.waycool.in/privkey.pem'),
       cert: fs.readFileSync('/etc/letsencrypt/live/api-dms.waycool.in/fullchain.pem')
@@ -104,10 +103,9 @@ if (parseInt(process.env.isClusterRequired) && cluster.isMaster) {
       key: fs.readFileSync('/etc/letsencrypt/live/dev.dms.waycool.in/privkey.pem'),
       cert: fs.readFileSync('/etc/letsencrypt/live/dev.dms.waycool.in/fullchain.pem')
     }, app);
-    console.log('securePort', securePort);
+    
     sslServer.listen(securePort, () => {
-      console.log(' Secure Server [ ✓ ] Running on port : ' + securePort) 
-    });
+      console.log(' Secure Server [ ✓ ] Running on port : ' + securePort) });
   }
 } else {
   // checking the environment of the node 

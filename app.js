@@ -14,6 +14,7 @@ const cronLogger = require('./src/utils/cronLogger');
 global.__basedir = __dirname;
 app.use(appLogger.requestDetails(appLogger));
 app.use(cronLogger.requestDetails(cronLogger));
+app.use(express.static(__dirname + '/public/privacy_policy'));
 
 // const authenticate = require('./utils/authenticate');
 app.enable('trust proxy');

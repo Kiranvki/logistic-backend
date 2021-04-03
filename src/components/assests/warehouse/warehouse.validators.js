@@ -4,7 +4,7 @@ const BaseJoi = require('joi');
 const Extension = require('joi-date-extensions');
 const Joi = BaseJoi.extend(Extension);
 // handling the joi response 
-const Response = require('../../src/responses/response');
+const Response = require('../../../responses/response');
 
 // add joi schema 
 const schemas = {

@@ -1,13 +1,13 @@
-const BasicCtrl = require('../../src/components/basic_config/basic_config.controller');
+const BasicCtrl = require('../../basic_config/basic_config.controller');
 
 const mongoose = require('mongoose'); // mongoose
-const BaseController = require('../../src/components/baseController');
+const BaseController = require('../../baseController');
 const Model = require('./models/warehouse.model');
 const camelCase = require('camelcase');
 const {
   error,
   info
-} = require('../../src/utils').logging;
+} = require('../../../utils').logging;
 const _ = require('lodash');
 
 // getting the model 
