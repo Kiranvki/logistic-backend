@@ -954,6 +954,11 @@ class MyTrip extends BaseController {
 
         const getAllTripsWithSalesOrder = await pickerBoyOrderMappingModel.aggregate([
           {
+            $match: {
+              'shipping_point': req.user.plant_id
+            }
+          },
+          {
             $lookup: {
               from: 'salesorders',
               let: {

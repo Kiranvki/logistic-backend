@@ -830,25 +830,27 @@ getOrderDetails = async (req,res,next)=>{
         for (let item of salesOrderData[0].availableItemDetails[0].itemDetail) {
           //calculating discount
 
-          let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.mrp_amount).toFixed(2))
+          let discountForSingleItem = parseFloat((item.discountPercentage / 100 * parseInt(item.mrp_amount)).toFixed(2))
           let discountForSupliedItem = discountForSingleItem * item.pickedQuantity
           totalDiscount = totalDiscount + discountForSupliedItem;
 
           //calculating selling price after discount
 
-          let amountAfterDiscountForSingle = item.total_amount - discountForSingleItem;
+          let amountAfterDiscountForSingle = parseInt(item.total_amount) - discountForSingleItem;
           // let amountAfterDiscountForSuppliedItem = amountAfterDiscountForSingle * item.pickedQuantity
-          totalAmount = totalAmount + item.total_amount;
+          // console.log('type of item.total_amount', typeof item.total_amount);
 
+          totalAmount = totalAmount + parseInt(item.total_amount);
           // calculating the tax amount 
-
-          let taxValueForSingleItemCGST = parseFloat((amountAfterDiscountForSingle * item['cgst-pr'] / 100).toFixed(2))
+          const cgstValue = parseFloat(item['cgst-pr']); // Converting to number
+          let taxValueForSingleItemCGST = parseFloat((amountAfterDiscountForSingle * cgstValue / 100).toFixed(2))
           let amountAfterCgstTaxForSingle = amountAfterDiscountForSingle + taxValueForSingleItemCGST;
           let CgstTaxValueForSuppliedItem = taxValueForSingleItemCGST * item.suppliedQty
           totalCgstTax = totalCgstTax + CgstTaxValueForSuppliedItem;
 
           // calculating the tax amount for SGST
-          let taxValueForSingleItemSGST = parseFloat((amountAfterDiscountForSingle * item['sgst_pr'] / 100).toFixed(2))
+          const sgstValue = parseFloat(item['sgst_pr']); // Converting to number
+          let taxValueForSingleItemSGST = parseFloat((amountAfterDiscountForSingle * sgstValue / 100).toFixed(2))
           let amountAfterSgstTaxForSingle = amountAfterDiscountForSingle + taxValueForSingleItemSGST;
           let SgstTaxValueForSuppliedItem = taxValueForSingleItemSGST * item.suppliedQty
           totalSgstTax = totalSgstTax + SgstTaxValueForSuppliedItem;
@@ -870,7 +872,7 @@ getOrderDetails = async (req,res,next)=>{
 
         salesOrderData[0].totalQuantitySupplied = totalQuantitySupplied
         salesOrderData[0].totalQuantityDemanded = totalQuantityDemanded
-        salesOrderData[0].totalAmount = totalAmount
+        salesOrderData[0].totalAmount = totalAmount.toString()
         salesOrderData[0].totalCgstTax = totalCgstTax
         salesOrderData[0].totalSgstTax = totalSgstTax
         salesOrderData[0].totalDiscount = totalDiscount
