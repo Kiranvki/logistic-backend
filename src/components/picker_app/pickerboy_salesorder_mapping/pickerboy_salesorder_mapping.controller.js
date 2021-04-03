@@ -814,7 +814,6 @@ getOrderDetails = async (req,res,next)=>{
         }
       }
       ])
-console.log(salesOrderData)
       // check if inserted 
       if (salesOrderData && !_.isEmpty(salesOrderData)) {
         //calculating the total basket amount -- needs to moved into hook
@@ -838,9 +837,13 @@ console.log(salesOrderData)
 
           let amountAfterDiscountForSingle = parseInt(item.total_amount) - discountForSingleItem;
           // let amountAfterDiscountForSuppliedItem = amountAfterDiscountForSingle * item.pickedQuantity
-          // console.log('type of item.total_amount', typeof item.total_amount);
 
-          totalAmount = totalAmount + parseInt(item.total_amount);
+          /**
+           * Calculating total amount formula
+           * No. of quantity picked * MRP amount
+           */
+
+          totalAmount = item.pickedQuantity * parseInt(item.mrp_amount)
           // calculating the tax amount 
           const cgstValue = parseFloat(item['cgst-pr']); // Converting to number
           let taxValueForSingleItemCGST = parseFloat((amountAfterDiscountForSingle * cgstValue / 100).toFixed(2))
@@ -967,7 +970,7 @@ console.log(salesOrderData)
             }
           }]
         };
-      console.log('searchObject', searchObject);
+      // console.log('searchObject', searchObject);
 
       let totalCount = await Model.aggregate([{
         $match: {
@@ -1166,7 +1169,7 @@ console.log(salesOrderData)
       }).toDate();
 
       if (searchDate && !_.isEmpty(searchDate)) {
-        console.log('he');
+        // console.log('he');
 
         startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
           h: 0,
@@ -1250,7 +1253,7 @@ console.log(salesOrderData)
   
 
       if (searchDate && !_.isEmpty(searchDate)) {
-        console.log('he');
+        // console.log('he');
 
         startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
           h: 0,
@@ -1280,12 +1283,12 @@ console.log(salesOrderData)
         endOfTheDay
       }
 
-      console.log('salesQueryDetails', salesQueryDetails);
+      // console.log('salesQueryDetails', salesQueryDetails);
 
       // finding the  data from the db 
       
       let hisoryData = await SalesOrderCtrl.getHistorySalesOrder(salesQueryDetails);
-      console.log(hisoryData)
+      // console.log(hisoryData)
       // success 
       if (hisoryData.success) {
         return this.success(req, res, this.status.HTTP_OK, {
@@ -1355,7 +1358,7 @@ console.log(salesOrderData)
             }
           }]
         };
-        console.log(...searchObject)
+        // console.log(...searchObject)
       let totalCount = await Model.aggregate([{
         $match: 
           searchObject
@@ -1403,7 +1406,7 @@ console.log(salesOrderData)
         }
       }
       ]).allowDiskUse(true)
-      console.log(salesOrderList)
+      // console.log(salesOrderList)
       // return {
       //   success: true,
       //   data: salesOrderList,
@@ -1523,7 +1526,7 @@ console.log(salesOrderData)
   getTodaysOrder = async(req,res,next)=>{
     let orderModel
 try{
-  console.log(req.user.plant)
+  // console.log(req.user.plant)
     info('Getting the todays Order !!!');
     let page = req.query.page || 1,
       pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
@@ -1561,7 +1564,7 @@ try{
       // getting the end of the day 
       endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
     }
-console.log(startOfTheDay)
+// console.log(startOfTheDay)
 
     let pipeline = [{
       $match:{
@@ -1595,7 +1598,7 @@ console.log(startOfTheDay)
       }
       
       }];
-    console.log('searchObject', pipeline);
+    // console.log('searchObject', pipeline);
 
 
 
@@ -1675,7 +1678,7 @@ console.log(startOfTheDay)
   let todaysOrderData = await orderModel.aggregate(pipeline)
   // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
 
-  console.log(todaysOrderData);
+  // console.log(todaysOrderData);
 
 
 
