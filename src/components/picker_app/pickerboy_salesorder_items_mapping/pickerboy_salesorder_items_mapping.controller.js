@@ -95,7 +95,7 @@ class pickerSalesOrderMappingController extends BaseController {
         let orderDetail = await pickerBoySalesOrderModel.getOrderByPickerBoyId(pickerBoySalesOrderMappingId)
      
     
-        console.log('orderItemsssss',Object.keys(orderDetail[0]['salesOrderId']))
+        // console.log('orderItemsssss',Object.keys(orderDetail[0]['salesOrderId']))
          // changes required quadratic
       if(orderDetail.length>0 && itemAdded.length>0){
         orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
@@ -162,14 +162,14 @@ class pickerSalesOrderMappingController extends BaseController {
   getAddedItemDetails = (pickerBoySalesOrderMappingId, itemId) => {
     try {
       info('Get Added Item details !');
-console.log(pickerBoySalesOrderMappingId,itemId)
+// console.log(pickerBoySalesOrderMappingId,itemId)
       // get details 
       return Model.findOne({
         pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
         'itemDetail.item_no': itemId,
         isDeleted: 0
       }).lean().then((res) => {
-        console.log(res)
+        // console.log(res)
         if (res && !_.isEmpty(res)) {
           return {
             success: true,
@@ -269,7 +269,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
 
 
     
-    console.log('Sales order',orderDetail[0]['salesOrderId']['item'])
+    // console.log('Sales order',orderDetail[0]['salesOrderId']['item'])
 
     // check if inserted 
     if (orderDetail ) {
@@ -398,7 +398,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
 
       req.body.invDetail['itemSupplied'].forEach((data,i)=>{
       OrderData['itemDetail'].forEach((item,j) => {
-        console.log('item_no',data.item_no,item.item_no)
+        // console.log('item_no',data.item_no,item.item_no)
         if(data.item_no==item.item_no){
           
           req.body.invDetail['itemSupplied'][i]['material_description'] = item['itemName']
@@ -409,7 +409,7 @@ console.log(pickerBoySalesOrderMappingId,itemId)
       })
 
     })
-    console.log(req.body.invDetail['itemSupplied'])
+    // console.log(req.body.invDetail['itemSupplied'])
 
       info('Invoice Generated and updated to DB !');
       if(req.body.invDetail){

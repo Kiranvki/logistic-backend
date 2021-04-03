@@ -814,7 +814,6 @@ getOrderDetails = async (req,res,next)=>{
         }
       }
       ])
-console.log(salesOrderData)
       // check if inserted 
       if (salesOrderData && !_.isEmpty(salesOrderData)) {
         //calculating the total basket amount -- needs to moved into hook
@@ -830,25 +829,31 @@ console.log(salesOrderData)
         for (let item of salesOrderData[0].availableItemDetails[0].itemDetail) {
           //calculating discount
 
-          let discountForSingleItem = parseFloat((item.discountPercentage / 100 * item.mrp_amount).toFixed(2))
+          let discountForSingleItem = parseFloat((item.discountPercentage / 100 * parseInt(item.mrp_amount)).toFixed(2))
           let discountForSupliedItem = discountForSingleItem * item.pickedQuantity
           totalDiscount = totalDiscount + discountForSupliedItem;
 
           //calculating selling price after discount
 
-          let amountAfterDiscountForSingle = item.total_amount - discountForSingleItem;
+          let amountAfterDiscountForSingle = parseInt(item.total_amount) - discountForSingleItem;
           // let amountAfterDiscountForSuppliedItem = amountAfterDiscountForSingle * item.pickedQuantity
-          totalAmount = totalAmount + item.total_amount;
 
+          /**
+           * Calculating total amount formula
+           * No. of quantity picked * MRP amount
+           */
+
+          totalAmount = item.pickedQuantity * parseInt(item.mrp_amount)
           // calculating the tax amount 
-
-          let taxValueForSingleItemCGST = parseFloat((amountAfterDiscountForSingle * item['cgst-pr'] / 100).toFixed(2))
+          const cgstValue = parseFloat(item['cgst-pr']); // Converting to number
+          let taxValueForSingleItemCGST = parseFloat((amountAfterDiscountForSingle * cgstValue / 100).toFixed(2))
           let amountAfterCgstTaxForSingle = amountAfterDiscountForSingle + taxValueForSingleItemCGST;
           let CgstTaxValueForSuppliedItem = taxValueForSingleItemCGST * item.suppliedQty
           totalCgstTax = totalCgstTax + CgstTaxValueForSuppliedItem;
 
           // calculating the tax amount for SGST
-          let taxValueForSingleItemSGST = parseFloat((amountAfterDiscountForSingle * item['sgst_pr'] / 100).toFixed(2))
+          const sgstValue = parseFloat(item['sgst_pr']); // Converting to number
+          let taxValueForSingleItemSGST = parseFloat((amountAfterDiscountForSingle * sgstValue / 100).toFixed(2))
           let amountAfterSgstTaxForSingle = amountAfterDiscountForSingle + taxValueForSingleItemSGST;
           let SgstTaxValueForSuppliedItem = taxValueForSingleItemSGST * item.suppliedQty
           totalSgstTax = totalSgstTax + SgstTaxValueForSuppliedItem;
@@ -870,7 +875,7 @@ console.log(salesOrderData)
 
         salesOrderData[0].totalQuantitySupplied = totalQuantitySupplied
         salesOrderData[0].totalQuantityDemanded = totalQuantityDemanded
-        salesOrderData[0].totalAmount = totalAmount
+        salesOrderData[0].totalAmount = totalAmount.toString()
         salesOrderData[0].totalCgstTax = totalCgstTax
         salesOrderData[0].totalSgstTax = totalSgstTax
         salesOrderData[0].totalDiscount = totalDiscount
@@ -965,7 +970,7 @@ console.log(salesOrderData)
             }
           }]
         };
-      console.log('searchObject', searchObject);
+      // console.log('searchObject', searchObject);
 
       let totalCount = await Model.aggregate([{
         $match: {
@@ -1164,7 +1169,7 @@ console.log(salesOrderData)
       }).toDate();
 
       if (searchDate && !_.isEmpty(searchDate)) {
-        console.log('he');
+        // console.log('he');
 
         startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
           h: 0,
@@ -1248,7 +1253,7 @@ console.log(salesOrderData)
   
 
       if (searchDate && !_.isEmpty(searchDate)) {
-        console.log('he');
+        // console.log('he');
 
         startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
           h: 0,
@@ -1283,7 +1288,7 @@ console.log(salesOrderData)
       // finding the  data from the db 
       
       let hisoryData = await SalesOrderCtrl.getHistorySalesOrder(salesQueryDetails);
-      console.log(hisoryData)
+      // console.log(hisoryData)
       // success 
       if (hisoryData.success) {
         return this.success(req, res, this.status.HTTP_OK, {
@@ -1353,7 +1358,7 @@ console.log(salesOrderData)
             }
           }]
         };
-        console.log(...searchObject)
+        // console.log(...searchObject)
       let totalCount = await Model.aggregate([{
         $match: 
           searchObject
@@ -1401,7 +1406,7 @@ console.log(salesOrderData)
         }
       }
       ]).allowDiskUse(true)
-      console.log(salesOrderList)
+      // console.log(salesOrderList)
       // return {
       //   success: true,
       //   data: salesOrderList,
@@ -1521,7 +1526,7 @@ console.log(salesOrderData)
   getTodaysOrder = async(req,res,next)=>{
     let orderModel
 try{
-  console.log(req.user.plant)
+  // console.log(req.user.plant)
     info('Getting the todays Order !!!');
     console.log(req.user)
     let page = req.query.page || 1,
@@ -1565,7 +1570,7 @@ try{
       // getting the end of the day 
       endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
     }
-console.log(startOfTheDay)
+// console.log(startOfTheDay)
 
     let pipeline = [{
       $match:{
@@ -1599,7 +1604,7 @@ console.log(startOfTheDay)
       }
       
       }];
-    
+    // console.log('searchObject', pipeline);
 
 
 
@@ -1687,7 +1692,7 @@ console.log(startOfTheDay)
   let todaysOrderData = await orderModel.aggregate(pipeline)
   // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
 
-  console.log(todaysOrderData);
+  // console.log(todaysOrderData);
 
 
 
