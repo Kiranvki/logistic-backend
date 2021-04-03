@@ -156,7 +156,7 @@ getInvoiceDocumentDetail = async (req,res)=>{
       let customerId = req.params.customerId;
       let cityId = req.params.cityId;
 
-      let customerDataFromMicroService = await getCustomerDetails(customerId, cityId);
+      let customerDataFromMicroService = await getCustomerDetails(customerId);
       if (customerDataFromMicroService.success) {
         // success
         return this.success(req, res, this.status.HTTP_OK, customerDataFromMicroService.data, this.messageTypes.customerDetailsFetchedSuccessfully);

@@ -8,13 +8,13 @@ const {
 } = require('../../../utils').logging;
 
 // exporting the hooks 
-module.exports = async (customerId, cityId) => {
+module.exports = async (customerId) => {
   try {
     info(`Hitting the DMS V1 server to get the customer details!`);
 
     // getting the data from the env
     let dmsV1BaseUrl = process.env.dmsV1BaseUrl;
-    let dmsGetCustomerDetails = process.env.dmsV1GetCustomerDetailsOne + customerId + process.env.dmsV1GetCustomerDetailsTwo + cityId;
+    let dmsGetCustomerDetails = process.env.dmsV1GetCustomerDetailsOne + customerId + process.env.dmsV1GetCustomerDetailsTwo;
 
     let url = dmsV1BaseUrl + dmsGetCustomerDetails; // DMS url
 
