@@ -56,7 +56,10 @@ class purchaseController extends BaseController {
       // inserting data into the db
       let isInserted = await Model.create(dataToInsert);
       let poUpdateDetails = await poCtrl.modifyPo(
-        { _id: poDetails._id },
+        { _id: poDetails._id ,
+          status:1,
+          isDeleted:0
+        },
         { receivingStatus: 4 }
       );
 

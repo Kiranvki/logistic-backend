@@ -215,7 +215,8 @@ class purchaseController extends BaseController {
          poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id,pickerBoyId:pickerBoyId}]
         await poCtrl.modifyPo({
           _id:poDetails._id,
-          //poStatus ://to-do
+          status :1,
+          isDeleted:0//to-do
         },{
           receivingStatus:fulfilmentStatus==1?1:2,
           fulfilmentStatus:fulfilmentStatus,
