@@ -843,7 +843,7 @@ getOrderDetails = async (req,res,next)=>{
            * No. of quantity picked * MRP amount
            */
 
-          totalAmount = item.pickedQuantity * parseInt(item.mrp_amount)
+          totalAmount = totalAmount + (item.pickedQuantity * parseInt(item.mrp_amount))
           // calculating the tax amount 
           const cgstValue = parseFloat(item['cgst-pr']); // Converting to number
           let taxValueForSingleItemCGST = parseFloat((amountAfterDiscountForSingle * cgstValue / 100).toFixed(2))
