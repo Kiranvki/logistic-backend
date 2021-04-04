@@ -24,7 +24,8 @@ module.exports = async (req,res,next) => {
     let sapBaseUrl = process.env.sapBaseUrl;
     
 
-    let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';
+    // let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';
+    let url = process.env.sapPickingAllocation;
 
     console.log('Hitting SAP server for Generating the delivery Number *> ', url);
     let obj = { 'request':{
