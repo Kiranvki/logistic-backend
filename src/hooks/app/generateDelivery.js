@@ -21,7 +21,7 @@ module.exports = async (req,res,next) => {
     let OrderData = req.body.orderDetail
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
-    let sapBaseUrl = 'http://52.172.31.130:50100/RESTAdapter/';
+    let sapBaseUrl = process.env.sapBaseUrl;
     
 
     let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';

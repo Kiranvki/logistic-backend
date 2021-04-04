@@ -22,7 +22,7 @@ module.exports = async (req,res,next) => {
 
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
-    let sapBaseUrl = 'http://52.172.31.130:50100/RESTAdapter/';
+    let sapBaseUrl = process.env.sapBaseUrl;
 
     
 console.log('delivery info',req.body.delivery_detail['delivery_no'])
