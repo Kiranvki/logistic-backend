@@ -56,7 +56,7 @@ const purchaseOrder = new Schema({
   },
  
   "status": {
-    type: String
+    type: Number
   }, 
   "receivingStatus": {
     type: Number,
