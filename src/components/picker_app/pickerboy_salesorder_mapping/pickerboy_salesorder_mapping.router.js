@@ -55,7 +55,7 @@ function userRoutes() {
     );
 
     // get customer details 
-    closed.route('/customer/details/:customerId/city/:cityId').get(
+    closed.route('/customer/details/:customerId').get(
       [joiCustomerGetDetails], // joi validation
       verifyAppToken, // verify app user token 
       ctrl.getCustomerDetails // controller function 

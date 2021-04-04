@@ -43,13 +43,13 @@ function purchaseOrderRoutes() {
       // verifyAppToken, // verify app user token 
       ctrl.getPODetails // post controller 
     );
-    // getting  invoice details
-    closed.route('/purchaseOrder/startPickup/:poId').get(
-      [joiPoIdValidation], // joi validation
-      // isInvoiceGenerated, // check whether the invoice is already generated
-      // verifyAppToken, // verify app user token 
-      ctrl.startPickUP // post controller 
-    );
+    // // getting  invoice details
+    // closed.route('/purchaseOrder/startPickup/:poId').get(
+    //   [joiPoIdValidation], // joi validation
+    //   // isInvoiceGenerated, // check whether the invoice is already generated
+    //   // verifyAppToken, // verify app user token 
+    //   ctrl.startPickUP // post controller 
+    // );
     closed.route('/purchaseOrder/vendorDetails/:poId').get(
       [joiPoIdValidation], // joi validation
       // isInvoiceGenerated, // check whether the invoice is already generated

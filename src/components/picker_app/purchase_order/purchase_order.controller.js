@@ -49,6 +49,8 @@ class purchaseController extends BaseController {
         plant:req.user.plant?req.user.plant.toString():'',//consider data type
         receivingStatus: { $ne: 1 }, //to-do// check if qury working properly
         end_of_validity_period: { $gte: todaysDate },
+        status:1,
+        isDeleted:0
         // delivery_date:{$lte:todaysEndDate}//to-do
       };
       if (req.query.poNumber) {
@@ -181,8 +183,8 @@ class purchaseController extends BaseController {
       var poDetails = await Model.aggregate([
         {
           $match: {
-            // poStatus: 1,
-            // isDeleted: 0,
+            status: 1,
+            isDeleted: 0,
             _id: mongoose.Types.ObjectId(req.params.poId),
           },
         },
@@ -235,33 +237,33 @@ class purchaseController extends BaseController {
     }
   };
 
-  startPickUP = async (req, res) => {
-    try {
-      info("Get Purchase order  details !", req.body, req.query, req.params);
-      var poList = await Model.findOne({
-        status: 1,
-        isDeleted: 0,
-      }).lean();
-      // success
-      return this.success(
-        req,
-        res,
-        this.status.HTTP_OK,
-        poList,
-        this.messageTypes.userDetailsFetched
-      );
+  // startPickUP = async (req, res) => {
+  //   try {
+  //     info("Get Purchase order  details !", req.body, req.query, req.params);
+  //     var poList = await Model.findOne({
+  //       status: 1,
+  //       isDeleted: 0,
+  //     }).lean();
+  //     // success
+  //     return this.success(
+  //       req,
+  //       res,
+  //       this.status.HTTP_OK,
+  //       poList,
+  //       this.messageTypes.userDetailsFetched
+  //     );
 
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
-    }
-  };
+  //     // catch any runtime error
+  //   } catch (err) {
+  //     error(err);
+  //     this.errors(
+  //       req,
+  //       res,
+  //       this.status.HTTP_INTERNAL_SERVER_ERROR,
+  //       this.exceptions.internalServerErr(req, err)
+  //     );
+  //   }
+  // };
   modifyPo = async (query, updateData) => {
     try {
       var poDetails = await Model.findOneAndUpdate(query, updateData, {
@@ -285,7 +287,7 @@ class purchaseController extends BaseController {
       var poDetails = await Model.aggregate([
         {
           $match: {
-            // isDeleted: 0, //to-do
+            isDeleted: 0, //to-do
             _id: mongoose.Types.ObjectId(poId),
           },
         },
@@ -321,8 +323,8 @@ class purchaseController extends BaseController {
 
       var sellerDetails = await Model.findOne(
         {
-          // poStatus: 1,//to-do
-          // isDeleted: 0,
+          status: 1,//to-do
+          isDeleted: 0,
           _id: mongoose.Types.ObjectId(req.params.poId),
         },
         {

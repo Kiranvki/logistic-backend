@@ -21,10 +21,11 @@ module.exports = async (req,res,next) => {
     let OrderData = req.body.orderDetail
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
-    let sapBaseUrl = 'http://52.172.31.130:50100/RESTAdapter/';
+    let sapBaseUrl = process.env.sapBaseUrl;
     
 
-    let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';
+    // let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';
+    let url = process.env.sapPickingAllocation;
 
     console.log('Hitting SAP server for Generating the delivery Number *> ', url);
     let obj = { 'request':{
@@ -121,6 +122,7 @@ console.log('sap',req.body.delivery_detail['success'],req.body.delivery_detail['
   }else{
 if(req.body.delivery_detail['data']['flag']==='E'){
   info('Failed to generate delivery NO.')
+  // status code changes check required
 return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,MessageTypes.salesOrder.pickerBoySalesOrderDeliveryNumberAlreadyGenerated);
 }else{
     //  Message pending

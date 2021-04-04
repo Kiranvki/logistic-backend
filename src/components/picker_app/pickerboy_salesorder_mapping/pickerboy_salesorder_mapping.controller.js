@@ -156,7 +156,7 @@ getInvoiceDocumentDetail = async (req,res)=>{
       let customerId = req.params.customerId;
       let cityId = req.params.cityId;
 
-      let customerDataFromMicroService = await getCustomerDetails(customerId, cityId);
+      let customerDataFromMicroService = await getCustomerDetails(customerId);
       if (customerDataFromMicroService.success) {
         // success
         return this.success(req, res, this.status.HTTP_OK, customerDataFromMicroService.data, this.messageTypes.customerDetailsFetchedSuccessfully);
@@ -843,7 +843,7 @@ getOrderDetails = async (req,res,next)=>{
            * No. of quantity picked * MRP amount
            */
 
-          totalAmount = totalAmount + (item.pickedQuantity * parseInt(item.mrp_amount))
+          totalAmount = parseInt(totalAmount) + (parseInt(item.pickedQuantity) * parseInt(item.mrp_amount))
           // calculating the tax amount 
           const cgstValue = parseFloat(item['cgst-pr']); // Converting to number
           let taxValueForSingleItemCGST = parseFloat((amountAfterDiscountForSingle * cgstValue / 100).toFixed(2))
@@ -1528,6 +1528,7 @@ getOrderDetails = async (req,res,next)=>{
 try{
   // console.log(req.user.plant)
     info('Getting the todays Order !!!');
+    console.log(req.user)
     let page = req.query.page || 1,
       pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
       searchKey =  '', //req.query.search ||
@@ -1537,7 +1538,12 @@ try{
       cityId =  'N/A', // cityId req.user.cityId ||
       searchDate = req.body.searchDate || '',
       type = req.params.type,
-      plant = req.user.plant;
+      plant = req.user.plant,
+      sortingArray = {};
+      sortingArray[sortBy] = -1;
+      
+
+      
       // 2021-03-29
     let startOfTheDay =  moment(new Date()).format('YYYY-MM-DD');
     // moment().set({
@@ -1630,7 +1636,11 @@ try{
                       '$eq': ['$salesOrderId', '$$orderId']
                     }
                   }
-                }],
+                },
+                {$sort: {
+                  'createdAt':-1
+                }}
+              ],
                 as:'pickingStatus'
           }   
         }
@@ -1661,7 +1671,11 @@ try{
                       '$eq': ['$assetTransferId', '$$orderId']
                     }
                   }
-                }],
+                },
+                {$sort: {
+                  'createdAt':-1
+                }}
+              ],
                 as:'pickingStatus'
           }   
         }
@@ -1769,7 +1783,14 @@ try{
   }
 
   getOrderDetailByPickerBoyId = async (pickerBoyId)=>{
-    return await Model.findOne({$and:[{'pickerBoyId':mongoose.Types.ObjectId(pickerBoyId)},{'isStartedPicking':true},{'isItemPicked':true},{'invoiceDetail.isInvoice':false}]}).lean().then((res) => {
+    return await Model.findOne(
+      {
+        $and: [
+          { 'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId) },
+          { 'isStartedPicking': true }, { 'isItemPicked': true }, 
+          { 'invoiceDetail.isInvoice': false }
+        ]
+      }).lean().then((res) => {
           
       if (res && !_.isEmpty(res)) {
         return {

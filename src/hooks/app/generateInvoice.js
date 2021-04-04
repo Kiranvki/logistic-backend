@@ -22,11 +22,11 @@ module.exports = async (req,res,next) => {
     let OrderData = req.body.delivery_detail
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
-    let sapBaseUrl = 'http://52.172.31.130:50100/RESTAdapter/';
-
+    let sapBaseUrl = process.env.sapBaseUrl;
     
-console.log('delivery info',req.body.delivery_detail['data']['delivery_no'])
-    let url = sapBaseUrl + 'waycool_qua/invoice_sto_create';
+
+    // let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';
+    let url = process.env.sapInvoiceGenerate;
 
     console.log('Hitting SAP server for Generating the Invoice *> ', url);
      obj = {

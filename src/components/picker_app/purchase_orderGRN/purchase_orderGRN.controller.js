@@ -18,7 +18,7 @@ const { error, info } = require("../../../utils").logging;
 const moment = require("moment");
 const { isArray } = require('lodash');
 // self apis
-const grnGenerateUrl = process.env.grnGenerateUrl || '';
+const grnGenerateUrl = (process.env.sapBaseUrl||'')+(process.env.grnGenerateUrl || '');
 
 // padding the numbers
 const pad = (n, width, z) => {
@@ -215,7 +215,8 @@ class purchaseController extends BaseController {
          poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id,pickerBoyId:pickerBoyId}]
         await poCtrl.modifyPo({
           _id:poDetails._id,
-          //poStatus ://to-do
+          status :1,
+          isDeleted:0//to-do
         },{
           receivingStatus:fulfilmentStatus==1?1:2,
           fulfilmentStatus:fulfilmentStatus,

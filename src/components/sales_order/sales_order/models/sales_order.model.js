@@ -256,7 +256,7 @@ const salesOrder = new Schema({
       'quantity': {
         type: 'Number'
       },
-      'suppliedQty': {
+      'suppliedQty': {   //quantity -inv_quantity
         type: 'String'
       },
       'itemAmount': {

@@ -51,7 +51,11 @@ module.exports = {
       'WAYCOOL_SAP_UAT_BASE_URL':'http://uat-waycoolmaster.waycool.in/index.php/',
       'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
       'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
-      'grnGenerateUrl':'http://52.172.31.130:50100/RESTAdapter/waycool_qua/goods_receipt_note_creation'
+      'grnGenerateUrl':'waycool_qua/goods_receipt_note_creation',
+      'sapBaseUrl' :'http://52.172.31.130:50100/RESTAdapter/',
+      'sapPickingAllocation' : 'http://52.172.31.130:50100/RESTAdapter/waycool_qua/Picking_Allocation_Creation',
+      'sapInvoiceGenerate':'http://52.172.31.130:50100/RESTAdapter/waycool_prod/invoice_sto_create',
+      'sapInvoiceFetch' : 'http://52.172.31.130:50100/RESTAdapter/waycool/invoice_sto_get'
     },
     env_staging: {
       'watch': false,
@@ -100,7 +104,11 @@ module.exports = {
       'WAYCOOL_SAP_UAT_BASE_URL':'http://uat-waycoolmaster.waycool.in/index.php/',
       'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
       'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
-      'grnGenerateUrl':'http://52.172.31.130:50100/RESTAdapter/waycool_qua/goods_receipt_note_creation'
+      'grnGenerateUrl':'waycool_qua/goods_receipt_note_creation',
+      'sapBaseUrl' :'http://52.172.31.130:50100/RESTAdapter/',
+      'sapPickingAllocation' : 'http://52.172.31.130:50100/RESTAdapter/waycool_qua/Picking_Allocation_Creation',
+      'sapInvoiceGenerate':'http://52.172.31.130:50100/RESTAdapter/waycool_prod/invoice_sto_create',
+      'sapInvoiceFetch' : 'http://52.172.31.130:50100/RESTAdapter/waycool/invoice_sto_get'
     },
     env_production: {
       'watch': false,
@@ -146,11 +154,15 @@ module.exports = {
       'IV': '5183666c72eec9e4',
       'validImageMimeTypes': ['jpg', 'jpeg', 'png'],
       'validImageDocumentMimeTypes': ['jpg', 'jpeg', 'png', 'pdf'],
-      'grnGenerateUrl':'http://13.71.71.184:50100/RESTAdapter/waycool/goods_receipt_note_creation',
+      'grnGenerateUrl':'waycool/goods_receipt_note_creation',
       'WAYCOOL_SAP_UAT_BASE_URL':'http://api-waycoolmaster.waycool.in/index.php/',
       'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
       'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
-      'isClusterRequired':1
+      'isClusterRequired':1,
+      'sapBaseUrl' :'http://13.71.71.184:50100/RESTAdapter/waycool_prod/',
+      'sapPickingAllocation' : 'http://13.71.71.184:50100/RESTAdapter/waycool_prod/Picking_Allocation_Creation',
+      'sapInvoiceGenerate':'http://13.71.71.184:50100/RESTAdapter/waycool_prod/invoice_sto_create',
+      'sapInvoiceFetch' : 'http://13.71.71.184:50100/RESTAdapter/waycool_prod/invoice_sto_get'
     }
   }]
 };
