@@ -18,7 +18,7 @@ const { error, info } = require("../../../utils").logging;
 const moment = require("moment");
 const { isArray } = require('lodash');
 // self apis
-const grnGenerateUrl = process.env.grnGenerateUrl || '';
+const grnGenerateUrl = (process.env.sapBaseUrl||'')+(process.env.grnGenerateUrl || '');
 
 // padding the numbers
 const pad = (n, width, z) => {
