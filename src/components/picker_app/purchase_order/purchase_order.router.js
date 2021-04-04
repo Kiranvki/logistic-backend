@@ -5,6 +5,7 @@ const ctrl = require('./purchase_order.controller');
 const {
   joiPoIdValidation,
   poList,
+  joiVendorNoValidation,
   joiPurchaseOrderFilter
 } = require('./purchase_order.validators');
 
@@ -50,11 +51,11 @@ function purchaseOrderRoutes() {
     //   // verifyAppToken, // verify app user token 
     //   ctrl.startPickUP // post controller 
     // );
-    closed.route('/purchaseOrder/vendorDetails/:poId').get(
-      [joiPoIdValidation], // joi validation
+    closed.route('/purchaseOrder/vendorDetails/:vendor_number').get(
+      [joiVendorNoValidation], // joi validation
       // isInvoiceGenerated, // check whether the invoice is already generated
       // verifyAppToken, // verify app user token 
-      ctrl.vendorDetails // post controller 
+      ctrl.getVendorDetails // post controller 
     );
     closed.route('/purchaseOrder/filteredList/:type').get(
       [joiPurchaseOrderFilter], // joi validation

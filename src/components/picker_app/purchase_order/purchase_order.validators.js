@@ -33,6 +33,9 @@ const schemas = {
       }
     })
   }),
+  joiVendorNoValidation: Joi.object().keys({
+    vendor_number: Joi.string().trim().required()
+  }),
 
   
 }
@@ -61,6 +64,25 @@ module.exports = {
   joiPoIdValidation: (req, res, next) => {
     // getting the schemas 
     let schema = schemas.joiPoIdValidation;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate(req.params, option).then(() => {
+      next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
+  joiVendorNoValidation: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiVendorNoValidation;
     let option = options.basic;
 
     // validating the schema 

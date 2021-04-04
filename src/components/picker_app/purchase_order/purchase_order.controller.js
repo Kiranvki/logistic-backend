@@ -4,6 +4,7 @@
 // const invoicePickerBoySalesOrderMappingctrl = require('../invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller');
 // const salesOrderctrl = require('../../sales_order/sales_order/sales_order.controller');
 // const pickerboySalesorderItemsMappingctrl = require('../pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
+const request = require('request-promise');
 
 const BasicCtrl = require("../../basic_config/basic_config.controller");
 const BaseController = require("../../baseController");
@@ -316,39 +317,103 @@ class purchaseController extends BaseController {
       };
     }
   };
+  getVendorInfo = async(vendor_no)=>{
+    try{
 
-  vendorDetails = async (req, res) => {
+      let body={
+        "request": {
+           "from_date": "",
+           "to_date": "",
+           "purchase_org": "",
+           "vendor_no": vendor_no
+        }
+     }
+      let options = {
+        method: 'GET',
+        uri: process.env.sapBaseUrl+ process.env.vendorDetails,
+        headers: {
+          'Content-Type': 'application/json' 
+      },
+        json: true,
+        body:body
+      };
+      console.log(options)
+
+      return await request(options);
+    }catch(err){
+      console.log(err)
+      throw err
+    }
+
+  }
+  getVendorDetails = async (req, res) => {
     try {
       info("Get Purchase order  details !", req.body, req.query, req.params);
+      var vendorDetails=[]
+      try{
+        vendorDetails= await this.getVendorInfo(req.params.vendor_number);
+        if(vendorDetails && vendorDetails.response && vendorDetails.response.length){
+          vendorDetails = vendorDetails.response[0];
+          let fullAddress=[];
+          if(vendorDetails.street){
+            fullAddress.push(vendorDetails.street)
+          }
+          if(vendorDetails.street_3){
+            fullAddress.push(vendorDetails.street_3)
+          }
+          if(vendorDetails.district){
+            fullAddress.push(vendorDetails.district)
+          }
+          if(vendorDetails.city){
+            fullAddress.push(vendorDetails.city)
+          }
+          if(vendorDetails.address_time_zone){
+            fullAddress.push(vendorDetails.address_time_zone)
+          }
+          if(vendorDetails.city_postal_code){
+            fullAddress.push(',')
+            fullAddress.push(vendorDetails.city_postal_code)
+          }
+          let details={
+            vendor_no:vendorDetails.vendor_no,
+            name_of_organization:vendorDetails.name_1_of_organization,
+            street:vendorDetails.street,
+            city_postal_code:vendorDetails.city_postal_code,
+            city:vendorDetails.city,
+            country:vendorDetails.address_time_zone,
+            mobileNumber:vendorDetails.mobile_no,
+            email:vendorDetails.e_mail_address,
+            currency:vendorDetails.purchase_order_currency,
+            street_3: vendorDetails.street_3,
+            district: vendorDetails.district,
+            fullAddress:fullAddress.join(' ')
 
-      var sellerDetails = await Model.findOne(
-        {
-          status: 1,//to-do
-          isDeleted: 0,
-          _id: mongoose.Types.ObjectId(req.params.poId),
-        },
-        {
-          po_number: 1,
-          vendor_no: 1,
-          vendor_name: 1,
-          supplierPhone: 1,
+          }
+          // success
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            details,
+            this.messageTypes.poListFetched
+          );
+        }else{
+          this.errors(
+            req,
+            res,
+            this.status.HTTP_INTERNAL_SERVER_ERROR,
+            this.messageTypes.vendorDetailsNotFound
+          );
         }
-      ).lean();
-      if (sellerDetails) {
-        sellerDetails.location = "Banglore";
-        sellerDetails.warehouse = "Banglore";
-        sellerDetails.address = "Banglore";
-      } else {
-        sellerDetails = {};
+      }catch(err){
+        console.log(err)
+        this.errors(
+          req,
+          res,
+          this.status.HTTP_INTERNAL_SERVER_ERROR,
+          this.messageTypes.errorInGettingVendorDetails
+        );
       }
-      // success
-      return this.success(
-        req,
-        res,
-        this.status.HTTP_OK,
-        sellerDetails,
-        this.messageTypes.poListFetched
-      );
 
       // catch any runtime error
     } catch (err) {
@@ -506,6 +571,8 @@ class purchaseController extends BaseController {
       };
     }
   }
+  
+  
 }
 
 // exporting the modules

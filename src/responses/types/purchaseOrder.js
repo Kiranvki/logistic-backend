@@ -33,5 +33,7 @@ module.exports = {
     pastDateNotAllowedforUDD:"For Upcoming Deliver Date past date is not allowed",
     requiredRemark:"Remarks is required as entered quantity is not equal to quantity to be received",
     alreadyHasOngoinOrder:"you already Have one Ongoing receiving Order.Please generate grn for that first.",
+    errorInGettingVendorDetails:"Error in getting vendor details",
+    vendorDetailsNotFound:"Vendor Details not Found"
 
 };
