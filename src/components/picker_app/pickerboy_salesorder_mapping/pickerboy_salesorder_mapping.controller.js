@@ -466,18 +466,20 @@ getOrderDetails = async (req,res,next)=>{
          orderData = {}
     try {
       info('SalesOrder GET DETAILS !');
-      console.log(req.params.type)
+      console.log(orderId)
       switch(req.params.type){
         case 'salesorders':
-         
-          orderData= await salesOrderModel.find({'_id':mongoose.Types.ObjectId(orderId)}).lean().then((res) => {
+         //check for release
+          orderData = await salesOrderModel.find({'_id':mongoose.Types.ObjectId(orderId)}).lean().then((res) => {
           
             if (res && !_.isEmpty(res)) {
+              console.log('Get details',res)
               return {
                 success: true,
                 data: res
               }
             } else {
+              console.log('no data')
               error('Error Searching Data in saleOrder DB!');
               return {
                 success: false
