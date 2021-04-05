@@ -50,10 +50,10 @@ class userController extends BaseController {
 
       // getting the end of the day 
       let endOfTheDay = moment().set({
-        h: 24,
-        m: 24,
-        s: 0,
-        millisecond: 0
+        h: 23,
+        m: 23,
+        s: 59,
+        millisecond: 999
       }).toDate();
 
       // inserting the new user into the db
