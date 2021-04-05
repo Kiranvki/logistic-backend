@@ -60,7 +60,7 @@ function purchaseOrderRoutes() {
     closed.route('/purchaseOrder/filteredList/:type').get(
       [joiPurchaseOrderFilter], // joi validation
       // isInvoiceGenerated, // check whether the invoice is already generated
-      // verifyAppToken, // verify app user token 
+      verifyAppToken, // verify app user token 
       ctrl.poFilteredList // post controller 
     );
   };
