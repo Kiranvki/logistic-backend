@@ -37,7 +37,7 @@ class purchaseController extends BaseController {
 
   grnDetails = async (req, res) => {
     try {
-      info("Get Purchase order GRN details !", req.body, req.query, req.params);
+      info("Get Purchase order GRN details !");
 
       // success
       return this.success(

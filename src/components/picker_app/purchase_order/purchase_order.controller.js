@@ -44,7 +44,7 @@ class purchaseController extends BaseController {
       sortingArray["delivery_date"] = -1;
       let todaysDate = moment().format("YYYY-MM-DD");
       let todaysEndDate = moment().format("YYYY-MM-DD");
-      info("Get Purchase order  details !", req.body, req.query, req.params);
+      info("Get Purchase order  details !");
       let query = {
         company_code:"1000",
         plant:req.user.plant?req.user.plant.toString():'',//consider data type
@@ -179,7 +179,7 @@ class purchaseController extends BaseController {
 
   getPODetails = async (req, res) => {
     try {
-      info("Get Purchase order  details !", req.body, req.query, req.params);
+      info("Get Purchase order  details !");
 
       var poDetails = await Model.aggregate([
         {
@@ -348,7 +348,7 @@ class purchaseController extends BaseController {
   }
   getVendorDetails = async (req, res) => {
     try {
-      info("Get Purchase order  details !", req.body, req.query, req.params);
+      info("Get Purchase order  details !");
       var vendorDetails=[]
       try{
         vendorDetails= await this.getVendorInfo(req.params.vendor_number);
@@ -428,7 +428,7 @@ class purchaseController extends BaseController {
   };
   poFilteredList =async(req,res)=>{
     try {
-      info("Get Purchase order  filtered list !", req.body, req.query, req.params);
+      info("Get Purchase order  filtered list !");
       let pickerBoyId=mongoose.Types.ObjectId(req.user._id)
       var page = req.query.page || 1,
         sortingArray = {},

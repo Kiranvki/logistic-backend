@@ -147,7 +147,7 @@ class purchaseController extends BaseController {
         }).format('YYYY-MM-DD hh:mm:ss')
       }
 
-      info("Receiving PO item!", req.body, req.query, req.params);
+      info("Receiving PO item!");
       let query = {
         _id: mongoose.Types.ObjectId(poReceivingId),
         "item._id": mongoose.Types.ObjectId(material_no),
