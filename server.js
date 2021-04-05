@@ -67,7 +67,7 @@ const setupWorkerProcesses = () => {
 
     // to receive messages from worker process
     workers[i].on('message', function (message) {
-      console.log(message);
+     // console.log(message);
     });
   }
 
@@ -84,7 +84,7 @@ const setupWorkerProcesses = () => {
     workers.push(cluster.fork());
     // to receive messages from worker process
     workers[workers.length - 1].on('message', function (message) {
-      console.log(message);
+    //  console.log(message);
     });
   });
 };
