@@ -402,8 +402,8 @@ class PickerBoyController extends BaseController {
          dataObject.fullName = reqBody.fullName || null;
        if (reqBody.address1 != undefined)
          dataObject.address1 = reqBody.address1 || null;
-       if (reqBody.lattitude != undefined)
-         dataObject.lattitude = reqBody.lattitude || null;
+       if (reqBody.latitude != undefined)
+         dataObject.latitude = reqBody.latitude || null;
        if (reqBody.longitude != undefined)
          dataObject.longitude = reqBody.longitude || null;
       // creating data to insert
