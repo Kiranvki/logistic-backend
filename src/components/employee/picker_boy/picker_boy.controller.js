@@ -388,16 +388,31 @@ class PickerBoyController extends BaseController {
   }
 
   // Internal function to update the details
-  updateDetails = async (dataObject, id) => {
+  updateDetails = async (reqBody, id) => {
     try {
       info('Update picker details Internal Function !');
+        let  dataObject=reqBody.toChangeObject;
+       // checking if profile pic is present 
+       if (reqBody.profilePic != undefined)
+         dataObject.profilePic = reqBody.profilePic || null;
 
+       if (reqBody.dateOfBirth != undefined)
+         dataObject.dateOfBirth = moment(reqBody.dateOfBirth, 'DD-MM-YYYY').toDate() || null;
+       if (reqBody.fullName != undefined)
+         dataObject.fullName = reqBody.fullName || null;
+       if (reqBody.address1 != undefined)
+         dataObject.address1 = reqBody.address1 || null;
+       if (reqBody.lattitude != undefined)
+         dataObject.lattitude = reqBody.lattitude || null;
+       if (reqBody.longitude != undefined)
+         dataObject.longitude = reqBody.longitude || null;
       // creating data to insert
       let dataToUpdate = {
         $set: {
           ...dataObject
         }
       };
+
 
       return Model.findOneAndUpdate({
         _id: mongoose.Types.ObjectId(id)
