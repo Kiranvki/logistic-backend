@@ -25,15 +25,10 @@ class userController extends BaseController {
 
       let user = req.user, // user 
         pickerBoyId = user._id, // salesman Id
-        todaysDate = moment().set({
-          h: 0,
-          m: 0,
-          s: 0,
-          millisecond: 0
-        }).toDate(); // today date 
+        todaysDate = moment.utc().utcOffset("+05:30").toDate() // today date 
 
-      let todayTimeInHour = moment().format('HH'); // getting the current hour 
-      let todayTimeInMins = moment().format('mm'); // getting the current min
+      let todayTimeInHour = moment.utc().utcOffset("+05:30").format('HH'); // getting the current hour 
+      let todayTimeInMins = moment.utc().utcOffset("+05:30").format('mm'); // getting the current min
       let timeOfTheDayInMins = parseInt(todayTimeInHour) * 60 + parseInt(todayTimeInMins); // getting the time in mins 
 
       let attendanceLog = [{
@@ -41,7 +36,7 @@ class userController extends BaseController {
         checkInTimeInMins: parseInt(timeOfTheDayInMins)
       }];
 
-      let startOfTheDay = moment().set({
+      let startOfTheDay = moment.utc().utcOffset("+05:30").set({
         h: 0,
         m: 0,
         s: 0,
@@ -49,11 +44,11 @@ class userController extends BaseController {
       }).toDate();
 
       // getting the end of the day 
-      let endOfTheDay = moment().set({
-        h: 24,
-        m: 24,
-        s: 0,
-        millisecond: 0
+      let endOfTheDay = moment.utc().utcOffset("+05:30").set({
+        h: 23,
+        m: 59,
+        s: 59,
+        millisecond: 999
       }).toDate();
 
       // inserting the new user into the db
@@ -115,10 +110,10 @@ class userController extends BaseController {
       info('Checking Out User !');
 
       let user = req.user, // user 
-        todaysDate = new Date(); // todays date
+        todaysDate = moment.utc().utcOffset("+05:30").toDate(); // todays date
 
-      let todayTimeInHour = moment().format('HH'); // getting the current hour 
-      let todayTimeInMins = moment().format('mm'); // getting the current min
+      let todayTimeInHour = moment.utc().utcOffset("+05:30").format('HH'); // getting the current hour 
+      let todayTimeInMins = moment.utc().utcOffset("+05:30").format('mm'); // getting the current min
       let timeOfTheDayInMins = parseInt(todayTimeInHour) * 60 + parseInt(todayTimeInMins); // getting the time in mins 
 
       // inserting the new user into the db
@@ -252,7 +247,7 @@ class userController extends BaseController {
   getUserAttendanceForAMonth = async (req, res) => {
     try {
       info('get the user attendance for a month !');
-
+      
       let user = req.user, // user 
         salesmanId = user._id, // salesman Id
         attendanceSheet = [], // attendance sheet 
@@ -299,8 +294,8 @@ class userController extends BaseController {
           // pushing the attendance log 
           for (let j = 0; j < isAttended.attendanceLog.length; j++) {
             attendanceLogArray.push({
-              checkInTime: moment.utc(moment.duration(isAttended.attendanceLog[j].checkInTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm"),
-              checkOutTimeIn: isAttended.attendanceLog[j].checkOutTimeInMins ? moment.utc(moment.duration(isAttended.attendanceLog[j].checkOutTimeInMins, "minutes").asMilliseconds()).utcOffset("+05:30").format("HH:mm") : 'N/A',
+              checkInTime: moment.utc(moment.duration(isAttended.attendanceLog[j].checkInTimeInMins, "minutes").asMilliseconds()).format("HH:mm"),
+              checkOutTimeIn: isAttended.attendanceLog[j].checkOutTimeInMins ? moment.utc(moment.duration(isAttended.attendanceLog[j].checkOutTimeInMins, "minutes").asMilliseconds()).format("HH:mm") : 'N/A',
               totalTimeTaken: isAttended.attendanceLog[j].totalWorkingInMins
             })
           }

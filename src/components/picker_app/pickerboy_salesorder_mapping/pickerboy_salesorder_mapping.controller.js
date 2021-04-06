@@ -109,7 +109,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       let id = req.user._id || '';
 
       // inserting data into the db 
-      let isUpdated = await PickerBoyCtrl.updateDetails(req.body.toChangeObject, id);
+      let isUpdated = await PickerBoyCtrl.updateDetails(req.body, id);
 
       // check if updated 
       if (isUpdated.success) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.pickerBoyDetailsUpdated);

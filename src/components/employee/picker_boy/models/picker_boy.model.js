@@ -120,7 +120,16 @@ const pickerBoy = new Schema({
   isDeleted: {
     type: Number,
     default: 0
-  }
+  },
+  latitude: {
+    type: 'String'
+  },
+  longitude: {
+    type: 'String'
+  },
+  address1: {
+    type: 'String'
+  },
 }, {
   timestamps: true
 });
