@@ -480,7 +480,6 @@ class purchaseController extends BaseController {
             poReceivingId: "$poDetails",
             receivingStatus: 1,
             updatedAt:1,
-            item: 1,
             sapGrnNo:1
           },
         },
