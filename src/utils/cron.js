@@ -1,3 +1,4 @@
+const cluster = require('cluster');
 const schedule = require('node-schedule');
 const cronLogger = require('./cronLogger');
 const moment = require('moment');
@@ -44,40 +45,43 @@ module.exports = () => {
     info('------------------------');
   });
 
-  // cron job for sync Purchase order
-  schedule.scheduleJob('0 */2 * * * *', async () => {
-    let requestdId = guid();
-    let time = moment().format('DD-MM-YYYY HH:mm')
-    info('------------------------');
-    info('CRON TAB RUNNING STARTED', time);
-    cronLogger.info(`CRON-${requestdId} | ${time} | STARTED FOR SYNC PURCHASE ORDER`);
-    let isPurchaseOrderUpdated = await hitCronToSyncPurchaseOrderData(requestdId);
-    if (isPurchaseOrderUpdated.success) {
-      cronLogger.info(`CRON-${requestdId} | ${time} | COMPLETED SUCCESSFULLY - `, JSON.stringify(isPurchaseOrderUpdated.data));
-      info('CRON TAB SUCCESSFULLY FINISHED ', time);
-    } else {
-      cronLogger.error(`CRON-${requestdId} | ${time} | ERROR - `, JSON.stringify(isPurchaseOrderUpdated.error));
-      error('CRON TAB ERROR ', time, isPurchaseOrderUpdated.error);
-    }
-    info('------------------------');
-  });
-
-  // cron job for sync Sales order
-  schedule.scheduleJob('0 */2 * * * *', async () => {
-    let requestdId = guid();
-    let time = moment().format('DD-MM-YYYY HH:mm')
-    info('------------------------');
-    info('CRON TAB RUNNING STARTED', time);
-    cronLogger.info(`CRON-${requestdId} | ${time} | STARTED FOR SYNC SALES ORDER`);
-    let isSalesOrderUpdated = await hitCronToSyncSalesOrderData(requestdId);
   
-    if (isSalesOrderUpdated.success) {
-      cronLogger.info(`CRON-${requestdId} | ${time} | COMPLETED SUCCESSFULLY - `, JSON.stringify(isSalesOrderUpdated.data));
-      info('CRON TAB SUCCESSFULLY FINISHED ', time);
-    } else {
-      cronLogger.error(`CRON-${requestdId} | ${time} | ERROR - `, JSON.stringify(isSalesOrderUpdated.error));
-      error('CRON TAB ERROR ', time, isSalesOrderUpdated.error);
-    }
-    info('------------------------');
-  });
+  if(cluster.isMaster) {
+    // cron job for sync Purchase order
+    schedule.scheduleJob('0 */2 * * * *', async () => {
+      let requestdId = guid();
+      let time = moment().format('DD-MM-YYYY HH:mm')
+      info('------------------------');
+      info('CRON TAB RUNNING STARTED', time);
+      cronLogger.info(`CRON-${requestdId} | ${time} | STARTED FOR SYNC PURCHASE ORDER`);
+      let isPurchaseOrderUpdated = await hitCronToSyncPurchaseOrderData(requestdId);
+      if (isPurchaseOrderUpdated.success) {
+        cronLogger.info(`CRON-${requestdId} | ${time} | COMPLETED SUCCESSFULLY - `, JSON.stringify(isPurchaseOrderUpdated.data));
+        info('CRON TAB SUCCESSFULLY FINISHED ', time);
+      } else {
+        cronLogger.error(`CRON-${requestdId} | ${time} | ERROR - `, JSON.stringify(isPurchaseOrderUpdated.error));
+        error('CRON TAB ERROR ', time, isPurchaseOrderUpdated.error);
+      }
+      info('------------------------');
+    });
+
+    // cron job for sync Sales order
+    schedule.scheduleJob('0 */2 * * * *', async () => {
+      let requestdId = guid();
+      let time = moment().format('DD-MM-YYYY HH:mm')
+      info('------------------------');
+      info('CRON TAB RUNNING STARTED', time);
+      cronLogger.info(`CRON-${requestdId} | ${time} | STARTED FOR SYNC SALES ORDER`);
+      let isSalesOrderUpdated = await hitCronToSyncSalesOrderData(requestdId);
+    
+      if (isSalesOrderUpdated.success) {
+        cronLogger.info(`CRON-${requestdId} | ${time} | COMPLETED SUCCESSFULLY - `, JSON.stringify(isSalesOrderUpdated.data));
+        info('CRON TAB SUCCESSFULLY FINISHED ', time);
+      } else {
+        cronLogger.error(`CRON-${requestdId} | ${time} | ERROR - `, JSON.stringify(isSalesOrderUpdated.error));
+        error('CRON TAB ERROR ', time, isSalesOrderUpdated.error);
+      }
+      info('------------------------');
+    });
+  }
 }
