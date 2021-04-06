@@ -285,7 +285,7 @@ class purchaseController extends BaseController {
           },
           {
             $addFields: {
-              total: {
+              basketTotal: {
                 $sum: {
                   $map: {
                     input: "$item",
@@ -309,7 +309,7 @@ class purchaseController extends BaseController {
                       $round: [
                         {
                           $multiply: [
-                            { $divide: ["$$item.itemTax", "$$item.quantity"] },
+                            "$$item.taxable_value",
                             "$$item.received_qty",
                           ],
                         },
@@ -350,14 +350,14 @@ class purchaseController extends BaseController {
               "item":1,
               totalDiscount:1,
               totalTax:1,
-              total:1,
+              basketTotal:1,
               poDetails:1
             },
           }
         ]
       );
       if(bucketList && bucketList[0] && bucketList[0].item && bucketList[0].item.length){
-        bucketList[0].basketTotal = bucketList[0].total+bucketList[0].totalDiscount-bucketList[0].totalTax
+        bucketList[0].total = bucketList[0].basketTotal-bucketList[0].totalDiscount+bucketList[0].totalTax
         bucketList[0].netWeight = 0;
         bucketList[0].vendorInvoiceNo = 'NA'
 
