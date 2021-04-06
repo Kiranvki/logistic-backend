@@ -58,7 +58,7 @@ const schemas = {
       }
     }),
     date_of_manufacturing:Joi.date().label('Manufacturing date').optional(),//to-do
-    received_qty:Joi.number().integer().min(1).label('Received quantity').required(),
+    received_qty:Joi.number().integer().min(0).label('Received quantity').required(),
     remarks:Joi.string().trim().label('remarks').valid('Stock Quantity supplied is less', 'Stock Quality not upto the mark').options({
       language: {
         string: {

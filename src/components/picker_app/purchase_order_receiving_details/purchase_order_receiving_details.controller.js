@@ -240,11 +240,49 @@ class purchaseController extends BaseController {
       let query = {
         _id: mongoose.Types.ObjectId(poReceivingId),
         isDeleted: 0,
-        'item.received_qty': {$gt:0}//to-do not workinfg properlu
+        'item.received_qty': {$gt:0},//to-do not workinfg properly
         // 'item.is_edited': 1//to-do not workinfg properlu
       };
       var bucketList = await Model.aggregate(
         [{$match:query},
+          {
+            $lookup: {
+              from: "purchase_order",
+              let: {
+                id: "$poId",
+              },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        { $eq: ["$_id", "$$id"] },
+                        { $eq: ["$receivingStatus", 4] },
+                        { $eq: ["$isDeleted", 0] },
+  
+                        // { $gt: ["$item.quantity", "$item.received_qty"] },//not working need to check later //to-do
+                      ],
+                    },
+                  },
+                },
+  
+                { $limit: 1 },
+                {
+                  $project: {
+                    _id: 1,
+                    po_number:1
+                  },
+                },
+              ],
+              as: "poDetails",
+            },
+          },
+          {
+            $unwind: {
+              path: "$poDetails",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
           {
             $addFields: {
               total: {
@@ -312,18 +350,13 @@ class purchaseController extends BaseController {
               "item":1,
               totalDiscount:1,
               totalTax:1,
-              total:1
+              total:1,
+              poDetails:1
             },
           }
         ]
       );
       if(bucketList && bucketList[0] && bucketList[0].item && bucketList[0].item.length){
-        let item= bucketList[0].item.filter(item=>{
-          return item.received_qty>0
-
-          // return item.is_edited>0
-        })
-        bucketList[0].item=item;
         bucketList[0].basketTotal = bucketList[0].total+bucketList[0].totalDiscount-bucketList[0].totalTax
         bucketList[0].netWeight = 0;
         bucketList[0].vendorInvoiceNo = 'NA'
