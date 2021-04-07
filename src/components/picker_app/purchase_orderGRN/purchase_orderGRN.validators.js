@@ -27,16 +27,9 @@ const schemas = {
         }),
     },
     body: {
-      vendorInvoiceNumber: Joi.string().trim().label("Vendor Invoice Number")
-      .regex(/^[A-Za-z0-9]*$/).options({
-          language: {
-            string: {
-              regex: {
-                base: 'should be a valid value'
-              }
-            }
-          }
-        }).required(),
+      vendorInvoiceNumber: Joi.string().trim()
+        .label("Vendor Invoice Number")
+        .required(),
     },
   }),
 
