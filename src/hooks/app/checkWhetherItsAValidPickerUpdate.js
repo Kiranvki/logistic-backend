@@ -23,12 +23,14 @@ module.exports = async (req, res, next) => {
     let objectId = mongoose.Types.ObjectId;
 
     // get the picker id   
-    let pickerBoyId = req.params.pickerBoyId || req.user._id, // picker id 
-      fullName = req.body.fullName,
-      dateOfBirth = req.body.dateOfBirth || '',
-      isNotChanged = [],
-      toChangeObject = [],// change object 
-      DateOfBirthFromDb = moment();
+    let contactMobile = req.body.contactMobile, // contact number 
+        email = req.body.email, // email  
+        pickerBoyId = req.params.pickerBoyId || req.user._id, // picker id 
+        fullName = req.body.fullName,
+        dateOfBirth = req.body.dateOfBirth || '',
+        isNotChanged = [],
+        toChangeObject = [],// change object 
+        DateOfBirthFromDb = moment();
 
 
     if (objectId.isValid(pickerBoyId)) {
@@ -39,20 +41,24 @@ module.exports = async (req, res, next) => {
       if (getPickerBoyDetails.success) {
         info('VALID PickerBoy!');
 
-        if (dateOfBirth && !_.isEmpty(dateOfBirth)) {
-          dateOfBirth = moment(dateOfBirth, 'DD-MM-YYYY').toDate();
-          DateOfBirthFromDb = moment(getPickerBoyDetails.data.dateOfBirth, 'DD-MM-YYYY').toDate();
-          //checking both dates are same
-          if (moment(DateOfBirthFromDb).isSame(dateOfBirth)) {
-            isNotChanged.push('dateOfBirth')
-          } else {
-            toChangeObject = { ...toChangeObject, 'dateOfBirth': dateOfBirth }
-          }
-        }
+        // if (dateOfBirth && !_.isEmpty(dateOfBirth)) {
+        //   dateOfBirth = moment(dateOfBirth, 'DD-MM-YYYY').toDate();
+        //   DateOfBirthFromDb = moment(getPickerBoyDetails.data.dateOfBirth, 'DD-MM-YYYY').toDate();
+        //   //checking both dates are same
+        //   if (moment(DateOfBirthFromDb).isSame(dateOfBirth)) {
+        //     isNotChanged.push('dateOfBirth')
+        //   } else {
+        //     toChangeObject = { ...toChangeObject, 'dateOfBirth': dateOfBirth }
+        //   }
+        // }
 
-        if (fullName && fullName == getPickerBoyDetails.data.fullName) isNotChanged.push('fullName');
-        else if (fullName) toChangeObject = { ...toChangeObject, 'fullName': fullName }
+        // if (fullName && fullName == getPickerBoyDetails.data.fullName) isNotChanged.push('fullName');
+        // else if (fullName) toChangeObject = { ...toChangeObject, 'fullName': fullName }
 
+        if (email && email == getSalesmanDetails.data.email) isNotChanged.push('email');
+        else if (email) toChangeObject = { ...toChangeObject, 'email': email }
+        if (contactMobile && contactMobile == getSalesmanDetails.data.contactMobile) isNotChanged.push('contactMobile')
+        else if (contactMobile) toChangeObject = { ...toChangeObject, 'contactMobile': parseInt(contactMobile) }
 
         // including it to request body 
         req.body.toChangeObject = toChangeObject;

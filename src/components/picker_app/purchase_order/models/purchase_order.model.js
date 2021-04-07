@@ -16,9 +16,9 @@ const purchaseOrder = new Schema({
     sapGrnNo:{
       type: String
     },
-    itemCount:{
-      type:Number
-    },
+    itemsNoArray:[{
+      type:String
+    }],
     grnId:{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'purchaseorderGRN',

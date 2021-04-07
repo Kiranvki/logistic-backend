@@ -109,7 +109,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       let id = req.user._id || '';
 
       // inserting data into the db 
-      let isUpdated = await PickerBoyCtrl.updateDetails(req.body.toChangeObject, id);
+      let isUpdated = await PickerBoyCtrl.updateDetails(req.body, id);
 
       // check if updated 
       if (isUpdated.success) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.pickerBoyDetailsUpdated);
@@ -866,7 +866,7 @@ getOrderDetails = async (req,res,next)=>{
            * No. of quantity picked * MRP amount
            */
 
-          totalAmount = parseInt(item.pickedQuantity) * parseInt(item.mrp_amount)
+          totalAmount = parseInt(totalAmount) + (parseInt(item.pickedQuantity) * parseInt(item.mrp_amount))
           // calculating the tax amount 
           const cgstValue = parseFloat(item['cgst-pr']); // Converting to number
           let taxValueForSingleItemCGST = parseFloat((amountAfterDiscountForSingle * cgstValue / 100).toFixed(2))

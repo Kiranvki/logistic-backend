@@ -37,7 +37,7 @@ class purchaseController extends BaseController {
 
   grnDetails = async (req, res) => {
     try {
-      info("Get Purchase order GRN details !", req.body, req.query, req.params);
+      info("Get Purchase order GRN details !");
 
       // success
       return this.success(
@@ -64,7 +64,8 @@ class purchaseController extends BaseController {
     try {
       let poReceivingDetails = req.body.poReceivingDetails;
       let poDetails = await poCtrl.get(poReceivingDetails.poId);
-      let pickerBoyId= mongoose.Types.ObjectId(req.user._id)  
+      let pickerBoyId= mongoose.Types.ObjectId(req.user._id)  ;
+      let receivedItemsMaterialNumber=[];
       var dateToday = new Date();
       poDetails = poDetails.data[0];
       var poDeliveryDate= poDetails.delivery_date;
@@ -154,6 +155,8 @@ class purchaseController extends BaseController {
       }
       for(let i = 0; i < poReceivingDetails.item.length; i++) {
         let item = poReceivingDetails.item[i];
+        receivedItemsMaterialNumber.push(item.material_no);
+
         poReceivingDetails.item[i].pending_qty=item.quantity- (item.received_qty?item.received_qty:0);
       }
 
@@ -210,9 +213,9 @@ class purchaseController extends BaseController {
         grnDetails.poVendorNumber = "NA";
         grnDetails.poVendorDate = "NA";
         if(poDetails.sapGrnNo &&poDetails.sapGrnNo.length)
-         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id,pickerBoyId:pickerBoyId})
+         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemsNoArray:receivedItemsMaterialNumber, grnId:grnDetails._id,pickerBoyId:pickerBoyId})
          else
-         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemCount:poReceivingDetails.item.length, grnId:grnDetails._id,pickerBoyId:pickerBoyId}]
+         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemsNoArray:receivedItemsMaterialNumber, grnId:grnDetails._id,pickerBoyId:pickerBoyId}]
         await poCtrl.modifyPo({
           _id:poDetails._id,
           status :1,

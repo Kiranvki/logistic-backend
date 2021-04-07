@@ -4,6 +4,7 @@
 // const invoicePickerBoySalesOrderMappingctrl = require('../invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller');
 // const salesOrderctrl = require('../../sales_order/sales_order/sales_order.controller');
 // const pickerboySalesorderItemsMappingctrl = require('../pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
+const request = require('request-promise');
 
 const BasicCtrl = require("../../basic_config/basic_config.controller");
 const BaseController = require("../../baseController");
@@ -43,7 +44,7 @@ class purchaseController extends BaseController {
       sortingArray["delivery_date"] = -1;
       let todaysDate = moment().format("YYYY-MM-DD");
       let todaysEndDate = moment().format("YYYY-MM-DD");
-      info("Get Purchase order  details !", req.body, req.query, req.params);
+      info("Get Purchase order  details !");
       let query = {
         company_code:"1000",
         plant:req.user.plant?req.user.plant.toString():'',//consider data type
@@ -178,7 +179,7 @@ class purchaseController extends BaseController {
 
   getPODetails = async (req, res) => {
     try {
-      info("Get Purchase order  details !", req.body, req.query, req.params);
+      info("Get Purchase order  details !");
 
       var poDetails = await Model.aggregate([
         {
@@ -316,39 +317,103 @@ class purchaseController extends BaseController {
       };
     }
   };
+  getVendorInfo = async(vendor_no)=>{
+    try{
 
-  vendorDetails = async (req, res) => {
-    try {
-      info("Get Purchase order  details !", req.body, req.query, req.params);
-
-      var sellerDetails = await Model.findOne(
-        {
-          status: 1,//to-do
-          isDeleted: 0,
-          _id: mongoose.Types.ObjectId(req.params.poId),
-        },
-        {
-          po_number: 1,
-          vendor_no: 1,
-          vendor_name: 1,
-          supplierPhone: 1,
+      let body={
+        "request": {
+           "from_date": "",
+           "to_date": "",
+           "purchase_org": "",
+           "vendor_no": vendor_no
         }
-      ).lean();
-      if (sellerDetails) {
-        sellerDetails.location = "Banglore";
-        sellerDetails.warehouse = "Banglore";
-        sellerDetails.address = "Banglore";
-      } else {
-        sellerDetails = {};
+     }
+      let options = {
+        method: 'GET',
+        uri: process.env.sapBaseUrl+ process.env.vendorDetails,
+        headers: {
+          'Content-Type': 'application/json' 
+      },
+        json: true,
+        body:body
+      };
+      console.log(options)
+
+      return await request(options);
+    }catch(err){
+      console.log(err)
+      throw err
+    }
+
+  }
+  getVendorDetails = async (req, res) => {
+    try {
+      info("Get Purchase order  details !");
+      var vendorDetails=[]
+      try{
+        vendorDetails= await this.getVendorInfo(req.params.vendor_number);
+        if(vendorDetails && vendorDetails.response && vendorDetails.response.length){
+          vendorDetails = vendorDetails.response[0];
+          let fullAddress=[];
+          if(vendorDetails.street){
+            fullAddress.push(vendorDetails.street)
+          }
+          if(vendorDetails.street_3){
+            fullAddress.push(vendorDetails.street_3)
+          }
+          if(vendorDetails.district){
+            fullAddress.push(vendorDetails.district)
+          }
+          if(vendorDetails.city){
+            fullAddress.push(vendorDetails.city)
+          }
+          if(vendorDetails.address_time_zone){
+            fullAddress.push(vendorDetails.address_time_zone)
+          }
+          if(vendorDetails.city_postal_code){
+            fullAddress.push(',')
+            fullAddress.push(vendorDetails.city_postal_code)
+          }
+          let details={
+            vendor_no:vendorDetails.vendor_no,
+            name_of_organization:vendorDetails.name_1_of_organization,
+            street:vendorDetails.street,
+            city_postal_code:vendorDetails.city_postal_code,
+            city:vendorDetails.city,
+            country:vendorDetails.address_time_zone,
+            mobileNumber:vendorDetails.mobile_no,
+            email:vendorDetails.e_mail_address,
+            currency:vendorDetails.purchase_order_currency,
+            street_3: vendorDetails.street_3,
+            district: vendorDetails.district,
+            fullAddress:fullAddress.join(' ')
+
+          }
+          // success
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            details,
+            this.messageTypes.poListFetched
+          );
+        }else{
+          this.errors(
+            req,
+            res,
+            this.status.HTTP_INTERNAL_SERVER_ERROR,
+            this.messageTypes.vendorDetailsNotFound
+          );
+        }
+      }catch(err){
+        console.log(err)
+        this.errors(
+          req,
+          res,
+          this.status.HTTP_INTERNAL_SERVER_ERROR,
+          this.messageTypes.errorInGettingVendorDetails
+        );
       }
-      // success
-      return this.success(
-        req,
-        res,
-        this.status.HTTP_OK,
-        sellerDetails,
-        this.messageTypes.poListFetched
-      );
 
       // catch any runtime error
     } catch (err) {
@@ -363,7 +428,7 @@ class purchaseController extends BaseController {
   };
   poFilteredList =async(req,res)=>{
     try {
-      info("Get Purchase order  filtered list !", req.body, req.query, req.params);
+      info("Get Purchase order  filtered list !");
       let pickerBoyId=mongoose.Types.ObjectId(req.user._id)
       var page = req.query.page || 1,
         sortingArray = {},
@@ -372,10 +437,17 @@ class purchaseController extends BaseController {
           else return 10;
         });
       let skip = parseInt(page - 1) * pageSize;
-      sortingArray["receivingStatus"] = -1;
-      sortingArray["delivery_date"] = -1;
       let todaysDate = moment().format("YYYY-MM-DD");
       let todaysEndDate = moment().format("YYYY-MM-DD");
+      var projectList={
+        po_number: 1,
+        vendor_no: 1,
+        vendor_name: 1,
+        poReceivingId: "$poDetails",
+        receivingStatus: 1,
+        updatedAt:1,
+        delivery_date:1,
+      }
       let query = {
         
       };
@@ -385,19 +457,27 @@ class purchaseController extends BaseController {
           $options: 'is'
         };
       }
-      if(req.params.type=='history'){
-        query.receivingStatus=1
-        query['sapGrnNo.pickerBoyId'] =pickerBoyId
-      }else if(req.params.type=='pending'){
-        query.receivingStatus=2;
-        query['sapGrnNo.pickerBoyId'] =pickerBoyId
-
-        // req.query['item.quantity']={$ne:''};
-
-      }else if(req.params.type=='ongoing'){
-        query.receivingStatus=4
+      if(req.query.date){
+        query['delivery_date'] =moment(new Date(req.query.date)).format("YYYY-MM-DD")
       }
+      if(req.params.type=='history'){
+        query.receivingStatus = 1;
+        query['sapGrnNo.pickerBoyId'] =pickerBoyId
+        projectList.itemCount = { $size: "$item" };
+        sortingArray["updatedAt"] = -1;
 
+      }else if(req.params.type=='pending'){
+        query.receivingStatus = 2;
+        query['sapGrnNo.pickerBoyId'] =pickerBoyId
+        projectList.item = 1;
+        projectList.sapGrnNo=1
+      }else if(req.params.type=='ongoing'){
+        query.receivingStatus = 4;
+        projectList.item = 1;
+
+      }
+      sortingArray["delivery_date"] = -1;
+      sortingArray["po_number"] = -1;
       // get the total PO
       let totalPO = await Model.countDocuments({
         ...query,
@@ -407,17 +487,7 @@ class purchaseController extends BaseController {
           $match: query,
         },
         {
-          $project: {
-            po_number: 1,
-            vendor_no: 1,
-            vendor_name: 1,
-            itemCount: { $size: "$item" },
-            poReceivingId: "$poDetails",
-            receivingStatus: 1,
-            updatedAt:1,
-            item: 1,
-            sapGrnNo:1
-          },
+          $project: projectList,
         },
         {
           $sort: sortingArray,
@@ -429,7 +499,39 @@ class purchaseController extends BaseController {
           $limit: pageSize,
         },
       ]);
-    
+      // if(req.params.type=='pending'){
+      //   if(poList && poList.length){
+      //     poList.forEach((element)=>{
+      //       let itemCount=0
+      //       element.item.forEach((item)=>{
+      //         if(item.received_qty>0){
+      //           itemCount++;
+      //         }
+      //       })
+      //       element.itemCount=itemCount;
+      //       delete element.item;
+      //     })
+      //   }
+      // }
+      if(req.params.type=='ongoing' || req.params.type=='pending'){
+        if(poList && poList.length){
+          poList.forEach((element)=>{
+            let itemCount=0
+            element.item.forEach((item)=>{
+              if(!item.received_qty || (item.received_qty!=item.quantity)){
+                itemCount++;
+              }
+            })
+            element.itemCount=itemCount;
+            delete element.item;
+            if(req.params.type=='pending'){
+              element.deliveredDate=element.sapGrnNo[(element.sapGrnNo.length-1)].date;
+              
+            }
+            delete element.sapGrnNo
+          })
+        }
+      }
       return this.success(
         req,
         res,
@@ -456,6 +558,41 @@ class purchaseController extends BaseController {
       );
     }
   }
+
+  filteredPODetails =async(req,res)=>{
+    try{
+      info("PO filtered list details");
+      var poDetails= await Model.findOne({_id:mongoose.Types.ObjectId(req.params.poId)})
+
+      if(poDetails){
+        return this.success(
+          req,
+          res,
+          this.status.HTTP_OK,
+          {
+            result: poDetails,
+          },
+          this.messageTypes.poDetailsFetched
+        );
+      }else{
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.poDetailsNotFound
+        );
+      }
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  }
+
 
   insertPurchaseOrderData = async (sapRawData) => {
     try{
@@ -506,6 +643,8 @@ class purchaseController extends BaseController {
       };
     }
   }
+  
+  
 }
 
 // exporting the modules
