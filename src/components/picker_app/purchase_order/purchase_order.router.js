@@ -63,6 +63,12 @@ function purchaseOrderRoutes() {
       verifyAppToken, // verify app user token 
       ctrl.poFilteredList // post controller 
     );
+    closed.route('/purchaseOrder/filteredPO/:poId').get(
+      [joiPoIdValidation], // joi validation
+      // isInvoiceGenerated, // check whether the invoice is already generated
+      verifyAppToken, // verify app user token 
+      ctrl.filteredPODetails // post controller 
+    );
   };
 }
 

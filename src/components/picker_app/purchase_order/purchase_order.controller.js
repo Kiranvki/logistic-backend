@@ -437,10 +437,17 @@ class purchaseController extends BaseController {
           else return 10;
         });
       let skip = parseInt(page - 1) * pageSize;
-      sortingArray["receivingStatus"] = -1;
-      sortingArray["delivery_date"] = -1;
       let todaysDate = moment().format("YYYY-MM-DD");
       let todaysEndDate = moment().format("YYYY-MM-DD");
+      var projectList={
+        po_number: 1,
+        vendor_no: 1,
+        vendor_name: 1,
+        poReceivingId: "$poDetails",
+        receivingStatus: 1,
+        updatedAt:1,
+        delivery_date:1,
+      }
       let query = {
         
       };
@@ -450,19 +457,27 @@ class purchaseController extends BaseController {
           $options: 'is'
         };
       }
-      if(req.params.type=='history'){
-        query.receivingStatus=1
-        query['sapGrnNo.pickerBoyId'] =pickerBoyId
-      }else if(req.params.type=='pending'){
-        query.receivingStatus=2;
-        query['sapGrnNo.pickerBoyId'] =pickerBoyId
-
-        // req.query['item.quantity']={$ne:''};
-
-      }else if(req.params.type=='ongoing'){
-        query.receivingStatus=4
+      if(req.query.date){
+        query['delivery_date'] =moment(new Date(req.query.date)).format("YYYY-MM-DD")
       }
+      if(req.params.type=='history'){
+        query.receivingStatus = 1;
+        query['sapGrnNo.pickerBoyId'] =pickerBoyId
+        projectList.itemCount = { $size: "$item" };
+        sortingArray["updatedAt"] = -1;
 
+      }else if(req.params.type=='pending'){
+        query.receivingStatus = 2;
+        query['sapGrnNo.pickerBoyId'] =pickerBoyId
+        projectList.item = 1;
+        projectList.sapGrnNo=1
+      }else if(req.params.type=='ongoing'){
+        query.receivingStatus = 4;
+        projectList.item = 1;
+
+      }
+      sortingArray["delivery_date"] = -1;
+      sortingArray["po_number"] = -1;
       // get the total PO
       let totalPO = await Model.countDocuments({
         ...query,
@@ -472,16 +487,7 @@ class purchaseController extends BaseController {
           $match: query,
         },
         {
-          $project: {
-            po_number: 1,
-            vendor_no: 1,
-            vendor_name: 1,
-            itemCount: { $size: "$item" },
-            poReceivingId: "$poDetails",
-            receivingStatus: 1,
-            updatedAt:1,
-            sapGrnNo:1
-          },
+          $project: projectList,
         },
         {
           $sort: sortingArray,
@@ -493,7 +499,39 @@ class purchaseController extends BaseController {
           $limit: pageSize,
         },
       ]);
-    
+      // if(req.params.type=='pending'){
+      //   if(poList && poList.length){
+      //     poList.forEach((element)=>{
+      //       let itemCount=0
+      //       element.item.forEach((item)=>{
+      //         if(item.received_qty>0){
+      //           itemCount++;
+      //         }
+      //       })
+      //       element.itemCount=itemCount;
+      //       delete element.item;
+      //     })
+      //   }
+      // }
+      if(req.params.type=='ongoing' || req.params.type=='pending'){
+        if(poList && poList.length){
+          poList.forEach((element)=>{
+            let itemCount=0
+            element.item.forEach((item)=>{
+              if(!item.received_qty || (item.received_qty!=item.quantity)){
+                itemCount++;
+              }
+            })
+            element.itemCount=itemCount;
+            delete element.item;
+            if(req.params.type=='pending'){
+              element.deliveredDate=element.sapGrnNo[(element.sapGrnNo.length-1)].date;
+              
+            }
+            delete element.sapGrnNo
+          })
+        }
+      }
       return this.success(
         req,
         res,
@@ -520,6 +558,41 @@ class purchaseController extends BaseController {
       );
     }
   }
+
+  filteredPODetails =async(req,res)=>{
+    try{
+      info("PO filtered list details");
+      var poDetails= await Model.findOne({_id:mongoose.Types.ObjectId(req.params.poId)})
+
+      if(poDetails){
+        return this.success(
+          req,
+          res,
+          this.status.HTTP_OK,
+          {
+            result: poDetails,
+          },
+          this.messageTypes.poDetailsFetched
+        );
+      }else{
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.poDetailsNotFound
+        );
+      }
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  }
+
 
   insertPurchaseOrderData = async (sapRawData) => {
     try{
