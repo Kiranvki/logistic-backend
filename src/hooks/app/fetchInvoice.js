@@ -18,7 +18,7 @@ module.exports = async (req,res,next) => {
     let obj;
   try {
     info(`Getting Invoice from SAP!`);
-    console.log(req.body.invoice_detail['data']['invoice_no'])
+    // console.log(req.body.invoice_detail['data']['invoice_no'])
 
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
@@ -32,7 +32,7 @@ module.exports = async (req,res,next) => {
      obj = {
         "request": {
           
-          "invoice_no":req.body.invoice_detail['data']['invoice_no'],
+          "invoice_no": "0900000037"    //req.body.invoice_detail['data']['invoice_no'],
           
         }
      }

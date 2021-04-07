@@ -17,6 +17,11 @@ const salesOrder = new Schema({
    * state 2 : Fully fulfilled
    */
   },
+  'quantitySupplied':{
+    type:Number,
+    default:0
+
+  },
   'orderPK': {
     type: 'Number'
   },
@@ -233,6 +238,27 @@ const salesOrder = new Schema({
       required: true
     },
   },
+  'item':[{
+    'fulfillmentStatus': {
+      type: 'Number',
+      default: 0,
+      enum: [0, 1, 2]
+      /**
+     * state 0 : Not started
+     * state 1 : Partially fulfilled 
+     * state 2 : Fully fulfilled
+     */
+    },
+    'suppliedQty':{
+      type:Number
+    },
+ 'requireQuantity':{
+  type:Number
+ },
+  'totalQuantity':{
+    type:Number
+  }
+  }],
   'orderItems': [
     {
       'rowNo': {

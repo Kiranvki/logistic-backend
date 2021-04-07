@@ -1,5 +1,6 @@
 // controllers 
 const SalesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
+
 const PockerBoyCtrl = require('../../employee/picker_boy/picker_boy.controller');
 const AttendanceCtrl = require('../onBoard/app_picker_user_attendance/app_picker_user_attendance.controller');
 const pickerboySalesOrderMappingController = require('../pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
@@ -20,6 +21,7 @@ const {
 const {
 
 } = require('../../../third_party_api/self');
+const sales_orderController = require('../../sales_order/sales_order/sales_order.controller');
 
 // We are using timeout because the Flow is synchronised and inorder to get the final report we need to wait for 5 secs 
 class timeout {
@@ -393,9 +395,22 @@ class pickerSalesOrderMappingController extends BaseController {
 
   generateInv = async (req,res,next)=>{
     try {
-      let OrderData = req.body.orderDetail,
+      let OrderData = req.body.orderDetail
       invoiceDetail = req.body.invoice_detail['data'][0]
+    //  console.log(OrderData['pickerBoySalesOrderMappingId']['salesOrderId'],OrderData['itemDetail'][0]['totalQuantity'])
+    //  console.log(OrderData['itemDetail'][0]['requireQuantity'],OrderData['itemDetail'][0]['suppliedQty'],OrderData['itemDetail'][0]['item_no'])
+    
+     
 
+     sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], req.body.invoice_detail)
+    //  salesOrderId: {
+    //   _id: 606901f99429dd62745df225,
+     
+      // itemDetail{
+      //   totalQuantity: 1,
+      // requireQuantity: 1,
+      // suppliedQty: 0,
+      // }
       req.body.invDetail['itemSupplied'].forEach((data,i)=>{
       OrderData['itemDetail'].forEach((item,j) => {
         // console.log('item_no',data.item_no,item.item_no)

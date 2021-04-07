@@ -466,20 +466,20 @@ getOrderDetails = async (req,res,next)=>{
          orderData = {}
     try {
       info('SalesOrder GET DETAILS !');
-      console.log(orderId)
+      // console.log(orderId)
       switch(req.params.type){
         case 'salesorders':
          //check for release
           orderData = await salesOrderModel.find({'_id':mongoose.Types.ObjectId(orderId)}).lean().then((res) => {
           
             if (res && !_.isEmpty(res)) {
-              console.log('Get details',res)
+              // console.log('Get details',res)
               return {
                 success: true,
                 data: res
               }
             } else {
-              console.log('no data')
+              // console.log('no data')
               error('Error Searching Data in saleOrder DB!');
               return {
                 success: false
@@ -507,10 +507,30 @@ getOrderDetails = async (req,res,next)=>{
   
       }
       // get the sale Order Details
-   
+   console.log(orderData)
+      // orderData.forEach((items,i)=>{
+
+      // })
+      
+
+
 
       // check if inserted 
-      if (orderData && !_.isEmpty(orderData)) return this.success(req, res, this.status.HTTP_OK, orderData, this.messageTypes.salesOrderDetailsFetched);
+      if (orderData && !_.isEmpty(orderData)){
+        orderData['data'][0]['item'].forEach((item,j)=>{
+          console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
+          orderData['data'][0]['item'][j]['qty'] = (parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)).toString()
+        if((item.fulfillmentStatus?item.fulfillmentStatus:0)==2){
+          // console.log(todaysOrderData[i]['item'][j])
+          // todaysOrderData[i]['item'].splice(j, 1)
+          let status = (item.fulfillmentStatus?item.fulfillmentStatus:0)
+          _.remove(orderData['data'][0]['item'],{'fulfillmentStatus':2})
+      
+        }
+        })
+
+       return this.success(req, res, this.status.HTTP_OK, orderData, this.messageTypes.salesOrderDetailsFetched);
+      }
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
 
       // catch any runtime error 
@@ -730,7 +750,8 @@ getOrderDetails = async (req,res,next)=>{
       // get the basket data
       let salesOrderData = await Model.aggregate([{
         $match: {
-          '_id': mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId)
+          '_id': mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId),
+          'isDeleted':0
         }
       },
       {
@@ -1579,7 +1600,26 @@ try{
       'req_del_date': {
         '$eq': startOfTheDay
       },
+      $or: [{'fulfillmentStatus': { $ne: 2 }},{
+       
+       'fulfillmentStatus': { $exists: false }
+    }],
+    // 'item':{
+    // '$elemMatch': {
+    //   "fulfillmentStatus": {$ne:2}
+    // }
+    // },
+  //     "item": { 
+  //       "$elemMatch": {
+  //         $or: [ {'fulfillmentStatus': {  $ne: 2 }},{
+  //         'fulfillmentStatus': { $exists: false}},
+  //      ]
+  //     // 'fulfillmentStatus': { $exists: true, $ne: 1 },
+  //     // 'fulfillmentStatus': { $exists: false },
+  // }},
+   
       'plant':{'$eq':plant.toString()}
+     
     }
     }];
 
@@ -1695,7 +1735,20 @@ try{
   // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
 
   // console.log(todaysOrderData);
+console.log(todaysOrderData)
+todaysOrderData.forEach((items,i)=>{
+  items['item'].forEach((item,j)=>{
+    console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
+  todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)).toString()
+  if((item.fulfillmentStatus?item.fulfillmentStatus:0)==2){
+    console.log(todaysOrderData[i]['item'][j])
+    // todaysOrderData[i]['item'].splice(j, 1)
+    let status = (item.fulfillmentStatus?item.fulfillmentStatus:0)
+    _.remove(todaysOrderData[i]['item'],{'fulfillmentStatus':2})
 
+  }
+  })
+})
 
 
   if (todaysOrderData.length>0) {

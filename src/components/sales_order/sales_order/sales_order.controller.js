@@ -1816,6 +1816,11 @@ return {
     }
   }
 
+
+  
+
+
+
   insertSalesOrderData = async (sapRawData) => {
     try{
       if(sapRawData && sapRawData.length > 0) {
@@ -1857,6 +1862,96 @@ return {
       };;
     }
   }
+
+
+
+  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity = async(salesOrderId,soItem,invData)=>{
+    try {
+      info(`Updating Customer Info ! ${salesOrderId}`);
+      let isUpdated;
+// suppliedQuantity 
+let tomorrow  = moment().add(1,'days').format('YYYY-MM-DD');
+  // moment(new Date()).format('YYYY-MM-DD')
+  console.log(tomorrow)
+let soFullfilmentStatus = 2;
+soItem.forEach(async (sItem,i)=>{
+invData['data'][0]['item'].forEach(async (item,i)=>{
+  let itemFullfilmentStatus=1
+  // item.qty=1
+  if(sItem.item_no==item.item_no && item.qty<=(parseInt(sItem.qty)-parseInt(sItem.suppliedQty))){
+  if(item.qty==(parseInt(sItem.qty)-parseInt(sItem.suppliedQty))){
+    itemFullfilmentStatus=2
+  }else{
+    soFullfilmentStatus = 1
+
+  }
+  // console.log(item)
+ 
+  
+
+   isUpdated = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId),'item.item_no':item.item_no
+
+}, {
+  $set:{
+  
+    'item.$.fulfillmentStatus':itemFullfilmentStatus,
+
+},
+$inc:{
+  
+  'item.$.suppliedQty':parseInt(item.qty?item.qty:0),
+}
+});
+  // console.log(isUpdated)
+}else if((sItem.fulfillmentStatus?sItem.fulfillmentStatus:0)<=1){
+  soFullfilmentStatus = 1
+
+}
+}
+)
+
+})
+// console.log('soFullfilmentStatus',soFullfilmentStatus)
+let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId)
+}, {
+  $set:{
+    'fulfillmentStatus':soFullfilmentStatus,
+    
+}
+
+});
+if(isUpdated && isUpdatedfulfillmentStatus){
+  info('SalesOrder Status updated! !');
+          return {
+            success: true,
+            data: res
+          };
+        } else {
+          error('Failed to update SALESORDER! ');
+          return {
+            success: false,
+          };
+        }
+   
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
+
+  
+
+
+
+
+
+
 }
 
 // exporting the modules 

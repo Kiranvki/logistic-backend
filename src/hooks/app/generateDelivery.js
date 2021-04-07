@@ -5,6 +5,8 @@ const StatusCodes = require('../../facades/response');
 const MessageTypes = require('../../responses/types');
 const Exceptions = require('../../exceptions/Handler');
 const BasicCtrl = require('../../components/basic_config/basic_config.controller');
+const pickerBoyOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model');
+const pickerBoyOrderItemMappingModel = require('../../components/picker_app/pickerboy_salesorder_items_mapping/models/pickerboy_salesorder_items_mapping.model')
    
 
 // Responses & others utils 
@@ -28,7 +30,7 @@ module.exports = async (req,res,next) => {
     let url = process.env.sapPickingAllocation;
 
     console.log('Hitting SAP server for Generating the delivery Number *> ', url);
-    let obj = { 'request':{
+    var obj = { 'request':{
       'sales_order_no': OrderData['pickerBoySalesOrderMappingId']['sales_order_no'],
       'delivery_date': OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
       'shipping_point': OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
@@ -122,6 +124,20 @@ console.log('sap',req.body.delivery_detail['success'],req.body.delivery_detail['
   }else{
 if(req.body.delivery_detail['data']['flag']==='E'){
   info('Failed to generate delivery NO.')
+  let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
+    '_id':req.params.pickerBoyOrderMappingId},{
+    $set:{
+    'picking_allocation_response':JSON.stringify(req.body.delivery_detail),
+    'picking_allocation_request':JSON.stringify(obj),
+    'isItemPicked':false,
+    'isStartedPicking':false,
+    'state':1,
+    'isDeleted':1,
+    'isSapError':'DNE' //DNE->delivery_no error
+  }})
+  //fixed require
+  await pickerBoyOrderItemMappingModel.update({ 'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId},{$set:{'isDeleted':1 }})
+  //'isItemPicked':false,'isStartedPicking':false,isInvoice:false,delivery:'N/A,state:1 ->delivery_no failed
   // status code changes check required
 return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,MessageTypes.salesOrder.pickerBoySalesOrderDeliveryNumberAlreadyGenerated);
 }else{

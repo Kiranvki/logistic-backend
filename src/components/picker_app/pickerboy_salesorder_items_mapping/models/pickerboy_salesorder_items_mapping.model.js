@@ -153,7 +153,7 @@ class PickerBoySalesOrderItemsMappingClass{
     let isExist = await this.count({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId });
     if(isExist){
 
-      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId },{$push:{'itemDetail':orderObjItem.itemDetail}})
+      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId,'isDeleted':0 },{$push:{'itemDetail':orderObjItem.itemDetail}})
       
     }
     // let obj = await new this(orderObjItem).save()
@@ -166,7 +166,7 @@ class PickerBoySalesOrderItemsMappingClass{
     let isExist = await this.count({ 'pickerBoySalesOrderMappingId':mongoose.Types.ObjectId(pickerBoySalesOrderMappingId) });
     if(isExist){
 
-      return await this.find({ 'pickerBoySalesOrderMappingId':pickerBoySalesOrderMappingId }).lean()
+      return await this.find({ 'pickerBoySalesOrderMappingId':pickerBoySalesOrderMappingId,'isDeleted':0 }).lean()
       
     }
     // let obj = await new this(orderObjItem).save()

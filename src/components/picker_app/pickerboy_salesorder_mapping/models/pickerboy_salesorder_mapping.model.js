@@ -91,6 +91,18 @@ const pickerBoyOrderMappingSchema = new Schema({
     
     default: 0
   },
+  'picking_allocation_response':{
+    type:String
+  },
+  'picking_allocation_request':{
+    type:String
+  },
+  'invoice_response':{
+    type:String
+  },
+      'invoice_request':{
+        type:String
+      },
   'remarks':[{
     type:String,
     default:'N/A'
@@ -99,6 +111,8 @@ const pickerBoyOrderMappingSchema = new Schema({
     type: Number,
     
     default: 1
+  },'isSapError':{
+    type:String
   },
   'invoiceDetail':{
     'isInvoiceRequest':{

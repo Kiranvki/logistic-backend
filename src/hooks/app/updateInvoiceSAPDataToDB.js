@@ -30,6 +30,7 @@ console.log('inv upload',req.body.invoice_detail)
            total_tax = 0,
           total_discount = 0,
           total_net_value = 0,
+          fullfiled = 2,//completely fullfiled
           total_weight = 0;
         
         const invoiceItemSuppliedArr = []
@@ -110,7 +111,7 @@ console.log('inv upload',req.body.invoice_detail)
             let invoiceObj = {
              'soId': OrderData['pickerBoySalesOrderMappingId']['sales_order_no'],
             //  OrderData['pickerBoySalesOrderMappingId']['delivery_date']
-            
+              'fullfiled':fullfiled, //fullfiled
               'so_db_id': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
             
               'so_deliveryDate': OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
@@ -307,6 +308,7 @@ console.log('inv upload',req.body.invoice_detail)
 
 
         let UpdatePickerBoyOrderMappingInvDetail = {
+          'fullfiled':fullfiled,
           'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
           'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId,
            'salesOrderId':OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
