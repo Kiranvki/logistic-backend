@@ -116,7 +116,7 @@ console.log('OrderData',JSON.stringify(obj))
   }
   // req.body.delivery_detail['success']
   console.log('delivery_data',req.body.delivery_detail)
-console.log('sap',req.body.delivery_detail['success'],req.body.delivery_detail['data']['flag']==='S')
+// console.log('sap',req.body.delivery_detail['success'],req.body.delivery_detail['data']['flag']==='S')
   if(req.body.delivery_detail['success'] && req.body.delivery_detail['data']['flag']==='S'){
     info('Order number generating sucessfully !')
      next()

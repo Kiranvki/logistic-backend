@@ -143,8 +143,8 @@ console.log(obj)
     
 // }
 // req.body.invoice_detail = {}
-console.log('sap invoice',req.body.invoice_detail)
-req.body.invoice_detail['success'] =true;
+// console.log('sap invoice',req.body.invoice_detail)
+// req.body.invoice_detail['success'] =true;
 // && req.body.invoice_detail['data']['flag']==='S'
 
 // req.body.invoice_detail['data']={
