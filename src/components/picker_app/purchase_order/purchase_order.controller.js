@@ -33,6 +33,7 @@ class purchaseController extends BaseController {
 
   getPOList = async (req, res) => {
     try {
+      var userId=mongoose.Types.ObjectId(req.user._id);
       var page = req.query.page || 1,
         sortingArray = {},
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
@@ -120,7 +121,7 @@ class purchaseController extends BaseController {
           $match: {
             $or: [
               {
-                "poReceivingId.pickerBoyId": mongoose.Types.ObjectId(req.user._id)
+                "poReceivingId.pickerBoyId": userId
                 ,
               },
               { "poReceivingId.pickerBoyId": { $exists: false } },
@@ -136,7 +137,7 @@ class purchaseController extends BaseController {
         {
           $limit: pageSize,
         },
-      ]);
+      ]).allowDiskUse(true);
       poList.forEach((order) => {
         let count = 0;
         order.item.forEach((item) => {
@@ -206,7 +207,7 @@ class purchaseController extends BaseController {
             delivery_date: 1,
           },
         },
-      ]);
+      ]).allowDiskUse(true);
 
       // success
       if(poDetails && poDetails[0] && poDetails[0].item){
@@ -304,7 +305,7 @@ class purchaseController extends BaseController {
 
           },
         },
-      ]);
+      ]).allowDiskUse(true);
       return {
         success: true,
         data: poDetails,
@@ -429,6 +430,7 @@ class purchaseController extends BaseController {
   poFilteredList =async(req,res)=>{
     try {
       info("Get Purchase order  filtered list !");
+      let type= req.params.type;
       let pickerBoyId=mongoose.Types.ObjectId(req.user._id)
       var page = req.query.page || 1,
         sortingArray = {},
@@ -449,7 +451,8 @@ class purchaseController extends BaseController {
         delivery_date:1,
       }
       let query = {
-        
+        status:1,
+        isDeleted:0
       };
       if (req.query.poNumber) {
         query.po_number = {
@@ -460,26 +463,30 @@ class purchaseController extends BaseController {
       if(req.query.date){
         query['delivery_date'] =moment(new Date(req.query.date)).format("YYYY-MM-DD")
       }
-      if(req.params.type=='history'){
+      if(type=='history'){
         query.receivingStatus = 1;
         query['sapGrnNo.pickerBoyId'] =pickerBoyId
         projectList.itemCount = { $size: "$item" };
         sortingArray["updatedAt"] = -1;
-
-      }else if(req.params.type=='pending'){
+        projectList.sapGrnNo=1
+      }else if(type=='pending'){
         query.receivingStatus = 2;
         query['sapGrnNo.pickerBoyId'] =pickerBoyId
         projectList.item = 1;
         projectList.sapGrnNo=1
-      }else if(req.params.type=='ongoing'){
+      }else if(type=='ongoing'){
         query.receivingStatus = 4;
         projectList.item = 1;
+        projectList.poReceivingId= "$poDetails"
 
       }
       sortingArray["delivery_date"] = -1;
       sortingArray["po_number"] = -1;
       // get the total PO
-      let totalPO = await Model.countDocuments({
+      if(type=='pending'||type=='history'){
+
+      
+      var totalPO = await Model.countDocuments({
         ...query,
       });
       var poList = await Model.aggregate([
@@ -498,8 +505,62 @@ class purchaseController extends BaseController {
         {
           $limit: pageSize,
         },
-      ]);
-      // if(req.params.type=='pending'){
+      ]).allowDiskUse(true);
+    }else{
+      var totalPO = await Model.countDocuments({
+        ...query,
+      });
+      var poList = await Model.aggregate([
+        {
+          $match: query,
+        },
+        {
+          $lookup: {
+            from: "purchaseorderreceivingdetails",
+            let: {
+              id: "$_id",
+              poRecStatus: "$receivingStatus",
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$poId", "$$id"] },
+                      { $eq: ["$$poRecStatus", 4] },
+                      { $eq: ["$isDeleted", 0] },
+                      { $eq: ["$pickerBoyId", mongoose.Types.ObjectId(req.user._id)] },
+                      // { $gt: ["$item.quantity", "$item.received_qty"] },//not working need to check later //to-do
+                    ],
+                  },
+                },
+              },
+
+              { $limit: 1 },
+              {
+                $project: {
+                  _id: 1,
+                  pickerBoyId:1
+                },
+              },
+            ],
+            as: "poDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$poDetails"
+          },
+        },
+        {
+          $project: projectList,
+        },
+        {
+          $limit: pageSize,
+        },
+      ]).allowDiskUse(true);
+    }
+      // if(type=='pending'){
       //   if(poList && poList.length){
       //     poList.forEach((element)=>{
       //       let itemCount=0
@@ -513,9 +574,10 @@ class purchaseController extends BaseController {
       //     })
       //   }
       // }
-      if(req.params.type=='ongoing' || req.params.type=='pending'){
         if(poList && poList.length){
           poList.forEach((element)=>{
+            if(type=='ongoing' || type=='pending'){
+
             let itemCount=0
             element.item.forEach((item)=>{
               if(!item.received_qty || (item.received_qty!=item.quantity)){
@@ -524,13 +586,14 @@ class purchaseController extends BaseController {
             })
             element.itemCount=itemCount;
             delete element.item;
-            if(req.params.type=='pending'){
+          }
+
+            if(type=='pending' || type=='history'){
               element.deliveredDate=element.sapGrnNo[(element.sapGrnNo.length-1)].date;
-              
             }
             delete element.sapGrnNo
           })
-        }
+        
       }
       return this.success(
         req,
@@ -562,16 +625,49 @@ class purchaseController extends BaseController {
   filteredPODetails =async(req,res)=>{
     try{
       info("PO filtered list details");
-      var poDetails= await Model.findOne({_id:mongoose.Types.ObjectId(req.params.poId)})
+      var type =req.query.type||'history';
+      var poDetails={}
+      var projectList={
+        po_number: 1,
+        vendor_no: 1,
+        vendor_name: 1,
+        receivingStatus: 1,
+        updatedAt:1,
+        delivery_date:1,
+        sapGrnNo:1
+      }
+      if(type=='pending'){
+        projectList.item=1;
+      }
+      poDetails= await Model.findOne({
+          _id:mongoose.Types.ObjectId(req.params.poId),
+          status:1,
+          isDeleted:0
+        },projectList).lean();
 
       if(poDetails){
+        // success
+        if(poDetails && poDetails && poDetails.item && type=='pending'){
+          let itemList=[]
+          for (let i = 0; i < poDetails.item.length; i++) {
+            // adding recieved quantity in po order and gettinf fullfilment status
+            poDetails.item[i].quantity = poDetails.item[i].pending_qty
+              ? poDetails.item[i].pending_qty
+              : poDetails.item[i].quantity;
+            if(poDetails.item[i].quantity>0){
+              itemList.push(poDetails.item[i])
+            }
+           
+          }
+          poDetails.item=itemList;
+        }
+        poDetails.deliveredDate=poDetails.sapGrnNo[(poDetails.sapGrnNo.length-1)].date;
+
         return this.success(
           req,
           res,
           this.status.HTTP_OK,
-          {
-            result: poDetails,
-          },
+          poDetails,
           this.messageTypes.poDetailsFetched
         );
       }else{
