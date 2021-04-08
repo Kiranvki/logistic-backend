@@ -116,13 +116,13 @@ console.log('OrderData',JSON.stringify(obj))
   }
   // req.body.delivery_detail['success']
   console.log('delivery_data',req.body.delivery_detail)
-console.log('sap',req.body.delivery_detail['success'],req.body.delivery_detail['data']['flag']==='S')
-  if(true && req.body.delivery_detail['data']['flag']==='S'){
+// console.log('sap',req.body.delivery_detail['success'],req.body.delivery_detail['data']['flag']==='S')
+  if(req.body.delivery_detail['success'] && req.body.delivery_detail['data']['flag']==='S'){
     info('Order number generating sucessfully !')
      next()
 
   }else{
-if(req.body.delivery_detail['data']['flag']==='E'){
+if(req.body.delivery_detail['success'] && req.body.delivery_detail['data']['flag']==='E'){
   info('Failed to generate delivery NO.')
   let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
     '_id':req.params.pickerBoyOrderMappingId},{
@@ -141,6 +141,19 @@ if(req.body.delivery_detail['data']['flag']==='E'){
   // status code changes check required
 return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,MessageTypes.salesOrder.pickerBoySalesOrderDeliveryNumberAlreadyGenerated);
 }else{
+  let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
+    '_id':req.params.pickerBoyOrderMappingId},{
+    $set:{
+    'picking_allocation_response':JSON.stringify(req.body.delivery_detail),
+    'picking_allocation_request':JSON.stringify(obj),
+    'isItemPicked':false,
+    'isStartedPicking':false,
+    'state':1,
+    'isDeleted':1,
+    'isSapError':'DNE' //DNE->delivery_no error
+  }})
+  //fixed require
+  await pickerBoyOrderItemMappingModel.update({ 'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId},{$set:{'isDeleted':1 }})
     //  Message pending
     info('some error generate delivery NO.')
     return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, req.body.delivery_detail['error']);

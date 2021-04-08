@@ -308,19 +308,16 @@ class invoiceMasterController extends BaseController {
 
           var salesOrderId = invoiceMappingDetails.data[0].saleOrderId;
 
-          var salesOrderDetails = invoiceMappingDetails.data[0].so[0];
-          var invoiceDetails = invoiceMappingDetails.data[0].invoice[0];
+          var salesOrderDetails = invoiceMappingDetails.data[0].so[0] || {};
+          var invoiceDetails = invoiceMappingDetails.data[0].invoice[0] || {};
 
-console.log(salesOrderDetails.created_at,invoiceDetails)
-salesOrderDetails['item'].forEach((item,i)=>{
-  invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
-    if(item.item_no==invItem.item_no){
-      invoiceDetails['itemSupplied'][j].itemName=item.material_description
-    }
-
-  })
-  item['material_description']
-})
+          salesOrderDetails['item'].forEach((item,i)=>{
+            invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
+              if(item.item_no==invItem.item_no){
+                invoiceDetails['itemSupplied'][j].itemName=item.material_description
+              }
+            })
+          })
 
             let InvoiceDetailsResponse={
               invoiceId:invoiceDetails._id,

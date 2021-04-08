@@ -275,7 +275,7 @@ class areaSalesManagerController extends BaseController {
                   {
                     $match: {
                       '$expr': {
-                        '$eq': ['$_id', mongoose.Types.ObjectId('6065fb9969d14825917eaae5')]
+                        '$eq': ['$_id', "$$id"]
                       }
                     }
                   },

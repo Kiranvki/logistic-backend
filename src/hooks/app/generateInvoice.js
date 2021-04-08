@@ -143,8 +143,8 @@ console.log(obj)
     
 // }
 // req.body.invoice_detail = {}
-console.log('sap invoice',req.body.invoice_detail)
-req.body.invoice_detail['success'] =true;
+// console.log('sap invoice',req.body.invoice_detail)
+// req.body.invoice_detail['success'] =true;
 // && req.body.invoice_detail['data']['flag']==='S'
 
 // req.body.invoice_detail['data']={
@@ -155,7 +155,7 @@ req.body.invoice_detail['success'] =true;
 // }
 
 
-  if(req.body.invoice_detail['success'] && req.body.invoice_detail['data']['invoice_no']){
+  if(req.body.invoice_detail['success'] && (req.body.invoice_detail['data']?req.body.invoice_detail['data']['invoice_no']:false)){
     return next()
 
   }else{

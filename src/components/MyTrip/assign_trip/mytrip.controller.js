@@ -947,15 +947,20 @@ class MyTrip extends BaseController {
           pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 10; }),
           sortBy = req.query.sortBy || 'createdAt',
           sortingArray = {};
-        sortingArray[sortBy] = -1;
+          sortingArray[sortBy] = -1;
         let skip = parseInt(page - 1) * pageSize;
           // get the total customer
-        const totalAgencies = await pickerBoyOrderMappingModel.countDocuments({});
+
+        const totalAgencies = await pickerBoyOrderMappingModel.countDocuments({
+          'shipping_point': req.user.plant_id,
+          'invoiceDetail.isInvoice':true
+        });
 
         const getAllTripsWithSalesOrder = await pickerBoyOrderMappingModel.aggregate([
           {
             $match: {
-              'shipping_point': req.user.plant_id
+              'shipping_point': req.user.plant_id,
+              'invoiceDetail.isInvoice':true
             }
           },
           {
@@ -1000,7 +1005,9 @@ class MyTrip extends BaseController {
               },{
                 $project: {
                   "employerName": 1,
-                  "firstName": 1
+                  "firstName": 1,
+                  "fullName": 1,
+                  "plant": 1
                 }
               }],
               "as": "pickerBoyName"

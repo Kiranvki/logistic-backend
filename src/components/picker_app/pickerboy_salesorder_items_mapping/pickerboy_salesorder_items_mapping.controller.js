@@ -70,8 +70,8 @@ class pickerSalesOrderMappingController extends BaseController {
         'pickedQuantity': quantityAdded,
         'total_amount':req.body.itemDetail.total_amount,
         'totalQuantity':parseInt(req.body.itemDetail.qty),
-        'requireQuantity':(parseInt(req.body.itemDetail.qty)), //- parseInt(req.body.itemDetail.suppliedQty)),
-        'suppliedQty':  0, //req.body.itemDetail.suppliedQty, //previous supplied
+        'requireQuantity':((parseInt(req.body.itemDetail.qty))-(parseInt(req.body.itemDetail.suppliedQty?req.body.itemDetail.suppliedQty:0))), //- parseInt(req.body.itemDetail.suppliedQty)),
+        'suppliedQty':  (parseInt(req.body.itemDetail.suppliedQty?req.body.itemDetail.suppliedQty:0)), //req.body.itemDetail.suppliedQty, //previous supplied
         // 'taxPercentage': req.body.itemDetail.taxPercentage,
         'discountPercentage': req.body.itemDetail.discountPercentage?req.body.itemDetail.discountPercentage:0,
         'freeQty': req.body.itemDetail.freeQty?req.body.itemDetail.freeQty:0,
@@ -298,6 +298,22 @@ class pickerSalesOrderMappingController extends BaseController {
     }
     })
   }
+
+  // orderDetail[0]['salesOrderId']['item'].forEach((items,i)=>{
+  //   items['item'].forEach((item,j)=>{
+  //     console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
+  //   todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)).toString()
+  //   if((item.fulfillmentStatus?item.fulfillmentStatus:0)==2){
+  //     console.log(todaysOrderData[i]['item'][j])
+  //     // todaysOrderData[i]['item'].splice(j, 1)
+  //     let status = (item.fulfillmentStatus?item.fulfillmentStatus:0)
+  //     _.remove(todaysOrderData[i]['item'],{'fulfillmentStatus':2})
+  
+  //   }
+  //   })
+  // })
+
+
       return this.success(req, res, this.status.HTTP_OK, 
         {
           results: orderDetail,
@@ -396,7 +412,7 @@ class pickerSalesOrderMappingController extends BaseController {
   generateInv = async (req,res,next)=>{
     try {
       let OrderData = req.body.orderDetail
-      invoiceDetail = req.body.invoice_detail['data'][0]
+      // invoiceDetail = req.body.invoice_detail['data'][0]
     //  console.log(OrderData['pickerBoySalesOrderMappingId']['salesOrderId'],OrderData['itemDetail'][0]['totalQuantity'])
     //  console.log(OrderData['itemDetail'][0]['requireQuantity'],OrderData['itemDetail'][0]['suppliedQty'],OrderData['itemDetail'][0]['item_no'])
     
@@ -411,19 +427,19 @@ class pickerSalesOrderMappingController extends BaseController {
       // requireQuantity: 1,
       // suppliedQty: 0,
       // }
-      req.body.invDetail['itemSupplied'].forEach((data,i)=>{
-      OrderData['itemDetail'].forEach((item,j) => {
-        // console.log('item_no',data.item_no,item.item_no)
-        if(data.item_no==item.item_no){
+    //   req.body.invDetail['itemSupplied'].forEach((data,i)=>{
+    //   OrderData['itemDetail'].forEach((item,j) => {
+    //     // console.log('item_no',data.item_no,item.item_no)
+    //     if(data.item_no==item.item_no){
           
-          req.body.invDetail['itemSupplied'][i]['material_description'] = item['itemName']
-        }
+    //       req.body.invDetail['itemSupplied'][i]['material_description'] = item['itemName']
+    //     }
         
 
 
-      })
+    //   })
 
-    })
+    // })
     // console.log(req.body.invDetail['itemSupplied'])
 
       info('Invoice Generated and updated to DB !');
