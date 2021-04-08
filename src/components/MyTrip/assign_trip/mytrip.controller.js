@@ -1005,7 +1005,9 @@ class MyTrip extends BaseController {
               },{
                 $project: {
                   "employerName": 1,
-                  "firstName": 1
+                  "firstName": 1,
+                  "fullName": 1,
+                  "plant": 1
                 }
               }],
               "as": "pickerBoyName"
