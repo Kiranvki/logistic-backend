@@ -1867,19 +1867,20 @@ return {
 
   UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity = async(salesOrderId,soItem,invData)=>{
     try {
-      info(`Updating Customer Info ! ${salesOrderId}`);
+      info(`Updating SO Info ! ${salesOrderId}`);
       let isUpdated;
 // suppliedQuantity 
+console.log(JSON.stringify(invData))
 let tomorrow  = moment().add(1,'days').format('YYYY-MM-DD');
   // moment(new Date()).format('YYYY-MM-DD')
-  console.log(tomorrow)
+  
 let soFullfilmentStatus = 2;
 soItem.forEach(async (sItem,i)=>{
 invData['data'][0]['item'].forEach(async (item,i)=>{
   let itemFullfilmentStatus=1
   // item.qty=1
-  if(sItem.item_no==item.item_no && item.qty<=(parseInt(sItem.qty)-parseInt(sItem.suppliedQty))){
-  if(item.qty==(parseInt(sItem.qty)-parseInt(sItem.suppliedQty))){
+  if(sItem.item_no==item.item_no && item.qty<=(parseInt(sItem.qty)-parseInt(sItem.suppliedQty?sItem.suppliedQty:0))){
+  if(item.qty==(parseInt(sItem.qty)-parseInt(sItem.suppliedQty?sItem.suppliedQty:0))){
     itemFullfilmentStatus=2
   }else{
     soFullfilmentStatus = 1
@@ -1920,11 +1921,12 @@ let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({'_id':mongoose.Ty
 }
 
 });
-if(isUpdated && isUpdatedfulfillmentStatus){
+console.log(isUpdated,isUpdatedfulfillmentStatus)
+if(isUpdatedfulfillmentStatus){
   info('SalesOrder Status updated! !');
           return {
             success: true,
-            data: res
+            data: isUpdatedfulfillmentStatus
           };
         } else {
           error('Failed to update SALESORDER! ');
