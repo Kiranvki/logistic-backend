@@ -308,8 +308,8 @@ class invoiceMasterController extends BaseController {
 
           var salesOrderId = invoiceMappingDetails.data[0].saleOrderId;
 
-          var salesOrderDetails = invoiceMappingDetails.data[0].so[0];
-          var invoiceDetails = invoiceMappingDetails.data[0].invoice[0];
+          var salesOrderDetails = invoiceMappingDetails.data[0].so[0] || {};
+          var invoiceDetails = invoiceMappingDetails.data[0].invoice[0] || {};
 
           salesOrderDetails['item'].forEach((item,i)=>{
             invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
