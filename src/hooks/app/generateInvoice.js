@@ -155,7 +155,7 @@ req.body.invoice_detail['success'] =true;
 // }
 
 
-  if(req.body.invoice_detail['success'] && req.body.invoice_detail['data']['invoice_no']){
+  if(req.body.invoice_detail['success'] && req.body.invoice_detail['data']?req.body.invoice_detail['data']['invoice_no']:false){
     return next()
 
   }else{
