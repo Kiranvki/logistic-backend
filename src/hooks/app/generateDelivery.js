@@ -39,14 +39,7 @@ module.exports = async (req,res,next) => {
     }
     }
 
-    // "item": [
-    //   {
-    //       "sales_order_item_no": "000010",
-    //       "delivery_quantity": "1",
-    //       "uom": "PAK"
-    //   },
 
-// console.log('ss',OrderData)
       OrderData['itemDetail'].forEach(item => {
         obj['request']['item'].push({
           'sales_order_item_no':item['item_no'],
@@ -58,6 +51,8 @@ module.exports = async (req,res,next) => {
         })
       });
 
+    //  var obj = {"request":{"sales_order_no":"0300000413","delivery_date":"2021-04-08","shipping_point":"1004","item":[{"sales_order_item_no":"10","delivery_quantity":"2","uom":"PAK"}]}}
+
 console.log('OrderData',JSON.stringify(obj))
       
 
@@ -65,8 +60,8 @@ console.log('OrderData',JSON.stringify(obj))
     req.body.delivery_detail = await request.post(url)
       .send(obj)
       .timeout({
-        response: 5000, // Wait 10 seconds for the server to start sending,
-        deadline: 5000, // but allow 1 minute for the file to finish loading.
+        response: 30000, // Wait 10 seconds for the server to start sending,
+        deadline: 30000, // but allow 1 minute for the file to finish loading.
       })
       .retry(1)
       .then((res,body) => {
