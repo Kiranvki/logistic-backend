@@ -1738,13 +1738,13 @@ try{
   // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
 
   // console.log(todaysOrderData);
-console.log(todaysOrderData)
+// console.log(todaysOrderData)
 todaysOrderData.forEach((items,i)=>{
   items['item'].forEach((item,j)=>{
-    console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
+    // console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
   todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)).toString()
   if((item.fulfillmentStatus?item.fulfillmentStatus:0)==2){
-    console.log(todaysOrderData[i]['item'][j])
+    // console.log(todaysOrderData[i]['item'][j])
     // todaysOrderData[i]['item'].splice(j, 1)
     let status = (item.fulfillmentStatus?item.fulfillmentStatus:0)
     _.remove(todaysOrderData[i]['item'],{'fulfillmentStatus':2})
