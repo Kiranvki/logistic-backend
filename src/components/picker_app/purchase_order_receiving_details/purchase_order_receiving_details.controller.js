@@ -355,7 +355,7 @@ class purchaseController extends BaseController {
             },
           }
         ]
-      );
+      ).allowDiskUse(true);
       if(bucketList && bucketList[0] && bucketList[0].item && bucketList[0].item.length){
         bucketList[0].total = bucketList[0].basketTotal-bucketList[0].totalDiscount+bucketList[0].totalTax
         bucketList[0].netWeight = 0;
@@ -479,7 +479,7 @@ class purchaseController extends BaseController {
             },
           }
         ]
-      );
+      ).allowDiskUse(true);
 
       if(bucketList && bucketList[0] && bucketList[0].item && bucketList[0].item.length){
         bucketList[0].total = bucketList[0].basketTotal-bucketList[0].totalDiscount+bucketList[0].totalTax
@@ -516,7 +516,7 @@ class purchaseController extends BaseController {
           'pickerBoyId':1,
           'receivingStatus':4,
       }}
-      ]);
+      ]).allowDiskUse(true);
       return {
         success: true,
         data: poReceivingDetails
@@ -549,7 +549,7 @@ class purchaseController extends BaseController {
           'pickerBoyId':1,
           'receivingStatus':4,
       }}
-      ]);
+      ]).allowDiskUse(true);
       return {
         success: true,
         data: poReceivingDetails
@@ -643,7 +643,7 @@ class purchaseController extends BaseController {
           poId:1,
         },
       }
-    ]);
+    ]).allowDiskUse(true);
     if(poReceivingDetails&& poReceivingDetails.length){
       let item= poReceivingDetails[0].item.filter(item=>{
         return item.received_qty>0

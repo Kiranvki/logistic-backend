@@ -310,11 +310,17 @@ class invoiceMasterController extends BaseController {
 
           var salesOrderDetails = invoiceMappingDetails.data[0].so[0] || {};
           var invoiceDetails = invoiceMappingDetails.data[0].invoice[0] || {};
-
+          let totalAmount=0;
+          let totalTaxValue=0
           salesOrderDetails['item'].forEach((item,i)=>{
             invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
-              if(item.item_no==invItem.item_no){
-                invoiceDetails['itemSupplied'][j].itemName=item.material_description
+              if(item.material_no==invItem.itemId){
+                invoiceDetails['itemSupplied'][j].unitPrice=Number(invoiceDetails['itemSupplied'][j].total_amount)/invoiceDetails['itemSupplied'][j].quantity;
+                invoiceDetails['itemSupplied'][j].totalAmount=Number(invoiceDetails['itemSupplied'][j].total_amount);
+                invoiceDetails['itemSupplied'][j].itemName=item.material_description;
+                totalAmount=totalAmount+Number(invoiceDetails['itemSupplied'][j].total_amount)
+                totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
+
               }
             })
           })
@@ -323,7 +329,7 @@ class invoiceMasterController extends BaseController {
               invoiceId:invoiceDetails._id,
               customerName:invoiceDetails.customerName,
               invoiceNo:invoiceDetails.invoiceDetails.invoiceNo,
-              invoiceDate:invoiceDetails.invoiceDate,
+              invoiceDate:invoiceDetails.createdAt,
               paymentMode:salesOrderDetails.paymentMode,
               // totalWeight:'NA',
               invoiceStatus:'Order Packed',
@@ -343,10 +349,13 @@ class invoiceMasterController extends BaseController {
               // totalAmount:invoiceDetails.totalAmount,
               // totalNetValue:invoiceDetails.totalNetValue,
               // itemsOrdered:invoiceDetails.itemSupplied,
-              invoiceDetail:invoiceDetails
-              
-              
-
+              invoiceDetail:invoiceDetails,
+              basketTotal: totalAmount-totalTaxValue,
+              finalTotal:totalAmount,
+              totalDiscount:Number(invoiceDetails.totalDiscount),
+              cgst:totalTaxValue/2,
+              sgst:totalTaxValue/2,
+              gstNo:'NA'
             }
             return this.success(req, res, this.status.HTTP_OK,InvoiceDetailsResponse , this.messageTypes.invoiceDetailsSent);
           } 
