@@ -32,14 +32,14 @@ module.exports = async (req,res,next) => {
      obj = {
         "request": {
           
-          "invoice_no": "0900000037"    //req.body.invoice_detail['data']['invoice_no'],
+          "invoice_no": req.body.invoice_detail['data']['invoice_no'],
           
         }
      }
 
 
 
-      
+    //  "0900000037" 
 
     // get the data from SAP
     
@@ -82,8 +82,8 @@ module.exports = async (req,res,next) => {
     req.body.invoice_detail = await request.post(url)
       .send(obj)
       .timeout({
-        response: 5000, // Wait 10 seconds for the server to start sending,
-        deadline: 5000, // but allow 1 minute for the file to finish loading.
+        response: 30000, // Wait 10 seconds for the server to start sending,
+        deadline: 30000, // but allow 1 minute for the file to finish loading.
       })
       .retry(1)
       .then((res,body) => {

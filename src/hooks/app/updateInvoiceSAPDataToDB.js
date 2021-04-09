@@ -58,7 +58,7 @@ console.log('inv upload',req.body.invoice_detail)
               'itemName': 'N/A', //not available
           
         
-              'salePrice':data['mrp_amount'],   // sap mrp_amount
+              'salePrice':(data['net_price']/data['qty']),                       //data['mrp_amount'],   // sap mrp_amount // change with selling_price
         
               'quantity': data['qty'],  
         
@@ -78,7 +78,7 @@ console.log('inv upload',req.body.invoice_detail)
           
               'sgst_pr': data['sgst_pr'],
         
-              'igst_pr':data['igst_pr'],
+              'igst_pr':data['igst_pr'], 
           
               'ugst_pr': data['ugst_pr'],
         

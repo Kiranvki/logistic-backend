@@ -1569,6 +1569,8 @@ try{
       
       // 2021-03-29
     let startOfTheDay =  moment(new Date()).format('YYYY-MM-DD');
+    let yasterdayDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD')
+    
     // moment().set({
     //   h: 0,
     //   m: 0,
@@ -1598,7 +1600,8 @@ try{
     let pipeline = [{
       $match:{
       'req_del_date': {
-        '$eq': startOfTheDay
+        '$gte':yasterdayDate,'$lte':startOfTheDay
+        // '$eq': startOfTheDay
       },
       $or: [{'fulfillmentStatus': { $ne: 2 }},{
        
