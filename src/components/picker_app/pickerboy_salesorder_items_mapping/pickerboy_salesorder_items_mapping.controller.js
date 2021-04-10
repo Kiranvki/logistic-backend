@@ -445,7 +445,7 @@ class pickerSalesOrderMappingController extends BaseController {
       info('Invoice Generated and updated to DB !');
       if(req.body.invDetail){
         return  this.success(req, res, this.status.HTTP_OK, 
-          
+          // req.body.invoice_detail
            req.body.invDetail,
          this.messageTypes.InvoiceGeneratedSuccesfully);
       }

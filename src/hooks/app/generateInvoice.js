@@ -5,6 +5,9 @@ const StatusCodes = require('../../facades/response');
 const MessageTypes = require('../../responses/types');
 const Exceptions = require('../../exceptions/Handler');
 const BasicCtrl = require('../../components/basic_config/basic_config.controller');
+const pickerBoyOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model');
+const pickerBoyOrderItemMappingModel = require('../../components/picker_app/pickerboy_salesorder_items_mapping/models/pickerboy_salesorder_items_mapping.model')
+
    
 
 // Responses & others utils 
