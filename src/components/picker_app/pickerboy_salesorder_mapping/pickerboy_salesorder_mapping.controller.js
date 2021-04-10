@@ -1621,9 +1621,17 @@ try{
   //     // 'fulfillmentStatus': { $exists: false },
   // }},
    
-      'plant':{'$eq':plant.toString()}
+      'plant':{'$eq':plant.toString()},
+      'item': { $exists: true, $not: {$size: 0} }
      
     }
+    },
+    {$sort: {
+      'created_at':-1
+    }},{
+      $skip:(pageSize*(page-1))
+    },{
+      $limit:pageSize
     }];
 
     // creating a match object
@@ -1648,6 +1656,13 @@ try{
         }]
       }
       
+      },    {$sort: {
+        'created_at':-1
+      }},
+      {
+        $skip:(1*(page-1))
+      },{
+        $limit:1
       }];
     // console.log('searchObject', pipeline);
 
