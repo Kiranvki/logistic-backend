@@ -163,7 +163,7 @@ console.log(obj)
 
   }else{
     let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
-      'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId},{
+      '_id':req.params.pickerBoyOrderMappingId},{
       $set:{
       'invoice_response':JSON.stringify(req.body.invoice_detail),
       'invoice_request':JSON.stringify(obj),
