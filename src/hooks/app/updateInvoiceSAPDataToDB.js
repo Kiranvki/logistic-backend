@@ -234,7 +234,8 @@ module.exports = async (req, res, next) => {
               
               'itemSupplied': invoiceItemSuppliedArr,
               
-              'totalWeight': total_weight.toString()
+              'totalWeight': total_weight == 0 ? "0" : total_weight.toString().replace(/^0+/, '')
+              // 'totalWeight': total_weight.toString()
             
             }
             
