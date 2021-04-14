@@ -4,7 +4,7 @@
 // const invoicePickerBoySalesOrderMappingctrl = require('../invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller');
 // const salesOrderctrl = require('../../sales_order/sales_order/sales_order.controller');
 // const pickerboySalesorderItemsMappingctrl = require('../pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
-const request = require('request-promise');
+const request = require("request-promise");
 
 const BasicCtrl = require("../../basic_config/basic_config.controller");
 const BaseController = require("../../baseController");
@@ -16,9 +16,10 @@ const mongoose = require("mongoose");
 const _ = require("lodash");
 const { error, info } = require("../../../utils").logging;
 const moment = require("moment");
-const { isArray } = require('lodash');
+const { isArray } = require("lodash");
 // self apis
-const grnGenerateUrl = (process.env.sapBaseUrl||'')+(process.env.grnGenerateUrl || '');
+const grnGenerateUrl =
+  (process.env.sapBaseUrl || "") + (process.env.grnGenerateUrl || "");
 
 // padding the numbers
 const pad = (n, width, z) => {
@@ -64,81 +65,94 @@ class purchaseController extends BaseController {
     try {
       let poReceivingDetails = req.body.poReceivingDetails;
       let poDetails = await poCtrl.get(poReceivingDetails.poId);
-      let pickerBoyId= mongoose.Types.ObjectId(req.user._id)  ;
-      let receivedItemsMaterialNumber=[];
+      let pickerBoyId = mongoose.Types.ObjectId(req.user._id);
+      let receivedItemsMaterialNumber = [];
       var dateToday = new Date();
       poDetails = poDetails.data[0];
-      var poDeliveryDate= poDetails.delivery_date;
-      var vendorInvoiceNo= req.body.vendorInvoiceNumber;
-      let todaysDate  = moment().set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0
-      }).format('YYYY-MM-DD');
-      
-      try{
-         let sapGrnResponse= await this.hitSapApiOfGRN(poReceivingDetails,poDetails,vendorInvoiceNo);
-         if(sapGrnResponse &&sapGrnResponse.response &&sapGrnResponse.response.flag=='S'){
-           req.body.sapGrnNo=sapGrnResponse.response.material_document_no
-         }else{//to-do remove comment
-          info(sapGrnResponse,"sapGrnResponse-------")
-           return this.errors(
-          req,
-          res,
-          this.status.HTTP_CONFLICT,
-          this.messageTypes.grnNotGeneratedinSAP
-        );
-         }
+      var poDeliveryDate = poDetails.delivery_date;
+      var vendorInvoiceNo = req.body.vendorInvoiceNumber;
+      let todaysDate = moment()
+        .set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0,
+        })
+        .format("YYYY-MM-DD");
 
-        }catch(err){
-//remove comment
+      try {
+        let sapGrnResponse = await this.hitSapApiOfGRN(
+          poReceivingDetails,
+          poDetails,
+          vendorInvoiceNo
+        );
+        if (
+          sapGrnResponse &&
+          sapGrnResponse.response &&
+          sapGrnResponse.response.flag == "S"
+        ) {
+          req.body.sapGrnNo = sapGrnResponse.response.material_document_no;
+        } else {
+          //to-do remove comment
+          info(sapGrnResponse, "sapGrnResponse-------");
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.grnNotGeneratedinSAP
+          );
+        }
+      } catch (err) {
+        //remove comment
         return this.errors(
           req,
           res,
           this.status.HTTP_CONFLICT,
           this.messageTypes.grnNotGeneratedinSAP
         );
-        
       }
-      let fulfilmentStatus=1;
-      for(let i = 0; i < poDetails.item.length; i++) {// adding recieved quantity in po order and gettinf fullfilment status
+      let fulfilmentStatus = 1;
+      for (let i = 0; i < poDetails.item.length; i++) {
+        // adding recieved quantity in po order and gettinf fullfilment status
         let item = poDetails.item[i];
-        let recievingItem= poReceivingDetails.item.filter((Ritem)=>{
-          return item.material_no== Ritem.material_no
+        let recievingItem = poReceivingDetails.item.filter((Ritem) => {
+          return item.material_no == Ritem.material_no;
         });
-        console.log("recievingItem---------------",recievingItem,item,recievingItem,item,(item.received_qty?item.received_qty:0),"(item.received_qty?item.received_qty:0)-------")
-        if(recievingItem && recievingItem[0]){
-          item.received_qty = (item.received_qty?item.received_qty:0)+recievingItem[0].received_qty
-
-        }else{
-          item.received_qty =item.received_qty?item.received_qty:0
+       
+        if (recievingItem && recievingItem[0]) {
+          item.received_qty =
+            (item.received_qty ? item.received_qty : 0) +
+            recievingItem[0].received_qty;
+        } else {
+          item.received_qty = item.received_qty ? item.received_qty : 0;
         }
         if (item.quantity != item.received_qty) {
-          fulfilmentStatus=2
+          fulfilmentStatus = 2;
         }
-        console.log("recievingItem---------------",recievingItem,item,recievingItem,item,(item.received_qty?item.received_qty:0),"(item.received_qty?item.received_qty:0)-------")
+     
 
-        poDetails.item[i].pending_qty=item.quantity- (item.received_qty?item.received_qty:0);
-      
+        poDetails.item[i].pending_qty =
+          item.quantity - (item.received_qty ? item.received_qty : 0);
       }
-      var upcoming_delivery_date =req.body.upcoming_delivery_date;//format received 'yyyy-mm-dd'
-      
-      if(fulfilmentStatus==2&& !upcoming_delivery_date){
-          return this.errors(
-                    req,
-                    res,
-                    this.status.HTTP_CONFLICT,
-                    this.messageTypes.upcomingDeliverDateMissing
-                  );
-      }else if(fulfilmentStatus==2){
-        upcoming_delivery_date =moment(new Date(upcoming_delivery_date)).set({
-          h: 0,
-          m: 0,
-          s: 0,
-          millisecond: 0
-        }).format('YYYY-MM-DD')
-        if(upcoming_delivery_date<todaysDate){
+      var upcoming_delivery_date = req.body.upcoming_delivery_date; //format received 'yyyy-mm-dd'
+
+      if (fulfilmentStatus == 2 && !upcoming_delivery_date) {
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.upcomingDeliverDateMissing
+        );
+      } else if (fulfilmentStatus == 2) {
+        upcoming_delivery_date = moment(new Date(upcoming_delivery_date))
+          .set({
+            h: 0,
+            m: 0,
+            s: 0,
+            millisecond: 0,
+          })
+          .format("YYYY-MM-DD");
+        if (upcoming_delivery_date < todaysDate) {
           return this.errors(
             req,
             res,
@@ -146,36 +160,43 @@ class purchaseController extends BaseController {
             this.messageTypes.pastDateNotAllowedforUDD
           );
         }
-        if(poDetails.delivery_date_array && isArray(poDetails.delivery_date_array)){
-          poDetails.delivery_date_array.push(upcoming_delivery_date)
-        }else{
-          poDetails.delivery_date_array=[poDetails.delivery_date,upcoming_delivery_date]
+        if (
+          poDetails.delivery_date_array &&
+          isArray(poDetails.delivery_date_array)
+        ) {
+          poDetails.delivery_date_array.push(upcoming_delivery_date);
+        } else {
+          poDetails.delivery_date_array = [
+            poDetails.delivery_date,
+            upcoming_delivery_date,
+          ];
         }
         poDetails.delivery_date = upcoming_delivery_date;
       }
-      for(let i = 0; i < poReceivingDetails.item.length; i++) {
+      for (let i = 0; i < poReceivingDetails.item.length; i++) {
         let item = poReceivingDetails.item[i];
         receivedItemsMaterialNumber.push(item.material_no);
 
-        poReceivingDetails.item[i].pending_qty=item.quantity- (item.received_qty?item.received_qty:0);
+        poReceivingDetails.item[i].pending_qty =
+          item.quantity - (item.received_qty ? item.received_qty : 0);
       }
 
       let grnData = {
-        sapGrnNo:req.body.sapGrnNo,
-        poReceivingId:poReceivingDetails._id,
+        sapGrnNo: req.body.sapGrnNo,
+        poReceivingId: poReceivingDetails._id,
         po_number: poDetails.po_number,
-        receivingStatus: fulfilmentStatus==1?1:2,
-        fulfilmentStatus:fulfilmentStatus,
+        receivingStatus: fulfilmentStatus == 1 ? 1 : 2,
+        fulfilmentStatus: fulfilmentStatus,
         document_date: poDetails.document_date,
-        delivery_date:poDeliveryDate,
-        delivery_date_array:poDetails.delivery_date_array,        
+        delivery_date: poDeliveryDate,
+        delivery_date_array: poDetails.delivery_date_array,
         poAmount: poReceivingDetails.total,
         netTotal: poReceivingDetails.netValue,
         totalTaxAmount: poReceivingDetails.totalTax,
         discount: poReceivingDetails.totalDiscount,
-        generatedBy:pickerBoyId,
+        generatedBy: pickerBoyId,
         item: poReceivingDetails.item,
-        vendorInvoiceNo:vendorInvoiceNo,
+        vendorInvoiceNo: vendorInvoiceNo,
         supplierDetails: {
           vendor_no: poDetails.vendor_no,
           vendor_name: poDetails.vendor_name,
@@ -212,32 +233,52 @@ class purchaseController extends BaseController {
         grnDetails.grnNo = grnNo;
         grnDetails.poVendorNumber = "NA";
         grnDetails.poVendorDate = "NA";
-        if(poDetails.sapGrnNo &&poDetails.sapGrnNo.length)
-         poDetails.sapGrnNo.push({sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemsNoArray:receivedItemsMaterialNumber, grnId:grnDetails._id,pickerBoyId:pickerBoyId})
-         else
-         poDetails.sapGrnNo=[{sapGrnNo:req.body.sapGrnNo,date:todaysDate,itemsNoArray:receivedItemsMaterialNumber, grnId:grnDetails._id,pickerBoyId:pickerBoyId}]
-        await poCtrl.modifyPo({
-          _id:poDetails._id,
-          status :1,
-          isDeleted:0//to-do
-        },{
-          receivingStatus:fulfilmentStatus==1?1:2,
-          fulfilmentStatus:fulfilmentStatus,
-          item:poDetails.item,
-          sapGrnNo:poDetails.sapGrnNo,
-          delivery_date:poDetails.delivery_date,
-          delivery_date_array:poDetails.delivery_date_array
-        })
+        if (poDetails.sapGrnNo && poDetails.sapGrnNo.length)
+          poDetails.sapGrnNo.push({
+            sapGrnNo: req.body.sapGrnNo,
+            date: todaysDate,
+            itemsNoArray: receivedItemsMaterialNumber,
+            grnId: grnDetails._id,
+            pickerBoyId: pickerBoyId,
+          });
+        else
+          poDetails.sapGrnNo = [
+            {
+              sapGrnNo: req.body.sapGrnNo,
+              date: todaysDate,
+              itemsNoArray: receivedItemsMaterialNumber,
+              grnId: grnDetails._id,
+              pickerBoyId: pickerBoyId,
+            },
+          ];
+        await poCtrl.modifyPo(
+          {
+            _id: poDetails._id,
+            status: 1,
+            isDeleted: 0, //to-do
+          },
+          {
+            receivingStatus: fulfilmentStatus == 1 ? 1 : 2,
+            fulfilmentStatus: fulfilmentStatus,
+            item: poDetails.item,
+            sapGrnNo: poDetails.sapGrnNo,
+            delivery_date: poDetails.delivery_date,
+            delivery_date_array: poDetails.delivery_date_array,
+          }
+        );
 
-        await poReceivingCtrl.modifyPo({
-            _id:poReceivingDetails._id,
-            status:1
-        },{
-          receivingStatus:fulfilmentStatus==1?1:2,
-          fulfilmentStatus:fulfilmentStatus,
-          item:poReceivingDetails.item,
-          isDeleted:1
-        })
+        await poReceivingCtrl.modifyPo(
+          {
+            _id: poReceivingDetails._id,
+            status: 1,
+          },
+          {
+            receivingStatus: fulfilmentStatus == 1 ? 1 : 2,
+            fulfilmentStatus: fulfilmentStatus,
+            item: poReceivingDetails.item,
+            isDeleted: 1,
+          }
+        );
         return this.success(
           req,
           res,
@@ -285,60 +326,63 @@ class purchaseController extends BaseController {
       };
     }
   };
-  hitSapApiOfGRN = async(poReceivingDetails,poDetails,vendorInvoiceNo)=>{
-    try{
-
-      let body=this.createRequestObject(poReceivingDetails,poDetails,vendorInvoiceNo)
+  hitSapApiOfGRN = async (poReceivingDetails, poDetails, vendorInvoiceNo) => {
+    try {
+      let body = this.createRequestObject(
+        poReceivingDetails,
+        poDetails,
+        vendorInvoiceNo
+      );
       let options = {
-        method: 'POST',
+        method: "POST",
         uri: grnGenerateUrl,
         headers: {
-          'Content-Type': 'application/json' 
-      },
+          "Content-Type": "application/json",
+        },
         json: true,
-        body:body
+        body: body,
       };
-      console.log(options)
+      console.log(options);
 
       return await request(options);
-    }catch(err){
-      console.log(err)
-      throw err
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
-
- 
-  }
-  createRequestObject = (poReceivingDetails,poDetails,vendorInvoiceNo)=>{
-    let itemArray=[]
-    let todaysDate  = moment().set({
-      h: 0,
-      m: 0,
-      s: 0,
-      millisecond: 0
-    }).format('YYYY-MM-DD');
-    poReceivingDetails.item.forEach(item => {
+  };
+  createRequestObject = (poReceivingDetails, poDetails, vendorInvoiceNo) => {
+    let itemArray = [];
+    let todaysDate = moment()
+      .set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0,
+      })
+      .format("YYYY-MM-DD");
+    poReceivingDetails.item.forEach((item) => {
       itemArray.push({
-        "material_no": item.material_no,
-        "movement_type": [],
-        "quantity": item.received_qty,
-        "po_number": poDetails.po_number,
-        "po_item": item.item_no,
-        "plant": item.plant,
-        "storage_location": item.storage_location
-    })
-    }); 
+        material_no: item.material_no,
+        movement_type: [],
+        quantity: item.received_qty,
+        po_number: poDetails.po_number,
+        po_item: item.item_no,
+        plant: item.plant,
+        storage_location: item.storage_location,
+      });
+    });
     return {
-      "request": {
-          "posting_date": todaysDate,
-          "document_date": todaysDate,
-          "referance_document_no":poDetails.po_number ,
-          "delivery_note":vendorInvoiceNo||121212,
-          "bill_of_lading": vendorInvoiceNo||12121212,
-          "header_txt": [],
-          "Item":itemArray
-      }
-  }
-  }
+      request: {
+        posting_date: todaysDate,
+        document_date: todaysDate,
+        referance_document_no: poDetails.po_number,
+        delivery_note: vendorInvoiceNo || 121212,
+        bill_of_lading: vendorInvoiceNo || 12121212,
+        header_txt: [],
+        Item: itemArray,
+      },
+    };
+  };
 }
 
 // exporting the modules
