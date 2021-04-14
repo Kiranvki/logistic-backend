@@ -19,7 +19,7 @@ const {
 module.exports = async (req, res, next) => {
     try {
         info('Updating SAP Invoice Detail to DB !');
-console.log('inv upload',req.body.invoice_detail)
+
         let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
             deliveryDetail = req.body.delivery_detail || undefined, // getting the SAP delivery Detail
             invoiceDetail = req.body.invoice_detail['data'][0] || undefined,
@@ -32,15 +32,13 @@ console.log('inv upload',req.body.invoice_detail)
           total_net_value = 0,
           fullfiled = 2,//completely fullfiled
           total_weight = 0;
-        
         const invoiceItemSuppliedArr = []
-        //    console.log('delivery',deliveryDetail,'invoiceDetail',invoiceDetail,'OrderData',OrderData)
         invoiceDetail['item'].forEach((data)=>{
-          total_quantity = total_weight = total_quantity_demanded += data['qty'];
-          total_amount += data['total_amount'];
-          total_tax += data['taxable_value'];
-          total_discount += data['discount_amount'];
-          total_net_value += data['total_amount'];
+          total_quantity = total_weight = total_quantity_demanded += parseFloat(data['qty']);
+          total_amount += parseFloat(data['total_amount']);
+          total_tax += parseFloat(data['taxable_value']);
+          total_discount += parseFloat(data['discount_amount']);
+          total_net_value += parseFloat(data['total_amount']);
 
           invoiceItemSuppliedArr.push({
       
@@ -227,16 +225,17 @@ console.log('inv upload',req.body.invoice_detail)
         
               'invoiceDate':invoiceDetail['billing_date'],
             
-              'totalQuantitySupplied':total_quantity,
-              'totalQuantityDemanded': total_quantity_demanded,
-              'totalAmount':total_amount,
-              'totalTax': total_tax,
-              'totalDiscount': total_discount,
-              'totalNetValue': total_net_value,
+              'totalQuantitySupplied':total_quantity.toString(),
+              'totalQuantityDemanded': total_quantity_demanded.toString(),
+              'totalAmount': total_amount == 0 ? "0" : total_amount.toString().replace(/^0+/, ''),
+              'totalTax': total_tax.toString(),
+              'totalDiscount': total_discount.toString(),
+              'totalNetValue': total_net_value.toString(),
               
               'itemSupplied': invoiceItemSuppliedArr,
               
-              'totalWeight': total_weight
+              'totalWeight': total_weight == 0 ? "0" : total_weight.toString().replace(/^0+/, '')
+              // 'totalWeight': total_weight.toString()
             
             }
             

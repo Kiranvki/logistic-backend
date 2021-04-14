@@ -180,6 +180,6 @@ console.log(obj)
 
     //  Message pending
     //req.body.delivery_detail['error']
-    return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, MessageTypes.salesOrder.pickerBoySalesOrderInvoiceGeneratedFailed);
+    return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, JSON.stringify(...req.body.invoice_detail['data']['remarks']) +','+MessageTypes.salesOrder.pickerBoySalesOrderInvoiceGeneratedFailed);
   }
 };

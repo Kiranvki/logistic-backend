@@ -134,7 +134,7 @@ if(req.body.delivery_detail['success'] && req.body.delivery_detail['data']['flag
   await pickerBoyOrderItemMappingModel.update({ 'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId},{$set:{'isDeleted':1 }})
   //'isItemPicked':false,'isStartedPicking':false,isInvoice:false,delivery:'N/A,state:1 ->delivery_no failed
   // status code changes check required
-return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,MessageTypes.salesOrder.pickerBoySalesOrderDeliveryNumberAlreadyGenerated);
+return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,JSON.stringify(...req.body.delivery_detail['data']['remarks']) +','+MessageTypes.salesOrder.pickerBoySalesOrderDeliveryNumberAlreadyGenerated);
 }else{
   let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
     '_id':req.params.pickerBoyOrderMappingId},{

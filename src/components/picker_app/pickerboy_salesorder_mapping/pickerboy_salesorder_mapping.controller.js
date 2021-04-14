@@ -898,7 +898,7 @@ getOrderDetails = async (req,res,next)=>{
 
         salesOrderData[0].totalQuantitySupplied = totalQuantitySupplied
         salesOrderData[0].totalQuantityDemanded = totalQuantityDemanded
-        salesOrderData[0].totalAmount = totalAmount.toString()
+        salesOrderData[0].totalAmount = totalAmount == 0 ? "0" : totalAmount.toString().replace(/^0+/, '')
         salesOrderData[0].totalCgstTax = totalCgstTax
         salesOrderData[0].totalSgstTax = totalSgstTax
         salesOrderData[0].totalDiscount = totalDiscount
