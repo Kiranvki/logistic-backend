@@ -227,7 +227,7 @@ module.exports = async (req, res, next) => {
             
               'totalQuantitySupplied':total_quantity.toString(),
               'totalQuantityDemanded': total_quantity_demanded.toString(),
-              'totalAmount':total_amount.toString(),
+              'totalAmount': total_amount == 0 ? "0" : total_amount.toString().replace(/^0+/, ''),
               'totalTax': total_tax.toString(),
               'totalDiscount': total_discount.toString(),
               'totalNetValue': total_net_value.toString(),
