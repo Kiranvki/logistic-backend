@@ -7,7 +7,7 @@ const autoIncrement = require("mongoose-sequence")(mongoose);
 const purchaseOrderGRN = new Schema(
   {
     po_number: {
-      type: Number,
+      type: String,
     },
     poReceivingId: {
       required: true,

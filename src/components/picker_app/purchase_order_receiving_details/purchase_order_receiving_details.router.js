@@ -11,6 +11,7 @@ const {
   startReceiving,
   joiReceivingList,
   joiReceivingItem,
+  joiScanItem
 } = require("./purchase_order_receiving_details.validators");
 
 // hooks
@@ -50,6 +51,12 @@ function purchaseOrderRoutes() {
       isValidInputsForReceivedItem, // check whether the poId is valid
       ctrl.receivePOItem // post controller
     );
+    // closed.route("/purchaseOrder/scan-item/:material_no").post(
+    //   [joiScanItem], // joi validation
+    //   verifyAppToken, // verify app user token
+    //   isValidInputsForReceivedItem, // check whether the poId is valid
+    //   ctrl.receivePOItem // post controller
+    // );
     closed.route("/purchaseOrder/basket-list/:poReceivingId").get(
       [joiReceivingList], // joi validation
       verifyAppToken, // verify app user token

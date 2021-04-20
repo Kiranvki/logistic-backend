@@ -15,6 +15,10 @@ const {
   isValidPogrnId,
   grnAlreadyGenerated,
   isValidPORecIdForGrnGetDetails,
+  getPOFulfilmentStatusAndCheckUpcomingDeliveryDate,
+  getPODetails,
+  storeGRNDetailsIntoDB,
+  generateGRN,
 } = require("../../../hooks/app");
 
 // auth
@@ -30,7 +34,11 @@ function purchaseOrderRoutes() {
       verifyAppToken,
       grnAlreadyGenerated,
       isValidPORecIdForGrnGetDetails,
-      ctrl.generateGRN // post controller
+      getPODetails,
+      getPOFulfilmentStatusAndCheckUpcomingDeliveryDate,
+      generateGRN,
+      storeGRNDetailsIntoDB,
+      ctrl.updateGRNDetails // post controller
     );
 
     // getting  invoice details

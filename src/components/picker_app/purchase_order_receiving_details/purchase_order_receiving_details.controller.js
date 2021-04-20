@@ -111,7 +111,7 @@ class purchaseController extends BaseController {
           vendor_name: 1,
           delivery_date: 1,
         },
-      });
+      }).lean();
       // success
       return this.success(
         req,

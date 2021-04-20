@@ -49,8 +49,9 @@ module.exports = {
   generateInvoice:require('./generateInvoice'),
   updateInvoiceSAPDataToDB:require('./updateInvoiceSAPDataToDB'),
   fetchInvoice:require('./fetchInvoice'),
- 
-
-
+  getPOFulfilmentStatusAndCheckUpcomingDeliveryDate:require('./getPOFulfilmentStatusAndCheckUpcomingDeliveryDate'),
+  getPODetails:require('./getPODetails'),
+  storeGRNDetailsIntoDB:require('./storeGRNDetailsIntoDB'),
+  generateGRN:require('./generateGRN'),
 
 }

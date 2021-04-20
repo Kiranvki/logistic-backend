@@ -100,6 +100,59 @@ const schemas = {
         .optional(),
     },
   }),
+  // joi add received item to cart
+  joiScanItem: Joi.object().keys({
+    params: {
+      material_no: Joi.string()
+        .trim()
+        .regex(/^[a-fA-F0-9]{24}$/)
+        .label("Purchase order receiving item Id")
+        .required()
+        .options({
+          language: {
+            string: {
+              regex: {
+                base: "should be a valid mongoose Id.",
+              },
+            },
+          },
+        }),
+    },
+    body: {
+      poReceivingId: Joi.string()
+        .trim()
+        .regex(/^[a-fA-F0-9]{24}$/)
+        .label("Purchase order receiving Id")
+        .required()
+        .options({
+          language: {
+            string: {
+              regex: {
+                base: "should be a valid mongoose Id.",
+              },
+            },
+          },
+        }),
+      date_of_manufacturing: Joi.date().label("Manufacturing date").optional(), //to-do
+      remarks: Joi.string()
+        .trim()
+        .label("remarks")
+        .valid(
+          "Stock Quantity supplied is less",
+          "Stock Quality not upto the mark"
+        )
+        .options({
+          language: {
+            string: {
+              regex: {
+                base: "should be a valid remark",
+              },
+            },
+          },
+        })
+        .optional(),
+    },
+  }),
 };
 // joi options
 const options = {
@@ -171,6 +224,28 @@ module.exports = {
   joiReceivingItem: (req, res, next) => {
     // getting the schemas
     let schema = schemas.joiReceivingItem;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate({ params: req.params, body: req.body }, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+  joiScanItem: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.joiScanItem;
     let option = options.basic;
 
     // validating the schema
