@@ -1,6 +1,7 @@
 // controller function
 
-const pickerBoySalesOrderItemMappingModel = require('../../components/picker_app/pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller'); // pickerboy SO mapping ctrl
+const pickerBoySalesOrderItemMappingCtrl = require('../../components/picker_app/pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller'); // pickerboy SO Item mapping ctrl
+const pickerBoySalesOrderMappingCtrl = require('../../components/picker_app/pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller'); // pickerboy SO mapping ctrl
 
 // Responses & others utils 
 const Response = require('../../responses/response');
@@ -33,11 +34,15 @@ module.exports = async (req, res, next) => {
     info('Getting the item detail !');
 
     // get all the salesman who are not checked out 
-    let orderDetail = await pickerBoySalesOrderItemMappingModel.getPickedItemByPickerOrderId(req.params.pickerBoyOrderMappingId);
+    let orderDetail = await pickerBoySalesOrderItemMappingCtrl.getPickedItemByPickerOrderId(req.params.pickerBoyOrderMappingId);
+    let deliveryNumber = await pickerBoySalesOrderMappingCtrl.getDeliveryNumberByPickerOrderId(req.params.pickerBoyOrderMappingId)
     // console.log(orderDetail.data[0]['pickerBoySalesOrderMappingId']['salesOrderId']['_id'])
     // get added item detail
+    
     if (orderDetail.success) {
       req.body.orderDetail = orderDetail.data[0];
+      console.log('order data',req.body.orderDetail)
+      req.body.deliveryNumber = deliveryNumber
       // console.log('item detail',req.body.orderDetail)
    
         return next()

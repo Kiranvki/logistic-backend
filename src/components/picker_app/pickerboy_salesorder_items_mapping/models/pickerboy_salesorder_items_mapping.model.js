@@ -23,6 +23,9 @@ const pickerBoySalesOrderItemsMapping = new Schema({
 
 
   'itemDetail':[{
+    'partialItemRemark':[{
+      type:String
+    }],
     'item_no':{
       type:String
     },

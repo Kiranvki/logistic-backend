@@ -37,10 +37,10 @@ console.log('inv upload',req.body.invoice_detail)
         //    console.log('delivery',deliveryDetail,'invoiceDetail',invoiceDetail,'OrderData',OrderData)
         invoiceDetail['item'].forEach((data)=>{
           total_quantity = total_weight = total_quantity_demanded += data['qty'];
-          total_amount += data['total_amount'];
-          total_tax += data['taxable_value'];
-          total_discount += data['discount_amount'];
-          total_net_value += data['total_amount'];
+          total_amount += data['total_amount'];  //parseInt then convert to string
+          total_tax += data['taxable_value']; //parseInt then convert to string
+          total_discount += data['discount_amount'];  //parseInt then convert to string
+          total_net_value += data['total_amount'];  //parseInt then convert to string
 
           invoiceItemSuppliedArr.push({
       
@@ -55,7 +55,7 @@ console.log('inv upload',req.body.invoice_detail)
             
         
         
-              'itemName': 'N/A', //not available
+              'itemName': data['itemName'], //not available
           
         
               'salePrice':(data['net_price']/data['qty']),                       //data['mrp_amount'],   // sap mrp_amount // change with selling_price
@@ -88,7 +88,7 @@ console.log('inv upload',req.body.invoice_detail)
           
               'freeQty': 0,
               
-              'discountForSingleItem': data['mrp_amount'] - data['discount_amount'],
+              'discountForSingleItem': parseInt(data['mrp_amount']) - parseInt(data['discount_amount']),  //use parseInt
             
         
             

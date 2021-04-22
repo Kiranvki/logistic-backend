@@ -42,76 +42,78 @@ class pickerSalesOrderMappingController extends BaseController {
 
 
   //adding the new items after each scan
+  //remark for partial need to added
+  //set next delivery date
   addItems = async (req, res) => {
     try {
       info('Add items after scanning  !');
       let pickerBoySalesOrderMappingId = mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId) || '',
-      quantityAdded = req.body.quantity,
-      mrp_amount = parseInt(req.body.itemDetail.mrp_amount)
-   
+        quantityAdded = req.body.quantity,
+        mrp_amount = parseInt(req.body.itemDetail.mrp_amount)
+
       //itemID->material
-// console.log('name',req.body.itemDetail.sold_to_party_description)
+      // console.log('name',req.body.itemDetail.sold_to_party_description)
       let dataToInsert = {
         'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
-        'itemDetail':[{
-        'item_no': req.body.item_no,
-        // 'itemName': req.body.sold_to_party_description,
-        'material_no':req.body.itemDetail.material_no,
-        'itemName': req.body.itemDetail.material_description?req.body.itemDetail.material_description:'N/A',
-        
-        'mrp_amount':mrp_amount,
-        'uom':req.body.itemDetail.uom,
-        'discount_amount': req.body.itemDetail.discount_amount?req.body.itemDetail.discount_amount:0,
-        'plant':req.body.plant,
-        'cgst-pr':req.body.itemDetail.cgst_pr,
-        'sgst_pr':req.body.itemDetail.sgst_pr,
-        'igst_pr':req.body.itemDetail.igst_pr,
-        'ugst_pr':req.body.itemDetail.ugst_pr,
-        'pickedQuantity': quantityAdded,
-        'total_amount':req.body.itemDetail.total_amount,
-        'totalQuantity':parseInt(req.body.itemDetail.qty),
-        'requireQuantity':((parseInt(req.body.itemDetail.qty))-(parseInt(req.body.itemDetail.suppliedQty?req.body.itemDetail.suppliedQty:0))), //- parseInt(req.body.itemDetail.suppliedQty)),
-        'suppliedQty':  (parseInt(req.body.itemDetail.suppliedQty?req.body.itemDetail.suppliedQty:0)), //req.body.itemDetail.suppliedQty, //previous supplied
-        // 'taxPercentage': req.body.itemDetail.taxPercentage,
-        'discountPercentage': req.body.itemDetail.discountPercentage?req.body.itemDetail.discountPercentage:0,
-        'freeQty': req.body.itemDetail.freeQty?req.body.itemDetail.freeQty:0,
-        'itemAmount': (mrp_amount*quantityAdded)  
-      }],
-        'createdBy':  req.user.email
+        'itemDetail': [{
+          'item_no': req.body.item_no,
+          // 'itemName': req.body.sold_to_party_description,
+          'material_no': req.body.itemDetail.material_no,
+          'itemName': req.body.itemDetail.material_description ? req.body.itemDetail.material_description : 'N/A',
+          'partialItemRemark': req.body.remarks,
+          'mrp_amount': mrp_amount,
+          'uom': req.body.itemDetail.uom,
+          'discount_amount': req.body.itemDetail.discount_amount ? req.body.itemDetail.discount_amount : 0,
+          'plant': req.body.plant,
+          'cgst-pr': req.body.itemDetail.cgst_pr,
+          'sgst_pr': req.body.itemDetail.sgst_pr,
+          'igst_pr': req.body.itemDetail.igst_pr,
+          'ugst_pr': req.body.itemDetail.ugst_pr,
+          'pickedQuantity': quantityAdded,
+          'total_amount': req.body.itemDetail.total_amount,
+          'totalQuantity': parseInt(req.body.itemDetail.qty),
+          'requireQuantity': ((parseInt(req.body.itemDetail.qty)) - (parseInt(req.body.itemDetail.suppliedQty ? req.body.itemDetail.suppliedQty : 0))), //- parseInt(req.body.itemDetail.suppliedQty)),
+          'suppliedQty': (parseInt(req.body.itemDetail.suppliedQty ? req.body.itemDetail.suppliedQty : 0)), //req.body.itemDetail.suppliedQty, //previous supplied
+          // 'taxPercentage': req.body.itemDetail.taxPercentage,
+          'discountPercentage': req.body.itemDetail.discountPercentage ? req.body.itemDetail.discountPercentage : 0,
+          'freeQty': req.body.itemDetail.freeQty ? req.body.itemDetail.freeQty : 0,
+          'itemAmount': (mrp_amount * quantityAdded)
+        }],
+        'createdBy': req.user.email
 
       };
 
       // inserting data into the db 
       let isInserted = await Model.addItem(dataToInsert);
-  
-  
+
+
       // console.log(orderDetail)
 
 
       // check if inserted 
       if (isInserted && !_.isEmpty(isInserted)) {
-        await pickerBoySalesOrderModel.updateIsItemPickedStatus(pickerBoySalesOrderMappingId,true)
-     
+        await pickerBoySalesOrderModel.updateIsItemPickedStatus(pickerBoySalesOrderMappingId, true)
+
         let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
         // getOrderByPickerBoyId
         let orderDetail = await pickerBoySalesOrderModel.getOrderByPickerBoyId(pickerBoySalesOrderMappingId)
-     
-    
-        // console.log('orderItemsssss',Object.keys(orderDetail[0]['salesOrderId']))
-         // changes required quadratic
-      if(orderDetail.length>0 && itemAdded.length>0){
-        orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
-        //   console.log(x)
-        orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
-        itemAdded[0]['itemDetail'].forEach((y,j)=>{
-            if(x.item_no ===y.item_no){
-              orderDetail[0]['salesOrderId']['item'][i]=y;
-              // orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
-              // orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
-            }
-        })
-      })}
- 
+
+
+
+        // changes required quadratic
+        if (orderDetail.length > 0 && itemAdded.length > 0) {
+          orderDetail[0]['salesOrderId']['item'].forEach((x, i) => {
+            //   console.log(x)
+            orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
+            itemAdded[0]['itemDetail'].forEach((y, j) => {
+              if (x.item_no === y.item_no) {
+                orderDetail[0]['salesOrderId']['item'][i] = y;
+
+              }
+            })
+          })
+        }
+
         return this.success(req, res, this.status.HTTP_OK, orderDetail, this.messageTypes.itemAddedInsalesOrderAfterScan);
       } else {
         error('Error while adding in packing collection !');
@@ -123,7 +125,7 @@ class pickerSalesOrderMappingController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
-// not working
+  // not working
   // patch the request 
   patchItems = async (req, res) => {
     try {
@@ -133,7 +135,7 @@ class pickerSalesOrderMappingController extends BaseController {
       // creating data to insert
       let dataToUpdate = {
         $set: {
-         'itemDetail.$':{...req.body.toChangeObject}
+          'itemDetail.$': { ...req.body.toChangeObject }
         }
       };
 
@@ -160,11 +162,15 @@ class pickerSalesOrderMappingController extends BaseController {
   }
 
 
+
+  
+
+
   // Internal Function get customer details 
   getAddedItemDetails = (pickerBoySalesOrderMappingId, itemId) => {
     try {
       info('Get Added Item details !');
-// console.log(pickerBoySalesOrderMappingId,itemId)
+      // console.log(pickerBoySalesOrderMappingId,itemId)
       // get details 
       return Model.findOne({
         pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
@@ -205,14 +211,14 @@ class pickerSalesOrderMappingController extends BaseController {
       // get details 
       return Model.update({
         pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId)
+      },
+        {
+          $set: {
+            isDeleted: 1,
+            status: 0
+          }
         },
-       {
-         $set: { 
-           isDeleted: 1,
-           status: 0
-          } 
-        },
-       {multi: true }
+        { multi: true }
 
       ).then((res) => {
         if (res && !_.isEmpty(res)) {
@@ -246,10 +252,10 @@ class pickerSalesOrderMappingController extends BaseController {
 
 
 
-  getBucketDetail=async (req,res,next)=>{
+  getBucketDetail = async (req, res, next) => {
 
     info('Get Bucket Item details !');
-    try{
+    try {
 
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
@@ -258,130 +264,113 @@ class pickerSalesOrderMappingController extends BaseController {
       let sortingArray = {};
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
-  
+
       let itemId = req.body.itemId, // itemId  
-    pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || '';
+        pickerBoySalesOrderMappingId = req.params.pickerBoySalesOrderMappingId || '';
 
 
-    let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
-    // getOrderByPickerBoyId
-    let orderDetail = await pickerBoySalesOrderModel.getOrderByPickerBoyId(pickerBoySalesOrderMappingId); 
-    // pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
- 
+      let itemAdded = await Model.getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId)
+      // getOrderByPickerBoyId
+      let orderDetail = await pickerBoySalesOrderModel.getOrderByPickerBoyId(pickerBoySalesOrderMappingId);
+      // pickerboySalesOrderMappingController.getOrderDetail(pickerBoySalesOrderMappingId)
 
 
-    
-    // console.log('Sales order',orderDetail[0]['salesOrderId']['item'])
 
-    // check if inserted 
-    if (orderDetail ) {
-  
-     
-       // changes required quadratic
-    if(orderDetail){
-      
-      orderDetail[0]['salesOrderId']['item'].forEach((x,i)=>{
-      //   console.log(x)
-      orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
-      if(itemAdded )
-      {
-        itemAdded[0]['itemDetail'].forEach((y,j)=>{
-          if(x.item_no ===y.item_no){
-            
-            orderDetail[0]['salesOrderId']['item'][i]=y;
-            // orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
-            
-            // orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
-           
-          }
-      })
+
+      // console.log('Sales order',orderDetail[0]['salesOrderId']['item'])
+
+      // check if inserted 
+      if (orderDetail) {
+
+
+        // changes required quadratic
+        if (orderDetail) {
+
+          orderDetail[0]['salesOrderId']['item'].forEach((x, i) => {
+            //   console.log(x)
+            orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
+            if (itemAdded) {
+              itemAdded[0]['itemDetail'].forEach((y, j) => {
+                if (x.item_no === y.item_no) {
+
+                  orderDetail[0]['salesOrderId']['item'][i] = y;
+                  // orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
+
+                  // orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
+
+                }
+              })
+            }
+          })
+        }
+
+        // orderDetail[0]['salesOrderId']['item'].forEach((items,i)=>{
+        //   items['item'].forEach((item,j)=>{
+        //     console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
+        //   todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)).toString()
+        //   if((item.fulfillmentStatus?item.fulfillmentStatus:0)==2){
+        //     console.log(todaysOrderData[i]['item'][j])
+        //     // todaysOrderData[i]['item'].splice(j, 1)
+        //     let status = (item.fulfillmentStatus?item.fulfillmentStatus:0)
+        //     _.remove(todaysOrderData[i]['item'],{'fulfillmentStatus':2})
+
+        //   }
+        //   })
+        // })
+
+
+        return this.success(req, res, this.status.HTTP_OK,
+          {
+            results: orderDetail,
+            pageMeta: {
+              skip: parseInt(skip),
+              pageSize: pageSize,
+              total: orderDetail[0]['salesOrderId']['item'].length
+            }
+          }, this.messageTypes.bucketItemListFetchSuccesfully);
+      } else {
+        error('Error while adding in packing collection !');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchBucketItemList);
+      }
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
-    })
-  }
-
-  // orderDetail[0]['salesOrderId']['item'].forEach((items,i)=>{
-  //   items['item'].forEach((item,j)=>{
-  //     console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
-  //   todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)).toString()
-  //   if((item.fulfillmentStatus?item.fulfillmentStatus:0)==2){
-  //     console.log(todaysOrderData[i]['item'][j])
-  //     // todaysOrderData[i]['item'].splice(j, 1)
-  //     let status = (item.fulfillmentStatus?item.fulfillmentStatus:0)
-  //     _.remove(todaysOrderData[i]['item'],{'fulfillmentStatus':2})
-  
-  //   }
-  //   })
-  // })
-
-
-      return this.success(req, res, this.status.HTTP_OK, 
-        {
-          results: orderDetail,
-          pageMeta: {
-            skip: parseInt(skip),
-            pageSize: pageSize,
-            total: orderDetail[0]['salesOrderId']['item'].length
-          }
-        }, this.messageTypes.bucketItemListFetchSuccesfully);
-    } else {
-      error('Error while adding in packing collection !');
-      return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchBucketItemList);
-    }
-    // catch any runtime error 
-  } catch (err) {
-    error(err);
-    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-  }
 
   }
 
+//Return all item picked by pickerboy 
+  getPickedItemByPickerOrderId = async (pickerBoyOrderMappingId) => {
 
-  getPickedItemByPickerOrderId = async (pickerBoyOrderMappingId)=>{
-    
     try {
-      info('test !');
+      info('Fetching Picked Item Details !');
 
       // get details 
       return Model.find({
         pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(pickerBoyOrderMappingId)
-        }
-     
+      }
 
-      ).lean().populate({path:'pickerBoySalesOrderMappingId',populate:{path:'salesOrderId'},select:{
-        
-        'invoiceDetail': 0,
-        'isDeleted': 0,
-        'status': 0,
-        
-        'pickerBoySalesOrderMappingId.invoiceDetail': 0,
-        'pickerBoySalesOrderMappingId.isDeleted':0,
-        'pickerBoySalesOrderMappingId.pickerBoyId':0,
-        'pickerBoySalesOrderMappingId.createdAt':0,
-        'pickerBoySalesOrderMappingId.updatedAt':0,
-        'pickerBoySalesOrderMappingId.__v':0,
-        // {
-        //   invoiceDetail: [Object],
-        //   isStartedPicking: true,
-        //   isItemPicked: false,
-        //   state: 0,
-        //   isDeleted: 0,
-        //   status: 1,
-        //   _id: 605f6d904a28e55420b4fe5d,
-        //   pickerBoyId: [Object],
-        //   createdBy: 'krishna.agrawal@waycool.in',
-        //   pickingDate: 2021-03-27T17:38:24.284Z,
-        //   createdAt: 2021-03-27T17:38:24.296Z,
-        //   updatedAt: 2021-03-27T19:12:52.293Z,
-        //   __v: 0
-        // },
-        // itemDetail: [ [Object] ],
-        // createdBy: 'krishna.agrawal@waycool.in',
-        // createdAt: 2021-03-27T18:20:06.706Z,
-        // updatedAt: 2021-03-27T19:12:52.263Z,
+
+      ).lean().populate({
+        path: 'pickerBoySalesOrderMappingId', populate: { path: 'salesOrderId' }, select: {
+
+          'invoiceDetail': 0,
+          'isDeleted': 0,
+          'status': 0,
+
+          'pickerBoySalesOrderMappingId.invoiceDetail': 0,
+          'pickerBoySalesOrderMappingId.isDeleted': 0,
+          'pickerBoySalesOrderMappingId.pickerBoyId': 0,
+          'pickerBoySalesOrderMappingId.createdAt': 0,
+          'pickerBoySalesOrderMappingId.updatedAt': 0,
+          'pickerBoySalesOrderMappingId.__v': 0,
       
-      }}).lean().then((res) => {
+
+        }
+      }).lean().then((res) => {
         if (res && !_.isEmpty(res)) {
-          // console.log('test',res['pickerBoySalesOrderMappingId'])
+       
           return {
             success: true,
             data: res
@@ -408,53 +397,92 @@ class pickerSalesOrderMappingController extends BaseController {
   }
 
 
-
-  generateInv = async (req,res,next)=>{
+//Update SO status and inv detail.Check hooks for INV generate method
+  generateInv = async (req, res, next) => {
     try {
       let OrderData = req.body.orderDetail
       // invoiceDetail = req.body.invoice_detail['data'][0]
-    //  console.log(OrderData['pickerBoySalesOrderMappingId']['salesOrderId'],OrderData['itemDetail'][0]['totalQuantity'])
-    //  console.log(OrderData['itemDetail'][0]['requireQuantity'],OrderData['itemDetail'][0]['suppliedQty'],OrderData['itemDetail'][0]['item_no'])
-    
-     
 
-     sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], req.body.invoice_detail)
-    //  salesOrderId: {
-    //   _id: 606901f99429dd62745df225,
-     
+
+      // sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], req.body.invoice_detail)
+      //  salesOrderId: {
+      //   _id: 606901f99429dd62745df225,
+
       // itemDetail{
       //   totalQuantity: 1,
       // requireQuantity: 1,
       // suppliedQty: 0,
       // }
-    //   req.body.invDetail['itemSupplied'].forEach((data,i)=>{
-    //   OrderData['itemDetail'].forEach((item,j) => {
-    //     // console.log('item_no',data.item_no,item.item_no)
-    //     if(data.item_no==item.item_no){
-          
-    //       req.body.invDetail['itemSupplied'][i]['material_description'] = item['itemName']
-    //     }
-        
+      //   req.body.invDetail['itemSupplied'].forEach((data,i)=>{
+      //   OrderData['itemDetail'].forEach((item,j) => {
+      //     // console.log('item_no',data.item_no,item.item_no)
+      //     if(data.item_no==item.item_no){
+
+      //       req.body.invDetail['itemSupplied'][i]['material_description'] = item['itemName']
+      //     }
 
 
-    //   })
 
-    // })
-    // console.log(req.body.invDetail['itemSupplied'])
+      //   })
+
+      // })
+      // console.log(req.body.invDetail['itemSupplied'])
 
       info('Invoice Generated and updated to DB !');
-      if(req.body.invDetail){
-        return  this.success(req, res, this.status.HTTP_OK, 
+      if (req.body.invDetail) {
+        return this.success(req, res, this.status.HTTP_OK,
           // req.body.invoice_detail
-           req.body.invDetail,
-         this.messageTypes.InvoiceGeneratedSuccesfully);
+          req.body.invDetail,
+          this.messageTypes.InvoiceGeneratedSuccesfully);
       }
 
-      
-    
+
+
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.InvoiceUpdateFailed);
 
+
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
+
+  pickingAllocation = async(req,res,next)=>{
+    
+
+
+    try {
+      let OrderData = req.body.orderDetail,
+      pickedItem = OrderData['itemDetail'];
+      // invoiceDetail = req.body.invoice_detail['data'][0]
+          let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
+    deliveryDetail = req.body.delivery_detail['data'] || undefined;
+    
+
+      //update delivery date
+      console.log('delivery',OrderData['itemDetail'])
+      let soUpdateFullfilemt = sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], pickedItem)
       
+      // data: {
+      //   'isUpdatedfulfillmentStatus':isUpdatedfulfillmentStatus,
+      //   'fulfillmentStatus':soFullfilmentStatus
+      // }
+
+      info('Picking Allocation is created !');
+      if (soUpdateFullfilemt.success) {
+        await pickerBoySalesOrderModel.updateOne({'_id':mongoose.Types.ObjectId(OrderData['pickerBoySalesOrderMappingId']['_id'])},{$set:{'fullfilment':soUpdateFullfilemt['data']['fulfillmentStatus']}});
+        return this.success(req, res, this.status.HTTP_OK,
+          
+          deliveryDetail,
+          this.messageTypes.PickingAllocationGeneratedSuccesfully);
+      }
+
+
+
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.PickingUpdateFailed);
+
+
     } catch (err) {
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
@@ -464,11 +492,159 @@ class pickerSalesOrderMappingController extends BaseController {
 
 
 
+  //Fetch pending invoice,picking is done 
+  getPickingList = async (req, res, next) => {
+    let orderModel
+    try {
+    
+      info('Getting the pending Invoice !!!');
+      console.log(req.user)
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = '', //req.query.search ||
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+        searchDate = req.body.searchDate || '',
+        type = req.params.type,
+        pickerBoyId = req.user._id,
+        plant = req.user.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
 
 
-  // generateDelivery = async (req,res,next)=>{
 
-  // }
+    
+
+
+
+      if (searchDate && !_.isEmpty(searchDate)) {
+
+
+        startOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+
+        // getting the end of the day 
+        endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+      }
+ 
+      let pipeline = [{
+        $match: {
+          'invoiceDetail.isInvoice':false,
+          'pickerBoyId':mongoose.Types.ObjectId(pickerBoyId),
+          'isSapError': 'INVE',
+          'delivery_no':{
+            $ne:'N/A'
+          }
+
+
+       
+
+
+        }
+      },
+      {
+        $project:{
+          '_id':1,
+          'delivery_no':1,
+          'sales_order_no':1,
+          'delivery_date':1,
+          'fullfilment':1
+
+
+        }
+      },
+      {
+        $sort: {
+          'created_at': -1
+        }
+      }, {
+        $skip: (pageSize * (page - 1))
+      }, {
+        $limit: pageSize
+      }];
+
+      // creating a match object
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
+            'invoiceDetail.isInvoice':false,
+            'pickerBoyId':mongoose.Types.ObjectId(pickerBoyId),
+            'isSapError': 'INVE',
+            'delivery_no':{
+              $ne:'N/A'
+            }
+  
+  
+          }
+        }, {
+          $sort: {
+            'created_at': -1
+          }
+        },
+        {
+          $skip: (1 * (page - 1))
+        }, {
+          $limit: 1
+        }];
+      // console.log('searchObject', pipeline);
+
+
+
+      // get list
+
+
+
+
+
+   
+
+      let totalPendingInvoice = await pickerBoySalesOrderModel.aggregate([{
+        $match: {
+          'invoiceDetail.isInvoice':false,
+            'pickerBoyId':mongoose.Types.ObjectId(pickerBoyId),
+            'isSapError': 'INVE',
+            'delivery_no':{
+              $ne:'N/A'
+            }
+  
+
+      }}])
+
+      let pendingInvoice = await pickerBoySalesOrderModel.aggregate(pipeline)
+      // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
+      console.log(pendingInvoice)
+ 
+
+
+      if (pendingInvoice.length > 0) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: pendingInvoice,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalPendingInvoice.length  //item
+          }
+        }, this.messageTypes.todoOrderFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+
+
+
+
+
+
+
+
 
 
 }

@@ -122,7 +122,7 @@ class areaSalesManagerController extends BaseController {
       //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
-  updateSalesOrderStatus = async (saleOrderId,soStatus) => {
+  updateSalesOrderStatus = async (saleOrderId, soStatus) => {
     try {
       info('Get saleOrderId  details !');
 
@@ -360,104 +360,104 @@ class areaSalesManagerController extends BaseController {
 
 
 
-    // Internal Function get the history sales order details 
-    getHistorySalesOrder = async (salesQueryDetails) => {
-      try {
-        info('Get History Sales Order details !');
-        let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
-        let sortingArray = {};
-        sortingArray[sortBy] = -1;
-        let skip = parseInt(page - 1) * pageSize;
-  
-  console.log(startOfTheDay)
-        let searchObject = {
-          // 'isPacked': 0,
-          // 'fulfillmentStatus': 0,
-          // 'locationId': parseInt(locationId),
-          // 'cityId': cityId,
-  
-          'req_del_date': {
-          
-            '$lte': startOfTheDay
-          }
-        };
-  
-        // creating a match object
-        if (searchKey !== '')
-          searchObject = {
-            ...searchObject,
-            '$or': [{
-              'customerName': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }, {
-              'customerCode': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }]
-          };
-          console.log(...searchObject)
-        let totalCount = await Model.aggregate([{
-          $match: 
-            searchObject
-          
-        },
-        {
-          $count: 'sum'
+  // Internal Function get the history sales order details 
+  getHistorySalesOrder = async (salesQueryDetails) => {
+    try {
+      info('Get History Sales Order details !');
+      let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
+      let sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      console.log(startOfTheDay)
+      let searchObject = {
+        // 'isPacked': 0,
+        // 'fulfillmentStatus': 0,
+        // 'locationId': parseInt(locationId),
+        // 'cityId': cityId,
+
+        'req_del_date': {
+
+          '$lte': startOfTheDay
         }
-        ]).allowDiskUse(true);
-  
-        // calculating the total number of applications for the given scenario
-        if (totalCount[0] !== undefined)
-          totalCount = totalCount[0].sum;
-        else
-          totalCount = 0;
-  
-        // get list  
-        let salesOrderList = await Model.aggregate([{
-          $match: {
-            ...searchObject
-          }
-        }, {
-          $sort: sortingArray
-        }, {
-          $skip: skip
-        }, {
-          $limit: pageSize
-        },
-        {
-          $project: {
-            'onlineReferenceNo': 1,
-            'customerCode': 1,
-            'customerName': 1,
-            'customerType': 1,
-            'shippingId':1,
-            'cityId':1,
-            'status':1,
-            'invoiceNo': 1,
-            'req_del_date':1,
-            'fulfillmentStatus': 1,
-            'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
-          }
-        }
-        ]).allowDiskUse(true)
-  
-        return {
-          success: true,
-          data: salesOrderList,
-          total: totalCount
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'customerName': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customerCode': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
         };
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        return {
-          success: false,
+      console.log(...searchObject)
+      let totalCount = await Model.aggregate([{
+        $match:
+          searchObject
+
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let salesOrderList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'onlineReferenceNo': 1,
+          'customerCode': 1,
+          'customerName': 1,
+          'customerType': 1,
+          'shippingId': 1,
+          'cityId': 1,
+          'status': 1,
+          'invoiceNo': 1,
+          'req_del_date': 1,
+          'fulfillmentStatus': 1,
+          'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
         }
       }
+      ]).allowDiskUse(true)
+
+      return {
+        success: true,
+        data: salesOrderList,
+        total: totalCount
+      };
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+      }
     }
+  }
 
   // get user details 
   get = async (req, res) => {
@@ -1732,68 +1732,68 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  getOrderByDeliveryDate = async (searchObject)=>{
-    
-   try{
-    let totalCount = await Model.aggregate([{
-      $match: {
-        ...searchObject
-      }
-    },
-    {
-      $count: 'sum'
-    }
-    ]).allowDiskUse(true);
+  getOrderByDeliveryDate = async (searchObject) => {
 
-    // calculating the total number of applications for the given scenario
-    if (totalCount[0] !== undefined)
-      totalCount = totalCount[0].sum;
-    else
-      totalCount = 0;
-    return Model.aggregate([
-      {
-        '$match':{
+    try {
+      let totalCount = await Model.aggregate([{
+        $match: {
           ...searchObject
         }
+      },
+      {
+        $count: 'sum'
       }
-  ]).allowDiskUse(true)
-  .then((data) => {
-    if (data && data.length) {
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+      return Model.aggregate([
+        {
+          '$match': {
+            ...searchObject
+          }
+        }
+      ]).allowDiskUse(true)
+        .then((data) => {
+          if (data && data.length) {
+            return {
+              total: totalCount,
+              success: true,
+              data: data
+            };
+          } else {
+            return {
+              success: false
+            }
+          }
+        })
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
       return {
-        total: totalCount,
-        success: true,
-        data: data
-      };
-    } else {
-      return {
-        success: false
+        success: false,
+        error: err
       }
     }
-  })
-
-// catch any runtime error
-} catch (err) {
-error(err);
-return {
-  success: false,
-  error: err
-}
-}
   }
 
-  UpdateSalesOrderFullfilmentStatus = async(salesOrderId,status)=>{
+  UpdateSalesOrderFullfilmentStatus = async (salesOrderId, status) => {
     try {
-      info(`Updating Customer Info ! ${salesOrderId}`);
+      info(`Updating SALESORDER FULLFILMENT STATUS ! ${salesOrderId}`);
 
       // get details 
-      return Model.findByIdAndUpdate(mongoose.Types.ObjectId(salesOrderId), { $set:{'fulfillmentStatus':status}}).lean().then((res) => {
+      return Model.findByIdAndUpdate(mongoose.Types.ObjectId(salesOrderId), { $set: { 'fulfillmentStatus': status } }).lean().then((res) => {
         if (res) {
           return {
             success: true,
             data: res
           };
         } else {
-          error('Customer Not Updated !');
+          error('SALESORDER Not Updated !');
           return {
             success: false,
           };
@@ -1817,44 +1817,44 @@ return {
   }
 
 
-  
+
 
 
 
   insertSalesOrderData = async (sapRawData) => {
-    try{
-      if(sapRawData && sapRawData.length > 0) {
-        const soNumberArrayFromSap = sapRawData.map( el => {
-          if(el) {
+    try {
+      if (sapRawData && sapRawData.length > 0) {
+        const soNumberArrayFromSap = sapRawData.map(el => {
+          if (el) {
             return el.sales_order_no
           }
         });
-  
+
         const soDataFromDb = await Model.find({
-          'sales_order_no':{
-            '$in':soNumberArrayFromSap
+          'sales_order_no': {
+            '$in': soNumberArrayFromSap
           }
-        },{
+        }, {
           "sales_order_no": 1
         });
-  
-        if(soDataFromDb.length > 0) {
-          const coNumberArrayFromdb = soDataFromDb.map( el => {
-            if(el) {
+
+        if (soDataFromDb.length > 0) {
+          const coNumberArrayFromdb = soDataFromDb.map(el => {
+            if (el) {
               return el.po_number
             }
           });
           const finalSOArray = sapRawData.filter((val) => {
             return coNumberArrayFromdb.indexOf(val.sales_order_no) == -1;
           });
-  
+
           return await Model.insertMany(finalSOArray);
         } else {
           return await Model.insertMany(sapRawData);
         }
       }
 
-    } catch(err) {
+    } catch (err) {
       error(err);
       return {
         success: false,
@@ -1865,76 +1865,83 @@ return {
 
 
 
-  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity = async(salesOrderId,soItem,invData)=>{
+  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity = async (salesOrderId, soItem, pickedItem) => {
     try {
       info(`Updating SO Info ! ${salesOrderId}`);
       let isUpdated;
-// suppliedQuantity 
-console.log(JSON.stringify(invData))
-let tomorrow  = moment().add(1,'days').format('YYYY-MM-DD');
-  // moment(new Date()).format('YYYY-MM-DD')
-  
-let soFullfilmentStatus = 2;
-soItem.forEach(async (sItem,i)=>{
-invData['data'][0]['item'].forEach(async (item,i)=>{
-  let itemFullfilmentStatus=1
-  // item.qty=1
-  if(sItem.item_no==item.item_no && item.qty<=(parseInt(sItem.qty)-parseInt(sItem.suppliedQty?sItem.suppliedQty:0))){
-  if(item.qty==(parseInt(sItem.qty)-parseInt(sItem.suppliedQty?sItem.suppliedQty:0))){
-    itemFullfilmentStatus=2
-  }else{
-    soFullfilmentStatus = 1
+      // suppliedQuantity 
+      console.log(JSON.stringify(invData))
+      let tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
+      let deliverDate = req.body.deliveryDate || tomorrow;
+      // moment(new Date()).format('YYYY-MM-DD')
 
-  }
-  // console.log(item)
- 
-  
+      let soFullfilmentStatus = 2;
+      soItem.forEach(async (sItem, i) => {
+        pickedItem.forEach(async (item, i) => {
+          let itemFullfilmentStatus = 1
+          // item.qty=1
+          if (sItem.item_no == item.item_no && item.pickedQuantity <= (parseInt(sItem.qty) - parseInt(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+            if (item.pickedQuantity == (parseInt(sItem.qty) - parseInt(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+              itemFullfilmentStatus = 2
+            } else {
+              soFullfilmentStatus = 1
 
-   isUpdated = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId),'item.item_no':item.item_no
+            }
+            // console.log(item)
 
-}, {
-  $set:{
-  
-    'item.$.fulfillmentStatus':itemFullfilmentStatus,
 
-},
-$inc:{
-  
-  'item.$.suppliedQty':parseInt(item.qty?item.qty:0),
-}
-});
-  // console.log(isUpdated)
-}else if((sItem.fulfillmentStatus?sItem.fulfillmentStatus:0)<=1){
-  soFullfilmentStatus = 1
 
-}
-}
-)
+            isUpdated = await Model.findOneAndUpdate({
+              '_id': mongoose.Types.ObjectId(salesOrderId), 'item.item_no': item.item_no
 
-})
-// console.log('soFullfilmentStatus',soFullfilmentStatus)
-let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId)
-}, {
-  $set:{
-    'fulfillmentStatus':soFullfilmentStatus,
-    
-}
+            }, {
+              $set: {
+                
+                'item.$.fulfillmentStatus': itemFullfilmentStatus,
 
-});
-console.log(isUpdated,isUpdatedfulfillmentStatus)
-if(isUpdatedfulfillmentStatus){
-  info('SalesOrder Status updated! !');
-          return {
-            success: true,
-            data: isUpdatedfulfillmentStatus
-          };
-        } else {
-          error('Failed to update SALESORDER! ');
-          return {
-            success: false,
-          };
+              },
+              $inc: {
+
+                'item.$.suppliedQty': parseInt(item.qty ? item.qty : 0),
+              }
+            });
+            // console.log(isUpdated)
+          } else if ((sItem.fulfillmentStatus ? sItem.fulfillmentStatus : 0) <= 1) {
+            soFullfilmentStatus = 1
+
+          }
         }
-   
+        )
+
+      })
+      // console.log('soFullfilmentStatus',soFullfilmentStatus)
+      let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({
+        '_id': mongoose.Types.ObjectId(salesOrderId)
+      }, {
+        $set: {
+          'req_del_date':deliverDate,
+          'fulfillmentStatus': soFullfilmentStatus,
+
+        }
+
+      });
+      console.log(isUpdated, isUpdatedfulfillmentStatus)
+      if (isUpdatedfulfillmentStatus) {
+        info('SalesOrder Status updated! !');
+        return {
+          success: true,
+          data: {
+            'isUpdatedfulfillmentStatus':isUpdatedfulfillmentStatus,
+            'fulfillmentStatus':soFullfilmentStatus
+          }
+        };
+      } else {
+        error('Failed to update SALESORDER! ');
+        return {
+          success: false,
+        };
+      }
+
 
       // catch any runtime error 
     } catch (err) {
@@ -1947,7 +1954,7 @@ if(isUpdatedfulfillmentStatus){
   }
 
 
-  
+
 
 
 

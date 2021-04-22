@@ -15,17 +15,22 @@ module.exports = {
     itemAddedInsalesOrderAfterScan: 'Item added in SalesOrder Details after scan Successfully !.',
     bucketItemListFetchSuccesfully: 'Bucket item Details fetched Successfully !.',
     InvoiceGeneratedSuccesfully: 'Invoice Generated Successfully !.',
+    PickingAllocationGeneratedSuccesfully: 'Picking is Created Successfully !.',
     InvoiceUpdateFailed: 'Invoice Update Failed !.',
+    PickingUpdateFailed: 'Picking Update Failed !.',
     unableToAddItemInsalesOrderAfterScan: 'Unable to add Item  in SalesOrder Details after scan !.',
     unableToFetchBucketItemList: 'Unable To Fetch Bucket Details !.',
     customerDetailsFetchedSuccessfully: 'Customer Details Fetched Successfully !',
     unableToFetchedCustomerDetails: 'Unable to fetch Customer Details!',
     itemAlreadyAdded: 'Item Already Added after Scan!',
+    invalidItemQuantity: 'All quantities can\'t be 0!',
     itemDataIsNotChanged: 'Item Details are not changed!',
     itemUpdatedSuccessfully: 'Item Updated Successfully !',
     itemNotUpdated: 'Error! Updating Item !',
     //picker sales order mapping id
     salesOrderAlreadyAddedInPickerState: 'Sales Order  Already Added in Picker State!',
+    deliveryDateUpdateFailedForSelesOrder: 'Delivery Date Update Failed For Sales Order!',
+    succesfullUpdateDeliveryDateForSelesOrder: 'Succesfully Updated Delivery Date For Sales Order!',
     invalidPickerBoySalesOrderMappingId: 'The Picker Boy Sales Order Mapping Id is Invalid !',
     pickerBoySalesOrderIdInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id is either deleted or deactivated !',
     pickerBoyDetailsUpdated: 'PickerBoy Details Updated Successfully  !',
@@ -34,7 +39,10 @@ module.exports = {
     // pending sales order details
     pendingSalesOrderFetchedSuccessfully: 'Pending SalesOrder Details Fetched Successfully !',
     todoOrderFetchedSuccessfully: 'Todo Order Details Fetched Successfully !',
+    historyFetchedSuccessfully: 'History Details Fetched Successfully !',
+    unableToFetchedHistoryDetails: 'Unable to fetch History Details!',
     unableToFetchedPendingSalesOrder: 'Unable to fetch Pending SalesOrder Details!',
+    
     //pickerboy salesorder mapping id or item code is invalid
     pickerBoySalesOrderIdOrItemCodeInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id or Item Code is either deleted or deactivated !',
     pickerBoySalesOrderInvoiceGeneratedSuccesfully:'SalesOrder Invoice Generated Succesfully!',

@@ -85,6 +85,14 @@ function userRoutes() {
       ctrl.getOrderDetails // get controller 
     );
 
+        // get the single sale order details
+        closed.route('/:type/update/deliverydate/:orderno').patch(
+          // [joiSalesOrderDetails],
+          verifyAppToken,   // verify app token
+          // isValidSalesOrder,
+          ctrl.updateDeliveryDate // get controller 
+        );
+
     closed.route('/:type/getdetail/:orderId').get(
       [joiSalesOrderDetails],
       // verifyAppToken,   // verify app token
@@ -148,6 +156,12 @@ function userRoutes() {
       [joiHistoryOfSO], // joi history SO
       verifyAppToken,   // verify app token
       ctrl.getOrderHistoryByPickerBoyID
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
+    closed.route('/history/:type/invoices/:orderid').get(
+      [joiHistoryOfSO], // joi history SO
+      // verifyAppToken,   // verify app token
+      ctrl.getOrderHistoryAndInvoices
       // getHistoryOfSalesOrder // history SO/invoice status
     );
   };
