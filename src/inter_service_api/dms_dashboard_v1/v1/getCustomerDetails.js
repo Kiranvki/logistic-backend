@@ -14,7 +14,7 @@ module.exports = async (customerId) => {
 
     // getting the data from the env
     let dmsV1BaseUrl = process.env.dmsV1BaseUrl;
-    let dmsGetCustomerDetails = process.env.dmsV1GetCustomerDetailsOne + customerId + process.env.dmsV1GetCustomerDetailsTwo;
+    let dmsGetCustomerDetails = process.env.dmsV1GetCustomerDetailsOne + customerId + process.env.dmsV1GetCustomerDetailsTwo+'chennai';
 
     let url = dmsV1BaseUrl + dmsGetCustomerDetails; // DMS url
 
