@@ -150,11 +150,15 @@ module.exports = async (req, res, next) => {
               'shippingDetails':  //sold_to_party  //bill_to_party
               {
                 'name': 'N/A',
-                'address': 'N/A',
+                'address1': 'N/A',
+                'address2': 'N/A',
+                'address3': 'N/A',
                 'mobileNo': 'N/A',
                 'gstNo': 'N/A',
                 'email': 'N/A',
                 'cityId': 'N/A',
+                'pan':'N/A',
+                'country':'N/A'
               },
             
 
