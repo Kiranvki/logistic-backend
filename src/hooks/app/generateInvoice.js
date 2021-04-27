@@ -21,8 +21,8 @@ module.exports = async (req, res, next) => {
   let obj;
   try {
     info(`Hitting the SAP for Generating Invoice !`);
-    let data = req.body.data;
-    let OrderData = req.body.delivery_detail
+    // let data = req.body.data;
+    // let OrderData = req.body.delivery_detail
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
     let sapBaseUrl = process.env.sapBaseUrl;
@@ -40,7 +40,7 @@ module.exports = async (req, res, next) => {
     }
 
 
-    info(`Invoice Request Body - ${obj}`)
+    info(`Invoice Request Body - ${JSON.stringify(obj)}`)
 
 
     // get the data from SAP

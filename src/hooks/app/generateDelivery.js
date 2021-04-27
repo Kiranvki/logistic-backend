@@ -101,7 +101,7 @@ module.exports = async (req, res, next) => {
     //800000515
 
 
-    // req.body.delivery_detail = {"data":{"delivery_no":"0800000056","flag":"S","remarks":["0800000056  has been saved"]}}
+    // req.body.delivery_detail = {"success": true,"data":{"delivery_no":"0800000056","flag":"S","remarks":["0800000056  has been saved"]}}
     // catch any runtime error 
   } catch (e) {
     error(e);

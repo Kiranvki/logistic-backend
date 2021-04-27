@@ -1865,14 +1865,15 @@ class areaSalesManagerController extends BaseController {
 
 
 
-  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity = async (salesOrderId, soItem, pickedItem) => {
+  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity = async (salesOrderId, soItem, pickedItem,delivery_date) => {
     try {
       info(`Updating SO Info ! ${salesOrderId}`);
+      console.log('pickedItem',pickedItem)
       let isUpdated;
       // suppliedQuantity 
-      console.log(JSON.stringify(invData))
+      // console.log(JSON.stringify(invData))
       let tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
-      let deliverDate = req.body.deliveryDate || tomorrow;
+      let deliverDate = delivery_date || tomorrow;
       // moment(new Date()).format('YYYY-MM-DD')
 
       let soFullfilmentStatus = 2;
@@ -1880,8 +1881,10 @@ class areaSalesManagerController extends BaseController {
         pickedItem.forEach(async (item, i) => {
           let itemFullfilmentStatus = 1
           // item.qty=1
-          if (sItem.item_no == item.item_no && item.pickedQuantity <= (parseInt(sItem.qty) - parseInt(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
-            if (item.pickedQuantity == (parseInt(sItem.qty) - parseInt(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+          console.log(parseFloat(item.pickedQuantity),parseFloat(sItem.qty),parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))
+          console.log(sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0)))
+          if (sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+            if (item.pickedQuantity == (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
               itemFullfilmentStatus = 2
             } else {
               soFullfilmentStatus = 1
@@ -1902,7 +1905,7 @@ class areaSalesManagerController extends BaseController {
               },
               $inc: {
 
-                'item.$.suppliedQty': parseInt(item.qty ? item.qty : 0),
+                'item.$.suppliedQty': parseFloat(item.pickedQuantity ? item.pickedQuantity : 0),
               }
             });
             // console.log(isUpdated)
@@ -1919,7 +1922,7 @@ class areaSalesManagerController extends BaseController {
         '_id': mongoose.Types.ObjectId(salesOrderId)
       }, {
         $set: {
-          'req_del_date':deliverDate,
+          // 'req_del_date':deliverDate,
           'fulfillmentStatus': soFullfilmentStatus,
 
         }
@@ -1927,7 +1930,7 @@ class areaSalesManagerController extends BaseController {
       });
       console.log(isUpdated, isUpdatedfulfillmentStatus)
       if (isUpdatedfulfillmentStatus) {
-        info('SalesOrder Status updated! !');
+        info('Sales order Status updated! !');
         return {
           success: true,
           data: {

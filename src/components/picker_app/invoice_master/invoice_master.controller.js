@@ -246,7 +246,7 @@ class invoiceMasterController extends BaseController {
             fulfilmentStatus = 2 // fullfilled
           }
           salesOrderCtrl.UpdateSalesOrderFullfilmentStatus(basketItemData.data[0].salesOrderId,fulfilmentStatus)
-          pickerBoySalesOrderMappingctrl.updateFullFilmentStatus(pickerBoySalesOrderMappingId,fulfilmentStatus)
+          pickerBoySalesOrderMappingctrl.updateFullfilmentStatus(pickerBoySalesOrderMappingId,fulfilmentStatus)
 
           //add Invoice no.
           newInvoice.invoiceDetails.invoiceNo=invoiceNo;
@@ -312,17 +312,16 @@ class invoiceMasterController extends BaseController {
           var invoiceDetails = invoiceMappingDetails.data[0].invoice[0] || {};
           let totalAmount=0;
           let totalTaxValue=0
-          salesOrderDetails['item'].forEach((item,i)=>{
-            invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
+          invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
+            salesOrderDetails['item'].forEach((item,i)=>{
               if(item.material_no==invItem.itemId){
-                invoiceDetails['itemSupplied'][j].unitPrice=Number(invoiceDetails['itemSupplied'][j].total_amount)/invoiceDetails['itemSupplied'][j].quantity;
-                invoiceDetails['itemSupplied'][j].totalAmount=Number(invoiceDetails['itemSupplied'][j].total_amount);
-                invoiceDetails['itemSupplied'][j].itemName=item.material_description;
-                totalAmount=totalAmount+Number(invoiceDetails['itemSupplied'][j].total_amount)
-                totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
-
+                invoiceDetails['itemSupplied'][j].itemName=item.material_description
               }
             })
+            invoiceDetails['itemSupplied'][j].unitPrice=Number(invoiceDetails['itemSupplied'][j].total_amount)/invoiceDetails['itemSupplied'][j].quantity;
+            invoiceDetails['itemSupplied'][j].totalAmount=Number(invoiceDetails['itemSupplied'][j].total_amount);
+            totalAmount=totalAmount+Number(invoiceDetails['itemSupplied'][j].total_amount)
+            totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
           })
 
             let InvoiceDetailsResponse={
@@ -353,8 +352,8 @@ class invoiceMasterController extends BaseController {
               basketTotal: totalAmount-totalTaxValue,
               finalTotal:totalAmount,
               totalDiscount:Number(invoiceDetails.totalDiscount),
-              cgst:totalTaxValue/2,
-              sgst:totalTaxValue/2,
+              cgst:Math.round((totalTaxValue/2)*100)/100,
+              sgst:Math.round((totalTaxValue/2)*100)/100,
               gstNo:'NA'
             }
             return this.success(req, res, this.status.HTTP_OK,InvoiceDetailsResponse , this.messageTypes.invoiceDetailsSent);

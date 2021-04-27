@@ -37,12 +37,12 @@ class purchaseController extends BaseController {
 
       // get the sale Order Details
       let poDetails = req.body.poDetails;
-      poDetails.item = poDetails.item.filter(item => {
-        return item.quantity!=item.received_qty
+      poDetails.item = poDetails.item.filter((item) => {
+        return item.quantity != item.received_qty;
       });
-      poDetails.item.forEach(item => {
-        item.quantity= (item.pending_qty?item.pending_qty:item.quantity);
-        item.received_qty=0;
+      poDetails.item.forEach((item) => {
+        item.quantity = item.pending_qty ? item.pending_qty : item.quantity;
+        item.received_qty = 0;
       });
 
       let dataToInsert = {
@@ -56,10 +56,7 @@ class purchaseController extends BaseController {
       // inserting data into the db
       let isInserted = await Model.create(dataToInsert);
       let poUpdateDetails = await poCtrl.modifyPo(
-        { _id: poDetails._id ,
-          status:1,
-          isDeleted:0
-        },
+        { _id: poDetails._id, status: 1, isDeleted: 0 },
         { receivingStatus: 4 }
       );
 
@@ -108,8 +105,13 @@ class purchaseController extends BaseController {
       };
       var poList = await Model.findOne(query).populate({
         path: "poId",
-        select: { po_number: 1, vendor_no: 1, vendor_name: 1, delivery_date: 1 },
-      });
+        select: {
+          po_number: 1,
+          vendor_no: 1,
+          vendor_name: 1,
+          delivery_date: 1,
+        },
+      }).lean();
       // success
       return this.success(
         req,
@@ -136,15 +138,17 @@ class purchaseController extends BaseController {
       var material_no = req.params.material_no;
       var poReceivingId = req.body.poReceivingId;
       var received_qty = req.body.received_qty;
-      var remarks =req.body.remarks;
-      var date_of_manufacturing= req.body.date_of_manufacturing||new Date();
-      if(date_of_manufacturing){
-        date_of_manufacturing  = moment(new Date(date_of_manufacturing)).set({
-          h: 0,
-          m: 0,
-          s: 0,
-          millisecond: 0
-        }).format('YYYY-MM-DD hh:mm:ss')
+      var remarks = req.body.remarks;
+      var date_of_manufacturing = req.body.date_of_manufacturing || new Date();
+      if (date_of_manufacturing) {
+        date_of_manufacturing = moment(new Date(date_of_manufacturing))
+          .set({
+            h: 0,
+            m: 0,
+            s: 0,
+            millisecond: 0,
+          })
+          .format("YYYY-MM-DD hh:mm:ss");
       }
 
       info("Receiving PO item!");
@@ -156,13 +160,11 @@ class purchaseController extends BaseController {
         "item.$.received_qty": received_qty,
         "item.$.date_of_manufacturing": date_of_manufacturing,
         // "item.$.is_edited":1
-
       };
-      if(remarks){
-        updateData["item.$.remarks"] =remarks;
-      }else{
-        updateData["item.$.remarks"] ='';
-
+      if (remarks) {
+        updateData["item.$.remarks"] = remarks;
+      } else {
+        updateData["item.$.remarks"] = "";
       }
       var updatedPO = await Model.findOneAndUpdate(query, updateData, {
         newValue: true,
@@ -240,126 +242,135 @@ class purchaseController extends BaseController {
       let query = {
         _id: mongoose.Types.ObjectId(poReceivingId),
         isDeleted: 0,
-        'item.received_qty': {$gt:0},//to-do not workinfg properly
+        "item.received_qty": { $gt: 0 }, //to-do not workinfg properly
         // 'item.is_edited': 1//to-do not workinfg properlu
       };
-      var bucketList = await Model.aggregate(
-        [{$match:query},
-          {
-            $lookup: {
-              from: "purchase_order",
-              let: {
-                id: "$poId",
-              },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        { $eq: ["$_id", "$$id"] },
-                        { $eq: ["$receivingStatus", 4] },
-                        { $eq: ["$isDeleted", 0] },
-  
-                        // { $gt: ["$item.quantity", "$item.received_qty"] },//not working need to check later //to-do
-                      ],
-                    },
-                  },
-                },
-  
-                { $limit: 1 },
-                {
-                  $project: {
-                    _id: 1,
-                    po_number:1
-                  },
-                },
-              ],
-              as: "poDetails",
+      var bucketList = await Model.aggregate([
+        { $match: query },
+        {
+          $lookup: {
+            from: "purchase_order",
+            let: {
+              id: "$poId",
             },
-          },
-          {
-            $unwind: {
-              path: "$poDetails",
-              preserveNullAndEmptyArrays: true,
-            },
-          },
-          {
-            $addFields: {
-              basketTotal: {
-                $sum: {
-                  $map: {
-                    input: "$item",
-                    as: "item",
-                    in: {
-                      $round: [
-                        { $multiply: ["$$item.net_price", "$$item.received_qty"] },
-                        4,
-                      ],
-                    },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$_id", "$$id"] },
+                      { $eq: ["$receivingStatus", 4] },
+                      { $eq: ["$isDeleted", 0] },
+
+                      // { $gt: ["$item.quantity", "$item.received_qty"] },//not working need to check later //to-do
+                    ],
                   },
                 },
               },
 
-              totalTax: {
-                $sum: {
-                  $map: {
-                    input: "$item",
-                    as: "item",
-                    in: {
-                      $round: [
-                        {
-                          $multiply: [
-                            "$$item.taxable_value",
-                            "$$item.received_qty",
-                          ],
-                        },
-                        4,
-                      ],
-                    },
+              { $limit: 1 },
+              {
+                $project: {
+                  _id: 1,
+                  po_number: 1,
+                },
+              },
+            ],
+            as: "poDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$poDetails",
+            preserveNullAndEmptyArrays: true,
+          },
+        },
+        {
+          $addFields: {
+            basketTotal: {
+              $sum: {
+                $map: {
+                  input: "$item",
+                  as: "item",
+                  in: {
+                    $round: [
+                      {
+                        $multiply: ["$$item.net_price", "$$item.received_qty"],
+                      },
+                      4,
+                    ],
                   },
                 },
               },
-              totalDiscount: {
-                $sum: {
-                  $map: {
-                    input: "$item",
-                    as: "item",
-                    in: {
-                      $round: [
-                        {
-                          $multiply: [
-                            {
-                              $divide: [
-                                "$$item.discount_amount",
-                                "$$item.quantity",
-                              ],
-                            },
-                            "$$item.received_qty",
-                          ],
-                        },
-                        4,
-                      ],
-                    },
+            },
+
+            totalTax: {
+              $sum: {
+                $map: {
+                  input: "$item",
+                  as: "item",
+                  in: {
+                    $round: [
+                      {
+                        $multiply: [
+                          "$$item.taxable_value",
+                          "$$item.received_qty",
+                        ],
+                      },
+                      4,
+                    ],
+                  },
+                },
+              },
+            },
+            totalDiscount: {
+              $sum: {
+                $map: {
+                  input: "$item",
+                  as: "item",
+                  in: {
+                    $round: [
+                      {
+                        $multiply: [
+                          {
+                            $divide: [
+                              "$$item.discount_amount",
+                              "$$item.quantity",
+                            ],
+                          },
+                          "$$item.received_qty",
+                        ],
+                      },
+                      4,
+                    ],
                   },
                 },
               },
             },
           },
-          {
-            $project: {
-              "item":1,
-              totalDiscount:1,
-              totalTax:1,
-              basketTotal:1,
-              poDetails:1
-            },
-          }
-        ]
-      ).allowDiskUse(true);
-      if(bucketList && bucketList[0] && bucketList[0].item && bucketList[0].item.length){
-        bucketList[0].total = bucketList[0].basketTotal-bucketList[0].totalDiscount+bucketList[0].totalTax
+        },
+        {
+          $project: {
+            item: 1,
+            totalDiscount: 1,
+            totalTax: 1,
+            basketTotal: 1,
+            poDetails: 1,
+          },
+        },
+      ]).allowDiskUse(true);
+      if (
+        bucketList &&
+        bucketList[0] &&
+        bucketList[0].item &&
+        bucketList[0].item.length
+      ) {
+        bucketList[0].total =
+          bucketList[0].basketTotal -
+          bucketList[0].totalDiscount +
+          bucketList[0].totalTax;
         bucketList[0].netWeight = 0;
-        bucketList[0].vendorInvoiceNo = 'NA'
+        bucketList[0].vendorInvoiceNo = "NA";
 
         // success
         return this.success(
@@ -369,8 +380,13 @@ class purchaseController extends BaseController {
           { result: bucketList },
           this.messageTypes.bucketListFetchedSuccessfully
         );
-      }else{
-        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.emptyBucketList);
+      } else {
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.emptyBucketList
+        );
       }
 
       // catch any runtime error
@@ -393,96 +409,105 @@ class purchaseController extends BaseController {
         req.query,
         req.params
       );
-      var poReceivingId= req.params.poReceivingId;
+      var poReceivingId = req.params.poReceivingId;
       var vendorInvoiceNo = req.body.vendorInvoiceNo;
       let query = {
         _id: mongoose.Types.ObjectId(poReceivingId),
         isDeleted: 0,
       };
-      var bucketList = await Model.aggregate(
-        [{$match:query},
-          {
-            $addFields: {
-              basketTotal: {
-                $sum: {
-                  $map: {
-                    input: "$item",
-                    as: "item",
-                    in: {
-                      $round: [
-                        { $multiply: ["$$item.net_price", "$$item.received_qty"] },
-                        4,
-                      ],
-                    },
+      var bucketList = await Model.aggregate([
+        { $match: query },
+        {
+          $addFields: {
+            basketTotal: {
+              $sum: {
+                $map: {
+                  input: "$item",
+                  as: "item",
+                  in: {
+                    $round: [
+                      {
+                        $multiply: ["$$item.net_price", "$$item.received_qty"],
+                      },
+                      4,
+                    ],
                   },
                 },
               },
+            },
 
-              totalTax: {
-                $sum: {
-                  $map: {
-                    input: "$item",
-                    as: "item",
-                    in: {
-                      $round: [
-                        {
-                          $multiply: [
-                            "$$item.taxable_value",
-                            "$$item.received_qty",
-                          ],
-                        },
-                        4,
-                      ],
-                    },
+            totalTax: {
+              $sum: {
+                $map: {
+                  input: "$item",
+                  as: "item",
+                  in: {
+                    $round: [
+                      {
+                        $multiply: [
+                          "$$item.taxable_value",
+                          "$$item.received_qty",
+                        ],
+                      },
+                      4,
+                    ],
                   },
                 },
               },
-              totalDiscount: {
-                $sum: {
-                  $map: {
-                    input: "$item",
-                    as: "item",
-                    in: {
-                      $round: [
-                        {
-                          $multiply: [
-                            {
-                              $divide: [
-                                "$$item.discount_amount",
-                                "$$item.quantity",
-                              ],
-                            },
-                            "$$item.received_qty",
-                          ],
-                        },
-                        4,
-                      ],
-                    },
+            },
+            totalDiscount: {
+              $sum: {
+                $map: {
+                  input: "$item",
+                  as: "item",
+                  in: {
+                    $round: [
+                      {
+                        $multiply: [
+                          {
+                            $divide: [
+                              "$$item.discount_amount",
+                              "$$item.quantity",
+                            ],
+                          },
+                          "$$item.received_qty",
+                        ],
+                      },
+                      4,
+                    ],
                   },
                 },
               },
             },
           },
-          {
-            $project: {
-              "item._id": 1,
-              "item.material_no": 1,
-              "item.material_description": 1,
-              "item.quantity": 1,
-              "item.net_price": 1,
-              "item.mrp": 1,
-              "item.received_qty": 1,
-              "item.mrp_amount": 1,
-              totalDiscount:1,
-              totalTax:1,
-              basketTotal:1
-            },
-          }
-        ]
-      ).allowDiskUse(true);
+        },
+        {
+          $project: {
+            "item._id": 1,
+            "item.material_no": 1,
+            "item.material_description": 1,
+            "item.quantity": 1,
+            "item.net_price": 1,
+            "item.mrp": 1,
+            "item.received_qty": 1,
+            "item.mrp_amount": 1,
+            totalDiscount: 1,
+            totalTax: 1,
+            basketTotal: 1,
+          },
+        },
+      ]).allowDiskUse(true);
 
-      if(bucketList && bucketList[0] && bucketList[0].item && bucketList[0].item.length){
-        bucketList[0].total = bucketList[0].basketTotal-bucketList[0].totalDiscount+bucketList[0].totalTax
+      if (
+        bucketList &&
+        bucketList[0] &&
+        bucketList[0].item &&
+        bucketList[0].item.length
+      ) {
+        bucketList[0].total =
+          bucketList[0].basketTotal -
+          bucketList[0].totalDiscount +
+          bucketList[0].totalTax;
         // success
         return this.success(
           req,
@@ -491,8 +516,13 @@ class purchaseController extends BaseController {
           { result: bucketList },
           this.messageTypes.bucketListFetchedSuccessfully
         );
-      }else{
-        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.emptyBucketList);
+      } else {
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.emptyBucketList
+        );
       }
       // catch any runtime error
     } catch (err) {
@@ -505,184 +535,197 @@ class purchaseController extends BaseController {
       );
     }
   };
-  get =async (query) =>{
-    try{
-      var poReceivingDetails= await  Model.aggregate([{
-        $match:query
-      },{
-        $project: {
-          poId:1,
-          'item':1,
-          'pickerBoyId':1,
-          'receivingStatus':4,
-      }}
+  get = async (query) => {
+    try {
+      var poReceivingDetails = await Model.aggregate([
+        {
+          $match: query,
+        },
+        {
+          $project: {
+            poId: 1,
+            item: 1,
+            pickerBoyId: 1,
+            receivingStatus: 4,
+          },
+        },
       ]).allowDiskUse(true);
       return {
         success: true,
-        data: poReceivingDetails
-      }
-    }catch(err){
+        data: poReceivingDetails,
+      };
+    } catch (err) {
       error(err);
       return {
         success: false,
-        error: err
-      }
+        error: err,
+      };
     }
-  }
-  getReceivingItem =async (poReceivingId,itemId) =>{
-    try{
-      var poReceivingDetails= await  Model.aggregate([{
-        $match:{ 
-          _id: mongoose.Types.ObjectId(poReceivingId),
-          "item._id": mongoose.Types.ObjectId(itemId),
-          receivingStatus:4
-        }
-      },
-      { $unwind : "$item" },
-      { $match : {
-        "item._id": mongoose.Types.ObjectId(itemId)
-      }},
-      {
-        $project: {
-          poId:1,
-          'item':1,
-          'pickerBoyId':1,
-          'receivingStatus':4,
-      }}
+  };
+  getReceivingItem = async (poReceivingId, itemId) => {
+    try {
+      var poReceivingDetails = await Model.aggregate([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(poReceivingId),
+            "item._id": mongoose.Types.ObjectId(itemId),
+            receivingStatus: 4,
+          },
+        },
+        { $unwind: "$item" },
+        {
+          $match: {
+            "item._id": mongoose.Types.ObjectId(itemId),
+          },
+        },
+        {
+          $project: {
+            poId: 1,
+            item: 1,
+            pickerBoyId: 1,
+            receivingStatus: 4,
+          },
+        },
       ]).allowDiskUse(true);
       return {
         success: true,
-        data: poReceivingDetails
-      }
-    }catch(err){
+        data: poReceivingDetails,
+      };
+    } catch (err) {
       error(err);
       return {
         success: false,
-        error: err
-      }
+        error: err,
+      };
     }
-  }
+  };
 
- getForGrnGeneration = async(poReceivingId)=>{
-  try{
-    let query = {
-      _id: mongoose.Types.ObjectId(poReceivingId),
-      isDeleted: 0,
-      // 'item.received_qty':{$gt:0}// not adding this as we need filtered and unfiltered both list
-    };
-    //calculate net value also when 
-    var poReceivingDetails= await  Model.aggregate( [{$match:query},
-      {
-        $addFields: {
-          total: {
-            $sum: {
-              $map: {
-                input: "$item",
-                as: "item",
-                in: {
-                  $round: [
-                    { $multiply: ["$$item.net_price", "$$item.received_qty"] },
-                    4,
-                  ],
+  getForGrnGeneration = async (poReceivingId) => {
+    try {
+      let query = {
+        _id: mongoose.Types.ObjectId(poReceivingId),
+        isDeleted: 0,
+        // 'item.received_qty':{$gt:0}// not adding this as we need filtered and unfiltered both list
+      };
+      //calculate net value also when
+      var poReceivingDetails = await Model.aggregate([
+        { $match: query },
+        {
+          $addFields: {
+            total: {
+              $sum: {
+                $map: {
+                  input: "$item",
+                  as: "item",
+                  in: {
+                    $round: [
+                      {
+                        $multiply: ["$$item.net_price", "$$item.received_qty"],
+                      },
+                      4,
+                    ],
+                  },
                 },
               },
             },
-          },
-  
-          totalTax: {
-            $sum: {
-              $map: {
-                input: "$item",
-                as: "item",
-                in: {
-                  $round: [
-                    {
-                      $multiply: [
-                        { $divide: ["$$item.itemTax", "$$item.quantity"] },
-                        "$$item.received_qty",
-                      ],
-                    },
-                    4,
-                  ],
+
+            totalTax: {
+              $sum: {
+                $map: {
+                  input: "$item",
+                  as: "item",
+                  in: {
+                    $round: [
+                      {
+                        $multiply: [
+                          { $divide: ["$$item.itemTax", "$$item.quantity"] },
+                          "$$item.received_qty",
+                        ],
+                      },
+                      4,
+                    ],
+                  },
                 },
               },
             },
-          },
-          totalDiscount: {
-            $sum: {
-              $map: {
-                input: "$item",
-                as: "item",
-                in: {
-                  $round: [
-                    {
-                      $multiply: [
-                        {
-                          $divide: [
-                            "$$item.discount_amount",
-                            "$$item.quantity",
-                          ],
-                        },
-                        "$$item.received_qty",
-                      ],
-                    },
-                    4,
-                  ],
+            totalDiscount: {
+              $sum: {
+                $map: {
+                  input: "$item",
+                  as: "item",
+                  in: {
+                    $round: [
+                      {
+                        $multiply: [
+                          {
+                            $divide: [
+                              "$$item.discount_amount",
+                              "$$item.quantity",
+                            ],
+                          },
+                          "$$item.received_qty",
+                        ],
+                      },
+                      4,
+                    ],
+                  },
                 },
               },
             },
           },
         },
-      },
-      {
-        $project: {
-          "item":1,
-          totalDiscount:1,
-          totalTax:1,
-          total:1,
-          poId:1,
+        {
+          $project: {
+            item: 1,
+            totalDiscount: 1,
+            totalTax: 1,
+            total: 1,
+            poId: 1,
+          },
         },
-      }
-    ]).allowDiskUse(true);
-    if(poReceivingDetails&& poReceivingDetails.length){
-      let item= poReceivingDetails[0].item.filter(item=>{
-        return item.received_qty>0
+      ]).allowDiskUse(true);
+      if (poReceivingDetails && poReceivingDetails.length) {
+        let item = poReceivingDetails[0].item.filter((item) => {
+          return item.received_qty > 0;
 
-        // return item.is_edited>0
-    })
-    poReceivingDetails[0].item=item;
-    poReceivingDetails[0].netValue=poReceivingDetails[0].total+ poReceivingDetails[0].totalDiscount-poReceivingDetails[0].totalTax;
-  }
-    return {
-      success: true,
-      data: poReceivingDetails
+          // return item.is_edited>0
+        });
+        poReceivingDetails[0].item = item;
+        poReceivingDetails[0].netValue =
+          poReceivingDetails[0].total +
+          poReceivingDetails[0].totalDiscount -
+          poReceivingDetails[0].totalTax;
+      }
+      return {
+        success: true,
+        data: poReceivingDetails,
+      };
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err,
+      };
     }
-  }catch(err){
-    error(err);
-    return {
-      success: false,
-      error: err
+  };
+  modifyPo = async (query, updateData) => {
+    try {
+      var poDetails = await Model.findOneAndUpdate(query, updateData, {
+        newValue: true,
+        useFindAndModify: false,
+      });
+      return {
+        success: true,
+        data: poDetails,
+      };
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err,
+      };
     }
-  }
- }
- modifyPo =async(query,updateData)=>{
-  try{
-    var poDetails= await  Model.findOneAndUpdate(query,updateData,{
-      newValue:true,useFindAndModify:false
-    }
-     );
-    return {
-      success: true,
-      data: poDetails
-    }
-  }catch(err){
-    error(err);
-    return {
-      success: false,
-      error: err
-    }
-  }
-}
+  };
 }
 
 // exporting the modules

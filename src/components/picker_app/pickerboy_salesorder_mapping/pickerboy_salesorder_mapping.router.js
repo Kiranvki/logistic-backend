@@ -76,7 +76,7 @@ function userRoutes() {
     );
 
 
-    
+
     // get the single sale order details
     closed.route('/:type/detail/:orderId').get(
       [joiSalesOrderDetails],
@@ -85,13 +85,13 @@ function userRoutes() {
       ctrl.getOrderDetails // get controller 
     );
 
-        // get the single sale order details
-        closed.route('/:type/update/deliverydate/:orderno').patch(
-          // [joiSalesOrderDetails],
-          verifyAppToken,   // verify app token
-          // isValidSalesOrder,
-          ctrl.updateDeliveryDate // get controller 
-        );
+    // get the single sale order details
+    closed.route('/:type/update/deliverydate/:orderno').patch(
+      // [joiSalesOrderDetails],
+      verifyAppToken,   // verify app token
+      // isValidSalesOrder,
+      ctrl.updateDeliveryDate // get controller 
+    );
 
     closed.route('/:type/getdetail/:orderId').get(
       [joiSalesOrderDetails],
@@ -100,7 +100,7 @@ function userRoutes() {
       ctrl.getSalesOrder // get controller 
     );
 
-    
+
 
 
     // add the salesorder in the packing stage
@@ -141,18 +141,18 @@ function userRoutes() {
       verifyAppToken,   // verify app token
       ctrl.getPendingSalesOrder // ongoing SO/invoice status
     );
-    
-// get the invoice detail by invoice mongo id
+
+    // get the invoice detail by invoice mongo id
     closed.route('/invoice/:type/:invId').get(
       // [joiGetInvValidate]
-       // joi history SO
+      // joi history SO
       verifyAppToken,   // verify app token
       ctrl.getInvoiceDocumentDetail // history SO/invoice status
     );
 
 
     // get the history invoice status
-    closed.route('/history/:type').get(
+    closed.route('/history').get(
       [joiHistoryOfSO], // joi history SO
       verifyAppToken,   // verify app token
       ctrl.getOrderHistoryByPickerBoyID

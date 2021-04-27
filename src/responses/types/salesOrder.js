@@ -39,6 +39,8 @@ module.exports = {
     // pending sales order details
     pendingSalesOrderFetchedSuccessfully: 'Pending SalesOrder Details Fetched Successfully !',
     todoOrderFetchedSuccessfully: 'Todo Order Details Fetched Successfully !',
+    pendingAllocationFetchedSuccessfully: 'Pending Allocation Fetched Successfully !',
+    unableToFetchedPendingAllocation: 'Unable to fetch pending allocation !',
     historyFetchedSuccessfully: 'History Details Fetched Successfully !',
     unableToFetchedHistoryDetails: 'Unable to fetch History Details!',
     unableToFetchedPendingSalesOrder: 'Unable to fetch Pending SalesOrder Details!',

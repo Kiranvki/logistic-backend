@@ -12,7 +12,7 @@ const schemas = {
 
   // joi start pick salesorder
   joiStartPickSalesOrder: Joi.object().keys({
-    type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+    type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders', 'spotSales', 'spotsales').options({
       language: {
         string: {
           regex: {
@@ -26,7 +26,7 @@ const schemas = {
   }),
 
   joiGetInvValidate: Joi.object().keys({
-    type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+    type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders', 'spotSales', 'spotsales').options({
       language: {
         string: {
           regex: {
@@ -40,7 +40,7 @@ const schemas = {
   }),
 
 
-  
+
 
   // joi salesorder details
   joiSalesOrderDetails: Joi.object().keys({
@@ -60,7 +60,7 @@ const schemas = {
   // joi customer get details 
   joiCustomerGetDetails: Joi.object().keys({
     customerId: Joi.number().integer().label('Customer Id').required(),
-    cityId: Joi.string().trim().lowercase().label('city Id').required().valid(['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']),
+    // cityId: Joi.string().trim().lowercase().label('city Id').required().valid(['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']),
   }),
 
   // joi ongoing sales order details
@@ -184,7 +184,7 @@ module.exports = {
   },
 
 
-  joiGetInvValidate:(req,res,next)=> {
+  joiGetInvValidate: (req, res, next) => {
     // getting the schemas 
     let schema = schemas.joiGetInvValidate;
     let option = options.basic;

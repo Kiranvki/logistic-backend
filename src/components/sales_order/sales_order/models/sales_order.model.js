@@ -48,6 +48,9 @@ const salesOrder = new Schema({
   'status': {
     type: 'String'
   },
+  'req_del_date':{
+    type:String
+  },
   'orderRemarks': {
     type: 'String'
   },

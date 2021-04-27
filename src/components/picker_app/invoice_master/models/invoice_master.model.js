@@ -101,9 +101,22 @@ const invoiceMaster = new Schema({
     'name': {
       type: 'String',
     },
-    'address': {
+    'address1': {
       type: 'String',
     },
+    'address2': {
+      type: 'String',
+    },
+    'address3': {
+      type: 'String',
+    },
+    'pan':{
+      type: 'String',
+    },
+    'country':{
+      type: 'String',
+    },
+    
     'mobileNo': {
       type: 'String',
     },

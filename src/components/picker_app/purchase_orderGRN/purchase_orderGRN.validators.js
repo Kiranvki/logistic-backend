@@ -27,7 +27,8 @@ const schemas = {
         }),
     },
     body: {
-      vendorInvoiceNumber: Joi.string().trim()
+      vendorInvoiceNumber: Joi.string()
+        .trim()
         .label("Vendor Invoice Number")
         .required(),
     },
@@ -104,7 +105,7 @@ module.exports = {
 
     // validating the schema
     schema
-      .validate({params:req.params,body:req.body}, option)
+      .validate({ params: req.params, body: req.body }, option)
       .then(() => {
         next();
         // if error occured

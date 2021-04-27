@@ -163,7 +163,7 @@ class pickerSalesOrderMappingController extends BaseController {
 
 
 
-  
+
 
 
   // Internal Function get customer details 
@@ -340,7 +340,7 @@ class pickerSalesOrderMappingController extends BaseController {
 
   }
 
-//Return all item picked by pickerboy 
+  //Return all item picked by pickerboy 
   getPickedItemByPickerOrderId = async (pickerBoyOrderMappingId) => {
 
     try {
@@ -365,12 +365,12 @@ class pickerSalesOrderMappingController extends BaseController {
           'pickerBoySalesOrderMappingId.createdAt': 0,
           'pickerBoySalesOrderMappingId.updatedAt': 0,
           'pickerBoySalesOrderMappingId.__v': 0,
-      
+
 
         }
       }).lean().then((res) => {
         if (res && !_.isEmpty(res)) {
-       
+
           return {
             success: true,
             data: res
@@ -397,7 +397,7 @@ class pickerSalesOrderMappingController extends BaseController {
   }
 
 
-//Update SO status and inv detail.Check hooks for INV generate method
+  //Update SO status and inv detail.Check hooks for INV generate method
   generateInv = async (req, res, next) => {
     try {
       let OrderData = req.body.orderDetail
@@ -448,32 +448,32 @@ class pickerSalesOrderMappingController extends BaseController {
 
   }
 
-  pickingAllocation = async(req,res,next)=>{
-    
+  pickingAllocation = async (req, res, next) => {
+
 
 
     try {
       let OrderData = req.body.orderDetail,
-      pickedItem = OrderData['itemDetail'];
+        pickedItem = OrderData['itemDetail'];
       // invoiceDetail = req.body.invoice_detail['data'][0]
-          let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
-    deliveryDetail = req.body.delivery_detail['data'] || undefined;
-    
+      let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
+        deliveryDetail = req.body.delivery_detail['data'] || undefined;
+
 
       //update delivery date
-      console.log('delivery',OrderData['itemDetail'])
-      let soUpdateFullfilemt = sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], pickedItem)
-      
-      // data: {
-      //   'isUpdatedfulfillmentStatus':isUpdatedfulfillmentStatus,
-      //   'fulfillmentStatus':soFullfilmentStatus
-      // }
+      console.log('delivery', OrderData['itemDetail'])
+      let soUpdateFullfilemt = await sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], pickedItem, req.body.deliveryDate)
+
+
 
       info('Picking Allocation is created !');
       if (soUpdateFullfilemt.success) {
-        await pickerBoySalesOrderModel.updateOne({'_id':mongoose.Types.ObjectId(OrderData['pickerBoySalesOrderMappingId']['_id'])},{$set:{'fullfilment':soUpdateFullfilemt['data']['fulfillmentStatus']}});
+        console.log('success')
+        let updateStatus = await pickerBoySalesOrderModel.updateFullfilmentStatus(OrderData['pickerBoySalesOrderMappingId']['_id'], soUpdateFullfilemt['data']['fulfillmentStatus'])
+
+        console.log('updateStatus', updateStatus)
         return this.success(req, res, this.status.HTTP_OK,
-          
+
           deliveryDetail,
           this.messageTypes.PickingAllocationGeneratedSuccesfully);
       }
@@ -493,15 +493,16 @@ class pickerSalesOrderMappingController extends BaseController {
 
 
   //Fetch pending invoice,picking is done 
-  getPickingList = async (req, res, next) => {
+  getpickingallocation = async (req, res, next) => {
     let orderModel
     try {
-    
+
       info('Getting the pending Invoice !!!');
       console.log(req.user)
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey = '', //req.query.search ||
+        searchKey = '', //req.query.search ||,
+        fullfilment = parseInt(req.query.fullfilment) || 2,
         sortBy = req.query.sortBy || 'createdAt',
         skip = parseInt(page - 1) * pageSize,
         locationId = 0, // locationId req.user.locationId || 
@@ -515,7 +516,7 @@ class pickerSalesOrderMappingController extends BaseController {
 
 
 
-    
+
 
 
 
@@ -527,29 +528,39 @@ class pickerSalesOrderMappingController extends BaseController {
         // getting the end of the day 
         endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
       }
- 
+
       let pipeline = [{
         $match: {
-          'invoiceDetail.isInvoice':false,
-          'pickerBoyId':mongoose.Types.ObjectId(pickerBoyId),
-          'isSapError': 'INVE',
-          'delivery_no':{
-            $ne:'N/A'
+          'invoiceDetail.isInvoice': false,
+          'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
+          $or: [
+            {
+              'isSapError':
+
+                { $exists: true, $ne: 'DNE' }
+            },
+            {
+              'isSapError': { $exists: false }
+
+            }],
+          'fullfilment': fullfilment,
+          'delivery_no': {
+            $ne: 'N/A'
           }
 
 
-       
+
 
 
         }
       },
       {
-        $project:{
-          '_id':1,
-          'delivery_no':1,
-          'sales_order_no':1,
-          'delivery_date':1,
-          'fullfilment':1
+        $project: {
+          '_id': 1,
+          'delivery_no': 1,
+          'sales_order_no': 1,
+          'delivery_date': 1,
+          'fullfilment': 1
 
 
         }
@@ -568,14 +579,15 @@ class pickerSalesOrderMappingController extends BaseController {
       if (searchKey !== '')
         pipeline = [{
           $match: {
-            'invoiceDetail.isInvoice':false,
-            'pickerBoyId':mongoose.Types.ObjectId(pickerBoyId),
+            'invoiceDetail.isInvoice': false,
+            'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
             'isSapError': 'INVE',
-            'delivery_no':{
-              $ne:'N/A'
+            'fullfilment': fullfilment,
+            'delivery_no': {
+              $ne: 'N/A'
             }
-  
-  
+
+
           }
         }, {
           $sort: {
@@ -587,7 +599,7 @@ class pickerSalesOrderMappingController extends BaseController {
         }, {
           $limit: 1
         }];
-      // console.log('searchObject', pipeline);
+
 
 
 
@@ -597,24 +609,26 @@ class pickerSalesOrderMappingController extends BaseController {
 
 
 
-   
+
 
       let totalPendingInvoice = await pickerBoySalesOrderModel.aggregate([{
         $match: {
-          'invoiceDetail.isInvoice':false,
-            'pickerBoyId':mongoose.Types.ObjectId(pickerBoyId),
-            'isSapError': 'INVE',
-            'delivery_no':{
-              $ne:'N/A'
-            }
-  
+          'invoiceDetail.isInvoice': false,
+          'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
+          'isSapError': 'INVE',
+          'fullfilment': fullfilment,
+          'delivery_no': {
+            $ne: 'N/A'
+          }
 
-      }}])
+
+        }
+      }])
 
       let pendingInvoice = await pickerBoySalesOrderModel.aggregate(pipeline)
       // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
       console.log(pendingInvoice)
- 
+
 
 
       if (pendingInvoice.length > 0) {
@@ -625,9 +639,9 @@ class pickerSalesOrderMappingController extends BaseController {
             pageSize: pageSize,
             total: totalPendingInvoice.length  //item
           }
-        }, this.messageTypes.todoOrderFetchedSuccessfully);
+        }, this.messageTypes.pendingAllocationFetchedSuccessfully);
       }
-      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingAllocation);
 
       // catch any runtime error 
     } catch (err) {

@@ -39,8 +39,9 @@ const {
   generateInvoice,
   fetchInvoice,
   updateInvoiceSAPDataToDB,
-  isValidItemQuantity
-  
+  isValidItemQuantity,
+  getDeliveryNumber
+
 } = require('../../../hooks/app');
 
 // auth 
@@ -70,39 +71,40 @@ function userRoutes() {
       ctrl.addItems // get controller 
     );
 
-//generate picking allocation(delivery#) and then generate invoice for the generated delivery#
+    //generate picking allocation(delivery#) and then generate invoice for the generated delivery#
     closed.route('/generate/invoice/:pickerBoyOrderMappingId').get(  //change to patch
       // [joiInvValidate],
       getPickedItemDetail,
-      // generateDelivery,
-      // updateSapDeliveryDetail,
-      generateInvoice,
-      fetchInvoice,
-      updateInvoiceSAPDataToDB,
+      getDeliveryNumber, //fetch already store delivery number from db
+                 // generateDelivery,
+                // updateSapDeliveryDetail,
+      // generateInvoice, //generate invoice for the delivery number
+      fetchInvoice, //fetch generated invoice from sap
+      updateInvoiceSAPDataToDB, //save the invoice detail to application db
       ctrl.generateInv
       // ctrl.getPickedItemByPickerOrderId
-      
+
     );
 
     //generate picking allocation(delivery#) 
     closed.route('/generate/pickingallocation/:pickerBoyOrderMappingId').patch(  //change to patch
       // [joiInvValidate],
-      getPickedItemDetail,
-      generateDelivery,
-      updateSapDeliveryDetail,
-    
+      getPickedItemDetail,  //get item list added in the basket
+      generateDelivery,  //generate picking for the SO
+      updateSapDeliveryDetail, //save the response to db
+
       ctrl.pickingAllocation
       // ctrl.getPickedItemByPickerOrderId
-      
+
     );
 
-      // get Pending invoice
-      closed.route('/sales-order/getpicking/').get(
-        // [joiEditAddedItem], // joi edit item
-        // checkWhetherItsAValidItemUpdate, // check whether the valid item update
-        verifyAppToken, // verify app token 
-        ctrl.getPickingList // get controller 
-      );
+    // get Pending invoice
+    closed.route('/sales-order/getpickingallocation').get(
+      // [joiEditAddedItem], // joi edit item
+      // checkWhetherItsAValidItemUpdate, // check whether the valid item update
+      verifyAppToken, // verify app token 
+      ctrl.getpickingallocation // get controller 
+    );
 
 
     // edit the item quantity 
@@ -114,14 +116,14 @@ function userRoutes() {
     );
 
     // list the Basket item  
-    
+
     closed.route('/:type/picking/:pickerBoySalesOrderMappingId').get(
-    //  [joiPickingValidate]
-   
+      //  [joiPickingValidate]
+
       verifyAppToken, // verify app token 
       ctrl.getBucketDetail // get controller 
     );
-    
+
 
   };
 }

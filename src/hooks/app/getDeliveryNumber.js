@@ -34,22 +34,21 @@ module.exports = async (req, res, next) => {
     info('Getting the item detail !');
 
     // get all the salesman who are not checked out 
-    let orderDetail = await pickerBoySalesOrderItemMappingCtrl.getPickedItemByPickerOrderId(req.params.pickerBoyOrderMappingId);
-   
-    // console.log(orderDetail.data[0]['pickerBoySalesOrderMappingId']['salesOrderId']['_id'])
-    // get added item detail
-    
-    if (orderDetail.success) {
-      req.body.orderDetail = orderDetail.data[0];
-      console.log('order data',req.body.orderDetail)
-     
-      // console.log('item detail',req.body.orderDetail)
+  
+    let deliveryNumber = await pickerBoySalesOrderMappingCtrl.getDeliveryNumberByPickerOrderId(req.params.pickerBoyOrderMappingId)
+  
+    console.log('deliveryNumber',deliveryNumber)
+    if (deliveryNumber.success) {
+      
+      
+      req.body.deliveryNumber = deliveryNumber['data']['delivery_no']
+      
    
         return next()
       
     }else{
-error('Order not found.')
-      return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR,"Order Not Found.");
+error('DELIVERY NUMBER NOT EXIST.')
+      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,"DELIVERY NUMBER NOT EXIST OR INVOICE ALREADY GENERATED!");
     }
 
     // move on 

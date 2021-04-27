@@ -15,11 +15,16 @@ const {
     info
 } = require('../../utils').logging;
 
+const {
+  getCustomerDetails
+} = require('../../inter_service_api/dms_dashboard_v1/v1')
+
+
 // exporting the hooks 
 module.exports = async (req, res, next) => {
     try {
         info('Updating SAP Invoice Detail to DB !');
-console.log('inv upload',req.body.invoice_detail)
+
         let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
             deliveryDetail = req.body.delivery_detail || undefined, // getting the SAP delivery Detail
             invoiceDetail = req.body.invoice_detail['data'][0] || undefined,
@@ -32,15 +37,19 @@ console.log('inv upload',req.body.invoice_detail)
           total_net_value = 0,
           fullfiled = 2,//completely fullfiled
           total_weight = 0;
-        
+
+
+          let customerDataFromMicroService = await getCustomerDetails(invoiceDetail['sold_to_party']);
+          
+            // // success
+            // return this.success(req, res, this.status.HTTP_OK, customerDataFromMicroService.data,
         const invoiceItemSuppliedArr = []
-        //    console.log('delivery',deliveryDetail,'invoiceDetail',invoiceDetail,'OrderData',OrderData)
         invoiceDetail['item'].forEach((data)=>{
-          total_quantity = total_weight = total_quantity_demanded += data['qty'];
-          total_amount += data['total_amount'];  //parseInt then convert to string
-          total_tax += data['taxable_value']; //parseInt then convert to string
-          total_discount += data['discount_amount'];  //parseInt then convert to string
-          total_net_value += data['total_amount'];  //parseInt then convert to string
+          total_quantity = total_weight = total_quantity_demanded += parseFloat(data['qty']);
+          total_amount += parseFloat(data['total_amount']);
+          total_tax += parseFloat(data['taxable_value']);
+          total_discount += parseFloat(data['discount_amount']);
+          total_net_value += parseFloat(data['total_amount']);
 
           invoiceItemSuppliedArr.push({
       
@@ -55,7 +64,7 @@ console.log('inv upload',req.body.invoice_detail)
             
         
         
-              'itemName': data['itemName'], //not available
+              'itemName': 'N/A',//data['itemName'], //not available
           
         
               'salePrice':(data['net_price']/data['qty']),                       //data['mrp_amount'],   // sap mrp_amount // change with selling_price
@@ -117,7 +126,7 @@ console.log('inv upload',req.body.invoice_detail)
               'so_deliveryDate': OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
               'shipping_point':OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
            
-              'deliveryNo':req.body.delivery_detail['data']['delivery_no'],
+              'deliveryNo':req.body.deliveryNumber,
               'cityId': OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
               'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
             
@@ -149,11 +158,15 @@ console.log('inv upload',req.body.invoice_detail)
               'shippingDetails':  //sold_to_party  //bill_to_party
               {
                 'name': 'N/A',
-                'address': 'N/A',
+                'address1': 'N/A',
+                'address2': 'N/A',
+                'address3': 'N/A',
                 'mobileNo': 'N/A',
                 'gstNo': 'N/A',
                 'email': 'N/A',
                 'cityId': 'N/A',
+                'pan':'N/A',
+                'country':'N/A'
               },
             
 
@@ -227,16 +240,17 @@ console.log('inv upload',req.body.invoice_detail)
         
               'invoiceDate':invoiceDetail['billing_date'],
             
-              'totalQuantitySupplied':total_quantity,
-              'totalQuantityDemanded': total_quantity_demanded,
-              'totalAmount':total_amount,
-              'totalTax': total_tax,
-              'totalDiscount': total_discount,
-              'totalNetValue': total_net_value,
+              'totalQuantitySupplied':total_quantity.toString(),
+              'totalQuantityDemanded': total_quantity_demanded.toString(),
+              'totalAmount': total_amount == 0 ? "0" : total_amount.toString().replace(/^0+/, ''),
+              'totalTax': total_tax.toString(),
+              'totalDiscount': total_discount.toString(),
+              'totalNetValue': total_net_value.toString(),
               
               'itemSupplied': invoiceItemSuppliedArr,
               
-              'totalWeight': total_weight
+              'totalWeight': total_weight == 0 ? "0" : total_weight.toString().replace(/^0+/, '')
+              // 'totalWeight': total_weight.toString()
             
             }
             
@@ -288,7 +302,22 @@ console.log('inv upload',req.body.invoice_detail)
 
         // create invoice and pickersalesorder mapping
         
-
+        if (customerDataFromMicroService.success) {
+          
+          invoiceObj['shippingDetails']= {
+            'name': customerDataFromMicroService.data['name'],
+            'address1': customerDataFromMicroService.data['address1'],
+            'address2': customerDataFromMicroService.data['address2'],
+            'address3': customerDataFromMicroService.data['address3'],
+            'mobileNo': customerDataFromMicroService.data['mobile'],
+            'pan': customerDataFromMicroService.data['panNumber'],
+            'gstNo': customerDataFromMicroService.data['gstNumber'],
+            'email': customerDataFromMicroService.data['email'],
+            'cityId': customerDataFromMicroService.data['city'],
+            'country':customerDataFromMicroService.data['country'],
+          }
+        
+        }
 
 
         // console.log('success invoice',invoiceObj)

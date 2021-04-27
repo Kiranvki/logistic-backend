@@ -32,7 +32,8 @@ module.exports = async (req,res,next) => {
      obj = {
         "request": {
           
-          "invoice_no": req.body.invoice_detail['data']['invoice_no'],
+          "invoice_no": '0900000067'
+          //req.body.invoice_detail['data']['invoice_no'],
           
         }
      }
