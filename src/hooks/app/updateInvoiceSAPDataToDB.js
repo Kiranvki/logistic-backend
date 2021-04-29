@@ -14,7 +14,9 @@ const {
     error,
     info
 } = require('../../utils').logging;
-
+const {
+  getCustomerDetails
+} = require('../../inter_service_api/dms_dashboard_v1/v1')
 // exporting the hooks 
 module.exports = async (req, res, next) => {
     try {
@@ -32,6 +34,7 @@ module.exports = async (req, res, next) => {
           total_net_value = 0,
           fullfiled = 2,//completely fullfiled
           total_weight = 0;
+          let customerDataFromMicroService = await getCustomerDetails(invoiceDetail['sold_to_party']);
         const invoiceItemSuppliedArr = []
         invoiceDetail['item'].forEach((data)=>{
           total_quantity = total_weight = total_quantity_demanded += parseFloat(data['qty']);
@@ -147,11 +150,15 @@ module.exports = async (req, res, next) => {
               'shippingDetails':  //sold_to_party  //bill_to_party
               {
                 'name': 'N/A',
-                'address': 'N/A',
+                'address1': 'N/A',
+                'address2': 'N/A',
+                'address3': 'N/A',
                 'mobileNo': 'N/A',
                 'gstNo': 'N/A',
                 'email': 'N/A',
                 'cityId': 'N/A',
+                'pan':'N/A',
+                'country':'N/A'
               },
             
 
@@ -283,6 +290,25 @@ module.exports = async (req, res, next) => {
         //             "total_amount": "0.00 "
         //         }]
         //     }
+
+// update customer detail
+        if (customerDataFromMicroService.success) {
+          
+          invoiceObj['shippingDetails']= {
+            'name': customerDataFromMicroService.data['name'],
+            'address1': customerDataFromMicroService.data['address1'],
+            'address2': customerDataFromMicroService.data['address2'],
+            'address3': customerDataFromMicroService.data['address3'],
+            'mobileNo': customerDataFromMicroService.data['mobile'],
+            'pan': customerDataFromMicroService.data['panNumber'],
+            'gstNo': customerDataFromMicroService.data['gstNumber'],
+            'email': customerDataFromMicroService.data['email'],
+            'cityId': customerDataFromMicroService.data['city'],
+            'country':customerDataFromMicroService.data['country'],
+          }
+        
+        }
+
 
 
         // create invoice and pickersalesorder mapping

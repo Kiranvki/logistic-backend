@@ -1749,6 +1749,29 @@ try{
   }
 
 
+  let totalOrderCount = await orderModel.countDocuments({
+   
+    'req_del_date': {
+      '$gte': yasterdayDate, '$lte': startOfTheDay
+      // '$eq': startOfTheDay
+    },
+    $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
+
+      'fulfillmentStatus': { $exists: false }
+    }],
+
+
+    'plant': { '$eq': plant.toString() },
+    $or: [
+      { 'item': { $exists: true, $not: { $size: 0 } } },
+      { 'assets': { $exists: true, $not: { $size: 0 } } }
+    ]
+
+
+  
+})
+
+
   let todaysOrderData = await orderModel.aggregate(pipeline)
   // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
 
@@ -1775,7 +1798,7 @@ todaysOrderData.forEach((items,i)=>{
       pageMeta: {
         skip: parseInt(skip),
         pageSize: pageSize,
-        total: todaysOrderData[0]['item'].length  //item
+        total: totalOrderCount  //total so count
       }
     }, this.messageTypes.todoOrderFetchedSuccessfully);
   }

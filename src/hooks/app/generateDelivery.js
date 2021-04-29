@@ -60,8 +60,8 @@ console.log('OrderData',JSON.stringify(obj))
     req.body.delivery_detail = await request.post(url)
       .send(obj)
       .timeout({
-        response: 30000, // Wait 10 seconds for the server to start sending,
-        deadline: 30000, // but allow 1 minute for the file to finish loading.
+        response: 65000, // Wait 10 seconds for the server to start sending,
+        deadline: 65000, // but allow 1 minute for the file to finish loading.
       })
       .retry(1)
       .then((res,body) => {
