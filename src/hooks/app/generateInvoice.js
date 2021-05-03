@@ -5,6 +5,8 @@ const StatusCodes = require('../../facades/response');
 const MessageTypes = require('../../responses/types');
 const Exceptions = require('../../exceptions/Handler');
 const BasicCtrl = require('../../components/basic_config/basic_config.controller');
+const sales_orderController = require('../../components/sales_order/sales_order/sales_order.controller');
+
 const pickerBoyOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model');
 const pickerBoyOrderItemMappingModel = require('../../components/picker_app/pickerboy_salesorder_items_mapping/models/pickerboy_salesorder_items_mapping.model')
 
@@ -159,6 +161,9 @@ module.exports = async (req, res, next) => {
 
 
   if (req.body.invoice_detail['success'] && (req.body.invoice_detail['data'] ? req.body.invoice_detail['data']['invoice_no'] : false)) {
+    
+  
+  //remove once sap stable
     let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
       '_id': req.params.pickerBoyOrderMappingId
     }, {
@@ -171,6 +176,10 @@ module.exports = async (req, res, next) => {
     return next()
 
   } else {
+    let OrderData = req.body.orderDetail,
+    pickedItem = OrderData['itemDetail'];
+ 
+
     let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
       '_id': req.params.pickerBoyOrderMappingId
     }, {
@@ -187,7 +196,7 @@ module.exports = async (req, res, next) => {
 
     //fixed require
     await pickerBoyOrderItemMappingModel.update({ 'pickerBoySalesOrderMappingId': req.params.pickerBoyOrderMappingId }, { $set: { 'isDeleted': 1 } })
-
+    let soUpdateFullfilemt = await sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityPickingStep(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], pickedItem)
 
     //  Message pending
     //req.body.delivery_detail['error']

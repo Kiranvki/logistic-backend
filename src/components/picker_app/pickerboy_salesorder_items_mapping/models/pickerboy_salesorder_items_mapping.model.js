@@ -150,10 +150,10 @@ pickerBoySalesOrderItemsMapping.index({
 
 class PickerBoySalesOrderItemsMappingClass{
   static async addItem(orderObjItem){
-    let isExist = await this.count({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId });
+    let isExist = await this.count({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId,'isDeleted': 0 });
     if(isExist){
 
-      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId,'isDeleted':0 },{$push:{'itemDetail':orderObjItem.itemDetail}})
+      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId},{$push:{'itemDetail':orderObjItem.itemDetail}})
       
     }
     // let obj = await new this(orderObjItem).save()
