@@ -1546,269 +1546,300 @@ getOrderDetails = async (req,res,next)=>{
 
 
 
-  getTodaysOrder = async(req,res,next)=>{
+  //Fetch T and T-1 delivery SALESORDERS
+  getTodaysOrder = async (req, res, next) => {
     let orderModel
-try{
-  // console.log(req.user.plant)
-    info('Getting the todays Order !!!');
-    console.log(req.user)
-    let page = req.query.page || 1,
-      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-      searchKey =  '', //req.query.search ||
-      sortBy = req.query.sortBy || 'createdAt',
-      skip = parseInt(page - 1) * pageSize,
-      locationId = 0, // locationId req.user.locationId || 
-      cityId =  'N/A', // cityId req.user.cityId ||
-      searchDate = req.body.searchDate || '',
-      type = req.params.type,
-      plant = req.user.plant,
-      sortingArray = {};
+    try {
+
+      info('Getting the todays Order !!!');
+      console.log(req.user)
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+        searchDate = req.query.searchDate || '',
+        type = req.params.type,
+        plant = req.user.plant,
+        sortingArray = {};
       sortingArray[sortBy] = -1;
-      
 
-      
+
+
       // 2021-03-29
-    let startOfTheDay =  moment(new Date()).format('YYYY-MM-DD');
-    let yasterdayDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD')
-    
-    // moment().set({
-    //   h: 0,
-    //   m: 0,
-    //   s: 0,
-    //   millisecond: 0
-    // }).toDate();
+      let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+      let yasterdayDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD')
 
-    let endOfTheDay = moment(new Date()).format('YYYY-MM-DD');
-    //  moment().set({
-    //   h: 24,
-    //   m: 24,
-    //   s: 0,
-    //   millisecond: 0
-    // }).toDate();
+      // moment().set({
+      //   h: 0,
+      //   m: 0,
+      //   s: 0,
+      //   millisecond: 0
+      // }).toDate();
 
-    
-    if (searchDate && !_.isEmpty(searchDate)) {
+      let endOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+      //  moment().set({
+      //   h: 24,
+      //   m: 24,
+      //   s: 0,
+      //   millisecond: 0
+      // }).toDate();
+
+
+      if (searchDate && !_.isEmpty(searchDate)) {
+
+
+        startOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+
+        // getting the end of the day 
+        yasterdayDate = moment(searchDate).subtract(1, 'days').format('YYYY-MM-DD')
+        // endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+      }
+
+
       
 
-      startOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+      let pipeline = [{
+        $match: {
+          'req_del_date': {
+            '$gte': yasterdayDate, '$lte': startOfTheDay
 
-      // getting the end of the day 
-      endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
-    }
-// console.log(startOfTheDay)
+          },
+          $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
 
-    let pipeline = [{
-      $match:{
-      'req_del_date': {
-        '$gte':yasterdayDate,'$lte':startOfTheDay
-        // '$eq': startOfTheDay
+            'fulfillmentStatus': { $exists: false }
+          }],
+
+
+          'plant': { '$eq': plant.toString() },
+          $or: [
+            { 'item': { $exists: true, $not: { $size: 0 } } },
+            { 'assets': { $exists: true, $not: { $size: 0 } } }
+          ]
+
+
+        }
       },
-      $or: [{'fulfillmentStatus': { $ne: 2 }},{
-       
-       'fulfillmentStatus': { $exists: false }
-    }],
-    // 'item':{
-    // '$elemMatch': {
-    //   "fulfillmentStatus": {$ne:2}
-    // }
-    // },
-  //     "item": { 
-  //       "$elemMatch": {
-  //         $or: [ {'fulfillmentStatus': {  $ne: 2 }},{
-  //         'fulfillmentStatus': { $exists: false}},
-  //      ]
-  //     // 'fulfillmentStatus': { $exists: true, $ne: 1 },
-  //     // 'fulfillmentStatus': { $exists: false },
-  // }},
-   
-      'plant':{'$eq':plant.toString()},
-      'item': { $exists: true, $not: {$size: 0} }
-     
-    }
-    },
-    {$sort: {
-      'created_at':-1
-    }},{
-      $skip:(pageSize*(page-1))
-    },{
-      $limit:pageSize
-    }];
-
-    // creating a match object
-    if (searchKey !== '')
-    pipeline = [{
-      $match:{
-        'req_del_date': {
-      '$eq': startOfTheDay
-       
-        }
-      ,
-        '$or': [{
-          'createdBy': {
-            $regex: searchKey,
-            $options: 'is'
-          }
-        }, {
-          'pickerBoyId': {
-            $regex: searchKey,
-            $options: 'is'
-          }
-        }]
-      }
-      
-      },    {$sort: {
-        'created_at':-1
-      }},
       {
-        $skip:(1*(page-1))
-      },{
-        $limit:1
+        $sort: {
+          'created_at': -1
+        }
+      }, {
+        $skip: (pageSize * (page - 1))
+      }, {
+        $limit: pageSize
       }];
-    // console.log('searchObject', pipeline);
 
-
-
-    // get list
-
-
-
- 
-
-    switch(type){
-
-    case 'salesorders':
-      pipeline.push(
-        {
-          $lookup: {
-              from: 'pickerboyordermappings',
-              let: {
-                'orderId': '$_id'
-              },
-              pipeline: [
-                
-
-                {
-                  $match: {
-                    'invoiceDetail.isInvoice':false,
-                    'status': 1,
-                    'isDeleted': 0,
-                    '$expr': {
-                      '$eq': ['$salesOrderId', '$$orderId']
-                    }
-                  }
-                },
-                {$sort: {
-                  'createdAt':-1
-                }}
-              ],
-                as:'pickingStatus'
-          }   
-        }
-      )
-      orderModel = salesOrderModel;
-      break;  
-    case 'spotsales':
-      orderModel = spotSalesModel;
-      
-      break;
-    case 'assettransfer':
-      pipeline.push(
-        {
-          $lookup: {
-              from: 'pickerboyordermappings',
-              let: {
-                'orderId': '$_id'
-              },
-              pipeline: [
-                
-
-                {
-                  $match: {
-                    'invoiceDetail.isInvoice':false,
-                    'status': 1,
-                    'isDeleted': 0,
-                    '$expr': {
-                      '$eq': ['$assetTransferId', '$$orderId']
-                    }
-                  }
-                },
-                {$sort: {
-                  'createdAt':-1
-                }}
-              ],
-                as:'pickingStatus'
-          }   
-        }
-      )
-      orderModel = require('../../MyTrip/assign_trip/model/assetTransfer.model')
-      break;
-    default:
-      orderModel = salesOrderModel
-      break;
-
-  }
-
-
-  let totalOrderCount = await orderModel.countDocuments({
-   
-    'req_del_date': {
-      '$gte': yasterdayDate, '$lte': startOfTheDay
-      // '$eq': startOfTheDay
-    },
-    $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
-
-      'fulfillmentStatus': { $exists: false }
-    }],
-
-
-    'plant': { '$eq': plant.toString() },
-    $or: [
-      { 'item': { $exists: true, $not: { $size: 0 } } },
-      { 'assets': { $exists: true, $not: { $size: 0 } } }
-    ]
-
-
+      // creating a match object
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
+            'req_del_date': {
+              '$gte': yasterdayDate, '$lte': startOfTheDay
   
-})
+            },
+            $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
+  
+              'fulfillmentStatus': { $exists: false }
+            }],
+  
+  
+            'plant': { '$eq': plant.toString() },
+            $or: [
+              { 'item': { $exists: true, $not: { $size: 0 } } },
+              { 'assets': { $exists: true, $not: { $size: 0 } } }
+            ],
+  
+  
+          
+            
+            $or: [{
+              'sales_order_no': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'pickerBoyId': {
+                $regex: searchKey,
+                $options: 'is'
+              }},{
+              'sold_to_party_description':{
+                $regex: searchKey,
+                $options: 'is'
+              }
+            },{
+              'customer_type':{
+                $regex: searchKey,
+                $options: 'is'
+              }}]
+          
+
+        }
+      }, {
+          $sort: {
+            'created_at': -1
+          }
+        },
+        {
+          $skip: (pageSize * (page - 1))
+        }, {
+          $limit: pageSize
+        }];
+      // console.log('searchObject', pipeline);
 
 
-  let todaysOrderData = await orderModel.aggregate(pipeline)
-  // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
 
-  // console.log(todaysOrderData);
-// console.log(todaysOrderData)
-todaysOrderData.forEach((items,i)=>{
-  items['item'].forEach((item,j)=>{
-    // console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
-  todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)).toString()
-  if((item.fulfillmentStatus?item.fulfillmentStatus:0)==2){
-    // console.log(todaysOrderData[i]['item'][j])
-    // todaysOrderData[i]['item'].splice(j, 1)
-    let status = (item.fulfillmentStatus?item.fulfillmentStatus:0)
-    _.remove(todaysOrderData[i]['item'],{'fulfillmentStatus':2})
-
-  }
-  })
-})
+      // get list
 
 
-  if (todaysOrderData.length>0) {
-    return this.success(req, res, this.status.HTTP_OK, {
-      results: todaysOrderData,
-      pageMeta: {
-        skip: parseInt(skip),
-        pageSize: pageSize,
-        total: totalOrderCount  //total so count
+
+
+
+      switch (type) {
+
+        case 'salesorders':
+          pipeline.push(
+            {
+              $lookup: {
+                from: 'pickerboyordermappings',
+                let: {
+                  'orderId': '$_id'
+                },
+                pipeline: [
+
+
+                  {
+                    $match: {
+                      'invoiceDetail.isInvoice': false,
+
+                      $and: [{ 'isStartedPicking': true },
+                      { 'isItemPicked': true }],
+
+
+                      'status': 1,
+                      'isDeleted': 0,
+                      '$expr': {
+                        '$eq': ['$salesOrderId', '$$orderId']
+                      }
+                    }
+                  },
+                  {
+                    $sort: {
+                      'createdAt': -1
+                    }
+                  }
+                ],
+                as: 'pickingStatus'
+              }
+            }
+          )
+          orderModel = salesOrderModel;
+          break;
+        case 'spotsales':
+          orderModel = spotSalesModel;
+
+          break;
+        case 'assettransfer':
+
+          pipeline.push(
+            {
+              $lookup: {
+                from: 'pickerboyordermappings',
+                let: {
+                  'orderId': '$_id'
+                },
+                pipeline: [
+
+
+                  {
+                    $match: {
+                      'invoiceDetail.isInvoice': false,
+                      'status': 1,
+                      'isDeleted': 0,
+                      '$expr': {
+                        '$eq': ['$assetTransferId', '$$orderId']
+                      }
+                    }
+                  },
+                  {
+                    $sort: {
+                      'createdAt': -1
+                    }
+                  }
+                ],
+                as: 'pickingStatus'
+              }
+            }
+          )
+          console.log(req.user.plant)
+          orderModel = require('../../MyTrip/assign_trip/model/assetTransfer.model')
+          break;
+        default:
+          orderModel = salesOrderModel
+          break;
+
       }
-    }, this.messageTypes.todoOrderFetchedSuccessfully);
-  }
-  else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
 
-  // catch any runtime error 
-} catch (err) {
-  error(err);
-  this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-}
+      let totalOrderCount = await orderModel.countDocuments({
+   
+          'req_del_date': {
+            '$gte': yasterdayDate, '$lte': startOfTheDay
+            // '$eq': startOfTheDay
+          },
+          $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
+
+            'fulfillmentStatus': { $exists: false }
+          }],
+
+
+          'plant': { '$eq': plant.toString() },
+          $or: [
+            { 'item': { $exists: true, $not: { $size: 0 } } },
+            { 'assets': { $exists: true, $not: { $size: 0 } } }
+          ]
+
+
+        
+      })
+
+      let todaysOrderData = await orderModel.aggregate(pipeline)
+      // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
+      console.log(todaysOrderData)
+
+      todaysOrderData.forEach((items, i) => {
+        items['item'].forEach((item, j) => {
+          // console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
+          todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0)).toString()
+          if ((item.fulfillmentStatus ? item.fulfillmentStatus : 0) == 2) {
+            // console.log(todaysOrderData[i]['item'][j])
+            // todaysOrderData[i]['item'].splice(j, 1)
+            let status = (item.fulfillmentStatus ? item.fulfillmentStatus : 0)
+            _.remove(todaysOrderData[i]['item'], { 'fulfillmentStatus': 2 })
+
+          }
+        })
+      })
+
+
+      if (todaysOrderData.length > 0) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: todaysOrderData,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalOrderCount  //total so
+          }
+        }, this.messageTypes.todoOrderFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
   }
 
    updateItemPickStatus = async (id,status)=>{
