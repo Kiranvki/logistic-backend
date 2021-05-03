@@ -1570,7 +1570,7 @@ getOrderDetails = async (req,res,next)=>{
 
       // 2021-03-29
       let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
-      let yasterdayDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD')
+      let yasterdayDate = moment(new Date()).subtract(2, 'days').format('YYYY-MM-DD')
 
       // moment().set({
       //   h: 0,
