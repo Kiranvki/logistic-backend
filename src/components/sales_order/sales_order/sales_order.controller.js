@@ -1954,8 +1954,10 @@ if(isUpdatedfulfillmentStatus){
       let isUpdated;
       // suppliedQuantity 
       // console.log(JSON.stringify(invData))
-      let tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
-      let deliverDate = delivery_date || tomorrow;
+     
+      // let tomorrow = moment(new Date()).add(1, 'days').format('YYYY-MM-DD');
+      // let deliverDate = delivery_date || tomorrow;
+      
       // moment(new Date()).format('YYYY-MM-DD')
 
       let soFullfilmentStatus = 2;

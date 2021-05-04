@@ -194,9 +194,11 @@ module.exports = async (req, res, next) => {
       }
     })
 
+    let soUpdateFullfilemt = await sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityPickingStep(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], pickedItem)
+
     //fixed require
     await pickerBoyOrderItemMappingModel.update({ 'pickerBoySalesOrderMappingId': req.params.pickerBoyOrderMappingId }, { $set: { 'isDeleted': 1 } })
-    let soUpdateFullfilemt = await sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityPickingStep(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], pickedItem)
+  
 
     //  Message pending
     //req.body.delivery_detail['error']
