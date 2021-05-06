@@ -1994,7 +1994,7 @@ if(isUpdatedfulfillmentStatus){
                 'item.$.suppliedQty': parseFloat(item.pickedQuantity ? item.pickedQuantity : 0),
               }
             });
-            break;
+       
             // console.log(isUpdated)
           }
         }
