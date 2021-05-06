@@ -385,6 +385,184 @@ class invoiceMasterController extends BaseController {
     }
   }
 
+  
+  getInvoices = async (req,res,next) => {
+    
+    try {
+
+      info('Getting the todays Order !!!');
+      
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.body.searchKey.toString() || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+        
+        startDate = req.body.startDate || moment(new Date()).subtract(30, 'days').set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        endDate = req.body.endDate || moment(new Date()).set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        type = req.params.type,
+        // plant = req.body.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+    console.log(startDate,endDate)
+  
+    
+      if (startDate && !_.isEmpty(startDate)) {
+
+
+        startDate = moment(startDate, "DD-MM-YYYY").set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+    
+      }
+
+      if (endDate && !_.isEmpty(endDate)) {
+
+
+        endDate = moment(endDate, "DD-MM-YYYY").set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+    
+      }
+      info('Get Invoices !');
+      let pipeline= [{
+        $match:{
+         
+          'invoiceDetails.invoiceDate':{$gte:startDate,$lte:endDate}
+         
+          
+      }}]
+
+
+     
+      if (searchKey !== '')
+ pipeline= [{
+  $match:{
+    'invoiceDetails.invoiceDate':{$gte:startDate,$lte:endDate},
+  
+  $or: [{
+    'customerName': {
+      $regex: searchKey,
+      $options: 'is'
+    }
+  }, {
+    'shippingDetails.name': {
+      $regex: searchKey,
+      $options: 'is'
+    }
+  }, {
+    'shippingDetails.gstNo': {
+      $regex: searchKey,
+      $options: 'is'
+    }
+  }, {
+    'shippingDetails.mobileNo': {
+      $regex: searchKey,
+      $options: 'is'
+    }
+  },
+  {
+    'cityId': {
+      $regex: searchKey,
+      $options: 'is'
+    }
+  },
+  {
+    'deliveryNo': {
+      $regex: searchKey,
+      $options: 'is'
+    }
+  },
+  {
+    'soId': {
+      $eq: parseInt(searchKey),
+   
+    }
+  },
+  {
+    'invoiceDetails.invoiceNo': {
+      $regex: searchKey,
+      $options: 'is'
+    }
+  }
+]
+
+}
+}
+  // status: 1,
+  // isDeleted: 0
+]
+
+
+      // get details 
+      return await Model.aggregate(pipeline).then((result) => {
+        console.log(result)
+        if (result && !_.isEmpty(result)) {
+          // return {
+          //   success: true,
+          //   data: res
+          // }
+
+          return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+        } else {
+          error('Error Searching Data in invoice DB!');
+          // return {
+          //   success: false
+          // }
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.invoicesDetailsNotFound
+          );
+        }
+      }).catch(err => {
+        error(err);
+        // return {
+        //   success: false,
+        //   error: err
+        // }
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.invoicesDetailsNotFound
+        );
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+     return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+        // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
 
   
 }
