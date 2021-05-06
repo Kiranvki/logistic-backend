@@ -1546,7 +1546,7 @@ getOrderDetails = async (req,res,next)=>{
 
 
 
-  //Fetch T and T-1 delivery SALESORDERS
+  //Fetch T and T-1,t-2,t-3 delivery SALESORDERS
   getTodaysOrder = async (req, res, next) => {
     let orderModel
     try {
@@ -1594,7 +1594,7 @@ getOrderDetails = async (req,res,next)=>{
         startOfTheDay = moment(searchDate).format('YYYY-MM-DD')
 
         // getting the end of the day 
-        yasterdayDate = moment(searchDate).subtract(1, 'days').format('YYYY-MM-DD')
+        yasterdayDate = moment(searchDate).subtract(3, 'days').format('YYYY-MM-DD')
         // endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
       }
 
@@ -1607,7 +1607,7 @@ getOrderDetails = async (req,res,next)=>{
             '$gte': yasterdayDate, '$lte': startOfTheDay
 
           },
-          $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
+          $or: [{ 'fulfillmentStatus': {$exists: true, $ne: 2 } }, {
 
             'fulfillmentStatus': { $exists: false }
           }],
@@ -1640,7 +1640,7 @@ getOrderDetails = async (req,res,next)=>{
               '$gte': yasterdayDate, '$lte': startOfTheDay
   
             },
-            $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
+            $or: [{ 'fulfillmentStatus': {$exists: true, $ne: 2 } }, {
   
               'fulfillmentStatus': { $exists: false }
             }],
@@ -1822,7 +1822,7 @@ getOrderDetails = async (req,res,next)=>{
         })
       })
 
-
+      _.remove(todaysOrderData, { 'fulfillmentStatus': 2 })
       if (todaysOrderData.length > 0) {
         return this.success(req, res, this.status.HTTP_OK, {
           results: todaysOrderData,

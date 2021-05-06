@@ -1889,7 +1889,7 @@ invData['data'][0]['item'].forEach(async (item,i)=>{
   // console.log(item)
  
   
-
+  soItem[i].fulfillmentStatus = itemFullfilmentStatus;
    isUpdated = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId),'item.item_no':item.item_no
 
 }, {
@@ -1904,12 +1904,14 @@ $inc:{
 }
 });
   // console.log(isUpdated)
-}else if((sItem.fulfillmentStatus?sItem.fulfillmentStatus:0)<=1){
-  soFullfilmentStatus = 1
-
 }
 }
 )
+
+if((soItem[i].fulfillmentStatus?soItem[i].fulfillmentStatus:0)<=1){
+  soFullfilmentStatus = 1
+
+}
 
 })
 // console.log('soFullfilmentStatus',soFullfilmentStatus)
@@ -1976,7 +1978,7 @@ if(isUpdatedfulfillmentStatus){
             }
             // console.log(item)
 
-
+            soItem[i].fulfillmentStatus = itemFullfilmentStatus;
 
             isUpdated = await Model.findOneAndUpdate({
               '_id': mongoose.Types.ObjectId(salesOrderId), 'item.item_no': item.item_no
@@ -1992,13 +1994,16 @@ if(isUpdatedfulfillmentStatus){
                 'item.$.suppliedQty': parseFloat(item.pickedQuantity ? item.pickedQuantity : 0),
               }
             });
+            break;
             // console.log(isUpdated)
-          } else if ((sItem.fulfillmentStatus ? sItem.fulfillmentStatus : 0) <= 1) {
-            soFullfilmentStatus = 1
-
           }
         }
+        
         )
+       if ((soItem[i].fulfillmentStatus ? soItem[i].fulfillmentStatus : 0) <= 1) {
+          soFullfilmentStatus = 1
+
+        }
 
       })
       // console.log('soFullfilmentStatus',soFullfilmentStatus)
