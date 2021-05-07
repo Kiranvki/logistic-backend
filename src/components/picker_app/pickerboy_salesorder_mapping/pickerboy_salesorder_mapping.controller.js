@@ -1823,7 +1823,11 @@ getOrderDetails = async (req,res,next)=>{
         })
       })
 
+      // fix require 
       _.remove(todaysOrderData, { 'fulfillmentStatus': 2 })
+      todaysOrderData = todaysOrderData.filter(function(sub) {
+        return sub['item'].length;
+      });
       if (todaysOrderData.length > 0) {
         return this.success(req, res, this.status.HTTP_OK, {
           results: todaysOrderData,
