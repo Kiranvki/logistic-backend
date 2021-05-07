@@ -2041,7 +2041,7 @@ getOrderDetails = async (req,res,next)=>{
       }
       }
       ,{$project:{
-        'invoiceDetail':1,
+        
         'state': 1,
         'remarks': 1,
         'shipping_point':1,
@@ -2119,7 +2119,7 @@ getOrderDetails = async (req,res,next)=>{
 }
 ,{$project:{
   
-  'invoiceDetail':1,
+  
   'state': 1,
   'remarks': 1,
   'shipping_point':1,
