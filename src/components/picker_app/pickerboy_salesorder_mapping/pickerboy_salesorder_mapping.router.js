@@ -150,6 +150,14 @@ function userRoutes() {
       ctrl.getOrderHistoryByPickerBoyID
       // getHistoryOfSalesOrder // history SO/invoice status
     );
+
+    open.route('/list/invoice-open').get(
+     
+      
+      ctrl.getInvoices
+
+      
+    );
   };
 }
 

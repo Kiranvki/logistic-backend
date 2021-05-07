@@ -49,13 +49,7 @@ function invoiceRoutes() {
       ctrl.getInvoiceDetails // post controller 
     );
 
-       // getting  invoice list
-       open.route('/invoice-list-open').get(
-        // [joiGetInvoiceDetails], // joi validation
-         // isInvoiceGenerated, // check whether the invoice is already generated
-         // verifyAppToken, // verify app user token 
-         ctrl.getInvoices // post controller 
-       );
+  
   };
 }
 
