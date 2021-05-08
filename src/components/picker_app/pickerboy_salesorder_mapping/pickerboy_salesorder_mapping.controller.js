@@ -1608,24 +1608,20 @@ getOrderDetails = async (req,res,next)=>{
             '$gte': yasterdayDate, '$lte': startOfTheDay
 
           },
+          $and:[{
           $or: [{ 'fulfillmentStatus': {$exists: true, $ne: 2 } }, {
 
             'fulfillmentStatus': { $exists: false }
-          }],
+          }]},
 
 
-          'plant': { '$eq': plant.toString() },
-          $or: [
+          {'plant': { '$eq': plant.toString() }},
+          {$or: [
             { 'item': { $exists: true, $not: { $size: 0 } } },
             { 'assets': { $exists: true, $not: { $size: 0 } } }
-          ]
+          ]}]
 
 
-        }
-      },
-      {
-        $sort: {
-          'created_at': -1
         }
       }, {
         $skip: (pageSize * (page - 1))
@@ -1641,18 +1637,19 @@ getOrderDetails = async (req,res,next)=>{
               '$gte': yasterdayDate, '$lte': startOfTheDay
   
             },
-            $or: [{ 'fulfillmentStatus': {$exists: true, $ne: 2 } }, {
-  
-              'fulfillmentStatus': { $exists: false }
-            }],
-  
-  
-            'plant': { '$eq': plant.toString() },
-            $or: [
-              { 'item': { $exists: true, $not: { $size: 0 } } },
-              { 'assets': { $exists: true, $not: { $size: 0 } } }
-            ],
-  
+            $and:[{
+              $or: [{ 'fulfillmentStatus': {$exists: true, $ne: 2 } }, {
+    
+                'fulfillmentStatus': { $exists: false }
+              }]},
+    
+    
+              {'plant': { '$eq': plant.toString() }},
+              {$or: [
+                { 'item': { $exists: true, $not: { $size: 0 } } },
+                { 'assets': { $exists: true, $not: { $size: 0 } } }
+              ]}],
+    
   
           
             
@@ -1678,11 +1675,7 @@ getOrderDetails = async (req,res,next)=>{
           
 
         }
-      }, {
-          $sort: {
-            'created_at': -1
-          }
-        },
+      }, 
         {
           $skip: (pageSize * (page - 1))
         }, {
@@ -1733,6 +1726,10 @@ getOrderDetails = async (req,res,next)=>{
                   }
                 ],
                 as: 'pickingStatus'
+              }
+            },{
+              $sort: {
+                'created_at': -1
               }
             }
           )
@@ -1789,17 +1786,19 @@ getOrderDetails = async (req,res,next)=>{
             '$gte': yasterdayDate, '$lte': startOfTheDay
             // '$eq': startOfTheDay
           },
-          $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
 
-            'fulfillmentStatus': { $exists: false }
-          }],
-
-
-          'plant': { '$eq': plant.toString() },
-          $or: [
-            { 'item': { $exists: true, $not: { $size: 0 } } },
-            { 'assets': { $exists: true, $not: { $size: 0 } } }
-          ]
+         $and:[{
+              $or: [{ 'fulfillmentStatus': {$exists: true, $ne: 2 } }, {
+    
+                'fulfillmentStatus': { $exists: false }
+              }]},
+    
+    
+              {'plant': { '$eq': plant.toString() }},
+              {$or: [
+                { 'item': { $exists: true, $not: { $size: 0 } } },
+                { 'assets': { $exists: true, $not: { $size: 0 } } }
+              ]}]
 
 
         
@@ -1825,9 +1824,9 @@ getOrderDetails = async (req,res,next)=>{
 
       // fix require 
       _.remove(todaysOrderData, { 'fulfillmentStatus': 2 })
-      todaysOrderData = todaysOrderData.filter(function(sub) {
-        return sub['item'].length;
-      });
+      // todaysOrderData = todaysOrderData.filter(await function(sub) {
+      //   return sub['item'].length;
+      // });
       if (todaysOrderData.length > 0) {
         return this.success(req, res, this.status.HTTP_OK, {
           results: todaysOrderData,
