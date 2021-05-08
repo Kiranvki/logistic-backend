@@ -1604,11 +1604,12 @@ getOrderDetails = async (req,res,next)=>{
 
       let pipeline = [{
         $match: {
-          'req_del_date': {
-            '$gte': yasterdayDate, '$lte': startOfTheDay
-
-          },
-          $and:[{
+         
+          $and:[
+            {'req_del_date': {
+              '$gte': yasterdayDate, '$lte': startOfTheDay
+  
+            }},{
           $or: [{ 'fulfillmentStatus': {$exists: true, $ne: 2 } }, {
 
             'fulfillmentStatus': { $exists: false }
@@ -1638,11 +1639,11 @@ getOrderDetails = async (req,res,next)=>{
       if (searchKey !== '')
         pipeline = [{
           $match: {
-            'req_del_date': {
+            
+            $and:[ {'req_del_date': {
               '$gte': yasterdayDate, '$lte': startOfTheDay
   
-            },
-            $and:[{
+            }},{
               $or: [{ 'fulfillmentStatus': {$exists: true, $ne: 2 } }, {
     
                 'fulfillmentStatus': { $exists: false }
