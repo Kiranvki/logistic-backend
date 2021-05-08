@@ -1623,6 +1623,11 @@ getOrderDetails = async (req,res,next)=>{
 
 
         }
+      },
+      {
+        $sort: {
+          '_id': -1
+        }
       }, {
         $skip: (pageSize * (page - 1))
       }, {
@@ -1675,7 +1680,12 @@ getOrderDetails = async (req,res,next)=>{
           
 
         }
-      }, 
+      },
+      {
+        $sort: {
+          '_id': -1
+        }
+      },
         {
           $skip: (pageSize * (page - 1))
         }, {
@@ -1721,15 +1731,16 @@ getOrderDetails = async (req,res,next)=>{
                   },
                   {
                     $sort: {
+                      'order_date': -1
+                    }
+                  },
+                  {
+                    $sort: {
                       'createdAt': -1
                     }
                   }
                 ],
                 as: 'pickingStatus'
-              }
-            },{
-              $sort: {
-                'created_at': -1
               }
             }
           )
