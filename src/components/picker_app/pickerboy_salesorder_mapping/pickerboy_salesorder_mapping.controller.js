@@ -1592,11 +1592,11 @@ getOrderDetails = async (req,res,next)=>{
       if (searchDate && !_.isEmpty(searchDate)) {
 
 
-        startOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+        startOfTheDay = moment(searchDate, "DD-MM-YYYY").format('YYYY-MM-DD')
 
-        // getting the end of the day 
-        yasterdayDate = moment(searchDate).subtract(3, 'days').format('YYYY-MM-DD')
-        // endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+        // getting t-3
+        yasterdayDate = moment(searchDate, "DD-MM-YYYY").subtract(3, 'days').format('YYYY-MM-DD')
+        
       }
 
 
@@ -1637,48 +1637,51 @@ getOrderDetails = async (req,res,next)=>{
 
       // creating a match object
       if (searchKey !== '')
-        pipeline = [{
-          $match: {
-            
-            $and:[ {'req_del_date': {
+      pipeline = [{
+        $match: {
+     
+          $and:[
+            {     'req_del_date': {
               '$gte': yasterdayDate, '$lte': startOfTheDay
-  
+
             }},{
-              $or: [{ 'fulfillmentStatus': {$exists: true, $ne: 2 } }, {
-    
-                'fulfillmentStatus': { $exists: false }
-              }]},
-    
-    
-              {'plant': { '$eq': plant.toString() }},
-              {$or: [
-                { 'item': { $exists: true, $not: { $size: 0 } } },
-                { 'assets': { $exists: true, $not: { $size: 0 } } }
-              ]}],
-    
-  
-          
-            
-            $or: [{
-              'sales_order_no': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }, {
-              'pickerBoyId': {
-                $regex: searchKey,
-                $options: 'is'
-              }},{
-              'sold_to_party_description':{
-                $regex: searchKey,
-                $options: 'is'
-              }
-            },{
-              'customer_type':{
-                $regex: searchKey,
-                $options: 'is'
-              }}]
-          
+          $or: [{ 'fulfillmentStatus': {$ne: 2 } }, {
+
+            'fulfillmentStatus': { $exists: false }
+          }]},
+
+          {
+          'plant': { '$eq': plant.toString() }},
+         { $or: [
+            { 'item': { $exists: true, $not: { $size: 0 } } },
+            { 'assets': { $exists: true, $not: { $size: 0 } } }
+          ]}],
+
+
+
+
+          $or: [{
+            'sales_order_no': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'sold_to_party': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'sold_to_party_description': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customer_type': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+
 
         }
       },
@@ -1687,11 +1690,12 @@ getOrderDetails = async (req,res,next)=>{
           '_id': -1
         }
       },
-        {
-          $skip: (pageSize * (page - 1))
-        }, {
-          $limit: pageSize
-        }];
+      {
+        $skip: (pageSize * (page - 1))
+      }, {
+        $limit: pageSize
+      }
+    ];
       // console.log('searchObject', pipeline);
 
 
