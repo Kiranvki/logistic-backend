@@ -5,14 +5,14 @@
 // const salesOrderctrl = require('../../sales_order/sales_order/sales_order.controller');
 // const pickerboySalesorderItemsMappingctrl = require('../pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
 
-const BasicCtrl = require("../../basic_config/basic_config.controller");
-const BaseController = require("../../baseController");
+const BasicCtrl = require("../../../basic_config/basic_config.controller");
+const BaseController = require("../../../baseController");
 const Model = require("./models/purchase_order_receiving_details.model");
 const poCtrl = require("../purchase_order/purchase_order.controller");
 
 const mongoose = require("mongoose");
 const _ = require("lodash");
-const { error, info } = require("../../../utils").logging;
+const { error, info } = require("../../../../utils").logging;
 const moment = require("moment");
 // self apis
 

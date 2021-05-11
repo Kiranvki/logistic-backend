@@ -4,16 +4,16 @@ const BaseJoi = require("joi");
 const Extension = require("joi-date-extensions");
 const Joi = BaseJoi.extend(Extension);
 // handling the joi response
-const Response = require("../../../responses/response");
+const Response = require("../../../../responses/response");
 
 // add joi schema
 const schemas = {
   // joi apicker boy start receiving
   startReceiving: Joi.object().keys({
-    poId: Joi.string()
+    stiId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Purchase order Id")
+      .label("Stock Transfer IN Id")
       .required()
       .options({
         language: {
@@ -25,12 +25,12 @@ const schemas = {
         },
       }),
   }),
-  // joi receiving list after doing start pick or for resuming reciving po
+  // joi receiving list after doing start pick or for resuming reciving sti
   joiReceivingList: Joi.object().keys({
-    poReceivingId: Joi.string()
+    stiReceivingId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Purchase order  receiving Id")
+      .label("Stock Transfer IN  receiving Id")
       .required()
       .options({
         language: {
@@ -45,10 +45,38 @@ const schemas = {
   // joi add received item to cart
   joiReceivingItem: Joi.object().keys({
     params: {
-      material_no: Joi.string()
+      material: Joi.string()
         .trim()
         .regex(/^[a-fA-F0-9]{24}$/)
-        .label("Purchase order receiving item Id")
+        .label("Stock Transfer IN receiving item Id")
+        .required()
+        .options({
+          language: {
+            string: {
+              regex: {
+                base: "should be a valid mongoose Id.",
+              },
+            },
+          },
+        }),
+        stiReceivingId: Joi.string()
+        .trim()
+        .regex(/^[a-fA-F0-9]{24}$/)
+        .label("Stock Transfer IN receiving Id")
+        .required()
+        .options({
+          language: {
+            string: {
+              regex: {
+                base: "should be a valid mongoose Id.",
+              },
+            },
+          },
+        }),
+        stiId: Joi.string()
+        .trim()
+        .regex(/^[a-fA-F0-9]{24}$/)
+        .label("Stock Transfer IN  Id")
         .required()
         .options({
           language: {
@@ -61,25 +89,11 @@ const schemas = {
         }),
     },
     body: {
-      poReceivingId: Joi.string()
-        .trim()
-        .regex(/^[a-fA-F0-9]{24}$/)
-        .label("Purchase order receiving Id")
-        .required()
-        .options({
-          language: {
-            string: {
-              regex: {
-                base: "should be a valid mongoose Id.",
-              },
-            },
-          },
-        }),
       date_of_manufacturing: Joi.date().label("Manufacturing date").optional(), //to-do
       received_qty: Joi.number()
         .integer()
         .min(0)
-        .label("Received quantity")
+        .label("Received delivery_quantity")
         .required(),
       remarks: Joi.string()
         .trim()
@@ -103,10 +117,10 @@ const schemas = {
   // joi add received item to cart
   joiScanItem: Joi.object().keys({
     params: {
-      material_no: Joi.string()
+      material: Joi.string()
         .trim()
         .regex(/^[a-fA-F0-9]{24}$/)
-        .label("Purchase order receiving item Id")
+        .label("Stock Transfer IN receiving item Id")
         .required()
         .options({
           language: {
@@ -119,10 +133,10 @@ const schemas = {
         }),
     },
     body: {
-      poReceivingId: Joi.string()
+      stiReceivingId: Joi.string()
         .trim()
         .regex(/^[a-fA-F0-9]{24}$/)
-        .label("Purchase order receiving Id")
+        .label("Stock Transfer IN receiving Id")
         .required()
         .options({
           language: {

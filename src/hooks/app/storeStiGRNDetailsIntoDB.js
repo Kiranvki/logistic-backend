@@ -1,6 +1,6 @@
 // Controller
-const poCtrl = require("../../components/picker_app/external_purchase_order/purchase_order/purchase_order.controller");
-const Model = require("../../components/picker_app/external_purchase_order/purchase_orderGRN/models/purchase_orderGRN.model");
+const stiCtrl = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in/stock_transfer_in.controller");
+const Model = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_GRN/models/stock_transfer_in_GRN.model");
 const _ = require("lodash");
 
 // Responses & others utils
@@ -25,56 +25,52 @@ const pad = (n, width, z) => {
 // exporting the hooks
 module.exports = async (req, res, next) => {
   try {
-    info("Check whether PO Id is valid or not");
-    let poReceivingDetails = req.body.poReceivingDetails;
-    let poDetails = req.body.poDetails;
+    info("Check whether STI Id is valid or not");
+    let stiReceivingDetails = req.body.stiReceivingDetails;
+    let stiDetails = req.body.stiDetails;
     let pickerBoyId = mongoose.Types.ObjectId(req.user._id);
     let receivedItemsMaterialNumber = [];
     var dateToday = new Date();
-    var poDeliveryDate = poDetails.delivery_date;
+    var stiDeliveryDate = stiDetails.delivery_date;
     var vendorInvoiceNo = req.body.vendorInvoiceNumber;
     let fulfilmentStatus = req.body.fulfilmentStatus;
 
     //filtering basket items based on quantity as for 0 quantity GRN cant be generated
-    for (let i = 0; i < poReceivingDetails.item.length; i++) {
-      let item = poReceivingDetails.item[i];
-      receivedItemsMaterialNumber.push(item.material_no);
+    for (let i = 0; i < stiReceivingDetails.item.length; i++) {
+      let item = stiReceivingDetails.item[i];
+      receivedItemsMaterialNumber.push(item.material);
 
-      poReceivingDetails.item[i].pending_qty =
+      stiReceivingDetails.item[i].pending_qty =
         item.quantity - (item.received_qty ? item.received_qty : 0);
     }
     req.body.receivedItemsMaterialNumber = receivedItemsMaterialNumber;
 
     let grnCreateData = {
       sapGrnNo: req.body.sapGrnNo,
-      poReceivingId: poReceivingDetails._id,
-      po_number: poDetails.po_number,
+      stiReceivingId: stiReceivingDetails._id,
+      po_number: stiDetails.po_number,
       receivingStatus:
         fulfilmentStatus == FULFILMENTSTATUS.fulfilled
           ? FULFILMENTSTATUS.fulfilled
           : FULFILMENTSTATUS.partial,
       fulfilmentStatus: fulfilmentStatus,
-      document_date: poDetails.document_date,
-      delivery_date: poDeliveryDate,
-      delivery_date_array: poDetails.delivery_date_array,
-      poAmount: poReceivingDetails.total,
-      netTotal: poReceivingDetails.netValue,
-      totalTaxAmount: poReceivingDetails.totalTax,
-      discount: poReceivingDetails.totalDiscount,
+      document_date: stiDetails.document_date,
+      delivery_date: stiDeliveryDate,
+      delivery_date_array: stiDetails.delivery_date_array,
+      stiAmount: stiReceivingDetails.total,
+      netTotal: stiReceivingDetails.netValue,
+      totalTaxAmount: stiReceivingDetails.totalTax,
+      discount: stiReceivingDetails.totalDiscount,
       generatedBy: pickerBoyId,
-      item: poReceivingDetails.item,
-      vendorInvoiceNo: vendorInvoiceNo,
-      supplierDetails: {
-        vendor_no: poDetails.vendor_no,
-        vendor_name: poDetails.vendor_name,
-      },
+      item: stiReceivingDetails.item,
+      
     };
     var grnDetails = await Model.create(grnCreateData);
     let grnNo = `GRN${dateToday.getFullYear()}${pad(
       parseInt(dateToday.getMonth() + 1),
       2
     )}${pad(parseInt(dateToday.getDay()), 2)}${pad(
-      parseInt(grnDetails.sequence % 99999),
+      parseInt(grnDetails.grnSequence % 99999),
       5
     )}`;
 
@@ -98,8 +94,6 @@ module.exports = async (req, res, next) => {
       info("GRN Successfully Created !");
       //add Invoice no.
       grnDetails.grnNo = grnNo;
-      grnDetails.poVendorNumber = "NA";
-      grnDetails.poVendorDate = "NA";
       req.body.grnDetails = grnDetails;
       next();
     } else {
@@ -107,7 +101,7 @@ module.exports = async (req, res, next) => {
         req,
         res,
         StatusCodes.HTTP_CONFLICT,
-        MessageTypes.purchaseOrder.grnNotGenerated
+        MessageTypes.stockTransferIn.grnNotGenerated
       );
     }
 

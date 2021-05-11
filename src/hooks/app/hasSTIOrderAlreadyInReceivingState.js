@@ -1,5 +1,5 @@
 // Controller
-const poGrnController = require("../../components/picker_app/external_purchase_order/purchase_orderGRN/purchase_orderGRN.controller");
+const stiReceivingController = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_receiving_details/stock_transfer_in_receiving_details.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -12,28 +12,39 @@ const { error, info } = require("../../utils").logging;
 // exporting the hooks
 module.exports = async (req, res, next) => {
   try {
-    info("Check whether the GRN already generated for PO");
+    info(
+      "Check whether the receiving boy already has pending order assigned to him"
+    );
     let objectId = mongoose.Types.ObjectId; // object id
-    let poReceivingId = req.params.poReceivingId; // get the sale order id
+    let receiverId = mongoose.Types.ObjectId(req.user._id); // get the sale order id
 
     // mongoose valid id
-    if (objectId.isValid(poReceivingId)) {
+    if (objectId.isValid(receiverId)) {
       // check whether the sale Order id is already added or not
-      let poGrnDetails = await poGrnController.get({
-        poReceivingId: poReceivingId,
+      let stiReceivingDetails = await stiReceivingController.get({
+        pickerBoyId: receiverId,
+        receivingStatus: 4,
       });
 
       // if sales order Id is not added
-      if (poGrnDetails.success && !poGrnDetails.recordNotFound) {
-        error("Purchase order GRN already generated");
+      if (
+        stiReceivingDetails.success &&
+        stiReceivingDetails.data &&
+        stiReceivingDetails.data.length
+      ) {
+        error("Already has 1 ongoing order");
         return Response.errors(
           req,
           res,
           StatusCodes.HTTP_CONFLICT,
-          MessageTypes.purchaseOrder.grnAlreadyGenerated
+          MessageTypes.stockTransferIn.alreadyHasOngoinOrder
         );
       }
-      if (poGrnDetails.recordNotFound) {
+      if (
+        stiReceivingDetails.success &&
+        stiReceivingDetails.data &&
+        !stiReceivingDetails.data.length
+      ) {
         next();
       } else {
         info("Something went wrong");
@@ -41,16 +52,16 @@ module.exports = async (req, res, next) => {
           req,
           res,
           StatusCodes.HTTP_CONFLICT,
-          MessageTypes.purchaseOrder.invalidPurchaseOrderReceivingId
+          MessageTypes.stockTransferIn.invalidStockTransferReceivingId
         );
       }
     } else {
-      error("The PickerBoy SalesOrder Mapping Id is Invalid !");
+      error("The ReceiverBoy  Mapping Id is Invalid !");
       return Response.errors(
         req,
         res,
         StatusCodes.HTTP_CONFLICT,
-        MessageTypes.purchaseOrder.invalidPurchaseOrderReceivingId
+        MessageTypes.stockTransferIn.receiverBoyIdInvalid
       );
     }
 

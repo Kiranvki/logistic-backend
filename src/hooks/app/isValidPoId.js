@@ -1,5 +1,5 @@
 // Controller
-const poCtrl = require("../../components/picker_app/purchase_order/purchase_order.controller");
+const poCtrl = require("../../components/picker_app/external_purchase_order/purchase_order/purchase_order.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");

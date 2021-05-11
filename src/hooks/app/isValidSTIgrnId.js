@@ -1,5 +1,5 @@
 // Controller
-const poCtrl = require("../../components/picker_app/external_purchase_order/purchase_order/purchase_order.controller");
+const stiGRNCtrl = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_GRN/stock_transfer_in_GRN.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -12,37 +12,40 @@ const { error, info } = require("../../utils").logging;
 // exporting the hooks
 module.exports = async (req, res, next) => {
   try {
-    info("Check whether PO Id is valid or not");
+    info("Check whether GRN Id is valid or not");
     let objectId = mongoose.Types.ObjectId; // object id
-    let poReceivingDetails = req.body.poReceivingDetails;
+    let grnId = req.params.grnId; // get the sale order id
+
     // mongoose valid id
-    if (objectId.isValid(poReceivingDetails.poId)) {
+    if (objectId.isValid(grnId)) {
       // check whether the sale Order id is unique or not
-      let poDetails = await poCtrl.get(poReceivingDetails.poId);
+      let grnDet = await stiGRNCtrl.get({
+        _id: mongoose.Types.ObjectId(grnId),
+        status: 1,
+      });
 
       // if email is unique
-      if (poDetails.success) {
-        info("Valid SaleOrder");
-        req.body.poDetails = poDetails.data[0];
+      if (grnDet.success) {
+        info("Valid Stock Transfer IN grn");
+        req.body.grnDetails = grnDet.data;
 
         next();
       } else {
-        error("INVALID PurchaseOrder!");
+        error("INVALID StockTransfer GRN!");
         return Response.errors(
           req,
           res,
           StatusCodes.HTTP_CONFLICT,
-          MessageTypes.purchaseOrder
-            .purchaseOrderIdInvalidEitherDeletedOrDeactivated
+          MessageTypes.stockTransferIn.grnRecordNotExist
         );
       }
     } else {
-      error("The PurchaseOrder ID is Invalid !");
+      error("The StockTransfer grn ID is Invalid !");
       return Response.errors(
         req,
         res,
         StatusCodes.HTTP_CONFLICT,
-        MessageTypes.purchaseOrder.invalidPurchaseOrderId
+        MessageTypes.stockTransferIn.invalidStockTransferGRNId
       );
     }
 

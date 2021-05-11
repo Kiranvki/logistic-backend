@@ -949,9 +949,19 @@ class MyTrip extends BaseController {
           sortingArray = {};
           sortingArray[sortBy] = -1;
         let skip = parseInt(page - 1) * pageSize;
+        let projection = {}
           // get the total customer
+        if (req.query.searchText && !req.query.searchText == '') {
+          projection = {...  {
+            '$or':  [ 
+                      { 'sales_order_no': { $regex: req.query.searchText, $options: 'i' } },
+                      { 'invoiceDetail.invoice.invoiceId': { $regex: req.query.searchText, $options: 'i' } }
+                    ]
+            }};
+        };
 
         const totalAgencies = await pickerBoyOrderMappingModel.countDocuments({
+          ...projection,
           'shipping_point': req.user.plant_id,
           'invoiceDetail.isInvoice':true
         });
@@ -959,6 +969,7 @@ class MyTrip extends BaseController {
         const getAllTripsWithSalesOrder = await pickerBoyOrderMappingModel.aggregate([
           {
             $match: {
+              ...projection,
               'shipping_point': req.user.plant_id,
               'invoiceDetail.isInvoice':true
             }
@@ -1011,6 +1022,26 @@ class MyTrip extends BaseController {
                 }
               }],
               "as": "pickerBoyName"
+            }
+          },{
+            $lookup: {
+              from: 'invoicemasters',
+              let: {
+                'id': "$invoiceDetail.invoice.invoiceDbId"
+              },
+              pipeline: [{
+                $match: { 
+                  "$expr": {
+                     "$eq": ['$_id', '$$id']
+                    }
+                  }
+              },{
+                $project: {
+                  'customerName': 1,
+                  'isInvoiceViewed': 1
+                }
+              }],
+              as: 'invoiceDetails'
             }
           },{
             $sort: sortingArray

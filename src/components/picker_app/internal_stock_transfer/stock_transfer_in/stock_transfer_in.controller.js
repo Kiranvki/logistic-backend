@@ -6,12 +6,12 @@
 // const pickerboySalesorderItemsMappingctrl = require('../pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
 const request = require("request-promise");
 
-const BasicCtrl = require("../../basic_config/basic_config.controller");
-const BaseController = require("../../baseController");
-const Model = require("./models/purchase_order.model");
+const BasicCtrl = require("../../../basic_config/basic_config.controller");
+const BaseController = require("../../../baseController");
+const Model = require("./models/stock_transfer_in.model");
 const mongoose = require("mongoose");
 const _ = require("lodash");
-const { error, info } = require("../../../utils").logging;
+const { error, info } = require("../../../../utils").logging;
 const moment = require("moment");
 const { forEach } = require("lodash");
 // self apis
@@ -24,14 +24,14 @@ const pad = (n, width, z) => {
 };
 
 // getting the model
-class purchaseController extends BaseController {
+class stockTransferController extends BaseController {
   // constructor
   constructor() {
     super();
-    this.messageTypes = this.messageTypes.purchaseOrder;
+    this.messageTypes = this.messageTypes.stockTransferIn;
   }
 
-  getPOList = async (req, res) => {
+  getSTIList = async (req, res) => {
     try {
       var userId = mongoose.Types.ObjectId(req.user._id);
       var page = req.query.page || 1,
@@ -42,30 +42,85 @@ class purchaseController extends BaseController {
         });
       let skip = parseInt(page - 1) * pageSize;
       sortingArray["receivingStatus"] = -1;
-      sortingArray["delivery_date"] = -1;
+      sortingArray["picking_date"] = -1;
       let todaysDate = moment().format("YYYY-MM-DD");
       let todaysEndDate = moment().format("YYYY-MM-DD");
-      info("Get Purchase order  details !");
+      info("Get Stock Transfer IN  details !");
       let query = {
-        company_code: "1000",
-        plant: req.user.plant ? req.user.plant.toString() : "", //consider data type
+        receiving_plant: req.user.plant ? req.user.plant.toString() : "", //consider data type
         receivingStatus: { $ne: 1 }, //to-do// check if qury working properly
-        end_of_validity_period: { $gte: todaysDate },
+        item: { $exists: true },
         status: 1,
         isDeleted: 0,
-        // delivery_date:{$lte:todaysEndDate}//to-do
+        "item.delivery_quantity": { $gt: 0 },
+        // "item.status": "Not yet processed"//to-do
+        // picking_date:{$lte:todaysEndDate}//to-do
       };
-      if (req.query.poNumber) {
+      var projectObject = {
+        po_number: 1,
+        "item.delivery_quantity": 1,
+        "item.material": 1,
+        "item.higher_level_item": 1,
+        "item.delivery_item_no": 1,
+      };
+      if (req.query.stiNumber) {
         query.po_number = {
-          $regex: req.query.poNumber,
+          $regex: req.query.stiNumber,
           $options: "i",
         };
       }
-      // get the total PO
-      let totalPO = await Model.countDocuments(query);
-      var poList = await Model.aggregate([
+      // get the total STI
+      let totalSTI = await Model.countDocuments(query);
+      var stiList = await Model.aggregate([
+        // {
+        //   $project: projectObject,
+        // },
+        
+        { $unwind: "$item" },
         {
           $match: query,
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id",
+              higher_level_item: "$item.higher_level_item",
+              material: "$item.material",
+            },
+            deliveryQuantity: { $sum: "$item.delivery_quantity" },
+            receivedQuantity: { $sum: "$item.received_qty" },
+            pendingQuantity: { $sum: "$item.pending_qty" },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            receivingStatus: { $first: "$receivingStatus" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            item: { $first: "$item" },
+          },
+        },
+        {
+          $addFields: {
+            "item.delivery_quantity": "$deliveryQuantity",
+            "item.received_qty": "$receivedQuantity",
+            "item.pending_qty": "$pendingQuantity",
+          },
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id.sti_id",
+            },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            receivingStatus: { $first: "$receivingStatus" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            item: { $push: "$item" },
+          },
         },
         {
           $lookup: {
@@ -97,33 +152,45 @@ class purchaseController extends BaseController {
                 },
               },
             ],
-            as: "poDetails",
+            as: "stiDetails",
           },
         },
         {
           $unwind: {
-            path: "$poDetails",
+            path: "$stiDetails",
             preserveNullAndEmptyArrays: true,
           },
         },
         {
           $project: {
+            _id: "$_id.sti_id",
             po_number: 1,
-            vendor_no: 1,
-            vendor_name: 1,
-            itemCount: { $size: "$item" },
-            poReceivingId: "$poDetails",
+            supply_plant: 1,
+            supply_plant_name: 1,
+            supply_plant_city: 1,
+            delivery_no: 1,
             receivingStatus: 1,
-            item: 1,
+            fulfilmentStatus: 1,
+            "item.delivery_quantity":1,
+            "item.material":1,
+            "item.material_description":1,
+            "item.uom":1,
+            "item.higher_level_item":1,
+            "item.po_item":1,
+            "item.delivery_item_no":1,
+            "item.received_qty":1,
+            "item.pending_qty":1,
+            itemCount: { $size: "$item" },
+            stiReceivingId: "$stiDetails",
           },
         },
         {
           $match: {
             $or: [
               {
-                "poReceivingId.pickerBoyId": userId,
+                "stiReceivingId.pickerBoyId": userId,
               },
-              { "poReceivingId.pickerBoyId": { $exists: false } },
+              { "stiReceivingId.pickerBoyId": { $exists: false } },
             ],
           },
         },
@@ -137,12 +204,15 @@ class purchaseController extends BaseController {
           $limit: pageSize,
         },
       ]).allowDiskUse(true);
-      poList.forEach((order) => {
+      stiList.forEach((order) => {
         let count = 0;
         order.item.forEach((item) => {
           if (!item.received_qty) {
             count++;
-          } else if (item.received_qty && item.received_qty < item.quantity) {
+          } else if (
+            item.received_qty &&
+            item.received_qty < item.delivery_quantity
+          ) {
             count++;
           }
         });
@@ -155,14 +225,14 @@ class purchaseController extends BaseController {
         res,
         this.status.HTTP_OK,
         {
-          result: poList,
+          result: stiList,
           pageMeta: {
             skip: parseInt(skip),
             pageSize: pageSize,
-            total: totalPO,
+            total: totalSTI,
           },
         },
-        this.messageTypes.poListFetched
+        this.messageTypes.stiListFetched
       );
 
       // catch any runtime error
@@ -177,44 +247,97 @@ class purchaseController extends BaseController {
     }
   };
 
-  getPODetails = async (req, res) => {
+  getSTIDetails = async (req, res) => {
     try {
-      info("Get Purchase order  details !");
+      info("Get Stock Transfer IN  details !");
 
-      var poDetails = await Model.aggregate([
+      var stiDetails = await Model.aggregate([
+        { $unwind: "$item" },
         {
           $match: {
             status: 1,
             isDeleted: 0,
-            _id: mongoose.Types.ObjectId(req.params.poId),
+            _id: mongoose.Types.ObjectId(req.params.stiId),
+            "item.delivery_quantity": { $gt: 0 },
+
+          },
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id",
+              higher_level_item: "$item.higher_level_item",
+              material: "$item.material",
+            },
+            deliveryQuantity: { $sum: "$item.delivery_quantity" },
+            receivedQuantity: { $sum: "$item.received_qty" },
+            pendingQuantity: { $sum: "$item.pending_qty" },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            picking_date: { $first: "$picking_date" },
+            receivingStatus: { $first: "$receivingStatus" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            item: { $first: "$item" },
+          },
+        },
+        {
+          $addFields: {
+            "item.delivery_quantity": "$deliveryQuantity",
+            "item.received_qty": "$receivedQuantity",
+            "item.pending_qty": "$pendingQuantity",
+          },
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id.sti_id",
+            },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            receivingStatus: { $first: "$receivingStatus" },
+            picking_date: { $first: "$picking_date" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            item: { $push: "$item" },
           },
         },
         {
           $project: {
+            _id: "$_id.sti_id",
             po_number: 1,
-            vendor_no: 1,
-            vendor_name: 1,
-            "item._id": 1,
-            "item.material_no": 1,
-            "item.material_description": 1,
-            "item.quantity": 1,
-            "item.net_price": 1,
-            "item.pending_qty": 1,
-            "item.mrp": 1,
-            pending_qty: 1,
-            received_qty: 1,
-            delivery_date: 1,
+            supply_plant: 1,
+            supply_plant_name: 1,
+            supply_plant_city: 1,
+            delivery_no: 1,
+            receivingStatus: 1,
+            picking_date: 1,
+            fulfilmentStatus: 1,
+            "item.delivery_quantity":1,
+            "item.material":1,
+            "item.material_description":1,
+            "item.uom":1,
+            "item.higher_level_item":1,
+            "item.po_item":1,
+            "item.delivery_item_no":1,
+            "item.received_qty":1,
+            "item.pending_qty":1,
           },
         },
       ]).allowDiskUse(true);
 
       // success
-      if (poDetails && poDetails[0] && poDetails[0].item) {
-        for (let i = 0; i < poDetails[0].item.length; i++) {
-          // adding recieved quantity in po order and gettinf fullfilment status
-          poDetails[0].item[i].quantity = poDetails[0].item[i].pending_qty
-            ? poDetails[0].item[i].pending_qty
-            : poDetails[0].item[i].quantity;
+      if (stiDetails && stiDetails[0] && stiDetails[0].item) {
+        for (let i = 0; i < stiDetails[0].item.length; i++) {
+          // adding recieved delivery_quantity in sti order and gettinf fullfilment status
+          stiDetails[0].item[i].delivery_quantity = stiDetails[0].item[i]
+            .pending_qty
+            ? stiDetails[0].item[i].pending_qty
+            : stiDetails[0].item[i].delivery_quantity;
         }
       }
 
@@ -222,8 +345,8 @@ class purchaseController extends BaseController {
         req,
         res,
         this.status.HTTP_OK,
-        poDetails,
-        this.messageTypes.poListFetched
+        stiDetails,
+        this.messageTypes.stiListFetched
       );
 
       // catch any runtime error
@@ -240,8 +363,8 @@ class purchaseController extends BaseController {
 
   // startPickUP = async (req, res) => {
   //   try {
-  //     info("Get Purchase order  details !", req.body, req.query, req.params);
-  //     var poList = await Model.findOne({
+  //     info("Get Stock Transfer IN  details !", req.body, req.query, req.params);
+  //     var stiList = await Model.findOne({
   //       status: 1,
   //       isDeleted: 0,
   //     }).lean();
@@ -250,7 +373,7 @@ class purchaseController extends BaseController {
   //       req,
   //       res,
   //       this.status.HTTP_OK,
-  //       poList,
+  //       stiList,
   //       this.messageTypes.userDetailsFetched
   //     );
 
@@ -265,15 +388,15 @@ class purchaseController extends BaseController {
   //     );
   //   }
   // };
-  modifyPo = async (query, updateData) => {
+  modifySti = async (query, updateData) => {
     try {
-      var poDetails = await Model.findOneAndUpdate(query, updateData, {
+      var stiDetails = await Model.findOneAndUpdate(query, updateData, {
         newValue: true,
         useFindAndModify: false,
       });
       return {
         success: true,
-        data: poDetails,
+        data: stiDetails,
       };
     } catch (err) {
       error(err);
@@ -283,30 +406,83 @@ class purchaseController extends BaseController {
       };
     }
   };
-  get = async (poId) => {
+  get = async (stiId) => {
     try {
-      var poDetails = await Model.aggregate([
+      var stiDetails = await Model.aggregate([
+        { $unwind: "$item" },
         {
           $match: {
             isDeleted: 0, //to-do
-            _id: mongoose.Types.ObjectId(poId),
+            _id: mongoose.Types.ObjectId(stiId),
+            "item.delivery_quantity": { $gt: 0 },
+          },
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id",
+              higher_level_item: "$item.higher_level_item",
+              material: "$item.material",
+            },
+            deliveryQuantity: { $sum: "$item.delivery_quantity" },
+            receivedQuantity: { $sum: "$item.received_qty" },
+            pendingQuantity: { $sum: "$item.pending_qty" },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            picking_date: { $first: "$picking_date" },
+            receivingStatus: { $first: "$receivingStatus" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            picking_date_array: { $first: "$picking_date_array" },
+            sapGrnNo: { $first: "$sapGrnNo" },
+            item: { $first: "$item" },
+          },
+        },
+        {
+          $addFields: {
+            "item.delivery_quantity": "$deliveryQuantity",
+            "item.received_qty": "$receivedQuantity",
+            "item.pending_qty": "$pendingQuantity",
+          },
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id.sti_id",
+            },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            receivingStatus: { $first: "$receivingStatus" },
+            picking_date: { $first: "$picking_date" },
+            picking_date_array: { $first: "$picking_date_array" },
+            sapGrnNo: { $first: "$sapGrnNo" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            item: { $push: "$item" },
           },
         },
         {
           $project: {
+            _id: "$_id.sti_id",
             po_number: 1,
-            document_date: 1,
-            vendor_no: 1,
+            supply_plant: 1,
+            supply_plant_name: 1,
+            supply_plant_city: 1,
+            delivery_no: 1,
+            receivingStatus: 1,
+            picking_date: 1,
+            fulfilmentStatus: 1,
             item: 1,
-            delivery_date: 1,
-            sapGrnNo: 1,
-            delivery_date_array: 1,
-          },
+          }
         },
       ]).allowDiskUse(true);
       return {
         success: true,
-        data: poDetails,
+        data: stiDetails,
       };
     } catch (err) {
       error(err);
@@ -316,14 +492,14 @@ class purchaseController extends BaseController {
       };
     }
   };
-  getVendorInfo = async (vendor_no) => {
+  getVendorInfo = async (supply_plant_city) => {
     try {
       let body = {
         request: {
           from_date: "",
           to_date: "",
           purchase_org: "",
-          vendor_no: vendor_no,
+          supply_plant_city: supply_plant_city,
         },
       };
       let options = {
@@ -345,7 +521,7 @@ class purchaseController extends BaseController {
   };
   getVendorDetails = async (req, res) => {
     try {
-      info("Get Purchase order  details !");
+      info("Get Stock Transfer IN  details !");
       var vendorDetails = [];
       try {
         vendorDetails = await this.getVendorInfo(req.params.vendor_number);
@@ -376,7 +552,7 @@ class purchaseController extends BaseController {
             fullAddress.push(vendorDetails.city_postal_code);
           }
           let details = {
-            vendor_no: vendorDetails.vendor_no,
+            supply_plant_city: vendorDetails.supply_plant_city,
             name_of_organization: vendorDetails.name_1_of_organization,
             street: vendorDetails.street,
             city_postal_code: vendorDetails.city_postal_code,
@@ -384,7 +560,7 @@ class purchaseController extends BaseController {
             country: vendorDetails.address_time_zone,
             mobileNumber: vendorDetails.mobile_no,
             email: vendorDetails.e_mail_address,
-            currency: vendorDetails.purchase_order_currency,
+            currency: vendorDetails.stock_transfer_in_currency,
             street_3: vendorDetails.street_3,
             district: vendorDetails.district,
             fullAddress: fullAddress.join(" "),
@@ -395,7 +571,7 @@ class purchaseController extends BaseController {
             res,
             this.status.HTTP_OK,
             details,
-            this.messageTypes.poListFetched
+            this.messageTypes.stiListFetched
           );
         } else {
           this.errors(
@@ -426,9 +602,9 @@ class purchaseController extends BaseController {
       );
     }
   };
-  poFilteredList = async (req, res) => {
+  stiFilteredList = async (req, res) => {
     try {
-      info("Get Purchase order  filtered list !");
+      info("Get Stock Transfer IN  filtered list !");
       let type = req.params.type;
       let pickerBoyId = mongoose.Types.ObjectId(req.user._id);
       var page = req.query.page || 1,
@@ -442,27 +618,29 @@ class purchaseController extends BaseController {
       let todaysEndDate = moment().format("YYYY-MM-DD");
       var projectList = {
         po_number: 1,
-        vendor_no: 1,
-        vendor_name: 1,
-        poReceivingId: "$poDetails",
+        delivery_no: 1,
+        supply_plant_city: 1,
+        supply_plant_name: 1,
+        stiReceivingId: "$stiDetails",
         receivingStatus: 1,
         updatedAt: 1,
-        delivery_date: 1,
+        picking_date: 1,
       };
       let query = {
         status: 1,
         isDeleted: 0,
       };
-      if (req.query.poNumber) {
+      if (req.query.stiNumber) {
         query.po_number = {
-          $regex: req.query.poNumber,
+          $regex: req.query.stiNumber,
           $options: "is",
         };
       }
       if (req.query.date) {
-        query["delivery_date"] = moment(new Date(req.query.date)).format(
-          "YYYY-MM-DD"
-        );
+        query["picking_date"] = moment
+          .utc(new Date(req.query.date))
+          .utcOffset("+05:30")
+          .format("YYYY-MM-DD");
       }
       if (type == "history") {
         query.receivingStatus = 1;
@@ -478,16 +656,16 @@ class purchaseController extends BaseController {
       } else if (type == "ongoing") {
         query.receivingStatus = 4;
         projectList.item = 1;
-        projectList.poReceivingId = "$poDetails";
+        projectList.stiReceivingId = "$stiDetails";
       }
-      sortingArray["delivery_date"] = -1;
+      sortingArray["picking_date"] = -1;
       sortingArray["po_number"] = -1;
-      // get the total PO
+      // get the total STI
       if (type == "pending" || type == "history") {
-        var totalPO = await Model.countDocuments({
+        var totalSTI = await Model.countDocuments({
           ...query,
         });
-        var poList = await Model.aggregate([
+        var stiList = await Model.aggregate([
           {
             $match: query,
           },
@@ -505,27 +683,27 @@ class purchaseController extends BaseController {
           },
         ]).allowDiskUse(true);
       } else {
-        var totalPO = await Model.countDocuments({
+        var totalSTI = await Model.countDocuments({
           ...query,
         });
-        var poList = await Model.aggregate([
+        var stiList = await Model.aggregate([
           {
             $match: query,
           },
           {
             $lookup: {
-              from: "purchaseorderreceivingdetails",
+              from: "stocktransferinreceivingdetails",
               let: {
                 id: "$_id",
-                poRecStatus: "$receivingStatus",
+                stiRecStatus: "$receivingStatus",
               },
               pipeline: [
                 {
                   $match: {
                     $expr: {
                       $and: [
-                        { $eq: ["$poId", "$$id"] },
-                        { $eq: ["$$poRecStatus", 4] },
+                        { $eq: ["$stiId", "$$id"] },
+                        { $eq: ["$$stiRecStatus", 4] },
                         { $eq: ["$isDeleted", 0] },
                         {
                           $eq: [
@@ -533,7 +711,7 @@ class purchaseController extends BaseController {
                             mongoose.Types.ObjectId(req.user._id),
                           ],
                         },
-                        // { $gt: ["$item.quantity", "$item.received_qty"] },//not working need to check later //to-do
+                        // { $gt: ["$item.delivery_quantity", "$item.received_qty"] },//not working need to check later //to-do
                       ],
                     },
                   },
@@ -547,12 +725,12 @@ class purchaseController extends BaseController {
                   },
                 },
               ],
-              as: "poDetails",
+              as: "stiDetails",
             },
           },
           {
             $unwind: {
-              path: "$poDetails",
+              path: "$stiDetails",
             },
           },
           {
@@ -564,8 +742,8 @@ class purchaseController extends BaseController {
         ]).allowDiskUse(true);
       }
       // if(type=='pending'){
-      //   if(poList && poList.length){
-      //     poList.forEach((element)=>{
+      //   if(stiList && stiList.length){
+      //     stiList.forEach((element)=>{
       //       let itemCount=0
       //       element.item.forEach((item)=>{
       //         if(item.received_qty>0){
@@ -577,12 +755,15 @@ class purchaseController extends BaseController {
       //     })
       //   }
       // }
-      if (poList && poList.length) {
-        poList.forEach((element) => {
+      if (stiList && stiList.length) {
+        stiList.forEach((element) => {
           if (type == "ongoing" || type == "pending") {
             let itemCount = 0;
             element.item.forEach((item) => {
-              if (!item.received_qty || item.received_qty != item.quantity) {
+              if (
+                !item.received_qty ||
+                item.received_qty != item.delivery_quantity
+              ) {
                 itemCount++;
               }
             });
@@ -602,14 +783,14 @@ class purchaseController extends BaseController {
         res,
         this.status.HTTP_OK,
         {
-          result: poList,
+          result: stiList,
           pageMeta: {
             skip: parseInt(skip),
             pageSize: pageSize,
-            total: totalPO,
+            total: totalSTI,
           },
         },
-        this.messageTypes.poListFetched
+        this.messageTypes.stiListFetched
       );
 
       // catch any runtime error
@@ -624,63 +805,65 @@ class purchaseController extends BaseController {
     }
   };
 
-  filteredPODetails = async (req, res) => {
+  filteredSTIDetails = async (req, res) => {
     try {
-      info("PO filtered list details");
+      info("STI filtered list details");
       var type = req.query.type || "history";
-      var poDetails = {};
+      var stiDetails = {};
       var projectList = {
         po_number: 1,
-        vendor_no: 1,
-        vendor_name: 1,
+        delivery_no: 1,
+        supply_plant_city: 1,
+        supply_plant_name: 1,
         receivingStatus: 1,
         updatedAt: 1,
-        delivery_date: 1,
+        picking_date: 1,
         sapGrnNo: 1,
       };
       if (type == "pending") {
         projectList.item = 1;
       }
-      poDetails = await Model.findOne(
+      stiDetails = await Model.findOne(
         {
-          _id: mongoose.Types.ObjectId(req.params.poId),
+          _id: mongoose.Types.ObjectId(req.params.stiId),
           status: 1,
           isDeleted: 0,
         },
         projectList
       ).lean();
 
-      if (poDetails) {
+      if (stiDetails) {
         // success
-        if (poDetails && poDetails && poDetails.item && type == "pending") {
+        if (stiDetails && stiDetails && stiDetails.item && type == "pending") {
           let itemList = [];
-          for (let i = 0; i < poDetails.item.length; i++) {
-            // adding recieved quantity in po order and gettinf fullfilment status
-            poDetails.item[i].quantity = poDetails.item[i].pending_qty
-              ? poDetails.item[i].pending_qty
-              : poDetails.item[i].quantity;
-            if (poDetails.item[i].quantity > 0) {
-              itemList.push(poDetails.item[i]);
+          for (let i = 0; i < stiDetails.item.length; i++) {
+            // adding recieved delivery_quantity in sti order and gettinf fullfilment status
+            stiDetails.item[i].delivery_quantity = stiDetails.item[i]
+              .pending_qty
+              ? stiDetails.item[i].pending_qty
+              : stiDetails.item[i].delivery_quantity;
+            if (stiDetails.item[i].delivery_quantity > 0) {
+              itemList.push(stiDetails.item[i]);
             }
           }
-          poDetails.item = itemList;
+          stiDetails.item = itemList;
         }
-        poDetails.deliveredDate =
-          poDetails.sapGrnNo[poDetails.sapGrnNo.length - 1].date;
+        stiDetails.deliveredDate =
+          stiDetails.sapGrnNo[stiDetails.sapGrnNo.length - 1].date;
 
         return this.success(
           req,
           res,
           this.status.HTTP_OK,
-          poDetails,
-          this.messageTypes.poDetailsFetched
+          stiDetails,
+          this.messageTypes.stiDetailsFetched
         );
       } else {
         return this.errors(
           req,
           res,
           this.status.HTTP_CONFLICT,
-          this.messageTypes.poDetailsNotFound
+          this.messageTypes.stiDetailsNotFound
         );
       }
     } catch (err) {
@@ -697,10 +880,10 @@ class purchaseController extends BaseController {
   insertPurchaseOrderData = async (sapRawData) => {
     try {
       if (sapRawData && sapRawData.length > 0) {
-        var poNumberArrayFromSap = [];
+        var stiNumberArrayFromSap = [];
         sapRawData = sapRawData.map((el) => {
           if (el) {
-            poNumberArrayFromSap.push(el.po_number);
+            stiNumberArrayFromSap.push(el.po_number);
             if (el.po_number) {
               el.po_number = el.po_number.toString();
               el.isDeleted = 0;
@@ -710,10 +893,10 @@ class purchaseController extends BaseController {
           return el;
         });
 
-        const poDataFromDb = await Model.find(
+        const stiDataFromDb = await Model.find(
           {
             po_number: {
-              $in: poNumberArrayFromSap,
+              $in: stiNumberArrayFromSap,
             },
           },
           {
@@ -721,17 +904,17 @@ class purchaseController extends BaseController {
           }
         );
 
-        if (poDataFromDb.length > 0) {
-          const poNumberArrayFromdb = poDataFromDb.map((el) => {
+        if (stiDataFromDb.length > 0) {
+          const stiNumberArrayFromdb = stiDataFromDb.map((el) => {
             if (el) {
               return el.po_number;
             }
           });
-          const finalPOArray = sapRawData.filter((val) => {
-            return poNumberArrayFromdb.indexOf(val.po_number) == -1;
+          const finalSTIArray = sapRawData.filter((val) => {
+            return stiNumberArrayFromdb.indexOf(val.po_number) == -1;
           });
 
-          return await Model.insertMany(finalPOArray);
+          return await Model.insertMany(finalSTIArray);
         } else {
           return await Model.insertMany(sapRawData);
         }
@@ -747,4 +930,4 @@ class purchaseController extends BaseController {
 }
 
 // exporting the modules
-module.exports = new purchaseController();
+module.exports = new stockTransferController();

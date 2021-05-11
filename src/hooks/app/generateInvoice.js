@@ -5,6 +5,8 @@ const StatusCodes = require('../../facades/response');
 const MessageTypes = require('../../responses/types');
 const Exceptions = require('../../exceptions/Handler');
 const BasicCtrl = require('../../components/basic_config/basic_config.controller');
+const sales_orderController = require('../../components/sales_order/sales_order/sales_order.controller');
+
 const pickerBoyOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model');
 const pickerBoyOrderItemMappingModel = require('../../components/picker_app/pickerboy_salesorder_items_mapping/models/pickerboy_salesorder_items_mapping.model')
 
@@ -34,13 +36,21 @@ module.exports = async (req, res, next) => {
     console.log('Hitting SAP server for Generating the Invoice *> ', url);
     obj = {
       "request": {
+<<<<<<< HEAD
         "delivery_no": req.body.deliveryNumber,
+=======
+        "delivery_no": req.body.delivery_detail['data']['delivery_no'],
+>>>>>>> 14ccfc69dd5f194bbb522a54946237295f2b54e6
         "reference_key": "1234"
       }
     }
 
 
+<<<<<<< HEAD
     info(`Invoice Request Body - ${JSON.stringify(obj)}`)
+=======
+    console.log(obj)
+>>>>>>> 14ccfc69dd5f194bbb522a54946237295f2b54e6
 
 
     // get the data from SAP
@@ -84,8 +94,8 @@ module.exports = async (req, res, next) => {
     req.body.invoice_detail = await request.post(url)
       .send(obj)
       .timeout({
-        response: 30000, // Wait 10 seconds for the server to start sending,
-        deadline: 30000, // but allow 1 minute for the file to finish loading.
+        response: 65000, // Wait 10 seconds for the server to start sending,
+        deadline: 65000, // but allow 1 minute for the file to finish loading.
       })
       .retry(1)
       .then((res, body) => {
@@ -103,7 +113,11 @@ module.exports = async (req, res, next) => {
           error('Error Updating Server !');
           return {
             success: false,
+<<<<<<< HEAD
             error: 'Error Updating Server !'
+=======
+            error: 'Picking successful but invoice creation failed.Please check directly if invoice is created!'
+>>>>>>> 14ccfc69dd5f194bbb522a54946237295f2b54e6
           };
         }
         // catch any runtime error
@@ -112,7 +126,7 @@ module.exports = async (req, res, next) => {
         if (err.timeout) {
           return {
             success: false,
-            error: 'API timeout'
+            error: 'Picking Successful and invoice creation timed out.Please check directly if invoice is created.'
           };
         } else {
           return {

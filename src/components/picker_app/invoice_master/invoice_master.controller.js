@@ -4,6 +4,7 @@ const pickerBoySalesOrderMappingctrl = require('../pickerboy_salesorder_mapping/
 const invoicePickerBoySalesOrderMappingctrl = require('../invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller');
 const salesOrderctrl = require('../../sales_order/sales_order/sales_order.controller');
 const pickerboySalesorderItemsMappingctrl = require('../pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
+const invoiceMastermodel = require('./models/invoice_master.model');
 
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
@@ -357,6 +358,10 @@ class invoiceMasterController extends BaseController {
               sgst:Math.round((totalTaxValue/2)*100)/100,
               gstNo:'NA'
             }
+
+            // Set isInvoiceViewed to true on view invoice details
+            await invoiceMastermodel.findOneAndUpdate({ _id: invoiceId }, {$set: { isInvoiceViewed: 1} });
+
             return this.success(req, res, this.status.HTTP_OK,InvoiceDetailsResponse , this.messageTypes.invoiceDetailsSent);
           } 
       else {
@@ -380,6 +385,9 @@ class invoiceMasterController extends BaseController {
       );
     }
   }
+
+  
+  
 
 
 

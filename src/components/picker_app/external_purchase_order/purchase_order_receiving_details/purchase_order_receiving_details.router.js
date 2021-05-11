@@ -20,17 +20,17 @@ const {
   poReceivingInitiationValidations,
   hasOrderAlreadyInReceivingState,
   isValidInputsForReceivedItem,
-} = require("../../../hooks/app");
+} = require("../../../../hooks/app");
 // auth
-const { verifyUserToken } = require("../../../hooks/Auth");
-const { verifyAppToken } = require("../../../hooks/app/Auth");
+const { verifyUserToken } = require("../../../../hooks/Auth");
+const { verifyAppToken } = require("../../../../hooks/app/Auth");
 
 // exporting the user routes
 function purchaseOrderRoutes() {
   //open, closed
   return (open, closed) => {
     // getting  invoice details
-    closed.route("/purchaseOrder/start-receiving/:poId").get(
+    closed.route("/start-receiving/:poId").get(
       [startReceiving], // joi validation
       verifyAppToken, // verify app user token
       isValidPoId, // check whether the poId is valid
@@ -39,25 +39,25 @@ function purchaseOrderRoutes() {
       ctrl.startPickUP // post controller
     );
     // getting  invoice details
-    closed.route("/purchaseOrder/receiving-list/:poReceivingId").get(
+    closed.route("/receiving-list/:poReceivingId").get(
       [joiReceivingList], // joi validation
       verifyAppToken, // verify app user token
       // isValidPoReceivingId, // check whether the poId is valid
       ctrl.poReceivingList // post controller
     );
-    closed.route("/purchaseOrder/receive-item/:material_no").post(
+    closed.route("/receive-item/:material_no").post(
       [joiReceivingItem], // joi validation
       verifyAppToken, // verify app user token
       isValidInputsForReceivedItem, // check whether the poId is valid
       ctrl.receivePOItem // post controller
     );
-    // closed.route("/purchaseOrder/scan-item/:material_no").post(
+    // closed.route("/scan-item/:material_no").post(
     //   [joiScanItem], // joi validation
     //   verifyAppToken, // verify app user token
     //   isValidInputsForReceivedItem, // check whether the poId is valid
     //   ctrl.receivePOItem // post controller
     // );
-    closed.route("/purchaseOrder/basket-list/:poReceivingId").get(
+    closed.route("/basket-list/:poReceivingId").get(
       [joiReceivingList], // joi validation
       verifyAppToken, // verify app user token
       // isValidPoId, // check whether the poId is valid

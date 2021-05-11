@@ -4,17 +4,17 @@ const BaseJoi = require("joi");
 const Extension = require("joi-date-extensions");
 const Joi = BaseJoi.extend(Extension);
 // handling the joi response
-const Response = require("../../../responses/response");
+const Response = require("../../../../responses/response");
 
 // add joi schema
 const schemas = {
   // joi zoho details
-  joipoGenerateGRN: Joi.object().keys({
+  joistiGenerateGRN: Joi.object().keys({
     params: {
-      poReceivingId: Joi.string()
+      stiReceivingId: Joi.string()
         .trim()
         .regex(/^[a-fA-F0-9]{24}$/)
-        .label("Purchase order receiving Id")
+        .label("Stock Transfer IN receiving Id")
         .required()
         .options({
           language: {
@@ -39,7 +39,7 @@ const schemas = {
     grnId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Purchase order GRN Id")
+      .label("Stock Transfer IN GRN Id")
       .required()
       .options({
         language: {
@@ -98,9 +98,9 @@ module.exports = {
   },
 
   // joi asm create
-  joipoGenerateGRN: (req, res, next) => {
+  joistiGenerateGRN: (req, res, next) => {
     // getting the schemas
-    let schema = schemas.joipoGenerateGRN;
+    let schema = schemas.joistiGenerateGRN;
     let option = options.basic;
 
     // validating the schema

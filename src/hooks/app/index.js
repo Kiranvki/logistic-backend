@@ -54,6 +54,19 @@ module.exports = {
   getPODetails:require('./getPODetails'),
   storeGRNDetailsIntoDB:require('./storeGRNDetailsIntoDB'),
   generateGRN:require('./generateGRN'),
-  getDeliveryNumber:require('./getDeliveryNumber')
+  getDeliveryNumber:require('./getDeliveryNumber'),
+  getSTIDetails:require('./getSTIDetails'),
+  isGRNAlreadyGeneratedForSTI:require('./isGRNAlreadyGeneratedForSTI'),
+  hasSTIOrderAlreadyInReceivingState:require('./hasSTIOrderAlreadyInReceivingState'),
+  isValidInputsForSTIReceivedItem:require('./isValidInputsForSTIReceivedItem'),
+  isValidSTIId:require('./isValidSTIId'),
+  isValidSTIReceivingId:require('./isValidSTIReceivingId'),
+  isValidSTIRecIdForGrnGetDetails:require('./isValidSTIRecIdForGrnGetDetails'),
+  isValidSTIgrnId:require('./isValidSTIgrnId'),
+  stiReceivingInitiationValidations:require('./stiReceivingInitiationValidations'),
+  storeStiGRNDetailsIntoDB:require('./storeStiGRNDetailsIntoDB'),
+  getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate:require('./getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate'),
+  generateStiGRN:require('./generateStiGRN'),
+
 
 }

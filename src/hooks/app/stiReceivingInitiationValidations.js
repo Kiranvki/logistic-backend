@@ -1,5 +1,5 @@
 // Controller
-const poReceivingDetailsCtrl = require("../../components/picker_app/external_purchase_order/purchase_order_receiving_details/purchase_order_receiving_details.controller");
+const stiReceivingDetailsCtrl = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_receiving_details/stock_transfer_in_receiving_details.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -14,25 +14,25 @@ module.exports = async (req, res, next) => {
   try {
     info("Check whether the sales order is already added in picking state");
     let objectId = mongoose.Types.ObjectId; // object id
-    let poId = req.params.poId; // get the sale order id
+    let stiId = req.params.stiId; // get the sale order id
 
     // mongoose valid id
-    if (objectId.isValid(poId)) {
+    if (objectId.isValid(stiId)) {
       // check whether the sale Order id is already added or not
-      let poDetails = await poReceivingDetailsCtrl.getPOReceivingDetails(poId);
+      let stiDetails = await stiReceivingDetailsCtrl.getSTIReceivingDetails(stiId);
       //send error based on record
       // if purchase order Id is not added
-      if ((poDetails.success, poDetails.data && poDetails.data.length)) {
+      if ((stiDetails.success, stiDetails.data && stiDetails.data.length)) {
         if (
-          poDetails.data[0].receivingStatus == 4 ||
-          poDetails.data[0].receivingStatus == 3
+          stiDetails.data[0].receivingStatus == 4 ||
+          stiDetails.data[0].receivingStatus == 3
         ) {
           error("Purchase Order already added to receiving state");
           return Response.errors(
             req,
             res,
             StatusCodes.HTTP_CONFLICT,
-            MessageTypes.purchaseOrder.purchaseOrderAlreadyAddedInReceivingState
+            MessageTypes.stockTransferIn.stiAlreadyAddedInReceivingState
           );
         }
         error("Purchase Order already added to receiving state");
@@ -40,7 +40,7 @@ module.exports = async (req, res, next) => {
           req,
           res,
           StatusCodes.HTTP_CONFLICT,
-          MessageTypes.purchaseOrder.purchaseOrderGRNalreadygenerated
+          MessageTypes.stockTransferIn.stiGRNalreadygenerated
         );
       } else {
         next();
@@ -51,7 +51,7 @@ module.exports = async (req, res, next) => {
         req,
         res,
         StatusCodes.HTTP_CONFLICT,
-        MessageTypes.salesOrder.invalidPickerBoyPurchaseOrderMappingId
+        MessageTypes.stockTransferIn.invalidPickerBoyStockTransferMappingId
       );
     }
     // catch any runtime error

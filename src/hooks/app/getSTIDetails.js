@@ -1,5 +1,5 @@
 // Controller
-const poCtrl = require("../../components/picker_app/external_purchase_order/purchase_order/purchase_order.controller");
+const stiCtrl = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in/stock_transfer_in.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -12,37 +12,36 @@ const { error, info } = require("../../utils").logging;
 // exporting the hooks
 module.exports = async (req, res, next) => {
   try {
-    info("Check whether PO Id is valid or not");
+    info("Check whether ST Id is valid or not");
     let objectId = mongoose.Types.ObjectId; // object id
-    let poReceivingDetails = req.body.poReceivingDetails;
+    let stiReceivingDetails = req.body.stiReceivingDetails;
     // mongoose valid id
-    if (objectId.isValid(poReceivingDetails.poId)) {
+    if (objectId.isValid(stiReceivingDetails.stiId)) {
       // check whether the sale Order id is unique or not
-      let poDetails = await poCtrl.get(poReceivingDetails.poId);
+      let stiDetails = await stiCtrl.get(stiReceivingDetails.stiId);
 
       // if email is unique
-      if (poDetails.success) {
+      if (stiDetails.success) {
         info("Valid SaleOrder");
-        req.body.poDetails = poDetails.data[0];
+        req.body.stiDetails = stiDetails.data[0];
 
         next();
       } else {
-        error("INVALID PurchaseOrder!");
+        error("INVALID StockTransfer!");
         return Response.errors(
           req,
           res,
           StatusCodes.HTTP_CONFLICT,
-          MessageTypes.purchaseOrder
-            .purchaseOrderIdInvalidEitherDeletedOrDeactivated
+          MessageTypes.stockTransferIn.stiIdInvalidEitherDeletedOrDeactivated
         );
       }
     } else {
-      error("The PurchaseOrder ID is Invalid !");
+      error("The StockTransfer ID is Invalid !");
       return Response.errors(
         req,
         res,
         StatusCodes.HTTP_CONFLICT,
-        MessageTypes.purchaseOrder.invalidPurchaseOrderId
+        MessageTypes.stockTransferIn.invalidStockTransferId
       );
     }
 
