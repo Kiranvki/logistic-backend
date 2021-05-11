@@ -2268,10 +2268,6 @@ class pickerboySalesOrderMappingController extends BaseController {
       // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
-
-
-
-
 }
 
 

@@ -22,7 +22,7 @@ const {
   isValidSalesOrder,  // check is valid sales order id 
   isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
   checkWhetherItsAValidPickerUpdate, //check whether its a valid picker profile update
-
+  isValidPickingDate,
   checkIsInPickingState
 } = require('../../../hooks/app');
 
@@ -100,6 +100,7 @@ function userRoutes() {
       [joiStartPickSalesOrder], // joi validation
       verifyAppToken,  // verify app token
       isValidSalesOrder, //check whether the valid salesOrder Id
+      isValidPickingDate, //is valid picking date
       isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
       ctrl.pickingState // get controller 
     );

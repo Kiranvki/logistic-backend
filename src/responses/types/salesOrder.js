@@ -8,6 +8,7 @@ module.exports = {
     salesOrderDetailsFetched: 'SalesOrder Details Fetched Successfully !.',
     salesOrderDetailsNotFetched: 'SalesOrder Details not Fetched !.',
     salesOrderIdInvalidEitherDeletedOrDeactivated: 'sales Order Id is either deleted or deactivated !',
+    invalidPickingDate: 'Picking is not allowed for the sales Order.Please check the delivery date !',
     invalidSalesOrderId: 'The Sales Order id is Invalid !',
     invalidPickerBoySalesOrderId: 'The Picker Boy Sales Order id is Invalid !',
     salesOrderNotAddedInPackingStage: 'Unable to add Sales Order in packing step !',

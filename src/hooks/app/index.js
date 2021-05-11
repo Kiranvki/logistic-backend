@@ -53,5 +53,6 @@ module.exports = {
   getPODetails:require('./getPODetails'),
   storeGRNDetailsIntoDB:require('./storeGRNDetailsIntoDB'),
   generateGRN:require('./generateGRN'),
+  isValidPickingDate:require('./isValidPickingDate')
 
 }
