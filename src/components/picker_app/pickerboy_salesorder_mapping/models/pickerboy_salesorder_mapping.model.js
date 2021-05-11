@@ -189,7 +189,7 @@ static async updateDeliveryStatus(pickerBoyOrderMappingId,delivery_no,remarks){
 static async getOrderByPickerBoyId (pickerBoyOrderMappingId){
   let isExist = await this.count({ '_id': pickerBoyOrderMappingId });
   if(isExist){
-    let orderPickerBoyMappingData = await this.find({'_id':pickerBoyOrderMappingId}).lean().populate('salesOrderId');
+    let orderPickerBoyMappingData = await this.find({'_id':pickerBoyOrderMappingId,'isDeleted': 0,'invoiceDetail.isInvoice':false}).lean().populate('salesOrderId');
    
     return orderPickerBoyMappingData;
   }

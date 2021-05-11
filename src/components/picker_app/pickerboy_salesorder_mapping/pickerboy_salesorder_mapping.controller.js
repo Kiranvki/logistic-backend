@@ -2,10 +2,10 @@
 const SalesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
 const PickerBoyCtrl = require('../../employee/picker_boy/picker_boy.controller');
 const AttendanceCtrl = require('../onBoard/app_picker_user_attendance/app_picker_user_attendance.controller');
-const salesOrderModel= require('../../sales_order/sales_order/models/sales_order.model')
+const salesOrderModel = require('../../sales_order/sales_order/models/sales_order.model')
 const salesOrderInvMappingModel = require('../../MyTrip/assign_trip/model/salesOrder.model');
 const salesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
-const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model');
+const spotSalesModel = require('../../MyTrip/assign_trip/model/spotsales.model');
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const invMasterCtrl = require('../invoice_master/invoice_master.controller');
 const BaseController = require('../../baseController');
@@ -13,6 +13,7 @@ const Model = require('./models/pickerboy_salesorder_mapping.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const moment = require('moment');
+var { Parser } = require('json2csv')
 const {
   error,
   info
@@ -122,15 +123,15 @@ class pickerboySalesOrderMappingController extends BaseController {
     }
   }
 
-// get Invoice
+  // get Invoice
 
-getInvoiceDocumentDetail = async (req,res)=>{
-      // get the sale Order Details
-      try{
+  getInvoiceDocumentDetail = async (req, res) => {
+    // get the sale Order Details
+    try {
       let id = req.params.invId
-      console.log('id',id)
-      let dataObj  = await invMasterCtrl.getDetails(id);
-      let saleOrderDetails = {'type':req.params.type};
+      console.log('id', id)
+      let dataObj = await invMasterCtrl.getDetails(id);
+      let saleOrderDetails = { 'type': req.params.type };
 
       // check if inserted 
       if (dataObj && !_.isEmpty(dataObj)) return this.success(req, res, this.status.HTTP_OK, dataObj, this.messageTypes.salesOrderDetailsFetched);
@@ -143,7 +144,7 @@ getInvoiceDocumentDetail = async (req,res)=>{
     }
   }
 
-  
+
 
 
 
@@ -237,11 +238,11 @@ getInvoiceDocumentDetail = async (req,res)=>{
                 'customerType': 1,
                 'req_del_date': 1,
                 'customerId': 1,
-                'sales_order_no':1,
-                'ship_to_party':1,
-                'sold_to_party':1,
-                'plant':1,
-                'item':1
+                'sales_order_no': 1,
+                'ship_to_party': 1,
+                'sold_to_party': 1,
+                'plant': 1,
+                'item': 1
               }
             }
           ],
@@ -297,7 +298,7 @@ getInvoiceDocumentDetail = async (req,res)=>{
 
 
 
-// pending logic clarification required
+  // pending logic clarification required
 
   // get to do sales order details
   getToDoSalesOrder = async (req, res) => {
@@ -378,29 +379,29 @@ getInvoiceDocumentDetail = async (req,res)=>{
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
-// pending for spot transfer asset transfer
+  // pending for spot transfer asset transfer
 
-getOrderDetails = async (req,res,next)=>{
+  getOrderDetails = async (req, res, next) => {
     let Model;
     info('Getting the Order History!!!');
-      let page = req.query.page || 1,
-        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        orderId = req.params.orderId,
-        searchKey =  '', //req.query.search ||
-        sortBy = req.query.sortBy || 'createdAt',
-        skip = parseInt(page - 1) * pageSize,
-        locationId = 0, // locationId req.user.locationId || 
-        cityId =  'N/A', // cityId req.user.cityId ||
-        searchDate = req.body.searchDate || '',
-         orderData = {}
+    let page = req.query.page || 1,
+      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+      orderId = req.params.orderId,
+      searchKey = '', //req.query.search ||
+      sortBy = req.query.sortBy || 'createdAt',
+      skip = parseInt(page - 1) * pageSize,
+      locationId = 0, // locationId req.user.locationId || 
+      cityId = 'N/A', // cityId req.user.cityId ||
+      searchDate = req.body.searchDate || '',
+      orderData = {}
     try {
       info('SalesOrder GET DETAILS !');
       console.log(req.params.type)
-      switch(req.params.type){
+      switch (req.params.type) {
         case 'salesorders':
-          Model= salesOrderInvMappingModel;
-          orderData = await salesOrderInvMappingModel.findOne({'salesOrderId':mongoose.Types.ObjectId(orderId)}).populate('salesOrderId').lean().then((res) => {
-          
+          Model = salesOrderInvMappingModel;
+          orderData = await salesOrderInvMappingModel.findOne({ 'salesOrderId': mongoose.Types.ObjectId(orderId) }).populate('salesOrderId').lean().then((res) => {
+
             if (res && !_.isEmpty(res)) {
               return {
                 success: true,
@@ -419,24 +420,24 @@ getOrderDetails = async (req,res,next)=>{
               error: err
             }
           });
-          
+
           break;
         case 'spotsales':
-          Model= spotSalesModel;
-          
+          Model = spotSalesModel;
+
           break;
         case 'assettransfer':
-          mMdel= require('../../MyTrip/assign_trip/model/spotsales.model')
+          mMdel = require('../../MyTrip/assign_trip/model/spotsales.model')
           break;
         default:
-          Model=null
+          Model = null
           break;
-  
+
       }
       // get the sale Order Details
-      let saleOrderDetails = {'type':req.params.type};
-      
-    
+      let saleOrderDetails = { 'type': req.params.type };
+
+
       // check if inserted 
       if (orderData && !_.isEmpty(orderData)) return this.success(req, res, this.status.HTTP_OK, orderData, this.messageTypes.salesOrderDetailsFetched);
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
@@ -454,24 +455,24 @@ getOrderDetails = async (req,res,next)=>{
   getSalesOrder = async (req, res) => {
     let Model;
     info('Getting the Order Detail!!!');
-      let page = req.query.page || 1,
-        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        orderId = req.params.orderId,
-        searchKey =  '', //req.query.search ||
-        sortBy = req.query.sortBy || 'createdAt',
-        skip = parseInt(page - 1) * pageSize,
-        locationId = 0, // locationId req.user.locationId || 
-        cityId =  'N/A', // cityId req.user.cityId ||
-        searchDate = req.body.searchDate || '',
-         orderData = {}
+    let page = req.query.page || 1,
+      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+      orderId = req.params.orderId,
+      searchKey = '', //req.query.search ||
+      sortBy = req.query.sortBy || 'createdAt',
+      skip = parseInt(page - 1) * pageSize,
+      locationId = 0, // locationId req.user.locationId || 
+      cityId = 'N/A', // cityId req.user.cityId ||
+      searchDate = req.body.searchDate || '',
+      orderData = {}
     try {
       info('SalesOrder GET DETAILS !');
       // console.log(orderId)
-      switch(req.params.type){
+      switch (req.params.type) {
         case 'salesorders':
-         //check for release
-          orderData = await salesOrderModel.find({'_id':mongoose.Types.ObjectId(orderId)}).lean().then((res) => {
-          
+          //check for release
+          orderData = await salesOrderModel.find({ '_id': mongoose.Types.ObjectId(orderId) }).lean().then((res) => {
+
             if (res && !_.isEmpty(res)) {
               // console.log('Get details',res)
               return {
@@ -492,44 +493,44 @@ getOrderDetails = async (req,res,next)=>{
               error: err
             }
           });
-          
+
           break;
         case 'spotsales':
-          Model= spotSalesModel;
-          
+          Model = spotSalesModel;
+
           break;
         case 'assettransfer':
-          Model= require('../../MyTrip/assign_trip/model/spotsales.model')
+          Model = require('../../MyTrip/assign_trip/model/spotsales.model')
           break;
         default:
-          Model=null
+          Model = null
           break;
-  
+
       }
       // get the sale Order Details
-   console.log(orderData)
+      console.log(orderData)
       // orderData.forEach((items,i)=>{
 
       // })
-      
+
 
 
 
       // check if inserted 
-      if (orderData && !_.isEmpty(orderData)){
-        orderData['data'][0]['item'].forEach((item,j)=>{
-          console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
-          orderData['data'][0]['item'][j]['qty'] = (parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)).toString()
-        if((item.fulfillmentStatus?item.fulfillmentStatus:0)==2){
-          // console.log(todaysOrderData[i]['item'][j])
-          // todaysOrderData[i]['item'].splice(j, 1)
-          let status = (item.fulfillmentStatus?item.fulfillmentStatus:0)
-          _.remove(orderData['data'][0]['item'],{'fulfillmentStatus':2})
-      
-        }
+      if (orderData && !_.isEmpty(orderData)) {
+        orderData['data'][0]['item'].forEach((item, j) => {
+          console.log(parseInt(item.qty), parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
+          orderData['data'][0]['item'][j]['qty'] = (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0)).toString()
+          if ((item.fulfillmentStatus ? item.fulfillmentStatus : 0) == 2) {
+            // console.log(todaysOrderData[i]['item'][j])
+            // todaysOrderData[i]['item'].splice(j, 1)
+            let status = (item.fulfillmentStatus ? item.fulfillmentStatus : 0)
+            _.remove(orderData['data'][0]['item'], { 'fulfillmentStatus': 2 })
+
+          }
         })
 
-       return this.success(req, res, this.status.HTTP_OK, orderData, this.messageTypes.salesOrderDetailsFetched);
+        return this.success(req, res, this.status.HTTP_OK, orderData, this.messageTypes.salesOrderDetailsFetched);
       }
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.salesOrderNotFound);
 
@@ -594,13 +595,13 @@ getOrderDetails = async (req,res,next)=>{
       let saleOrderDetails = req.body.saleOrderDetails;
 
       let dataToInsert = {
-        'delivery_type':'N/A',
-        'shipping_point':saleOrderDetails.plant,
-        'delivery_no':'N/A',
-        'picking_date':moment(new Date()).format('YYYY-MM-DD'),
-        'delivery_date':saleOrderDetails.req_del_date||moment(new Date()).format('YYYY-MM-DD'),
-        'picking_time':moment(new Date()).format('hh:mm:ss'),
-        'sales_order_no':saleOrderDetails.sales_order_no,
+        'delivery_type': 'N/A',
+        'shipping_point': saleOrderDetails.plant,
+        'delivery_no': 'N/A',
+        'picking_date': moment(new Date()).format('YYYY-MM-DD'),
+        'delivery_date': saleOrderDetails.req_del_date || moment(new Date()).format('YYYY-MM-DD'),
+        'picking_time': moment(new Date()).format('hh:mm:ss'),
+        'sales_order_no': saleOrderDetails.sales_order_no,
         'salesOrderId': saleOrderDetails._id,
         'pickerBoyId': req.user._id,
         // 'pickerBoyId': mongoose.Types.ObjectId('60227a45c9e10d6cda8c182b'),
@@ -637,7 +638,7 @@ getOrderDetails = async (req,res,next)=>{
       let sortingArray = {};
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
-      
+
       // get the sale Order Details
       let salesOrderData = await Model.aggregate([{
         $match: {
@@ -670,7 +671,7 @@ getOrderDetails = async (req,res,next)=>{
                 'customerType': 1,
                 'orderItems': 1,
                 'deliveryDate': 1,
-              
+
               }
             }
           ],
@@ -688,9 +689,9 @@ getOrderDetails = async (req,res,next)=>{
           'pickerBoyId': 1,
           'customerType': 1,
           'salesOrderId': 1,
-          'isItemPicked':1,
-          'updatedAt':1,
-          'isStartedPicking':1,
+          'isItemPicked': 1,
+          'updatedAt': 1,
+          'isStartedPicking': 1,
           'salesOrdersDetails.deliveryDate': 1,
           'salesOrdersDetails.invoiceNo': 1,
           'salesOrdersDetails.onlineReferenceNo': 1,
@@ -707,7 +708,7 @@ getOrderDetails = async (req,res,next)=>{
 
       // check if inserted 
       if (salesOrderData && !_.isEmpty(salesOrderData)) {
-        return this.success(req, res, this.status.HTTP_OK,{
+        return this.success(req, res, this.status.HTTP_OK, {
           results: salesOrderData,
           pageMeta: {
             skip: parseInt(skip),
@@ -732,7 +733,7 @@ getOrderDetails = async (req,res,next)=>{
       info('View the Order Basket !');
 
       // initializing the value
-      let totalQuantityDemanded = 0, 
+      let totalQuantityDemanded = 0,
         totalQuantitySupplied = 0,
         totalAmount = 0,
         totalCgstTax = 0,
@@ -741,17 +742,17 @@ getOrderDetails = async (req,res,next)=>{
         totalNetValue = 0;
 
 
-        let page = req.query.page || 1,
+      let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 10; })
-       
+
       let skip = parseInt(page - 1) * pageSize;
-     
+
 
       // get the basket data
       let salesOrderData = await Model.aggregate([{
         $match: {
           '_id': mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId),
-          'isDeleted':0
+          'isDeleted': 0
         }
       },
       {
@@ -843,7 +844,7 @@ getOrderDetails = async (req,res,next)=>{
         //calculating the total quantity supplied and demanded
 
         await salesOrderData[0].availableItemDetails[0].itemDetail.map((v, i) => {
-      
+
           totalQuantitySupplied = v.pickedQuantity + totalQuantitySupplied
           totalQuantityDemanded = v.requireQuantity + totalQuantityDemanded
         });
@@ -903,7 +904,7 @@ getOrderDetails = async (req,res,next)=>{
         salesOrderData[0].totalSgstTax = totalSgstTax
         salesOrderData[0].totalDiscount = totalDiscount
         salesOrderData[0].totalNetValue = totalNetValue
-        return this.success(req, res, this.status.HTTP_OK,  {
+        return this.success(req, res, this.status.HTTP_OK, {
           results: salesOrderData,
           pageMeta: {
             skip: parseInt(skip),
@@ -1132,7 +1133,7 @@ getOrderDetails = async (req,res,next)=>{
       return Model.findOne({
         salesOrderId: mongoose.Types.ObjectId(saleOrderId),
         isDeleted: 0,
-        isItemPicked:true
+        isItemPicked: true
       }).lean().then((res) => {
         if (res && !_.isEmpty(res)) {
           return {
@@ -1253,11 +1254,11 @@ getOrderDetails = async (req,res,next)=>{
       info('Getting the Order History!!!');
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey =  '', //req.query.search ||
+        searchKey = '', //req.query.search ||
         sortBy = req.query.sortBy || 'createdAt',
         skip = parseInt(page - 1) * pageSize,
         locationId = 0, // locationId req.user.locationId || 
-        cityId =  'N/A', // cityId req.user.cityId ||
+        cityId = 'N/A', // cityId req.user.cityId ||
         searchDate = req.body.searchDate || '';
 
       let startOfTheDay = moment().set({
@@ -1273,7 +1274,7 @@ getOrderDetails = async (req,res,next)=>{
         s: 0,
         millisecond: 0
       }).toDate();
-  
+
 
       if (searchDate && !_.isEmpty(searchDate)) {
         // console.log('he');
@@ -1309,7 +1310,7 @@ getOrderDetails = async (req,res,next)=>{
       // console.log('salesQueryDetails', salesQueryDetails);
 
       // finding the  data from the db 
-      
+
       let hisoryData = await SalesOrderCtrl.getHistorySalesOrder(salesQueryDetails);
       // console.log(hisoryData)
       // success 
@@ -1333,34 +1334,34 @@ getOrderDetails = async (req,res,next)=>{
   }
 
   // getOrderHistoryByPickerBoyID
-  getOrderHistoryByPickerBoyID = async (req,res,next) => {
+  getOrderHistoryByPickerBoyID = async (req, res, next) => {
     try {
       info('Get History  Order details !');
-      
+
       // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = req.query
       // let sortingArray = {};
       // sortingArray[sortBy] = -1;
       // let skip = parseInt(page - 1) * pageSize;
-         // get the query params
-         let page = req.query.page || 1,
-         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-         searchKey = req.query.search || '',
-         sortBy = req.query.sortBy || 'req_del_date',
-         sortingArray = {};
-         sortingArray[sortBy] = -1;
-       let skip = parseInt(page - 1) * pageSize;
+      // get the query params
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.search || '',
+        sortBy = req.query.sortBy || 'req_del_date',
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
 
-// item count missing
+      // item count missing
       let searchObject = {
-        'pickerBoyId':mongoose.Types.ObjectId(req.user._id), //req.user._id,
-        'invoiceDetail.isInvoice':true
+        'pickerBoyId': mongoose.Types.ObjectId(req.user._id), //req.user._id,
+        'invoiceDetail.isInvoice': true
         // 'isPacked': 0,
         // 'fulfillmentStatus': 0,
         // 'locationId': parseInt(locationId),
         // 'cityId': cityId,
 
         // 'req_del_date': {
-        
+
         //   '$lte': startOfTheDay
         // }
       };
@@ -1381,11 +1382,11 @@ getOrderDetails = async (req,res,next)=>{
             }
           }]
         };
-        // console.log(...searchObject)
+      // console.log(...searchObject)
       let totalCount = await Model.aggregate([{
-        $match: 
+        $match:
           searchObject
-        
+
       },
       {
         $count: 'sum'
@@ -1416,14 +1417,14 @@ getOrderDetails = async (req,res,next)=>{
           'customerCode': 1,
           'customerName': 1,
           'customerType': 1,
-          'shippingId':1,
-          'cityId':1,
-          'plant':1,
-          'sales_order_no':1,
-          'status':1,
+          'shippingId': 1,
+          'cityId': 1,
+          'plant': 1,
+          'sales_order_no': 1,
+          'status': 1,
           'invoiceNo': 1,
-          'req_del_date':1,
-          'salesOrderId':1,
+          'req_del_date': 1,
+          'salesOrderId': 1,
           'fulfillmentStatus': 1,
           'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
         }
@@ -1435,7 +1436,7 @@ getOrderDetails = async (req,res,next)=>{
       //   data: salesOrderList,
       //   total: totalCount
       // };
-      if (salesOrderList.length>0) {
+      if (salesOrderList.length > 0) {
         return this.success(req, res, this.status.HTTP_OK, {
           results: salesOrderList,
           pageMeta: {
@@ -1446,7 +1447,7 @@ getOrderDetails = async (req,res,next)=>{
         }, this.messageTypes.todoOrderFetchedSuccessfully);
       }
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
-    
+
 
       // catch any runtime error 
     } catch (err) {
@@ -1546,355 +1547,383 @@ getOrderDetails = async (req,res,next)=>{
 
 
 
-  getTodaysOrder = async(req,res,next)=>{
+  //Fetch T and T-1,t-2,t-3 delivery SALESORDERS
+  getTodaysOrder = async (req, res, next) => {
     let orderModel
-try{
-  // console.log(req.user.plant)
-    info('Getting the todays Order !!!');
-    console.log(req.user)
-    let page = req.query.page || 1,
-      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-      searchKey =  '', //req.query.search ||
-      sortBy = req.query.sortBy || 'createdAt',
-      skip = parseInt(page - 1) * pageSize,
-      locationId = 0, // locationId req.user.locationId || 
-      cityId =  'N/A', // cityId req.user.cityId ||
-      searchDate = req.body.searchDate || '',
-      type = req.params.type,
-      plant = req.user.plant,
-      sortingArray = {};
+    try {
+
+      info('Getting the todays Order !!!');
+      console.log(req.user)
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+        searchDate = req.query.searchDate || '',
+        type = req.params.type,
+        plant = req.user.plant,
+        sortingArray = {};
       sortingArray[sortBy] = -1;
-      
 
-      
+
+
       // 2021-03-29
-    let startOfTheDay =  moment(new Date()).format('YYYY-MM-DD');
-    let yasterdayDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD')
-    
-    // moment().set({
-    //   h: 0,
-    //   m: 0,
-    //   s: 0,
-    //   millisecond: 0
-    // }).toDate();
+      let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+      let yasterdayDate = moment(new Date()).subtract(3, 'days').format('YYYY-MM-DD')
 
-    let endOfTheDay = moment(new Date()).format('YYYY-MM-DD');
-    //  moment().set({
-    //   h: 24,
-    //   m: 24,
-    //   s: 0,
-    //   millisecond: 0
-    // }).toDate();
+      // moment().set({
+      //   h: 0,
+      //   m: 0,
+      //   s: 0,
+      //   millisecond: 0
+      // }).toDate();
 
-    
-    if (searchDate && !_.isEmpty(searchDate)) {
-      
+      let endOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+      //  moment().set({
+      //   h: 24,
+      //   m: 24,
+      //   s: 0,
+      //   millisecond: 0
+      // }).toDate();
 
-      startOfTheDay = moment(searchDate).format('YYYY-MM-DD')
 
-      // getting the end of the day 
-      endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
-    }
-// console.log(startOfTheDay)
+      if (searchDate && !_.isEmpty(searchDate)) {
 
-    let pipeline = [{
-      $match:{
-      'req_del_date': {
-        '$gte':yasterdayDate,'$lte':startOfTheDay
-        // '$eq': startOfTheDay
+
+        startOfTheDay = moment(searchDate, "DD-MM-YYYY").format('YYYY-MM-DD')
+
+        // getting t-3
+        yasterdayDate = moment(searchDate, "DD-MM-YYYY").format('YYYY-MM-DD')
+
+      }
+
+
+
+
+      let pipeline = [{
+        $match: {
+
+          $and: [
+            {
+              'req_del_date': {
+                '$gte': yasterdayDate, '$lte': startOfTheDay
+
+              }
+            }, {
+              $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
+
+                'fulfillmentStatus': { $exists: false }
+              }]
+            },
+
+
+            { 'plant': { '$eq': plant.toString() } },
+            {
+              $or: [
+                { 'item': { $exists: true, $not: { $size: 0 } } },
+                { 'assets': { $exists: true, $not: { $size: 0 } } }
+              ]
+            }]
+
+
+        }
       },
-      $or: [{'fulfillmentStatus': { $ne: 2 }},{
-       
-       'fulfillmentStatus': { $exists: false }
-    }],
-    // 'item':{
-    // '$elemMatch': {
-    //   "fulfillmentStatus": {$ne:2}
-    // }
-    // },
-  //     "item": { 
-  //       "$elemMatch": {
-  //         $or: [ {'fulfillmentStatus': {  $ne: 2 }},{
-  //         'fulfillmentStatus': { $exists: false}},
-  //      ]
-  //     // 'fulfillmentStatus': { $exists: true, $ne: 1 },
-  //     // 'fulfillmentStatus': { $exists: false },
-  // }},
-   
-      'plant':{'$eq':plant.toString()},
-      'item': { $exists: true, $not: {$size: 0} }
-     
-    }
-    },
-    {$sort: {
-      'created_at':-1
-    }},{
-      $skip:(pageSize*(page-1))
-    },{
-      $limit:pageSize
-    }];
-
-    // creating a match object
-    if (searchKey !== '')
-    pipeline = [{
-      $match:{
-        'req_del_date': {
-      '$eq': startOfTheDay
-       
-        }
-      ,
-        '$or': [{
-          'createdBy': {
-            $regex: searchKey,
-            $options: 'is'
-          }
-        }, {
-          'pickerBoyId': {
-            $regex: searchKey,
-            $options: 'is'
-          }
-        }]
-      }
-      
-      },    {$sort: {
-        'created_at':-1
-      }},
       {
-        $skip:(1*(page-1))
-      },{
-        $limit:1
+        $sort: {
+          '_id': -1
+        }
+      }, {
+        $skip: (pageSize * (page - 1))
+      }, {
+        $limit: pageSize
       }];
-    // console.log('searchObject', pipeline);
 
+      // creating a match object
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
 
+            $and: [
+              {
+                'req_del_date': {
+                  '$gte': yasterdayDate, '$lte': startOfTheDay
 
-    // get list
+                }
+              }, {
+                $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
 
-
-
- 
-
-    switch(type){
-
-    case 'salesorders':
-      pipeline.push(
-        {
-          $lookup: {
-              from: 'pickerboyordermappings',
-              let: {
-                'orderId': '$_id'
+                  'fulfillmentStatus': { $exists: false }
+                }]
               },
-              pipeline: [
-                
 
-                {
-                  $match: {
-                    'invoiceDetail.isInvoice':false,
-                    'status': 1,
-                    'isDeleted': 0,
-                    '$expr': {
-                      '$eq': ['$salesOrderId', '$$orderId']
+              {
+                'plant': { '$eq': plant.toString() }
+              },
+              {
+                $or: [
+                  { 'item': { $exists: true, $not: { $size: 0 } } },
+                  { 'assets': { $exists: true, $not: { $size: 0 } } }
+                ]
+              }],
+
+
+
+
+            $or: [{
+              'sales_order_no': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'sold_to_party': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'sold_to_party_description': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'customer_type': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }]
+
+
+          }
+        },
+        {
+          $sort: {
+            '_id': -1
+          }
+        },
+        {
+          $skip: (pageSize * (page - 1))
+        }, {
+          $limit: pageSize
+        }
+        ];
+      // console.log('searchObject', pipeline);
+
+
+
+      // get list
+
+
+
+
+
+      switch (type) {
+
+        case 'salesorders':
+          pipeline.push(
+            {
+              $lookup: {
+                from: 'pickerboyordermappings',
+                let: {
+                  'orderId': '$_id'
+                },
+                pipeline: [
+
+
+                  {
+                    $match: {
+                      'invoiceDetail.isInvoice': false,
+
+                      $and: [{ 'isStartedPicking': true },
+                      { 'isItemPicked': true }],
+
+
+                      'status': 1,
+                      'isDeleted': 0,
+                      '$expr': {
+                        '$eq': ['$salesOrderId', '$$orderId']
+                      }
+                    }
+                  },
+                  {
+                    $sort: {
+                      'order_date': -1
+                    }
+                  },
+                  {
+                    $sort: {
+                      'createdAt': -1
                     }
                   }
-                },
-                {$sort: {
-                  'createdAt':-1
-                }}
-              ],
-                as:'pickingStatus'
-          }   
-        }
-      )
-      orderModel = salesOrderModel;
-      break;  
-    case 'spotsales':
-      orderModel = spotSalesModel;
-      
-      break;
-    case 'assettransfer':
-      pipeline.push(
-        {
-          $lookup: {
-              from: 'pickerboyordermappings',
-              let: {
-                'orderId': '$_id'
-              },
-              pipeline: [
-                
+                ],
+                as: 'pickingStatus'
+              }
+            }
+          )
+          orderModel = salesOrderModel;
+          break;
+        case 'spotsales':
+          orderModel = spotSalesModel;
 
-                {
-                  $match: {
-                    'invoiceDetail.isInvoice':false,
-                    'status': 1,
-                    'isDeleted': 0,
-                    '$expr': {
-                      '$eq': ['$assetTransferId', '$$orderId']
+          break;
+        case 'assettransfer':
+
+          pipeline.push(
+            {
+              $lookup: {
+                from: 'pickerboyordermappings',
+                let: {
+                  'orderId': '$_id'
+                },
+                pipeline: [
+
+
+                  {
+                    $match: {
+                      'invoiceDetail.isInvoice': false,
+                      'status': 1,
+                      'isDeleted': 0,
+                      '$expr': {
+                        '$eq': ['$assetTransferId', '$$orderId']
+                      }
+                    }
+                  },
+                  {
+                    $sort: {
+                      'createdAt': -1
                     }
                   }
-                },
-                {$sort: {
-                  'createdAt':-1
-                }}
-              ],
-                as:'pickingStatus'
-          }   
-        }
-      )
-      orderModel = require('../../MyTrip/assign_trip/model/assetTransfer.model')
-      break;
-    default:
-      orderModel = salesOrderModel
-      break;
+                ],
+                as: 'pickingStatus'
+              }
+            }
+          )
+          console.log(req.user.plant)
+          orderModel = require('../../MyTrip/assign_trip/model/assetTransfer.model')
+          break;
+        default:
+          orderModel = salesOrderModel
+          break;
 
-  }
-
-
-  let totalOrderCount = await orderModel.countDocuments({
-   
-    'req_del_date': {
-      '$gte': yasterdayDate, '$lte': startOfTheDay
-      // '$eq': startOfTheDay
-    },
-    $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
-
-      'fulfillmentStatus': { $exists: false }
-    }],
-
-
-    'plant': { '$eq': plant.toString() },
-    $or: [
-      { 'item': { $exists: true, $not: { $size: 0 } } },
-      { 'assets': { $exists: true, $not: { $size: 0 } } }
-    ]
-
-
-  
-})
-
-
-  let todaysOrderData = await orderModel.aggregate(pipeline)
-  // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
-
-  // console.log(todaysOrderData);
-// console.log(todaysOrderData)
-todaysOrderData.forEach((items,i)=>{
-  items['item'].forEach((item,j)=>{
-    // console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
-  todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)).toString()
-  if((item.fulfillmentStatus?item.fulfillmentStatus:0)==2){
-    // console.log(todaysOrderData[i]['item'][j])
-    // todaysOrderData[i]['item'].splice(j, 1)
-    let status = (item.fulfillmentStatus?item.fulfillmentStatus:0)
-    _.remove(todaysOrderData[i]['item'],{'fulfillmentStatus':2})
-
-  }
-  })
-})
-
-
-  if (todaysOrderData.length>0) {
-    return this.success(req, res, this.status.HTTP_OK, {
-      results: todaysOrderData,
-      pageMeta: {
-        skip: parseInt(skip),
-        pageSize: pageSize,
-        total: totalOrderCount  //total so count
       }
-    }, this.messageTypes.todoOrderFetchedSuccessfully);
-  }
-  else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
 
-  // catch any runtime error 
-} catch (err) {
-  error(err);
-  this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-}
-  }
+      let totalOrderCount = await orderModel.countDocuments({
 
-   updateItemPickStatus = async (id,status)=>{
+        'req_del_date': {
+          '$gte': yasterdayDate, '$lte': startOfTheDay
+          // '$eq': startOfTheDay
+        },
 
-    return await Model.updateIsItemPickedStatus(id,status);
+        $and: [{
+          $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
+
+            'fulfillmentStatus': { $exists: false }
+          }]
+        },
+
+
+        { 'plant': { '$eq': plant.toString() } },
+        {
+          $or: [
+            { 'item': { $exists: true, $not: { $size: 0 } } },
+            { 'assets': { $exists: true, $not: { $size: 0 } } }
+          ]
+        }]
 
 
 
-  }
+      })
 
-  getOrderItem = async (pickerboySalesOrderMappingId,item_no)=>{
-  return Model.aggregate([
-    {'$match':{'_id':mongoose.Types.ObjectId(pickerboySalesOrderMappingId)}},
-    {'$lookup':{
-      'from':'salesorders',
-      'let':{'so_id':'$salesOrderId'},
-    'pipeline': [
-      // {'$unwind': { path: '$item'} },
-        { '$match': {
-          
-          '$expr': { '$and': [ 
-            {$eq:['$_id','$$so_id']},
-          // {$eq:[ '$item.item_no',item_no]}
-         ] 
-        }
-        }}
-        
-        
-      ],
-    as:"salesOrders"
-}}
-]).allowDiskUse(true).then((res) => {
-  let plant = res[0]['salesOrders'][0]['plant'];
-  // console.log(res[0])
-  let item = res[0]['salesOrders'][0]['item'].filter(item => item['item_no'] ===item_no);
-  // console.log('item',_.isEmpty(item))
-  if (item && !_.isEmpty(item)) {
-    return {
-      success: true,
-      data: {'salesOrder':item[0],'plant':res[0]['salesOrders'][0]['plant']}
-  
-  
+      let todaysOrderData = await orderModel.aggregate(pipeline)
+      // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
+      console.log(todaysOrderData)
+
+      todaysOrderData.forEach((items, i) => {
+        items['item'].forEach((item, j) => {
+          // console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
+          todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0)).toString()
+          if ((item.fulfillmentStatus ? item.fulfillmentStatus : 0) == 2) {
+            // console.log(todaysOrderData[i]['item'][j])
+            // todaysOrderData[i]['item'].splice(j, 1)
+            let status = (item.fulfillmentStatus ? item.fulfillmentStatus : 0)
+            _.remove(todaysOrderData[i]['item'], { 'fulfillmentStatus': 2 })
+
+          }
+        })
+      })
+
+      // fix require 
+      _.remove(todaysOrderData, { 'fulfillmentStatus': 2 })
+      // todaysOrderData = todaysOrderData.filter(await function(sub) {
+      //   return sub['item'].length;
+      // });
+      if (todaysOrderData.length > 0) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: todaysOrderData,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalOrderCount  //total so
+          }
+        }, this.messageTypes.todoOrderFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
-  } else {
-    error('Error Searching item in PickerBoy Item SalesOrder Mapping DB!');
-    return {
-      success: false
-    }
-  }
-}).catch(err => {
-  error(err);
-  return {
-    success: false,
-    error: err
-  }
-});
-
-// catch any runtime error 
- 
-
-
-}
-// fix require
-
-  
-  getOrderDetail = async (pickerBoyOrderMappingId)=>{
-    return Model.getOrderByPickerBoyId (pickerBoyOrderMappingId);
   }
 
-  getOrderDetailByPickerBoyId = async (pickerBoyId)=>{
-    return await Model.findOne(
+  updateItemPickStatus = async (id, status) => {
+
+    return await Model.updateIsItemPickedStatus(id, status);
+
+
+
+  }
+
+  getOrderItem = async (pickerboySalesOrderMappingId, item_no) => {
+    return Model.aggregate([
+      { '$match': { '_id': mongoose.Types.ObjectId(pickerboySalesOrderMappingId) } },
       {
-        $and: [
-          { 'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId) },
-          { 'isStartedPicking': true }, { 'isItemPicked': true }, 
-          { 'invoiceDetail.isInvoice': false }
-        ]
-      }).lean().then((res) => {
-          
-      if (res && !_.isEmpty(res)) {
+        '$lookup': {
+          'from': 'salesorders',
+          'let': { 'so_id': '$salesOrderId' },
+          'pipeline': [
+            // {'$unwind': { path: '$item'} },
+            {
+              '$match': {
+
+                '$expr': {
+                  '$and': [
+                    { $eq: ['$_id', '$$so_id'] },
+                    // {$eq:[ '$item.item_no',item_no]}
+                  ]
+                }
+              }
+            }
+
+
+          ],
+          as: "salesOrders"
+        }
+      }
+    ]).allowDiskUse(true).then((res) => {
+      let plant = res[0]['salesOrders'][0]['plant'];
+      // console.log(res[0])
+      let item = res[0]['salesOrders'][0]['item'].filter(item => item['item_no'] === item_no);
+      // console.log('item',_.isEmpty(item))
+      if (item && !_.isEmpty(item)) {
         return {
           success: true,
-          data: res
+          data: { 'salesOrder': item[0], 'plant': res[0]['salesOrders'][0]['plant'] }
+
+
         }
       } else {
-        error('Error Searching Data in saleOrder DB!');
+        error('Error Searching item in PickerBoy Item SalesOrder Mapping DB!');
         return {
           success: false
         }
@@ -1906,16 +1935,342 @@ todaysOrderData.forEach((items,i)=>{
         error: err
       }
     });
-    
+
+    // catch any runtime error 
+
+
+
+  }
+  // fix require
+
+
+  getOrderDetail = async (pickerBoyOrderMappingId) => {
+    return Model.getOrderByPickerBoyId(pickerBoyOrderMappingId);
+  }
+
+  getOrderDetailByPickerBoyId = async (pickerBoyId) => {
+    return await Model.findOne(
+      {
+        $and: [
+          { 'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId) },
+          { 'isStartedPicking': true }, { 'isItemPicked': true },
+          { 'invoiceDetail.isInvoice': false }
+        ]
+      }).lean().then((res) => {
+
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in saleOrder DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
   }
 
 
-  updateFullFilmentStatus = (pickerBoyOrderMappingId,status)=>{
-    return Model.updateFullFilmentStatus (pickerBoyOrderMappingId,status);
+  updateFullFilmentStatus = (pickerBoyOrderMappingId, status) => {
+    return Model.updateFullFilmentStatus(pickerBoyOrderMappingId, status);
   }
 
 
-  
+
+
+  getInvoices = async (req, res, next) => {
+
+    try {
+
+      info('Getting the todays Order !!!');
+
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+
+        startDate = req.query.startDate || moment().subtract(100, 'days').set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        endDate = req.query.endDate || moment().set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        type = req.params.type,
+        // plant = req.body.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+      console.log(startDate, endDate)
+
+
+      if (startDate && !_.isEmpty(startDate)) {
+
+
+        startDate = moment(startDate, "DD-MM-YYYY").set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+
+      }
+
+      if (endDate && !_.isEmpty(endDate)) {
+
+
+        endDate = moment(endDate, "DD-MM-YYYY").set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+
+      }
+      info('Get Invoices !');
+
+      let pipeline = [{
+        $match: {
+          'createdAt': { $gte: startDate, $lte: endDate },
+          'isStartedPicking': false,
+          'isItemPicked': false,
+
+
+
+
+        }
+      },
+      {
+        $lookup: {
+          from: 'invoicemasters',
+          let: {
+            id: '$invoiceDetail.invoice.invoiceDbId'
+          },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $eq: ['$$id', '$_id']
+              }
+
+            }
+
+          }
+          ],
+          as: "invoice"
+
+        }
+      }
+        , {
+          $project: {
+
+            'state': 1,
+            'remarks': 1,
+            'shipping_point': 1,
+            'delivery_no': 1,
+            'delivery_date': 1,
+            'sales_order_no': 1,
+            'salesOrderId': 1,
+            'pickerBoyId': 1,
+            'createdBy': 1,
+            'pickingDate': 1,
+            'createdAt': 1,
+            'updatedAt': 1,
+
+            'invoice_request': 1,
+            'invoice_response': 1,
+            'picking_allocation_request': 1,
+            'picking_allocation_response': 1,
+            'isSapError': 1,
+            'cityId': { $first: '$invoice.cityId' },
+            'customerName': { $first: '$invoice.customerName' },
+            'companyDetails': { $first: '$invoice.companyDetails' },
+            'payerDetails': { $first: '$invoice.payerDetails' },
+            'shippingDetails': { $first: '$invoice.shippingDetails' },
+            'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+            'invoiceDate': { $first: '$invoice.invoiceDate' },
+            'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+            'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+            'totalAmount': { $first: '$invoice.totalAmount' },
+            'totalTax': { $first: '$invoice.totalTax' },
+            'totalDiscount': { $first: '$invoice.totalDiscount' },
+            'totalNetValue': { $first: '$invoice.totalNetValue' },
+            'itemSupplied': { $first: '$invoice.itemSupplied' }
+          }
+      },
+      {
+        $sort: {
+          'createdAt': -1
+        }
+      }
+        // status: 1,
+        // isDeleted: 0
+      ]
+
+
+
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
+            'createdAt': { $gte: startDate, $lte: endDate },
+            'isStartedPicking': false,
+            'isItemPicked': false,
+
+
+
+
+          }
+        },
+        {
+          $lookup: {
+            from: 'invoicemasters',
+            let: {
+              id: '$invoiceDetail.invoice.invoiceDbId'
+            },
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ['$$id', '$_id']
+                }
+
+              }
+
+            }
+            ],
+            as: "invoice"
+
+          }
+        }
+          , {
+            $project: {
+
+
+              'state': 1,
+              'remarks': 1,
+              'shipping_point': 1,
+              'delivery_no': 1,
+              'delivery_date': 1,
+              'sales_order_no': 1,
+              'salesOrderId': 1,
+              'pickerBoyId': 1,
+              'createdBy': 1,
+              'pickingDate': 1,
+              'createdAt': 1,
+              'updatedAt': 1,
+
+              'invoice_request': 1,
+              'invoice_response': 1,
+              'picking_allocation_request': 1,
+              'picking_allocation_response': 1,
+              'isSapError': 1,
+              'cityId': { $first: '$invoice.cityId' },
+              'customerName': { $first: '$invoice.customerName' },
+              'companyDetails': { $first: '$invoice.companyDetails' },
+              'payerDetails': { $first: '$invoice.payerDetails' },
+              'shippingDetails': { $first: '$invoice.shippingDetails' },
+              'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+              'invoiceDate': { $first: '$invoice.invoiceDate' },
+              'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+              'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+              'totalAmount': { $first: '$invoice.totalAmount' },
+              'totalTax': { $first: '$invoice.totalTax' },
+              'totalDiscount': { $first: '$invoice.totalDiscount' },
+              'totalNetValue': { $first: '$invoice.totalNetValue' },
+              'itemSupplied': { $first: '$invoice.itemSupplied' }
+            }
+        },
+        {
+          $sort: {
+            'createdAt': -1
+          }
+        }
+          // status: 1,
+          // isDeleted: 0
+        ]
+
+
+      // get details 
+      return await Model.aggregate(pipeline).then((result) => {
+        // console.log(result)
+        if (result && !_.isEmpty(result)) {
+          // return {
+          //   success: true,
+          //   data: res
+          // }
+
+          const json2csv = new Parser()
+
+          try {
+            // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+            const csv = json2csv.parse(result)
+            res.attachment(`report-${moment(startDate).format('DD:MM:YY')}-${moment(endDate).format('DD:MM:YY')}.csv`)
+            res.status(200).send(csv)
+          } catch (error) {
+            console.log('error:', error.message)
+            res.status(500).send(error.message)
+          }
+
+
+          // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+        } else {
+          error('Error Searching Data in invoice DB!');
+          // return {
+          //   success: false
+          // }
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.invoicesDetailsNotFound
+          );
+        }
+      }).catch(err => {
+        error(err);
+        // return {
+        //   success: false,
+        //   error: err
+        // }
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.invoicesDetailsNotFound
+        );
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+      // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+
 
 }
 

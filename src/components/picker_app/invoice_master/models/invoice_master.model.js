@@ -377,6 +377,10 @@ const invoiceMaster = new Schema({
   },
   'seq': {
     type: Number
+  },
+  'isInvoiceViewed': {
+    type: Number,
+    default: 0
   }
 
 }, {

@@ -48,6 +48,8 @@ function invoiceRoutes() {
       // verifyAppToken, // verify app user token 
       ctrl.getInvoiceDetails // post controller 
     );
+
+  
   };
 }
 

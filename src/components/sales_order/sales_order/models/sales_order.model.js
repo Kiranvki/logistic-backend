@@ -51,6 +51,10 @@ const salesOrder = new Schema({
   'orderRemarks': {
     type: 'String'
   },
+
+  'customer_type':{
+    type:String
+  },
   'Channel': {
     type: 'String'
   },

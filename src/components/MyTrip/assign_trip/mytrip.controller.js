@@ -1037,7 +1037,8 @@ class MyTrip extends BaseController {
                   }
               },{
                 $project: {
-                  'customerName': 1
+                  'customerName': 1,
+                  'isInvoiceViewed': 1
                 }
               }],
               as: 'invoiceDetails'

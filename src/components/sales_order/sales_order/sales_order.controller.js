@@ -1889,7 +1889,7 @@ invData['data'][0]['item'].forEach(async (item,i)=>{
   // console.log(item)
  
   
-
+  soItem[i].fulfillmentStatus = itemFullfilmentStatus;
    isUpdated = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId),'item.item_no':item.item_no
 
 }, {
@@ -1904,12 +1904,14 @@ $inc:{
 }
 });
   // console.log(isUpdated)
-}else if((sItem.fulfillmentStatus?sItem.fulfillmentStatus:0)<=1){
-  soFullfilmentStatus = 1
-
 }
 }
 )
+
+if((soItem[i].fulfillmentStatus?soItem[i].fulfillmentStatus:0)<=1){
+  soFullfilmentStatus = 1
+
+}
 
 })
 // console.log('soFullfilmentStatus',soFullfilmentStatus)
@@ -1935,6 +1937,103 @@ if(isUpdatedfulfillmentStatus){
           };
         }
    
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
+// update So status and qty if inv failed but picking succesfull
+  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityPickingStep = async (salesOrderId, soItem, pickedItem) => {
+    try {
+      info(`Updating SO Info ! ${salesOrderId}`);
+      console.log('pickedItem',pickedItem)
+      let isUpdated;
+      // suppliedQuantity 
+      // console.log(JSON.stringify(invData))
+     
+      // let tomorrow = moment(new Date()).add(1, 'days').format('YYYY-MM-DD');
+      // let deliverDate = delivery_date || tomorrow;
+      
+      // moment(new Date()).format('YYYY-MM-DD')
+
+      let soFullfilmentStatus = 2;
+      soItem.forEach(async (sItem, i) => {
+        pickedItem.forEach(async (item, i) => {
+          let itemFullfilmentStatus = 1
+          // item.qty=1
+          console.log(parseFloat(item.pickedQuantity),parseFloat(sItem.qty),parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))
+          console.log(sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0)))
+          if (sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+            if (item.pickedQuantity == (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+              itemFullfilmentStatus = 2
+            } else {
+              soFullfilmentStatus = 1
+
+            }
+            // console.log(item)
+
+            soItem[i].fulfillmentStatus = itemFullfilmentStatus;
+
+            isUpdated = await Model.findOneAndUpdate({
+              '_id': mongoose.Types.ObjectId(salesOrderId), 'item.item_no': item.item_no
+
+            }, {
+              $set: {
+                
+                'item.$.fulfillmentStatus': itemFullfilmentStatus,
+
+              },
+              $inc: {
+
+                'item.$.suppliedQty': parseFloat(item.pickedQuantity ? item.pickedQuantity : 0),
+              }
+            });
+       
+            // console.log(isUpdated)
+          }
+        }
+        
+        )
+       if ((soItem[i].fulfillmentStatus ? soItem[i].fulfillmentStatus : 0) <= 1) {
+          soFullfilmentStatus = 1
+
+        }
+
+      })
+      // console.log('soFullfilmentStatus',soFullfilmentStatus)
+      let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({
+        '_id': mongoose.Types.ObjectId(salesOrderId)
+      }, {
+        $set: {
+          // 'req_del_date':deliverDate,
+          'fulfillmentStatus': soFullfilmentStatus,
+
+        }
+
+      });
+      console.log(isUpdated, isUpdatedfulfillmentStatus)
+      if (isUpdatedfulfillmentStatus) {
+        info('Sales order Status updated! !');
+        return {
+          success: true,
+          data: {
+            'isUpdatedfulfillmentStatus':isUpdatedfulfillmentStatus,
+            'fulfillmentStatus':soFullfilmentStatus
+          }
+        };
+      } else {
+        error('Failed to update SALESORDER! ');
+        return {
+          success: false,
+        };
+      }
+
 
       // catch any runtime error 
     } catch (err) {
