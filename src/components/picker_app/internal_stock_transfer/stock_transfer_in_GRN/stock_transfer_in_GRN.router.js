@@ -14,7 +14,7 @@ const {
   isValidSTIRecIdForGrnGetDetails,
   getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate,
   getSTIDetails,
-  storeGRNDetailsIntoDB,
+  storeStiGRNDetailsIntoDB,
   generateStiGRN,
 } = require("../../../../hooks/app");
 
@@ -34,7 +34,7 @@ function stockTransferInRoutes() {
       getSTIDetails,
       getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate,
       generateStiGRN,
-      storeGRNDetailsIntoDB,
+      storeStiGRNDetailsIntoDB,
       ctrl.updateGRNDetails // stist controller
     );
 

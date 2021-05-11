@@ -10,12 +10,11 @@ const { error, info } = require("../../utils").logging;
 const stiGRNGenerateUrl =
   (process.env.sapBaseUrl || "") + (process.env.stiGRNGenerateUrl || "");
 
-var hitSapApiOfGRN = async (stiReceivingDetails, stiDetails, vendorInvoiceNo) => {
+var hitSapApiOfGRN = async (stiReceivingDetails, stiDetails) => {
   try {
     let body = createRequestObject(
       stiReceivingDetails,
-      stiDetails,
-      vendorInvoiceNo
+      stiDetails
     );
     let options = {
       method: "POST",
@@ -34,7 +33,7 @@ var hitSapApiOfGRN = async (stiReceivingDetails, stiDetails, vendorInvoiceNo) =>
     throw err;
   }
 };
-var createRequestObject = (stiReceivingDetails, stiDetails, vendorInvoiceNo) => {
+var createRequestObject = (stiReceivingDetails, stiDetails) => {
   let itemArray = [];
   let todaysDate = moment()
     .set({
@@ -54,15 +53,14 @@ var createRequestObject = (stiReceivingDetails, stiDetails, vendorInvoiceNo) => 
       po_number: stiDetails.po_number,
       po_item: item.po_item,
       plant: item.receiving_plant,
-      storage_location: item.storage_location,
     });
   });
   return {
     request: {
       posting_date: todaysDate,
       document_date: todaysDate,
-      referance_document_no: stiDetails.po_number,
-      bill_of_lading: vendorInvoiceNo,
+      referance_document_no: stiDetails.delivery_no,
+      bill_of_lading: stiDetails.delivery_n,
       header_txt: [],
       Item: itemArray,
     },
@@ -73,12 +71,10 @@ module.exports = async (req, res, next) => {
   try {
     let stiReceivingDetails = req.body.stiReceivingDetails;
     let stiDetails = req.body.stiDetails;
-    var vendorInvoiceNo = req.body.vendorInvoiceNumber;
     try {
       let sapGrnResponse = await hitSapApiOfGRN(
         stiReceivingDetails,
-        stiDetails,
-        vendorInvoiceNo
+        stiDetails
       );
       if (
         sapGrnResponse &&

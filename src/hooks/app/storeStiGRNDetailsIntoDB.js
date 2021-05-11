@@ -32,7 +32,6 @@ module.exports = async (req, res, next) => {
     let receivedItemsMaterialNumber = [];
     var dateToday = new Date();
     var stiDeliveryDate = stiDetails.delivery_date;
-    var vendorInvoiceNo = req.body.vendorInvoiceNumber;
     let fulfilmentStatus = req.body.fulfilmentStatus;
 
     //filtering basket items based on delivery_quantity as for 0 delivery_quantity GRN cant be generated
