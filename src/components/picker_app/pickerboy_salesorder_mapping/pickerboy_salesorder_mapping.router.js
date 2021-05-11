@@ -15,6 +15,7 @@ const {
   joiOngoingDelivery, // joi ongoing sales order details
   joiPendingDelivery, //  joi pending SO
   joiHistoryOfSO, // joi history of SO
+ 
 } = require('./pickerboy_salesorder_mapping.validators');
 
 // hooks 
@@ -75,7 +76,15 @@ function userRoutes() {
       ctrl.getTodaysOrder // get controller 
     );
 
+    // closed.route('/purchaseorder').get(
+    //   // verifyAppToken,   // verify app token
+    //   // checkIsInPickingState,
+    //   ctrl.getTodaysPurchaseOrder // get controller 
+    // );
 
+
+
+    
 
     // get the single sale order details
     closed.route('/:type/detail/:orderId').get(
@@ -164,6 +173,18 @@ function userRoutes() {
       ctrl.getOrderHistoryAndInvoices
       // getHistoryOfSalesOrder // history SO/invoice status
     );
+
+
+
+    open.route('/list/invoice-open').get(
+     
+      // verifyAppToken,   // verify app token
+      ctrl.getInvoices
+
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
+
+
   };
 }
 

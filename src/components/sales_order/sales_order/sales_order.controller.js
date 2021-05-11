@@ -22,6 +22,7 @@ const {
   hitTallyCustomerAccountsSync,
   hitCustomerPaymentInvoiceSync,
 } = require('../../../third_party_api/self');
+const { pickerBoyAlreadyInPickingState } = require('../../../responses/types/salesOrder');
 
 // We are using timeout because the Flow is synchronised and inorder to get the final report we need to wait for 5 secs 
 class timeout {
@@ -267,7 +268,7 @@ class areaSalesManagerController extends BaseController {
   getPartialSalesOrder = async (salesQueryDetails) => {
     try {
       info('Get Partial Sales Order details !');
-      let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
+      let { plant,sortBy, page, pageSize, locationId, cityId, searchKey, yasterdayDate, startOfTheDay} = salesQueryDetails
       let sortingArray = {};
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
@@ -276,12 +277,14 @@ class areaSalesManagerController extends BaseController {
       let searchObject = {
         // 'isPacked': 0,
         'fulfillmentStatus': 1,
-        'locationId': parseInt(locationId),
-        'cityId': cityId,
+        'plant': { '$eq': plant.toString() },
+        
+        // 'locationId': parseInt(locationId),
+        // 'cityId': cityId,
 
         'req_del_date': {
-          '$gte': startOfTheDay,
-          '$lte': endOfTheDay
+          '$gte': yasterdayDate,
+          '$lte': startOfTheDay
         }
       };
 
@@ -290,12 +293,17 @@ class areaSalesManagerController extends BaseController {
         searchObject = {
           ...searchObject,
           '$or': [{
-            'customerName': {
+            'sales_order_no': {
               $regex: searchKey,
               $options: 'is'
             }
           }, {
-            'customerCode': {
+            'ship_to_party': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          },{
+            'sold_to_party_description': {
               $regex: searchKey,
               $options: 'is'
             }
@@ -337,8 +345,9 @@ class areaSalesManagerController extends BaseController {
           'customerName': 1,
           'customerType': 1,
           'invoiceNo': 1,
+          'sales_order_no':1,
           'fulfillmentStatus': 1,
-          'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
+          'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
         }
       }
       ]).allowDiskUse(true)

@@ -116,9 +116,12 @@ const schemas = {
     // }).required(),
     page: Joi.number().integer().min(1).label('Page').required(),
     search: Joi.string().trim().lowercase().label('Search Query').optional().allow(''),
-  }),
+  })
 
 }
+
+
+
 // joi options
 const options = {
   // generic option
@@ -330,4 +333,6 @@ module.exports = {
       Response.joierrors(req, res, err);
     });
   },
+
+
 }

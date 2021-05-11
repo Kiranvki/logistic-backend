@@ -6,6 +6,7 @@ const salesOrderModel = require('../../sales_order/sales_order/models/sales_orde
 const salesOrderInvMappingModel = require('../../MyTrip/assign_trip/model/salesOrder.model');
 const salesOrderCtrl = require('../../sales_order/sales_order/sales_order.controller');
 const spotSalesModel = require('../../MyTrip/assign_trip/model/spotsales.model');
+
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const invMasterCtrl = require('../invoice_master/invoice_master.controller');
 const BaseController = require('../../baseController');
@@ -13,6 +14,7 @@ const Model = require('./models/pickerboy_salesorder_mapping.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
 const moment = require('moment');
+var { Parser } = require('json2csv')
 const {
   error,
   info
@@ -27,6 +29,8 @@ const {
   hitTallyCustomerAccountsSync,
   hitCustomerPaymentInvoiceSync,
 } = require('../../../third_party_api/self');
+const invoice = require('../../../responses/types/invoice');
+const { db } = require('../../sales_order/sales_order/models/sales_order.model');
 
 // We are using timeout because the Flow is synchronised and inorder to get the final report we need to wait for 5 secs 
 class timeout {
@@ -928,7 +932,8 @@ class pickerboySalesOrderMappingController extends BaseController {
       info('View the Ongoing Orders !');
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey = req.query.search || '',
+        searchKey = req.query.searchKey || '',
+        pickerBoyId = req.user._id,
         sortBy = req.query.sortBy || 'createdAt';
       let sortingArray = {};
       sortingArray[sortBy] = -1;
@@ -971,10 +976,12 @@ class pickerboySalesOrderMappingController extends BaseController {
 
       let searchObject = {
 
-        'pickingDate': {
-          '$gte': startOfTheDay,
-          '$lte': endOfTheDay
-        }
+
+        'isStartedPicking': true,
+        'isStartedPicking': true,
+        'invoiceDetail.isInvoice': false,
+        'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId)
+
       };
 
       // creating a match object
@@ -1052,7 +1059,7 @@ class pickerboySalesOrderMappingController extends BaseController {
                 'otherChargesTaxInclusive': 1,
                 'customerType': 1,
                 'salesOrderId': 1,
-                'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
+                'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
 
               }
             }
@@ -1065,13 +1072,13 @@ class pickerboySalesOrderMappingController extends BaseController {
       // success
       if (true) {
         return this.success(req, res, this.status.HTTP_OK, {
-          salesOrderList
-          // results: salesOrderData.data,
-          // pageMeta: {
-          //   skip: parseInt(skip),
-          //   pageSize: pageSize,
-          //   total: salesOrderData.total
-          // }
+
+          results: salesOrderList,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalCount
+          }
         }, this.messageTypes.toDoSalesOrderDetailsFetchedSuccessfully);
       }
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchToDoSalesOrderDetails);
@@ -1169,57 +1176,63 @@ class pickerboySalesOrderMappingController extends BaseController {
       info('Getting  the Pending Sales Order  Data !');
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey = req.query.search || '',
+        searchKey = req.query.searchKey || '',
+        plant = req.user.plant,
         sortBy = req.query.sortBy || 'createdAt',
         skip = parseInt(page - 1) * pageSize,
         locationId = req.user.locationId || 0, // locationId 
         cityId = req.user.cityId || 'N/A', // cityId 
         searchDate = req.body.searchDate || '';
 
-      let startOfTheDay = moment().set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0
-      }).toDate();
+      // let startOfTheDay = moment().set({
+      //   h: 0,
+      //   m: 0,
+      //   s: 0,
+      //   millisecond: 0
+      // }).toDate();
 
-      // getting the end of the day 
-      let endOfTheDay = moment().set({
-        h: 24,
-        m: 24,
-        s: 0,
-        millisecond: 0
-      }).toDate();
+      // // getting the end of the day 
+      // let endOfTheDay = moment().set({
+      //   h: 24,
+      //   m: 24,
+      //   s: 0,
+      //   millisecond: 0
+      // }).toDate();
+      let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+      let yasterdayDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD')
 
       if (searchDate && !_.isEmpty(searchDate)) {
         // console.log('he');
+        startOfTheDay = moment(searchDate).format('YYYY-MM-DD');
+        yasterdayDate = moment(searchDate).subtract(1, 'days').format('YYYY-MM-DD')
 
-        startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
-          h: 0,
-          m: 0,
-          s: 0,
-          millisecond: 0
-        }).toDate();
+        // startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+        //   h: 0,
+        //   m: 0,
+        //   s: 0,
+        //   millisecond: 0
+        // }).toDate();
 
-        // getting the end of the day 
-        endOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
-          h: 24,
-          m: 24,
-          s: 0,
-          millisecond: 0
-        }).toDate();
+        // // getting the end of the day 
+        // endOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
+        //   h: 24,
+        //   m: 24,
+        //   s: 0,
+        //   millisecond: 0
+        // }).toDate();
       }
 
       //creating the object with query details to pass , in order to get the sales order details
       let salesQueryDetails = {
+        plant,
         page,
         pageSize,
         searchKey,
         sortBy,
         locationId,
         cityId,
-        startOfTheDay,
-        endOfTheDay
+        yasterdayDate,
+        startOfTheDay
       }
       // console.log('salesQueryDetails', salesQueryDetails);
 
@@ -1344,7 +1357,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       // get the query params
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey = '',//req.query.search || '',
+        searchKey = req.query.searchKey || '',
         sortBy = req.query.sortBy || 'req_del_date',
         sortingArray = {};
       sortingArray[sortBy] = -1;
@@ -1370,7 +1383,7 @@ class pickerboySalesOrderMappingController extends BaseController {
         searchObject = {
           ...searchObject,
           '$or': [{
-            'customerName': {
+            'sales_order_no': {
               $regex: searchKey,
               $options: 'is'
             }
@@ -1457,7 +1470,7 @@ class pickerboySalesOrderMappingController extends BaseController {
           pageMeta: {
             skip: parseInt(skip),
             pageSize: pageSize,
-            total: salesOrderList.length  //item
+            total: totalCount  //item
           }
         }, this.messageTypes.historyFetchedSuccessfully);
       }
@@ -1570,12 +1583,12 @@ class pickerboySalesOrderMappingController extends BaseController {
       console.log(req.user)
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-        searchKey = '', //req.query.search ||
+        searchKey = req.query.searchKey || '',
         sortBy = req.query.sortBy || 'createdAt',
         skip = parseInt(page - 1) * pageSize,
         locationId = 0, // locationId req.user.locationId || 
         cityId = 'N/A', // cityId req.user.cityId ||
-        searchDate = req.body.searchDate || '',
+        searchDate = req.query.searchDate || '',
         type = req.params.type,
         plant = req.user.plant,
         sortingArray = {};
@@ -1583,9 +1596,10 @@ class pickerboySalesOrderMappingController extends BaseController {
 
 
 
+
       // 2021-03-29
       let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
-      let yasterdayDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD')
+      let yasterdayDate = moment(new Date()).subtract(3, 'days').format('YYYY-MM-DD')
 
       // moment().set({
       //   h: 0,
@@ -1606,38 +1620,45 @@ class pickerboySalesOrderMappingController extends BaseController {
       if (searchDate && !_.isEmpty(searchDate)) {
 
 
-        startOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+        startOfTheDay = moment(searchDate, "DD-MM-YYYY").format('YYYY-MM-DD')
 
         // getting the end of the day 
-        endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+        yasterdayDate = moment(searchDate, "DD-MM-YYYY").subtract(3, 'days').format('YYYY-MM-DD')
+        // endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
       }
+
+
+
 
       let pipeline = [{
         $match: {
-          'req_del_date': {
-            '$gte': yasterdayDate, '$lte': startOfTheDay
-
-          },
-          $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
-
-            'fulfillmentStatus': { $exists: false }
-          }],
-
-
-          'plant': { '$eq': plant.toString() },
-          $or: [
-            { 'item': { $exists: true, $not: { $size: 0 } } },
-            { 'assets': { $exists: true, $not: { $size: 0 } } }
-          ]
+         
+          $and:[
+            { 'req_del_date': {
+              '$gte': yasterdayDate, '$lte': startOfTheDay
+  
+            }},{
+            $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
+  
+              'fulfillmentStatus': { $exists: false }
+            }]},
+  
+  {
+            'plant': { '$eq': plant.toString() }},
+            {$or: [
+              { 'item': { $exists: true, $not: { $size: 0 } } },
+              { 'assets': { $exists: true, $not: { $size: 0 } } }
+            ]}]
 
 
         }
       },
       {
         $sort: {
-          'created_at': -1
+          '_id': -1
         }
-      }, {
+      },
+      {
         $skip: (pageSize * (page - 1))
       }, {
         $limit: pageSize
@@ -1647,34 +1668,63 @@ class pickerboySalesOrderMappingController extends BaseController {
       if (searchKey !== '')
         pipeline = [{
           $match: {
-            'req_del_date': {
-              '$eq': startOfTheDay
+       
+            $and:[
+              {     'req_del_date': {
+                '$gte': yasterdayDate, '$lte': startOfTheDay
+  
+              }},{
+            $or: [{ 'fulfillmentStatus': {$ne: 2 } }, {
 
-            }
-            ,
-            '$or': [{
-              'createdBy': {
+              'fulfillmentStatus': { $exists: false }
+            }]},
+
+            {
+            'plant': { '$eq': plant.toString() }},
+           { $or: [
+              { 'item': { $exists: true, $not: { $size: 0 } } },
+              { 'assets': { $exists: true, $not: { $size: 0 } } }
+            ]}],
+
+
+
+
+            $or: [{
+              'sales_order_no': {
                 $regex: searchKey,
                 $options: 'is'
               }
             }, {
-              'pickerBoyId': {
+              'sold_to_party': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'sold_to_party_description': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'customer_type': {
                 $regex: searchKey,
                 $options: 'is'
               }
             }]
-          }
 
-        }, {
-          $sort: {
-            'created_at': -1
+
           }
         },
         {
-          $skip: (1 * (page - 1))
+          $sort: {
+            '_id': -1
+          }
+        },
+        {
+          $skip: (pageSize * (page - 1))
         }, {
-          $limit: 1
-        }];
+          $limit: pageSize
+        }
+      ];
       // console.log('searchObject', pipeline);
 
 
@@ -1722,6 +1772,22 @@ class pickerboySalesOrderMappingController extends BaseController {
                 as: 'pickingStatus'
               }
             }
+            // {
+            //   $project: {
+            //     '_id': 1,
+            //     'sales_order_no': 1,
+            //     'req_del_date': 1,
+            //     'sold_to_party': 1,
+            //     'ship_to_party': 1,
+            //     'plant': 1,
+            //     'sold_to_party_description': 1,
+            //     'fulfillmentStatus': 1,
+            //     'pickingStatus': 1,
+            //     'item': 1
+
+            //   }
+            // }, 
+          
           )
           orderModel = salesOrderModel;
           break;
@@ -1771,30 +1837,34 @@ class pickerboySalesOrderMappingController extends BaseController {
       }
 
       let totalOrderCount = await orderModel.countDocuments({
-   
-          'req_del_date': {
-            '$gte': yasterdayDate, '$lte': startOfTheDay
-            // '$eq': startOfTheDay
-          },
-          $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
 
-            'fulfillmentStatus': { $exists: false }
-          }],
+        'req_del_date': {
+          '$gte': yasterdayDate, '$lte': startOfTheDay
+          // '$eq': startOfTheDay
+        },
+        $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
 
-
-          'plant': { '$eq': plant.toString() },
-          $or: [
-            { 'item': { $exists: true, $not: { $size: 0 } } },
-            { 'assets': { $exists: true, $not: { $size: 0 } } }
-          ]
+          'fulfillmentStatus': { $exists: false }
+        }],
 
 
-        
+        'plant': { '$eq': plant.toString() },
+        $or: [
+          { 'item': { $exists: true, $not: { $size: 0 } } },
+          { 'assets': { $exists: true, $not: { $size: 0 } } }
+        ]
+
+
+
       })
 
-      let todaysOrderData = await orderModel.aggregate(pipeline)
+      let todaysOrderData = await orderModel.aggregate( pipeline)
       // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
-      console.log(todaysOrderData)
+      // console.log(todaysOrderData)
+
+
+
+
 
       todaysOrderData.forEach((items, i) => {
         items['item'].forEach((item, j) => {
@@ -1810,7 +1880,12 @@ class pickerboySalesOrderMappingController extends BaseController {
         })
       })
 
+      // fix require 
+      _.remove(todaysOrderData, { 'fulfillmentStatus': 2 })
+  
 
+    
+    
       if (todaysOrderData.length > 0) {
         return this.success(req, res, this.status.HTTP_OK, {
           results: todaysOrderData,
@@ -2131,7 +2206,21 @@ class pickerboySalesOrderMappingController extends BaseController {
         }
       },
       { $unwind: '$invoice' },
-      { $unwind: '$salesOrderId' }
+      { $unwind: '$salesOrderId' },
+      {
+        $group: {
+          _id: '$sales_order_no', invoice: {
+            $push: {
+              'invoiceId': '$invoiceDetail.invoice.invoiceId',
+              'suppliedQty': { '$sum': '$invoice.itemSupplied.suppliedQty' }, 'item_no': '$invoice.itemSupplied.item_no',
+              'invoicedbid': '$invoiceDetail.invoice.invoiceDbId', 'date': '$invoice.createdAt'
+            }
+          },
+          'customerName': { '$first': '$invoice.customerName' },
+          'deliveryDate': { $first: '$delivery_date' },
+          'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
+        }
+      }
 
 
         , {
@@ -2150,17 +2239,19 @@ class pickerboySalesOrderMappingController extends BaseController {
           'shippingId': 1,
           'cityId': 1,
           'plant': 1,
+
           'sales_order_no': 1,
           'state': 1,
           'invoiceDetail.invoice.invoiceId': 1,
-          'req_del_date': 1,
+          'deliveryDate': 1,
           'salesOrderId': 1,
           'fulfillmentStatus': 1,
           'delivery_date': 1,
           'pickingDate': 1,
           'shipping_point': 1,
           'invoice': 1,
-          'numberOfItems': { $cond: { if: { $isArray: "$invoice.itemSupplied" }, then: { $size: "$invoice.itemSupplied" }, else: "NA" } }
+          'sold_to_party': 1
+          // 'numberOfItems': { $cond: { if: { $isArray: "$invoice.itemSupplied" }, then: { $size: "$invoice.itemSupplied" }, else: "NA" } }
         }
       }
 
@@ -2192,6 +2283,606 @@ class pickerboySalesOrderMappingController extends BaseController {
       }
     }
   }
+
+
+  getInvoiceDetailById = async (req,res,next) =>{
+    
+  }
+
+
+
+
+  getInvoice = async (req, res, next) => {
+    
+    try {
+
+      info('Getting the Invoice !!!');
+      
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+        searchDate = req.query.searchDate || '',
+        type = req.params.type,
+        plant = req.user.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+
+
+
+      // 2021-03-29
+      let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+      let yasterdayDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD')
+
+      // moment().set({
+      //   h: 0,
+      //   m: 0,
+      //   s: 0,
+      //   millisecond: 0
+      // }).toDate();
+
+      let endOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+      //  moment().set({
+      //   h: 24,
+      //   m: 24,
+      //   s: 0,
+      //   millisecond: 0
+      // }).toDate();
+
+
+      if (searchDate && !_.isEmpty(searchDate)) {
+
+
+        startOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+
+        // getting the end of the day 
+        yasterdayDate = moment(searchDate).subtract(1, 'days').format('YYYY-MM-DD')
+        // endOfTheDay = moment(searchDate).format('YYYY-MM-DD')
+      }
+
+
+
+
+      let pipeline = [{
+        $match: {
+          'req_del_date': {
+            '$gte': yasterdayDate, '$lte': startOfTheDay
+
+          },
+          $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
+
+            'fulfillmentStatus': { $exists: false }
+          }],
+
+
+          'plant': { '$eq': plant.toString() },
+          $or: [
+            { 'item': { $exists: true, $not: { $size: 0 } } },
+            { 'assets': { $exists: true, $not: { $size: 0 } } }
+          ]
+
+
+        }
+      },
+      {
+        $sort: {
+          'created_at': -1
+        }
+      }, {
+        $skip: (pageSize * (page - 1))
+      }, {
+        $limit: pageSize
+      }];
+
+      // creating a match object
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
+            'req_del_date': {
+              '$gte': yasterdayDate, '$lte': startOfTheDay
+
+            },
+            $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
+
+              'fulfillmentStatus': { $exists: false }
+            }],
+
+
+            'plant': { '$eq': plant.toString() },
+            $or: [
+              { 'item': { $exists: true, $not: { $size: 0 } } },
+              { 'assets': { $exists: true, $not: { $size: 0 } } }
+            ],
+
+
+
+
+            $or: [{
+              'sales_order_no': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'pickerBoyId': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'sold_to_party_description': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'customer_type': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }]
+
+
+          }
+        }, {
+          $sort: {
+            'created_at': -1
+          }
+        },
+        {
+          $skip: (pageSize * (page - 1))
+        }, {
+          $limit: pageSize
+        }];
+      // console.log('searchObject', pipeline);
+
+
+
+      // get list
+
+
+
+
+
+      switch (type) {
+
+        case 'salesorders':
+          pipeline.push(
+            {
+              $lookup: {
+                from: 'pickerboyordermappings',
+                let: {
+                  'orderId': '$_id'
+                },
+                pipeline: [
+
+
+                  {
+                    $match: {
+                      'invoiceDetail.isInvoice': false,
+
+                      $and: [{ 'isStartedPicking': true },
+                      { 'isItemPicked': true }],
+
+
+                      'status': 1,
+                      'isDeleted': 0,
+                      '$expr': {
+                        '$eq': ['$salesOrderId', '$$orderId']
+                      }
+                    }
+                  },
+                  {
+                    $sort: {
+                      'createdAt': -1
+                    }
+                  }
+                ],
+                as: 'pickingStatus'
+              }
+            },
+            {
+              $project: {
+                '_id': 1,
+                'sales_order_no': 1,
+                'req_del_date': 1,
+                'sold_to_party': 1,
+                'ship_to_party': 1,
+                'plant': 1,
+                'sold_to_party_description': 1,
+                'fulfillmentStatus': 1,
+                'pickingStatus': 1,
+                'item': 1
+
+              }
+            }
+          )
+          orderModel = salesOrderModel;
+          break;
+        case 'spotsales':
+          orderModel = spotSalesModel;
+
+          break;
+        case 'assettransfer':
+
+          pipeline.push(
+            {
+              $lookup: {
+                from: 'pickerboyordermappings',
+                let: {
+                  'orderId': '$_id'
+                },
+                pipeline: [
+
+
+                  {
+                    $match: {
+                      'invoiceDetail.isInvoice': false,
+                      'status': 1,
+                      'isDeleted': 0,
+                      '$expr': {
+                        '$eq': ['$assetTransferId', '$$orderId']
+                      }
+                    }
+                  },
+                  {
+                    $sort: {
+                      'createdAt': -1
+                    }
+                  }
+                ],
+                as: 'pickingStatus'
+              }
+            }
+          )
+          console.log(req.user.plant)
+          orderModel = require('../../MyTrip/assign_trip/model/assetTransfer.model')
+          break;
+        default:
+          orderModel = salesOrderModel
+          break;
+
+      }
+
+      let totalOrderCount = await orderModel.countDocuments({
+
+        'req_del_date': {
+          '$gte': yasterdayDate, '$lte': startOfTheDay
+          // '$eq': startOfTheDay
+        },
+        $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
+
+          'fulfillmentStatus': { $exists: false }
+        }],
+
+
+        'plant': { '$eq': plant.toString() },
+        $or: [
+          { 'item': { $exists: true, $not: { $size: 0 } } },
+          { 'assets': { $exists: true, $not: { $size: 0 } } }
+        ]
+
+
+
+      })
+
+      let todaysOrderData = await orderModel.aggregate(pipeline)
+      // let todaysOrderData = await orderModel.find({'req_del_date':'2021-03-29'})
+      console.log(todaysOrderData)
+
+      todaysOrderData.forEach((items, i) => {
+        items['item'].forEach((item, j) => {
+          // console.log(parseInt(item.qty),parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
+          todaysOrderData[i]['item'][j]['qty'] = (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0)).toString()
+          if ((item.fulfillmentStatus ? item.fulfillmentStatus : 0) == 2) {
+            // console.log(todaysOrderData[i]['item'][j])
+            // todaysOrderData[i]['item'].splice(j, 1)
+            let status = (item.fulfillmentStatus ? item.fulfillmentStatus : 0)
+            _.remove(todaysOrderData[i]['item'], { 'fulfillmentStatus': 2 })
+
+          }
+        })
+      })
+
+
+      if (todaysOrderData.length > 0) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: todaysOrderData,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalOrderCount  //total so
+          }
+        }, this.messageTypes.todoOrderFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedPendingSalesOrder);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+
+
+  getInvoices = async (req,res,next) => {
+    
+    try {
+
+      info('Getting the todays Order !!!');
+      
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+        
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+        
+        startDate = req.query.startDate || moment().subtract(100, 'days').set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        endDate = req.query.endDate || moment().set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        type = req.params.type,
+        // plant = req.body.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+    console.log(startDate,endDate)
+  
+   
+      if (startDate && !_.isEmpty(startDate)) {
+
+
+        startDate = moment(startDate, "DD-MM-YYYY").set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+    
+      }
+
+      if (endDate && !_.isEmpty(endDate)) {
+
+
+        endDate = moment(endDate, "DD-MM-YYYY").set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+    
+      }
+      info('Get Invoices !');
+      
+      let pipeline= [{
+        $match:{
+          'createdAt':{$gte:startDate,$lte:endDate},
+          'isStartedPicking':false,
+          'isItemPicked':false,
+         
+        
+        
+      
+      }
+      },
+      {$lookup:{
+        from:'invoicemasters',
+        let:{
+          id:'$invoiceDetail.invoice.invoiceDbId'
+        },
+        pipeline:[{
+          $match:{
+            $expr: {
+            $eq:['$$id','$_id']
+            }
+         
+          }
+          
+        }
+      ],
+        as: "invoice"
+      
+      }
+      }
+      ,{$project:{
+        
+        'state': 1,
+        'remarks': 1,
+        'shipping_point':1,
+        'delivery_no': 1,
+        'delivery_date':1,
+        'sales_order_no':1,
+        'salesOrderId':1,
+        'pickerBoyId': 1,
+        'createdBy': 1,
+        'pickingDate': 1,
+        'createdAt': 1,
+        'updatedAt': 1,
+        
+        'invoice_request': 1,
+        'invoice_response': 1,
+        'picking_allocation_request':1,
+        'picking_allocation_response':1,
+        'isSapError': 1,
+        'cityId': { $first:'$invoice.cityId'},
+        'customerName': { $first:'$invoice.customerName'},
+        'companyDetails': { $first:'$invoice.companyDetails'},
+        'payerDetails': { $first:'$invoice.payerDetails'},
+        'shippingDetails': { $first:'$invoice.shippingDetails'},
+        'invoiceDetails': { $first:'$invoice.invoiceDetails'},
+        'invoiceDate':  { $first:'$invoice.invoiceDate'},
+        'totalQuantitySupplied': { $first:'$invoice.totalQuantitySupplied'},
+        'totalQuantityDemanded': { $first:'$invoice.totalQuantityDemanded'},
+        'totalAmount': { $first:'$invoice.totalAmount'},
+        'totalTax': { $first:'$invoice.totalTax'},
+        'totalDiscount': { $first:'$invoice.totalDiscount'},
+        'totalNetValue': { $first:'$invoice.totalNetValue'},
+        'itemSupplied': { $first:'$invoice.itemSupplied'}
+      }},
+      {
+        $sort:{
+          'createdAt':-1
+        }
+      }
+        // status: 1,
+        // isDeleted: 0
+      ]
+
+
+     
+      if (searchKey !== '')
+ pipeline= [{
+  $match:{
+    'createdAt':{$gte:startDate,$lte:endDate},
+    'isStartedPicking':false,
+    'isItemPicked':false,
+   
+  
+  
+
+}
+},
+{$lookup:{
+  from:'invoicemasters',
+  let:{
+    id:'$invoiceDetail.invoice.invoiceDbId'
+  },
+  pipeline:[{
+    $match:{
+      $expr: {
+      $eq:['$$id','$_id']
+      }
+   
+    }
+    
+  }
+],
+  as: "invoice"
+
+}
+}
+,{$project:{
+  
+  
+  'state': 1,
+  'remarks': 1,
+  'shipping_point':1,
+  'delivery_no': 1,
+  'delivery_date':1,
+  'sales_order_no':1,
+  'salesOrderId':1,
+  'pickerBoyId': 1,
+  'createdBy': 1,
+  'pickingDate': 1,
+  'createdAt': 1,
+  'updatedAt': 1,
+  
+  'invoice_request': 1,
+  'invoice_response': 1,
+  'picking_allocation_request':1,
+  'picking_allocation_response':1,
+  'isSapError': 1,
+  'cityId': { $first:'$invoice.cityId'},
+  'customerName': { $first:'$invoice.customerName'},
+  'companyDetails': { $first:'$invoice.companyDetails'},
+  'payerDetails': { $first:'$invoice.payerDetails'},
+  'shippingDetails': { $first:'$invoice.shippingDetails'},
+  'invoiceDetails': { $first:'$invoice.invoiceDetails'},
+  'invoiceDate':  { $first:'$invoice.invoiceDate'},
+  'totalQuantitySupplied': { $first:'$invoice.totalQuantitySupplied'},
+  'totalQuantityDemanded': { $first:'$invoice.totalQuantityDemanded'},
+  'totalAmount': { $first:'$invoice.totalAmount'},
+  'totalTax': { $first:'$invoice.totalTax'},
+  'totalDiscount': { $first:'$invoice.totalDiscount'},
+  'totalNetValue': { $first:'$invoice.totalNetValue'},
+  'itemSupplied': { $first:'$invoice.itemSupplied'}
+}},
+{
+  $sort:{
+    'createdAt':-1
+  }
+}
+  // status: 1,
+  // isDeleted: 0
+]
+
+
+      // get details 
+      return await Model.aggregate(pipeline).then((result) => {
+        // console.log(result)
+        if (result && !_.isEmpty(result)) {
+          // return {
+          //   success: true,
+          //   data: res
+          // }
+
+          const json2csv = new Parser()
+
+          try {
+            // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+              const csv = json2csv.parse(result)
+              res.attachment(`report-${moment(startDate).format('DD:MM:YY')}-${moment(endDate).format('DD:MM:YY')}.csv`)
+              res.status(200).send(csv)
+          } catch (error) {
+              console.log('error:', error.message)
+              res.status(500).send(error.message)
+          }
+       
+
+          // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+        } else {
+          error('Error Searching Data in invoice DB!');
+          // return {
+          //   success: false
+          // }
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.invoicesDetailsNotFound
+          );
+        }
+      }).catch(err => {
+        error(err);
+        // return {
+        //   success: false,
+        //   error: err
+        // }
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.invoicesDetailsNotFound
+        );
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+     return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+        // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
 
 
 

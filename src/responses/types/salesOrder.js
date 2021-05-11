@@ -38,12 +38,12 @@ module.exports = {
     pickerBoyAlreadyInPickingState:'Already in picking State',
     // pending sales order details
     pendingSalesOrderFetchedSuccessfully: 'Pending SalesOrder Details Fetched Successfully !',
-    todoOrderFetchedSuccessfully: 'Todo Order Details Fetched Successfully !',
+    todoOrderFetchedSuccessfully: 'Order Details Fetched Successfully !',
     pendingAllocationFetchedSuccessfully: 'Pending Allocation Fetched Successfully !',
     unableToFetchedPendingAllocation: 'Unable to fetch pending allocation !',
     historyFetchedSuccessfully: 'History Details Fetched Successfully !',
     unableToFetchedHistoryDetails: 'Unable to fetch History Details!',
-    unableToFetchedPendingSalesOrder: 'Unable to fetch Pending SalesOrder Details!',
+    unableToFetchedPendingSalesOrder: 'Pending Sales order Not Found!',
     
     //pickerboy salesorder mapping id or item code is invalid
     pickerBoySalesOrderIdOrItemCodeInvalidEitherDeletedOrDeactivated: 'Picker Boy Sales Order Id or Item Code is either deleted or deactivated !',
