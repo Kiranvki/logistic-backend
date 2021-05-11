@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
     // mongoose valid id
     if (objectId.isValid(stiReceivingDetails.stiId)) {
       // check whether the sale Order id is unique or not
-      let stiDetails = await stiCtrl.get(stiReceivingDetails.stiId);
+      let stiDetails = await stiCtrl.getDetailedSti(stiReceivingDetails.stiId);
 
       // if email is unique
       if (stiDetails.success) {

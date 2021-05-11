@@ -124,9 +124,9 @@ class stockTransferController extends BaseController {
         },
         {
           $lookup: {
-            from: "purchaseorderreceivingdetails",
+            from: "stocktransferinreceivingdetails",
             let: {
-              id: "$_id",
+              id: "$_id.sti_id",
               poRecStatus: "$receivingStatus",
             },
             pipeline: [
@@ -134,7 +134,7 @@ class stockTransferController extends BaseController {
                 $match: {
                   $expr: {
                     $and: [
-                      { $eq: ["$poId", "$$id"] },
+                      { $eq: ["$stiId", "$$id"] },
                       { $eq: ["$$poRecStatus", 4] },
                       { $eq: ["$isDeleted", 0] },
 
@@ -394,6 +394,29 @@ class stockTransferController extends BaseController {
         newValue: true,
         useFindAndModify: false,
       });
+      return {
+        success: true,
+        data: stiDetails,
+      };
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err,
+      };
+    }
+  };
+  getDetailedSti = async (stiId) => {
+    try {
+      var stiDetails = await Model.aggregate([
+        {
+          $match: {
+            isDeleted: 0, //to-do
+            status:1,
+            _id: mongoose.Types.ObjectId(stiId),
+          }
+        }
+      ]).allowDiskUse(true);
       return {
         success: true,
         data: stiDetails,
