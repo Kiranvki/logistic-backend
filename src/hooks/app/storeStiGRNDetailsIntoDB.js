@@ -35,13 +35,13 @@ module.exports = async (req, res, next) => {
     var vendorInvoiceNo = req.body.vendorInvoiceNumber;
     let fulfilmentStatus = req.body.fulfilmentStatus;
 
-    //filtering basket items based on quantity as for 0 quantity GRN cant be generated
+    //filtering basket items based on delivery_quantity as for 0 delivery_quantity GRN cant be generated
     for (let i = 0; i < stiReceivingDetails.item.length; i++) {
       let item = stiReceivingDetails.item[i];
       receivedItemsMaterialNumber.push(item.material);
 
       stiReceivingDetails.item[i].pending_qty =
-        item.quantity - (item.received_qty ? item.received_qty : 0);
+        item.delivery_quantity - (item.received_qty ? item.received_qty : 0);
     }
     req.body.receivedItemsMaterialNumber = receivedItemsMaterialNumber;
 

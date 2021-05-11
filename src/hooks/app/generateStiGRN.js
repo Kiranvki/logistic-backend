@@ -48,8 +48,8 @@ var createRequestObject = (stiReceivingDetails, stiDetails, vendorInvoiceNo) => 
     itemArray.push({
       material_no: item.material,
       movement_type: 101,
-      quantity: item.received_qty,
-      delivery_item: stiDetails.higher_level_item||stiDetails.delivery_item_no,
+      delivery_quantity: item.received_qty,
+      delivery_item: item.higher_level_item||item.delivery_item_no,
       devlivery_no:stiDetails.delivery_no,
       po_number: stiDetails.po_number,
       po_item: item.po_item,
