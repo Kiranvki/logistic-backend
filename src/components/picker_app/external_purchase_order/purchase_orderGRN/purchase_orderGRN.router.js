@@ -19,17 +19,17 @@ const {
   getPODetails,
   storeGRNDetailsIntoDB,
   generateGRN,
-} = require("../../../hooks/app");
+} = require("../../../../hooks/app");
 
 // auth
-const { verifyAppToken } = require("../../../hooks/app/Auth");
+const { verifyAppToken } = require("../../../../hooks/app/Auth");
 
 // exporting the user routes
 function purchaseOrderRoutes() {
   //open, closed
   return (open, closed) => {
     // generating invoice
-    closed.route("/purchaseOrder/generate-grn/:poReceivingId").post(
+    closed.route("/generate-grn/:poReceivingId").post(
       [joipoGenerateGRN], // joi validation
       verifyAppToken,
       grnAlreadyGenerated,
@@ -42,7 +42,7 @@ function purchaseOrderRoutes() {
     );
 
     // getting  invoice details
-    closed.route("/purchaseOrder/grn-details/:grnId").get(
+    closed.route("/grn-details/:grnId").get(
       [joigrnId], // joi validation
       verifyAppToken,
       isValidPogrnId,

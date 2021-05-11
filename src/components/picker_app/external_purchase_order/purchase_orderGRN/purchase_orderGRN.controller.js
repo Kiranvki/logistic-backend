@@ -2,15 +2,15 @@ let FULFILMENTSTATUS={
   partial:2,
   fulfilled:1
 }
-const BasicCtrl = require("../../basic_config/basic_config.controller");
-const BaseController = require("../../baseController");
+const BasicCtrl = require("../../../basic_config/basic_config.controller");
+const BaseController = require("../../../baseController");
 const Model = require("./models/purchase_orderGRN.model");
 const poReceivingCtrl = require("../purchase_order_receiving_details/purchase_order_receiving_details.controller");
 const poCtrl = require("../purchase_order/purchase_order.controller");
 
 const mongoose = require("mongoose");
 const _ = require("lodash");
-const { error, info } = require("../../../utils").logging;
+const { error, info } = require("../../../../utils").logging;
 const moment = require("moment");
 const { isArray } = require("lodash");
 // self apis

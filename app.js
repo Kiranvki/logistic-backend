@@ -27,6 +27,13 @@ require('./src/config/db');
 const onBoardPickerOpenRouter = express.Router(); // Open routes 
 const onBoardPickerApiRouter = express.Router(); // Protected routes
 
+// internal sti orderpicker boy
+const internalPOPickerOpenRouter = express.Router(); // Open routes 
+const internalPOPickerApiRouter = express.Router(); // Protected routes
+// external sti order picker boy
+const externalPOPickerOpenRouter = express.Router(); // Open routes 
+const externalPOPickerApiRouter = express.Router(); // Protected routes
+
 const deliveryExecutiveOpenRouter = express.Router(); // Open routes 
 const deliveryExecutiveApiRouter = express.Router(); // protected routes 
 
@@ -96,7 +103,24 @@ glob('./src/components/picker_app/onBoard/*', null, (err, items) => {
     );
   });
 });
-
+/* Fetch router files and apply them to our routers */
+glob('./src/components/picker_app/external_purchase_order/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      externalPOPickerOpenRouter,
+      externalPOPickerApiRouter,
+    );
+  });
+});
+/* Fetch router files and apply them to our routers */
+glob('./src/components/picker_app/internal_stock_transfer/*', null, (err, items) => {
+  items.forEach(component => {
+    if (require(component).routes) require(component).routes(
+      internalPOPickerOpenRouter,
+      internalPOPickerApiRouter,
+    );
+  });
+});
 /* Fetch router files and apply them to our routers */
 glob('./src/components/security_guard_app/onBoard/*', null, (err, items) => {
   items.forEach(component => {
@@ -133,8 +157,8 @@ glob('./src/components/delivery_app/*', null, (err, items) => {
 /* Fetch router files and apply them to our routers */
 glob('./src/components/picker_app/*', null, (err, items) => {
   items.forEach(component => {
-    if (component != './src/components/picker_app/onBoard')
-      if (require(component).routes) require(component).routes(
+    if (!(component == './src/components/picker_app/onBoard' || component == './src/components/picker_app/external_purchase_order'|| component == './src/components/picker_app/internal_stock_transfer'))
+if (require(component).routes) require(component).routes(
         appPickerBoyOpenRouter,
         appPickerBoyApiRouter,
       );
@@ -274,7 +298,12 @@ glob('./src/components/assests/*', null, (err, items) => {
 // Picker Boy Routes
 app.use('/v1/picker', onBoardPickerOpenRouter);
 app.use('/api/v1/picker', onBoardPickerApiRouter);
-
+// Picker Boy external_purchase_order Routes
+app.use('/v1/picker-app/purchaseOrder', externalPOPickerOpenRouter);
+app.use('/app/api/v1/picker-app/purchaseOrder', externalPOPickerApiRouter);
+// Picker Boy internal_purchase_order Routes
+app.use('/v1/picker-app/stock-transfer-in', internalPOPickerOpenRouter);
+app.use('/app/api/v1/picker-app/stock-transfer-in', internalPOPickerApiRouter);
 // Security Guard Routes
 app.use('/v1/security', onBoardSecurityOpenRouter);
 app.use('/api/v1/security', onBoardSecurityApiRouter);

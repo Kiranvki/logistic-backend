@@ -1,5 +1,5 @@
 // Controller
-const poReceivingController = require("../../components/picker_app/external_purchase_order/purchase_order_receiving_details/purchase_order_receiving_details.controller");
+const stiReceivingController = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_receiving_details/stock_transfer_in_receiving_details.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -14,27 +14,27 @@ module.exports = async (req, res, next) => {
   try {
     info("Check whether quantity entered has valid value");
     let objectId = mongoose.Types.ObjectId; // object id
-    let poReceivingId = req.body.poReceivingId; // get the sale order id
-    var material_no = req.params.material_no;
+    let stiReceivingId = req.params.stiReceivingId; // get the sale order id
+    var material = req.params.material;
     var received_qty = req.body.received_qty;
     var remarks = req.body.remarks;
 
     // mongoose valid id
-    if (objectId.isValid(material_no)) {
+    if (objectId.isValid(material)) {
       // check whether the sale Order id is already added or not
-      let poReceivingItemDetails = await poReceivingController.getReceivingItem(
-        poReceivingId,
-        material_no
+      let stiReceivingItemDetails = await stiReceivingController.getReceivingItem(
+        stiReceivingId,
+        material
       );
 
       // if sales order Id is not added
       if (
-        poReceivingItemDetails.success &&
-        poReceivingItemDetails.data &&
-        poReceivingItemDetails.data.length
+        stiReceivingItemDetails.success &&
+        stiReceivingItemDetails.data &&
+        stiReceivingItemDetails.data.length
       ) {
         if (
-          poReceivingItemDetails.data[0].item.quantity != received_qty &&
+          stiReceivingItemDetails.data[0].item.quantity != received_qty &&
           !remarks
         ) {
           info("Remarks required");
@@ -42,22 +42,22 @@ module.exports = async (req, res, next) => {
             req,
             res,
             StatusCodes.HTTP_CONFLICT,
-            MessageTypes.purchaseOrder.requiredRemark
+            MessageTypes.stockTransferIn.requiredRemark
           );
         }
-        if (poReceivingItemDetails.data[0].item.quantity < received_qty) {
+        if (stiReceivingItemDetails.data[0].item.quantity < received_qty) {
           info("Received quantity greter than required quantity");
           return Response.errors(
             req,
             res,
             StatusCodes.HTTP_CONFLICT,
-            MessageTypes.purchaseOrder.receivedQuantityGreaterThanQty
+            MessageTypes.stockTransferIn.receivedQuantityGreaterThanQty
           );
         }
-        if (poReceivingItemDetails.data[0].item.quantity == received_qty) {
+        if (stiReceivingItemDetails.data[0].item.quantity == received_qty) {
           req.body.remarks = "";
         }
-        req.body.poReceivingItemDetails = poReceivingItemDetails.data[0];
+        req.body.stiReceivingItemDetails = stiReceivingItemDetails.data[0];
         next();
       } else {
         info("Invalid item id");
@@ -65,7 +65,7 @@ module.exports = async (req, res, next) => {
           req,
           res,
           StatusCodes.HTTP_CONFLICT,
-          MessageTypes.purchaseOrder.invalidItemId
+          MessageTypes.stockTransferIn.invalidItemId
         );
       }
     } else {
@@ -74,7 +74,7 @@ module.exports = async (req, res, next) => {
         req,
         res,
         StatusCodes.HTTP_CONFLICT,
-        MessageTypes.purchaseOrder.receiverBoyIdInvalid
+        MessageTypes.stockTransferIn.receiverItemIdInvalid
       );
     }
 

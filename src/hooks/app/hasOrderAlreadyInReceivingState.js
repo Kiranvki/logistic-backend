@@ -1,5 +1,5 @@
 // Controller
-const poReceivingController = require("../../components/picker_app/purchase_order_receiving_details/purchase_order_receiving_details.controller");
+const poReceivingController = require("../../components/picker_app/external_purchase_order/purchase_order_receiving_details/purchase_order_receiving_details.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");

@@ -15,5 +15,6 @@ module.exports = {
   agencies: require('./agencies'), // agencies 
   vehicleModel: require('./vehicleModel'),
   purchaseOrder: require('./purchaseOrder'), // invoice
+  stockTransferIn: require('./stockTransferIn'), // invoice
 
 };

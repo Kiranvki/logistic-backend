@@ -1,5 +1,5 @@
 // Controller
-const poGrnController = require("../../components/picker_app/external_purchase_order/purchase_orderGRN/purchase_orderGRN.controller");
+const stiGrnController = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_GRN/stock_transfer_in_GRN.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -12,28 +12,28 @@ const { error, info } = require("../../utils").logging;
 // exporting the hooks
 module.exports = async (req, res, next) => {
   try {
-    info("Check whether the GRN already generated for PO");
+    info("Check whether the GRN already generated for STI");
     let objectId = mongoose.Types.ObjectId; // object id
-    let poReceivingId = req.params.poReceivingId; // get the sale order id
+    let stiReceivingId = req.params.stiReceivingId; // get the sale order id
 
     // mongoose valid id
-    if (objectId.isValid(poReceivingId)) {
+    if (objectId.isValid(stiReceivingId)) {
       // check whether the sale Order id is already added or not
-      let poGrnDetails = await poGrnController.get({
-        poReceivingId: poReceivingId,
+      let stiGrnDetails = await stiGrnController.get({
+        stiReceivingId: stiReceivingId,
       });
 
       // if sales order Id is not added
-      if (poGrnDetails.success && !poGrnDetails.recordNotFound) {
-        error("Purchase order GRN already generated");
+      if (stiGrnDetails.success && !stiGrnDetails.recordNotFound) {
+        error("Stock Transfer IN GRN already generated");
         return Response.errors(
           req,
           res,
           StatusCodes.HTTP_CONFLICT,
-          MessageTypes.purchaseOrder.grnAlreadyGenerated
+          MessageTypes.stockTransferIn.grnAlreadyGenerated
         );
       }
-      if (poGrnDetails.recordNotFound) {
+      if (stiGrnDetails.recordNotFound) {
         next();
       } else {
         info("Something went wrong");
@@ -41,7 +41,7 @@ module.exports = async (req, res, next) => {
           req,
           res,
           StatusCodes.HTTP_CONFLICT,
-          MessageTypes.purchaseOrder.invalidPurchaseOrderReceivingId
+          MessageTypes.stockTransferIn.invalidStockTransferReceivingId
         );
       }
     } else {
@@ -50,7 +50,7 @@ module.exports = async (req, res, next) => {
         req,
         res,
         StatusCodes.HTTP_CONFLICT,
-        MessageTypes.purchaseOrder.invalidPurchaseOrderReceivingId
+        MessageTypes.stockTransferIn.invalidStockTransferReceivingId
       );
     }
 
