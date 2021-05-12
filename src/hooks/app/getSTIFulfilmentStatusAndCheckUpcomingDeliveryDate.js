@@ -121,17 +121,17 @@ module.exports = async (req, res, next) => {
         );
       }
       if (
-        stiDetails.delivery_date_array &&
-        Array.isArray(stiDetails.delivery_date_array)
+        stiDetails.picking_date_array &&
+        Array.isArray(stiDetails.picking_date_array)
       ) {
-        stiDetails.delivery_date_array.push(upcoming_delivery_date);
+        stiDetails.picking_date_array.push(upcoming_delivery_date);
       } else {
-        stiDetails.delivery_date_array = [
-          stiDetails.delivery_date,
+        stiDetails.picking_date_array = [
+          stiDetails.picking_date,
           upcoming_delivery_date,
         ];
       }
-      stiDetails.delivery_date = upcoming_delivery_date;
+      stiDetails.picking_date = upcoming_delivery_date;
     }
     req.body.stiDetails = stiDetails;
     req.body.fulfilmentStatus = fulfilmentStatus;

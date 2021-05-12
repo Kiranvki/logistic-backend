@@ -17,13 +17,15 @@ const stockTransferInGRN = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "stocktransferinreceivingdetails",
     },
+    stiId: {
+      required: true,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "stocktransferin",
+    },
     sapGrnNo: {
       type: String,
     },
     grnNo: {
-      type: String,
-    },
-    document_date: {
       type: String,
     },
     status: {
@@ -55,6 +57,12 @@ const stockTransferInGRN = new Schema(
         type: String,
       },
     },
+    supply_plant: {
+      type: String,
+    },
+    receiving_plant: {
+      type: String,
+    },
     picking_date: {
       type: String,
     },
@@ -68,30 +76,6 @@ const stockTransferInGRN = new Schema(
     },
     timeStamp: {
       type: String,
-    },
-    locationId: {
-      type: Number,
-    },
-    grnNo: {
-      type: String,
-    },
-    stiVendorNumber: {
-      type: String,
-    },
-    stiVendorDate: {
-      type: String,
-    },
-    discount: {
-      type: Number,
-    },
-    totalTaxAmount: {
-      type: Number,
-    },
-    stiAmount: {
-      type: Number,
-    },
-    netTotal: {
-      type: Number,
     },
     generatedBy: {
       type: mongoose.Schema.Types.ObjectId,
