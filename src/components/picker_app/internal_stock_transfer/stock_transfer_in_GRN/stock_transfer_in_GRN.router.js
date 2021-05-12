@@ -39,7 +39,7 @@ function stockTransferInRoutes() {
     );
 
     // getting  invoice details
-    closed.route("/:stiId/receiving-details/:stiReceivingId/grn-details/:grnId").get(
+    closed.route("/:stiId/grn-details/:grnId").get(
       [joigrnId], // joi validation
       verifyAppToken,
       isValidSTIgrnId,
