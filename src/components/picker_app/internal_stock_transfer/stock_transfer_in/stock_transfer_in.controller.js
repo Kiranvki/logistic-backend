@@ -63,9 +63,9 @@ class stockTransferController extends BaseController {
         "item.higher_level_item": 1,
         "item.delivery_item_no": 1,
       };
-      if (req.query.stiNumber) {
+      if (req.query.po_number) {
         query.po_number = {
-          $regex: req.query.stiNumber,
+          $regex: req.query.po_number,
           $options: "i",
         };
       }
@@ -653,9 +653,9 @@ class stockTransferController extends BaseController {
         status: 1,
         isDeleted: 0,
       };
-      if (req.query.stiNumber) {
+      if (req.query.po_number) {
         query.po_number = {
-          $regex: req.query.stiNumber,
+          $regex: req.query.po_number,
           $options: "is",
         };
       }
@@ -903,10 +903,10 @@ class stockTransferController extends BaseController {
   insertPurchaseOrderData = async (sapRawData) => {
     try {
       if (sapRawData && sapRawData.length > 0) {
-        var stiNumberArrayFromSap = [];
+        var po_numberArrayFromSap = [];
         sapRawData = sapRawData.map((el) => {
           if (el) {
-            stiNumberArrayFromSap.push(el.po_number);
+            po_numberArrayFromSap.push(el.po_number);
             if (el.po_number) {
               el.po_number = el.po_number.toString();
               el.isDeleted = 0;
@@ -919,7 +919,7 @@ class stockTransferController extends BaseController {
         const stiDataFromDb = await Model.find(
           {
             po_number: {
-              $in: stiNumberArrayFromSap,
+              $in: po_numberArrayFromSap,
             },
           },
           {
@@ -928,13 +928,13 @@ class stockTransferController extends BaseController {
         );
 
         if (stiDataFromDb.length > 0) {
-          const stiNumberArrayFromdb = stiDataFromDb.map((el) => {
+          const po_numberArrayFromdb = stiDataFromDb.map((el) => {
             if (el) {
               return el.po_number;
             }
           });
           const finalSTIArray = sapRawData.filter((val) => {
-            return stiNumberArrayFromdb.indexOf(val.po_number) == -1;
+            return po_numberArrayFromdb.indexOf(val.po_number) == -1;
           });
 
           return await Model.insertMany(finalSTIArray);
