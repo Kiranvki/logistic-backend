@@ -153,7 +153,7 @@ class purchaseController extends BaseController {
         
       });
       poList = poList.filter((order)=>{
-        return order && order.item && order.item.length;
+        return order && order.itemCount && order.itemCount>0 ;
       })
       // success
       return this.success(
