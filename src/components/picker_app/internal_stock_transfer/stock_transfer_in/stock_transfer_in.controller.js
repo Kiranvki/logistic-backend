@@ -63,9 +63,9 @@ class stockTransferController extends BaseController {
         "item.higher_level_item": 1,
         "item.delivery_item_no": 1,
       };
-      if (req.query.po_number) {
+      if (req.query.poNumber) {
         query.po_number = {
-          $regex: req.query.po_number,
+          $regex: req.query.poNumber,
           $options: "i",
         };
       }
@@ -219,6 +219,9 @@ class stockTransferController extends BaseController {
         order.itemCount = count;
         delete order.item;
       });
+      stiList = stiList.filter((order)=>{
+        return order && order.itemCount && order.itemCount>0 ;
+      })
       // success
       return this.success(
         req,
@@ -653,9 +656,9 @@ class stockTransferController extends BaseController {
         status: 1,
         isDeleted: 0,
       };
-      if (req.query.po_number) {
+      if (req.query.poNumber) {
         query.po_number = {
-          $regex: req.query.po_number,
+          $regex: req.query.poNumber,
           $options: "is",
         };
       }
