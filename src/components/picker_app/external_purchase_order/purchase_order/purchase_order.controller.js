@@ -120,6 +120,7 @@ class purchaseController extends BaseController {
         },
         {
           $match: {
+            itemCount:{$gt:0},
             $or: [
               {
                 "poReceivingId.pickerBoyId": userId,
@@ -149,7 +150,11 @@ class purchaseController extends BaseController {
         });
         order.itemCount = count;
         delete order.item;
+        
       });
+      poList = poList.filter((order)=>{
+        return order && order.item && order.item.length;
+      })
       // success
       return this.success(
         req,
