@@ -46,8 +46,8 @@ var createRequestObject = (stiReceivingDetails, stiDetails) => {
   stiReceivingDetails.item.forEach((item) => {
     itemArray.push({
       material_no: item.material,
-      movement_type: 101,
-      delivery_quantity: item.received_qty,
+      movement_type: "101",
+      quantity: item.received_qty,
       delivery_item: item.higher_level_item||item.delivery_item_no,
       devlivery_no:stiDetails.delivery_no,
       po_number: stiDetails.po_number,
@@ -60,8 +60,8 @@ var createRequestObject = (stiReceivingDetails, stiDetails) => {
       posting_date: todaysDate,
       document_date: todaysDate,
       referance_document_no: stiDetails.delivery_no,
-      bill_of_lading: stiDetails.delivery_n,
-      header_txt: [],
+      bill_of_lading: stiDetails.delivery_no,
+      header_txt: "",
       Item: itemArray,
     },
   };
