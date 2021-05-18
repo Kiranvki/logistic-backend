@@ -65,6 +65,6 @@ module.exports = {
   storeStiGRNDetailsIntoDB:require('./storeStiGRNDetailsIntoDB'),
   getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate:require('./getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate'),
   generateStiGRN:require('./generateStiGRN'),
-
+  isValidPickingDate:require('./isValidPickingDate'),
 
 }
