@@ -518,116 +518,7 @@ class stockTransferController extends BaseController {
       };
     }
   };
-  getVendorInfo = async (supply_plant_city) => {
-    try {
-      let body = {
-        request: {
-          from_date: "",
-          to_date: "",
-          purchase_org: "",
-          supply_plant_city: supply_plant_city,
-        },
-      };
-      let options = {
-        method: "GET",
-        uri: process.env.sapBaseUrl + process.env.vendorDetails,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        json: true,
-        body: body,
-      };
-      console.log(options);
-
-      return await request(options);
-    } catch (err) {
-      console.log(err);
-      throw err;
-    }
-  };
-  getVendorDetails = async (req, res) => {
-    try {
-      info("Get Stock Transfer IN  details !");
-      var vendorDetails = [];
-      try {
-        vendorDetails = await this.getVendorInfo(req.params.vendor_number);
-        if (
-          vendorDetails &&
-          vendorDetails.response &&
-          vendorDetails.response.length
-        ) {
-          vendorDetails = vendorDetails.response[0];
-          let fullAddress = [];
-          if (vendorDetails.street) {
-            fullAddress.push(vendorDetails.street);
-          }
-          if (vendorDetails.street_3) {
-            fullAddress.push(vendorDetails.street_3);
-          }
-          if (vendorDetails.district) {
-            fullAddress.push(vendorDetails.district);
-          }
-          if (vendorDetails.city) {
-            fullAddress.push(vendorDetails.city);
-          }
-          if (vendorDetails.address_time_zone) {
-            fullAddress.push(vendorDetails.address_time_zone);
-          }
-          if (vendorDetails.city_postal_code) {
-            fullAddress.push(",");
-            fullAddress.push(vendorDetails.city_postal_code);
-          }
-          let details = {
-            supply_plant_city: vendorDetails.supply_plant_city,
-            name_of_organization: vendorDetails.name_1_of_organization,
-            street: vendorDetails.street,
-            city_postal_code: vendorDetails.city_postal_code,
-            city: vendorDetails.city,
-            country: vendorDetails.address_time_zone,
-            mobileNumber: vendorDetails.mobile_no,
-            email: vendorDetails.e_mail_address,
-            currency: vendorDetails.stock_transfer_in_currency,
-            street_3: vendorDetails.street_3,
-            district: vendorDetails.district,
-            fullAddress: fullAddress.join(" "),
-          };
-          // success
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            details,
-            this.messageTypes.stiListFetched
-          );
-        } else {
-          this.errors(
-            req,
-            res,
-            this.status.HTTP_INTERNAL_SERVER_ERROR,
-            this.messageTypes.vendorDetailsNotFound
-          );
-        }
-      } catch (err) {
-        console.log(err);
-        this.errors(
-          req,
-          res,
-          this.status.HTTP_INTERNAL_SERVER_ERROR,
-          this.messageTypes.errorInGettingVendorDetails
-        );
-      }
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
-    }
-  };
+  
   stiFilteredList = async (req, res) => {
     try {
       info("Get Stock Transfer IN  filtered list !");
@@ -647,6 +538,7 @@ class stockTransferController extends BaseController {
         delivery_no: 1,
         supply_plant_city: 1,
         supply_plant_name: 1,
+        supply_plant: 1,
         stiReceivingId: "$stiDetails",
         receivingStatus: 1,
         updatedAt: 1,
@@ -662,12 +554,7 @@ class stockTransferController extends BaseController {
           $options: "is",
         };
       }
-      if (req.query.date) {
-        query["picking_date"] = moment
-          .utc(new Date(req.query.date))
-          .utcOffset("+05:30")
-          .format("YYYY-MM-DD");
-      }
+      
       if (type == "history") {
         query.receivingStatus = 1;
         query["sapGrnNo.pickerBoyId"] = pickerBoyId;
@@ -675,11 +562,18 @@ class stockTransferController extends BaseController {
         sortingArray["updatedAt"] = -1;
         projectList.sapGrnNo = 1;
       } else if (type == "pending") {
+        if (req.query.date) {
+          query["picking_date"] = moment
+            .utc(new Date(req.query.date))
+            .utcOffset("+05:30")
+            .format("YYYY-MM-DD");
+        }
         query.receivingStatus = 2;
         query["sapGrnNo.pickerBoyId"] = pickerBoyId;
         projectList.item = 1;
         projectList.sapGrnNo = 1;
       } else if (type == "ongoing") {
+        
         query.receivingStatus = 4;
         projectList.item = 1;
         projectList.stiReceivingId = "$stiDetails";
@@ -694,6 +588,50 @@ class stockTransferController extends BaseController {
         var stiList = await Model.aggregate([
           {
             $match: query,
+          },
+          {
+            $group: {
+              _id: {
+                sti_id: "$_id",
+                higher_level_item: "$item.higher_level_item",
+                material: "$item.material",
+              },
+              deliveryQuantity: { $sum: "$item.delivery_quantity" },
+              receivedQuantity: { $sum: "$item.received_qty" },
+              pendingQuantity: { $sum: "$item.pending_qty" },
+              po_number: { $first: "$po_number" },
+              supply_plant: { $first: "$supply_plant" },
+              supply_plant_name: { $first: "$supply_plant_name" },
+              supply_plant_city: { $first: "$supply_plant_city" },
+              delivery_no: { $first: "$delivery_no" },
+              receivingStatus: { $first: "$receivingStatus" },
+              fulfilmentStatus: { $first: "$fulfilmentStatus" },
+              sapGrnNo:{$first:'$sapGrnNo'},
+              item: { $first: "$item" },
+            },
+          },
+          {
+            $addFields: {
+              "item.delivery_quantity": "$deliveryQuantity",
+              "item.received_qty": "$receivedQuantity",
+              "item.pending_qty": "$pendingQuantity",
+            },
+          },
+          {
+            $group: {
+              _id: {
+                sti_id: "$_id.sti_id",
+              },
+              po_number: { $first: "$po_number" },
+              supply_plant: { $first: "$supply_plant" },
+              supply_plant_name: { $first: "$supply_plant_name" },
+              supply_plant_city: { $first: "$supply_plant_city" },
+              delivery_no: { $first: "$delivery_no" },
+              receivingStatus: { $first: "$receivingStatus" },
+              fulfilmentStatus: { $first: "$fulfilmentStatus" },
+              sapGrnNo:{ $first:'$sapGrnNo'},
+              item: { $push: "$item" },
+            },
           },
           {
             $project: projectList,
@@ -717,10 +655,52 @@ class stockTransferController extends BaseController {
             $match: query,
           },
           {
+            $group: {
+              _id: {
+                sti_id: "$_id",
+                higher_level_item: "$item.higher_level_item",
+                material: "$item.material",
+              },
+              deliveryQuantity: { $sum: "$item.delivery_quantity" },
+              receivedQuantity: { $sum: "$item.received_qty" },
+              pendingQuantity: { $sum: "$item.pending_qty" },
+              po_number: { $first: "$po_number" },
+              supply_plant: { $first: "$supply_plant" },
+              supply_plant_name: { $first: "$supply_plant_name" },
+              supply_plant_city: { $first: "$supply_plant_city" },
+              delivery_no: { $first: "$delivery_no" },
+              receivingStatus: { $first: "$receivingStatus" },
+              fulfilmentStatus: { $first: "$fulfilmentStatus" },
+              item: { $first: "$item" },
+            },
+          },
+          {
+            $addFields: {
+              "item.delivery_quantity": "$deliveryQuantity",
+              "item.received_qty": "$receivedQuantity",
+              "item.pending_qty": "$pendingQuantity",
+            },
+          },
+          {
+            $group: {
+              _id: {
+                sti_id: "$_id.sti_id",
+              },
+              po_number: { $first: "$po_number" },
+              supply_plant: { $first: "$supply_plant" },
+              supply_plant_name: { $first: "$supply_plant_name" },
+              supply_plant_city: { $first: "$supply_plant_city" },
+              delivery_no: { $first: "$delivery_no" },
+              receivingStatus: { $first: "$receivingStatus" },
+              fulfilmentStatus: { $first: "$fulfilmentStatus" },
+              item: { $push: "$item" },
+            },
+          },
+          {
             $lookup: {
               from: "stocktransferinreceivingdetails",
               let: {
-                id: "$_id",
+                id: "$_id.sti_id",
                 stiRecStatus: "$receivingStatus",
               },
               pipeline: [
@@ -748,6 +728,7 @@ class stockTransferController extends BaseController {
                   $project: {
                     _id: 1,
                     pickerBoyId: 1,
+                    receivingDate:'$createdAt'
                   },
                 },
               ],
@@ -839,6 +820,7 @@ class stockTransferController extends BaseController {
       var projectList = {
         po_number: 1,
         delivery_no: 1,
+        supply_plant: 1,
         supply_plant_city: 1,
         supply_plant_name: 1,
         receivingStatus: 1,

@@ -5,7 +5,6 @@ const ctrl = require("./stock_transfer_in.controller");
 const {
   joiStiIdValidation,
   stiList,
-  joiVendorNoValidation,
   joiStockTransferInFilter,
 } = require("./stock_transfer_in.validators");
 
@@ -46,12 +45,7 @@ function stockTransferInRoutes() {
     //   // verifyAppToken, // verify app user token
     //   ctrl.startPickUP // stist controller
     // );
-    closed.route("/vendorDetails/:vendor_number").get(
-      [joiVendorNoValidation], // joi validation
-      // isInvoiceGenerated, // check whether the invoice is already generated
-      verifyAppToken, // verify app user token
-      ctrl.getVendorDetails // stist controller
-    );
+
     closed.route("/filteredList/:type").get(
       [joiStockTransferInFilter], // joi validation
       // isInvoiceGenerated, // check whether the invoice is already generated

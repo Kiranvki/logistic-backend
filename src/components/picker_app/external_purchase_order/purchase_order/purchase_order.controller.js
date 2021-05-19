@@ -550,6 +550,7 @@ class purchaseController extends BaseController {
                   $project: {
                     _id: 1,
                     pickerBoyId: 1,
+                    receivingDate:'$createdAt'
                   },
                 },
               ],
