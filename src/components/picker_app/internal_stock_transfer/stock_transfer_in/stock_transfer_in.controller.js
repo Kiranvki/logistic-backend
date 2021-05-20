@@ -171,15 +171,15 @@ class stockTransferController extends BaseController {
             delivery_no: 1,
             receivingStatus: 1,
             fulfilmentStatus: 1,
-            "item.delivery_quantity":1,
-            "item.material":1,
-            "item.material_description":1,
-            "item.uom":1,
-            "item.higher_level_item":1,
-            "item.po_item":1,
-            "item.delivery_item_no":1,
-            "item.received_qty":1,
-            "item.pending_qty":1,
+            "item.delivery_quantity": 1,
+            "item.material": 1,
+            "item.material_description": 1,
+            "item.uom": 1,
+            "item.higher_level_item": 1,
+            "item.po_item": 1,
+            "item.delivery_item_no": 1,
+            "item.received_qty": 1,
+            "item.pending_qty": 1,
             itemCount: { $size: "$item" },
             stiReceivingId: "$stiDetails",
           },
@@ -219,9 +219,9 @@ class stockTransferController extends BaseController {
         order.itemCount = count;
         delete order.item;
       });
-      stiList = stiList.filter((order)=>{
-        return order && order.itemCount && order.itemCount>0 ;
-      })
+      stiList = stiList.filter((order) => {
+        return order && order.itemCount && order.itemCount > 0;
+      });
       // success
       return this.success(
         req,
@@ -262,7 +262,6 @@ class stockTransferController extends BaseController {
             isDeleted: 0,
             _id: mongoose.Types.ObjectId(req.params.stiId),
             "item.delivery_quantity": { $gt: 0 },
-
           },
         },
         {
@@ -320,15 +319,15 @@ class stockTransferController extends BaseController {
             receivingStatus: 1,
             picking_date: 1,
             fulfilmentStatus: 1,
-            "item.delivery_quantity":1,
-            "item.material":1,
-            "item.material_description":1,
-            "item.uom":1,
-            "item.higher_level_item":1,
-            "item.po_item":1,
-            "item.delivery_item_no":1,
-            "item.received_qty":1,
-            "item.pending_qty":1,
+            "item.delivery_quantity": 1,
+            "item.material": 1,
+            "item.material_description": 1,
+            "item.uom": 1,
+            "item.higher_level_item": 1,
+            "item.po_item": 1,
+            "item.delivery_item_no": 1,
+            "item.received_qty": 1,
+            "item.pending_qty": 1,
           },
         },
       ]).allowDiskUse(true);
@@ -415,10 +414,10 @@ class stockTransferController extends BaseController {
         {
           $match: {
             isDeleted: 0, //to-do
-            status:1,
+            status: 1,
             _id: mongoose.Types.ObjectId(stiId),
-          }
-        }
+          },
+        },
       ]).allowDiskUse(true);
       return {
         success: true,
@@ -503,7 +502,7 @@ class stockTransferController extends BaseController {
             picking_date: 1,
             fulfilmentStatus: 1,
             item: 1,
-          }
+          },
         },
       ]).allowDiskUse(true);
       return {
@@ -518,283 +517,20 @@ class stockTransferController extends BaseController {
       };
     }
   };
-  
+
   stiFilteredList = async (req, res) => {
     try {
-      info("Get Stock Transfer IN  filtered list !");
-      let type = req.params.type;
-      let pickerBoyId = mongoose.Types.ObjectId(req.user._id);
-      var page = req.query.page || 1,
-        sortingArray = {},
-        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
-          if (res.success) return res.data;
-          else return 10;
-        });
-      let skip = parseInt(page - 1) * pageSize;
-      let todaysDate = moment().format("YYYY-MM-DD");
-      let todaysEndDate = moment().format("YYYY-MM-DD");
-      var projectList = {
-        po_number: 1,
-        delivery_no: 1,
-        supply_plant_city: 1,
-        supply_plant_name: 1,
-        supply_plant: 1,
-        stiReceivingId: "$stiDetails",
-        receivingStatus: 1,
-        updatedAt: 1,
-        picking_date: 1,
-      };
-      let query = {
-        status: 1,
-        isDeleted: 0,
-      };
-      if (req.query.poNumber) {
-        query.po_number = {
-          $regex: req.query.poNumber,
-          $options: "is",
-        };
-      }
-      
-      if (type == "history") {
-        query.receivingStatus = 1;
-        query["sapGrnNo.pickerBoyId"] = pickerBoyId;
-        projectList.itemCount = { $size: "$item" };
-        sortingArray["updatedAt"] = -1;
-        projectList.sapGrnNo = 1;
-      } else if (type == "pending") {
-        if (req.query.date) {
-          query["picking_date"] = moment
-            .utc(new Date(req.query.date))
-            .utcOffset("+05:30")
-            .format("YYYY-MM-DD");
-        }
-        query.receivingStatus = 2;
-        query["sapGrnNo.pickerBoyId"] = pickerBoyId;
-        projectList.item = 1;
-        projectList.sapGrnNo = 1;
-      } else if (type == "ongoing") {
-        
-        query.receivingStatus = 4;
-        projectList.item = 1;
-        projectList.stiReceivingId = "$stiDetails";
-      }
-      sortingArray["picking_date"] = -1;
-      sortingArray["po_number"] = -1;
-      // get the total STI
-      if (type == "pending" || type == "history") {
-        var totalSTI = await Model.countDocuments({
-          ...query,
-        });
-        var stiList = await Model.aggregate([
-          {
-            $match: query,
-          },
-          {
-            $group: {
-              _id: {
-                sti_id: "$_id",
-                higher_level_item: "$item.higher_level_item",
-                material: "$item.material",
-              },
-              deliveryQuantity: { $sum: "$item.delivery_quantity" },
-              receivedQuantity: { $sum: "$item.received_qty" },
-              pendingQuantity: { $sum: "$item.pending_qty" },
-              po_number: { $first: "$po_number" },
-              supply_plant: { $first: "$supply_plant" },
-              supply_plant_name: { $first: "$supply_plant_name" },
-              supply_plant_city: { $first: "$supply_plant_city" },
-              delivery_no: { $first: "$delivery_no" },
-              receivingStatus: { $first: "$receivingStatus" },
-              fulfilmentStatus: { $first: "$fulfilmentStatus" },
-              sapGrnNo:{$first:'$sapGrnNo'},
-              item: { $first: "$item" },
-            },
-          },
-          {
-            $addFields: {
-              "item.delivery_quantity": "$deliveryQuantity",
-              "item.received_qty": "$receivedQuantity",
-              "item.pending_qty": "$pendingQuantity",
-            },
-          },
-          {
-            $group: {
-              _id: {
-                sti_id: "$_id.sti_id",
-              },
-              po_number: { $first: "$po_number" },
-              supply_plant: { $first: "$supply_plant" },
-              supply_plant_name: { $first: "$supply_plant_name" },
-              supply_plant_city: { $first: "$supply_plant_city" },
-              delivery_no: { $first: "$delivery_no" },
-              receivingStatus: { $first: "$receivingStatus" },
-              fulfilmentStatus: { $first: "$fulfilmentStatus" },
-              sapGrnNo:{ $first:'$sapGrnNo'},
-              item: { $push: "$item" },
-            },
-          },
-          {
-            $project: projectList,
-          },
-          {
-            $sort: sortingArray,
-          },
-          {
-            $skip: skip,
-          },
-          {
-            $limit: pageSize,
-          },
-        ]).allowDiskUse(true);
-      } else {
-        var totalSTI = await Model.countDocuments({
-          ...query,
-        });
-        var stiList = await Model.aggregate([
-          {
-            $match: query,
-          },
-          {
-            $group: {
-              _id: {
-                sti_id: "$_id",
-                higher_level_item: "$item.higher_level_item",
-                material: "$item.material",
-              },
-              deliveryQuantity: { $sum: "$item.delivery_quantity" },
-              receivedQuantity: { $sum: "$item.received_qty" },
-              pendingQuantity: { $sum: "$item.pending_qty" },
-              po_number: { $first: "$po_number" },
-              supply_plant: { $first: "$supply_plant" },
-              supply_plant_name: { $first: "$supply_plant_name" },
-              supply_plant_city: { $first: "$supply_plant_city" },
-              delivery_no: { $first: "$delivery_no" },
-              receivingStatus: { $first: "$receivingStatus" },
-              fulfilmentStatus: { $first: "$fulfilmentStatus" },
-              item: { $first: "$item" },
-            },
-          },
-          {
-            $addFields: {
-              "item.delivery_quantity": "$deliveryQuantity",
-              "item.received_qty": "$receivedQuantity",
-              "item.pending_qty": "$pendingQuantity",
-            },
-          },
-          {
-            $group: {
-              _id: {
-                sti_id: "$_id.sti_id",
-              },
-              po_number: { $first: "$po_number" },
-              supply_plant: { $first: "$supply_plant" },
-              supply_plant_name: { $first: "$supply_plant_name" },
-              supply_plant_city: { $first: "$supply_plant_city" },
-              delivery_no: { $first: "$delivery_no" },
-              receivingStatus: { $first: "$receivingStatus" },
-              fulfilmentStatus: { $first: "$fulfilmentStatus" },
-              item: { $push: "$item" },
-            },
-          },
-          {
-            $lookup: {
-              from: "stocktransferinreceivingdetails",
-              let: {
-                id: "$_id.sti_id",
-                stiRecStatus: "$receivingStatus",
-              },
-              pipeline: [
-                {
-                  $match: {
-                    $expr: {
-                      $and: [
-                        { $eq: ["$stiId", "$$id"] },
-                        { $eq: ["$$stiRecStatus", 4] },
-                        { $eq: ["$isDeleted", 0] },
-                        {
-                          $eq: [
-                            "$pickerBoyId",
-                            mongoose.Types.ObjectId(req.user._id),
-                          ],
-                        },
-                        // { $gt: ["$item.delivery_quantity", "$item.received_qty"] },//not working need to check later //to-do
-                      ],
-                    },
-                  },
-                },
-
-                { $limit: 1 },
-                {
-                  $project: {
-                    _id: 1,
-                    pickerBoyId: 1,
-                    receivingDate:'$createdAt'
-                  },
-                },
-              ],
-              as: "stiDetails",
-            },
-          },
-          {
-            $unwind: {
-              path: "$stiDetails",
-            },
-          },
-          {
-            $project: projectList,
-          },
-          {
-            $limit: pageSize,
-          },
-        ]).allowDiskUse(true);
-      }
-      // if(type=='pending'){
-      //   if(stiList && stiList.length){
-      //     stiList.forEach((element)=>{
-      //       let itemCount=0
-      //       element.item.forEach((item)=>{
-      //         if(item.received_qty>0){
-      //           itemCount++;
-      //         }
-      //       })
-      //       element.itemCount=itemCount;
-      //       delete element.item;
-      //     })
-      //   }
-      // }
-      if (stiList && stiList.length) {
-        stiList.forEach((element) => {
-          if (type == "ongoing" || type == "pending") {
-            let itemCount = 0;
-            element.item.forEach((item) => {
-              if (
-                !item.received_qty ||
-                item.received_qty != item.delivery_quantity
-              ) {
-                itemCount++;
-              }
-            });
-            element.itemCount = itemCount;
-            delete element.item;
-          }
-
-          if (type == "pending" || type == "history") {
-            element.deliveredDate =
-              element.sapGrnNo[element.sapGrnNo.length - 1].date;
-          }
-          delete element.sapGrnNo;
-        });
-      }
+      var stiData = await this.getFilteredListBasedOnInput(req);
       return this.success(
         req,
         res,
         this.status.HTTP_OK,
         {
-          result: stiList,
+          result: stiData.list,
           pageMeta: {
             skip: parseInt(skip),
             pageSize: pageSize,
-            total: totalSTI,
+            total: stiData.total,
           },
         },
         this.messageTypes.stiListFetched
@@ -811,7 +547,275 @@ class stockTransferController extends BaseController {
       );
     }
   };
+  getFilteredListBasedOnInput = async (req) => {
+    info("Get Stock Transfer IN  filtered list !");
+    let type = req.params.type;
+    let pickerBoyId = mongoose.Types.ObjectId(req.user._id);
+    var page = req.query.page || 1,
+      sortingArray = {},
+      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
+        if (res.success) return res.data;
+        else return 10;
+      });
+    let skip = parseInt(page - 1) * pageSize;
+    var projectList = {
+      po_number: 1,
+      delivery_no: 1,
+      supply_plant_city: 1,
+      supply_plant_name: 1,
+      supply_plant: 1,
+      stiReceivingId: "$stiDetails",
+      receivingStatus: 1,
+      updatedAt: 1,
+      picking_date: 1,
+    };
+    let query = {
+      status: 1,
+      isDeleted: 0,
+    };
+    if (req.query.poNumber) {
+      query.po_number = {
+        $regex: req.query.poNumber,
+        $options: "is",
+      };
+    }
 
+    switch (type) {
+      case "history":
+        query.receivingStatus = 1;
+        query["sapGrnNo.pickerBoyId"] = pickerBoyId;
+        projectList.itemCount = { $size: "$item" };
+        sortingArray["updatedAt"] = -1;
+        projectList.sapGrnNo = 1;
+        break;
+      case "pending":
+        if (req.query.date) {
+          query["picking_date"] = moment
+            .utc(new Date(req.query.date))
+            .utcOffset("+05:30")
+            .format("YYYY-MM-DD");
+        }
+        query.receivingStatus = 2;
+        query["sapGrnNo.pickerBoyId"] = pickerBoyId;
+        projectList.item = 1;
+        projectList.sapGrnNo = 1;
+      case "ongoing":
+        query.receivingStatus = 4;
+        projectList.item = 1;
+        projectList.stiReceivingId = "$stiDetails";
+      default:
+        break;
+    }
+
+    sortingArray["picking_date"] = -1;
+    sortingArray["po_number"] = -1;
+    // get the total STI
+    if (type == "pending" || type == "history") {
+      var totalSTI = await Model.countDocuments({
+        ...query,
+      });
+      var stiList = await Model.aggregate([
+        {
+          $match: query,
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id",
+              higher_level_item: "$item.higher_level_item",
+              material: "$item.material",
+            },
+            deliveryQuantity: { $sum: "$item.delivery_quantity" },
+            receivedQuantity: { $sum: "$item.received_qty" },
+            pendingQuantity: { $sum: "$item.pending_qty" },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            receivingStatus: { $first: "$receivingStatus" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            sapGrnNo: { $first: "$sapGrnNo" },
+            item: { $first: "$item" },
+          },
+        },
+        {
+          $addFields: {
+            "item.delivery_quantity": "$deliveryQuantity",
+            "item.received_qty": "$receivedQuantity",
+            "item.pending_qty": "$pendingQuantity",
+          },
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id.sti_id",
+            },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            receivingStatus: { $first: "$receivingStatus" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            sapGrnNo: { $first: "$sapGrnNo" },
+            item: { $push: "$item" },
+          },
+        },
+        {
+          $project: projectList,
+        },
+        {
+          $sort: sortingArray,
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: pageSize,
+        },
+      ]).allowDiskUse(true);
+    } else {
+      var totalSTI = await Model.countDocuments({
+        ...query,
+      });
+      var stiList = await Model.aggregate([
+        {
+          $match: query,
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id",
+              higher_level_item: "$item.higher_level_item",
+              material: "$item.material",
+            },
+            deliveryQuantity: { $sum: "$item.delivery_quantity" },
+            receivedQuantity: { $sum: "$item.received_qty" },
+            pendingQuantity: { $sum: "$item.pending_qty" },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            receivingStatus: { $first: "$receivingStatus" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            item: { $first: "$item" },
+          },
+        },
+        {
+          $addFields: {
+            "item.delivery_quantity": "$deliveryQuantity",
+            "item.received_qty": "$receivedQuantity",
+            "item.pending_qty": "$pendingQuantity",
+          },
+        },
+        {
+          $group: {
+            _id: {
+              sti_id: "$_id.sti_id",
+            },
+            po_number: { $first: "$po_number" },
+            supply_plant: { $first: "$supply_plant" },
+            supply_plant_name: { $first: "$supply_plant_name" },
+            supply_plant_city: { $first: "$supply_plant_city" },
+            delivery_no: { $first: "$delivery_no" },
+            receivingStatus: { $first: "$receivingStatus" },
+            fulfilmentStatus: { $first: "$fulfilmentStatus" },
+            item: { $push: "$item" },
+          },
+        },
+        {
+          $lookup: {
+            from: "stocktransferinreceivingdetails",
+            let: {
+              id: "$_id.sti_id",
+              stiRecStatus: "$receivingStatus",
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$stiId", "$$id"] },
+                      { $eq: ["$$stiRecStatus", 4] },
+                      { $eq: ["$isDeleted", 0] },
+                      {
+                        $eq: [
+                          "$pickerBoyId",
+                          mongoose.Types.ObjectId(req.user._id),
+                        ],
+                      },
+                      // { $gt: ["$item.delivery_quantity", "$item.received_qty"] },//not working need to check later //to-do
+                    ],
+                  },
+                },
+              },
+
+              { $limit: 1 },
+              {
+                $project: {
+                  _id: 1,
+                  pickerBoyId: 1,
+                  receivingDate: "$createdAt",
+                },
+              },
+            ],
+            as: "stiDetails",
+          },
+        },
+        {
+          $unwind: {
+            path: "$stiDetails",
+          },
+        },
+        {
+          $project: projectList,
+        },
+        {
+          $limit: pageSize,
+        },
+      ]).allowDiskUse(true);
+    }
+    // if(type=='pending'){
+    //   if(stiList && stiList.length){
+    //     stiList.forEach((element)=>{
+    //       let itemCount=0
+    //       element.item.forEach((item)=>{
+    //         if(item.received_qty>0){
+    //           itemCount++;
+    //         }
+    //       })
+    //       element.itemCount=itemCount;
+    //       delete element.item;
+    //     })
+    //   }
+    // }
+    if (stiList && stiList.length) {
+      stiList.forEach((element) => {
+        if (type == "ongoing" || type == "pending") {
+          let itemCount = 0;
+          element.item.forEach((item) => {
+            if (
+              !item.received_qty ||
+              item.received_qty != item.delivery_quantity
+            ) {
+              itemCount++;
+            }
+          });
+          element.itemCount = itemCount;
+          delete element.item;
+        }
+
+        if (type == "pending" || type == "history") {
+          element.deliveredDate =
+            element.sapGrnNo[element.sapGrnNo.length - 1].date;
+        }
+        delete element.sapGrnNo;
+      });
+    }
+    return { list: stiList, total: totalSTI };
+  };
   filteredSTIDetails = async (req, res) => {
     try {
       info("STI filtered list details");
