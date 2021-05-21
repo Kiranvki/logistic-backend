@@ -1611,7 +1611,8 @@ class pickerboySalesOrderMappingController extends BaseController {
                 '$gte': yasterdayDate, '$lte': startOfTheDay
 
               }
-            }, {
+            },
+            {'sales_document_type':{$ne:'ZBRD'}}, {
               $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
 
                 'fulfillmentStatus': { $exists: false }
@@ -1651,7 +1652,8 @@ class pickerboySalesOrderMappingController extends BaseController {
                   '$gte': yasterdayDate, '$lte': startOfTheDay
 
                 }
-              }, {
+              },
+              {'sales_document_type':{$ne:'ZBRD'}}, {
                 $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
 
                   'fulfillmentStatus': { $exists: false }
