@@ -75,7 +75,7 @@ class stockTransferController extends BaseController {
         // {
         //   $project: projectObject,
         // },
-        
+
         { $unwind: "$item" },
         {
           $match: query,
@@ -520,6 +520,12 @@ class stockTransferController extends BaseController {
 
   stiFilteredList = async (req, res) => {
     try {
+      var page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
+          if (res.success) return res.data;
+          else return 10;
+        });
+      let skip = parseInt(page - 1) * pageSize;
       var stiData = await this.getFilteredListBasedOnInput(req);
       return this.success(
         req,
