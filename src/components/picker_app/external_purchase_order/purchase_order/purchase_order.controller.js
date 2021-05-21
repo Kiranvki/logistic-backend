@@ -53,6 +53,8 @@ class purchaseController extends BaseController {
         start_of_validity_period: { $lte: todaysDate },
         status: 1,
         isDeleted: 0,
+        po_document_type:{$nin:["ZFPO","ZNDR","ZNFV","ZWAS","ZWBD","ZWDI","ZWIO","ZWPO","ZWRE","ZWSO","ZWSU","ZNPD","ZWPD","ZNPO"]}
+
         // delivery_date:{$lte:todaysEndDate}//to-do
       };
       if (req.query.poNumber) {
