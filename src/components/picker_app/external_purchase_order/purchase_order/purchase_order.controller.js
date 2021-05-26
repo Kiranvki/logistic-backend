@@ -53,7 +53,24 @@ class purchaseController extends BaseController {
         start_of_validity_period: { $lte: todaysDate },
         status: 1,
         isDeleted: 0,
-        po_document_type:{$nin:["ZFPO","ZNDR","ZNFV","ZWAS","ZWBD","ZWDI","ZWIO","ZWPO","ZWRE","ZWSO","ZWSU","ZNPD","ZWPD","ZNPO"]}
+        po_document_type: {
+          $nin: [
+            "ZFPO",
+            "ZNDR",
+            "ZNFV",
+            "ZWAS",
+            "ZWBD",
+            "ZWDI",
+            "ZWIO",
+            "ZWPO",
+            "ZWRE",
+            "ZWSO",
+            "ZWSU",
+            "ZNPD",
+            "ZWPD",
+            "ZNPO",
+          ],
+        },
 
         // delivery_date:{$lte:todaysEndDate}//to-do
       };
@@ -116,13 +133,13 @@ class purchaseController extends BaseController {
             itemCount: { $size: "$item" },
             poReceivingId: "$poDetails",
             receivingStatus: 1,
-            fulfilmentStatus:1,
+            fulfilmentStatus: 1,
             item: 1,
           },
         },
         {
           $match: {
-            itemCount:{$gt:0},
+            itemCount: { $gt: 0 },
             $or: [
               {
                 "poReceivingId.pickerBoyId": userId,
@@ -152,11 +169,10 @@ class purchaseController extends BaseController {
         });
         order.itemCount = count;
         delete order.item;
-        
       });
-      poList = poList.filter((order)=>{
-        return order && order.itemCount && order.itemCount>0 ;
-      })
+      poList = poList.filter((order) => {
+        return order && order.itemCount && order.itemCount > 0;
+      });
       // success
       return this.success(
         req,
@@ -468,9 +484,10 @@ class purchaseController extends BaseController {
         };
       }
       if (req.query.date) {
-        query["delivery_date"] = moment.utc(new Date(req.query.date)).utcOffset("+05:30").format(
-          "YYYY-MM-DD"
-        );
+        query["delivery_date"] = moment
+          .utc(new Date(req.query.date))
+          .utcOffset("+05:30")
+          .format("YYYY-MM-DD");
       }
       if (type == "history") {
         query.receivingStatus = 1;
@@ -552,7 +569,7 @@ class purchaseController extends BaseController {
                   $project: {
                     _id: 1,
                     pickerBoyId: 1,
-                    receivingDate:'$createdAt'
+                    receivingDate: "$createdAt",
                   },
                 },
               ],
