@@ -90,7 +90,7 @@ module.exports = async (req, res, next) => {
         Response.errors(
           req,
           res,
-          StatusCodes.HTTP_INTERNAL_SERVER_ERROR,
+          StatusCodes.HTTP_CONFLICT,
           MessageTypes.stockTransferIn.upcomingDeliverDateMissing
         );
         return;
