@@ -27,6 +27,7 @@ module.exports = {
     itemNotFound:"Item not found for this purchase order",
     invalidItemId:"Invalid Item Id",
     upcomingDeliverDateMissing:"Upcoming Delivery Date is Missing",
+    partialFlowNotAllowed:"Partial Flow Not Allowed ",
     pastDateNotAllowedforUDD:"For Upcoming Deliver Date past date is not allowed",
     requiredRemark:"Remarks is required as entered quantity is not equal to quantity to be received",
     alreadyHasOngoinOrder:"you already Have one Ongoing receiving Order.Please generate STI for that first.",

@@ -67,29 +67,37 @@ module.exports = async (req, res, next) => {
                   : 0) + remainingQuantityReceived;
               remainingQuantityReceived = 0;
             } else {
-              remainingQuantityReceived =remainingQuantityReceived-
+              remainingQuantityReceived =
+                remainingQuantityReceived -
                 (stiReceivedItemArray[j].delivery_quantity -
-                (stiReceivedItemArray[j].received_qty
-                  ? stiReceivedItemArray[j].received_qty
-                  : 0));
+                  (stiReceivedItemArray[j].received_qty
+                    ? stiReceivedItemArray[j].received_qty
+                    : 0));
               stiReceivedItemArray[j].received_qty =
                 stiReceivedItemArray[j].delivery_quantity;
             }
           }
         }
-        
       } else {
         // item.received_qty = item.received_qty ? item.received_qty : 0;
       }
-
     }
-     for (let i = 0; i < stiDetails.item.length; i++) {
-    stiDetails.item[i].pending_qty =
-    stiDetails.item[i].delivery_quantity- (stiDetails.item[i].received_qty ? stiDetails.item[i].received_qty : 0);
-    if(stiDetails.item[i].pending_qty>0){
-      fulfilmentStatus = FULFILMENTSTATUS.partial;
+    for (let i = 0; i < stiDetails.item.length; i++) {
+      stiDetails.item[i].pending_qty =
+        stiDetails.item[i].delivery_quantity -
+        (stiDetails.item[i].received_qty ? stiDetails.item[i].received_qty : 0);
+      if (stiDetails.item[i].pending_qty > 0) {
+        Response.errors(
+          req,
+          res,
+          StatusCodes.HTTP_INTERNAL_SERVER_ERROR,
+          MessageTypes.stockTransferIn.upcomingDeliverDateMissing
+        );
+        return;
+        /* not allowing partial flow for now */
+        // fulfilmentStatus = FULFILMENTSTATUS.partial;    }
+      }
     }
-  }
 
     var upcoming_delivery_date = req.body.upcoming_delivery_date; //format received 'yyyy-mm-dd'
 
