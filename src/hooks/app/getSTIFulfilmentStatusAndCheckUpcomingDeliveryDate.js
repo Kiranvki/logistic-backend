@@ -91,7 +91,7 @@ module.exports = async (req, res, next) => {
           req,
           res,
           StatusCodes.HTTP_CONFLICT,
-          MessageTypes.stockTransferIn.upcomingDeliverDateMissing
+          MessageTypes.stockTransferIn.partialFlowNotAllowed
         );
         return;
         /* not allowing partial flow for now */
