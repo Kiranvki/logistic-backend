@@ -53,7 +53,7 @@ class stockTransferController extends BaseController {
         status: 1,
         isDeleted: 0,
         "item.delivery_quantity": { $gt: 0 },
-        // "item.status": "Not yet processed"//to-do
+         "item.status": {$ne:"Completely processed"}//to-do
         // picking_date:{$lte:todaysEndDate}//to-do
       };
       var projectObject = {
