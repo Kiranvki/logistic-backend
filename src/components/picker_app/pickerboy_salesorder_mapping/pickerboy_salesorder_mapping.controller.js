@@ -1735,7 +1735,8 @@ console.log(searchDate)
                 '$gte': yasterdayDate, '$lte': startOfTheDay
 
               }
-            }, {
+            },
+            {'sales_document_type':{$ne:'ZBRD'}}, {
               $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
 
                 'fulfillmentStatus': { $exists: false }
@@ -1775,7 +1776,8 @@ console.log(searchDate)
                   '$gte': yasterdayDate, '$lte': startOfTheDay
 
                 }
-              }, {
+              },
+              {'sales_document_type':{$ne:'ZBRD'}}, {
                 $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
 
                   'fulfillmentStatus': { $exists: false }

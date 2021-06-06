@@ -2033,6 +2033,11 @@ if(salesOrderList.length>0){
         }
 
       })
+
+
+
+
+
       // console.log('soFullfilmentStatus',soFullfilmentStatus)
       let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({
         '_id': mongoose.Types.ObjectId(salesOrderId)
@@ -2074,6 +2079,49 @@ if(salesOrderList.length>0){
 
 
 
+// fetch detail if so in valid picking date
+  salesOrderDetailByIdAndPickingDate = async (saleOrderId) => {
+    try {
+      info('Get saleOrderId  details !');
+
+      let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+      let yasterdayDate = moment(new Date()).subtract(3, 'days').format('YYYY-MM-DD')
+
+      // get details 
+      return await Model.findOne({
+        '_id': mongoose.Types.ObjectId(saleOrderId),
+        'req_del_date':{$gte:yasterdayDate,$lte:startOfTheDay}
+        // status: 1,
+        // isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in saleOrder DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+  
 
 
 

@@ -78,5 +78,7 @@ module.exports = {
   isSTOItemAlreadyAdded:require('./isSTOItemAlreadyAdded'),
   updateStoInvoiceToDB:require('./updateStoInvoiceToDB'),
   checkIsInPickingState:require('./checkIsInPickingState'),
-  checkIsValidPicking:require('./checkIsValidPicking')
+  checkIsValidPicking:require('./checkIsValidPicking'),
+  isValidPickingDate:require('./isValidPickingDate')
+
 }

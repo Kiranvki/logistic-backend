@@ -24,6 +24,7 @@ const {
   isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
   checkWhetherItsAValidPickerUpdate, //check whether its a valid picker profile update
   checkIsValidPicking,
+  isValidPickingDate,
   checkIsInPickingState
 } = require('../../../hooks/app');
 
@@ -118,6 +119,7 @@ function userRoutes() {
       verifyAppToken,  // verify app token
       checkIsValidPicking,
       isValidSalesOrder, //check whether the valid salesOrder Id
+      isValidPickingDate, //is valid picking date
       isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
       ctrl.pickingState // get controller 
     );
