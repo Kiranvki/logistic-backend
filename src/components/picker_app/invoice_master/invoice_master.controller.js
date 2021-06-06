@@ -44,14 +44,13 @@ class invoiceMasterController extends BaseController {
     super();
     this.messageTypes = this.messageTypes.invoice;
   }
-  getDetails = async (saleOrderId) => {
-    console.log(saleOrderId)
+  getDetails = async (invId) => {
     try {
-      info('Get saleOrderId  details !');
+      info('Get Invoice details !');
 
       // get details 
       return await Model.findOne({
-        _id: mongoose.Types.ObjectId(saleOrderId),
+        _id: mongoose.Types.ObjectId(invId),
         // status: 1,
         // isDeleted: 0
       }).lean().then((res) => {
@@ -61,7 +60,7 @@ class invoiceMasterController extends BaseController {
             data: res
           }
         } else {
-          error('Error Searching Data in saleOrder DB!');
+          error('Error Searching Data in Invoice DB!');
           return {
             success: false
           }

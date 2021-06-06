@@ -17,6 +17,17 @@ const invoiceMaster = new Schema({
   so_deliveryDate: {  //sap delivery_date
     type: Date
   },
+  stoPoNumber : {  //sto_po_no
+    type: Number
+  },
+              stockTransferDbId: {
+                type: Schema.Types.ObjectId,
+                ref: 'purchase_order'
+              },
+            
+              stockTransferDeliveryDate: {  //sap delivery_date
+                type: Date
+              },
   deliveryNo:{
     type:String
   },

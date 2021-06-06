@@ -114,7 +114,7 @@ class purchaseController extends BaseController {
             itemCount: { $size: "$item" },
             poReceivingId: "$poDetails",
             receivingStatus: 1,
-            fulfilmentStatus:1,
+            fulfilmentStatus: 1,
             item: 1,
           },
         },
@@ -181,7 +181,6 @@ class purchaseController extends BaseController {
   getPODetails = async (req, res) => {
     try {
       info("Get Purchase order  details !");
-
       var poDetails = await Model.aggregate([
         {
           $match: {
@@ -302,9 +301,18 @@ class purchaseController extends BaseController {
             delivery_date: 1,
             sapGrnNo: 1,
             delivery_date_array: 1,
+            shiping_plant: 1,
+            plant: 1
           },
         },
       ]).allowDiskUse(true);
+      if (poDetails && _.isEmpty(poDetails)) {
+        return {
+          success: false
+
+        };
+
+      }
       return {
         success: true,
         data: poDetails,
@@ -745,6 +753,301 @@ class purchaseController extends BaseController {
       };
     }
   };
+
+
+  getStockTransferList = async (req, res) => {
+    try {
+      var userId = mongoose.Types.ObjectId(req.user._id);
+      var page = req.query.page || 1,
+        sortingArray = {},
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
+          if (res.success) return res.data;
+          else return 10;
+        });
+      let skip = parseInt(page - 1) * pageSize;
+      sortingArray["pickingStatus"] = -1;
+      sortingArray["delivery_date"] = -1;
+      let todaysDate = moment().format("YYYY-MM-DD");
+      let todaysEndDate = moment().format("YYYY-MM-DD");
+      info("Get Stock Transfer details !");
+      let query = {
+       //consider data type
+        // end_of_validity_period: { $gte: todaysDate },
+        // start_of_validity_period: { $lte: todaysDate },
+       
+        $and: [
+         { shiping_plant: req.user.plant ? req.user.plant.toString() : ""},
+          {
+            $or: [{ po_document_type: 'ZWSI' }, { po_document_type: 'ZWST' }]
+          }, {
+            $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
+
+              'fulfillmentStatus': { $exists: false }
+            }]
+          }
+
+
+       
+         ], 
+        status: 1,
+        isDeleted: 0,
+        
+        // delivery_date:{$lte:todaysEndDate}//to-do
+      };
+      if (req.query.poNumber) {
+        query.po_number = {
+          $regex: req.query.poNumber,
+          $options: "i",
+        };
+      }
+      // get the total PO
+      let totalPO = await Model.countDocuments(query);
+      var poList = await Model.aggregate([
+        {
+          $match: query,
+        },
+
+
+        {
+          $project: {
+            po_number: 1,
+            vendor_no: 1,
+            vendor_name: 1,
+            itemCount: { $size: "$item" },
+            poReceivingId: "$poDetails",
+            receivingStatus: 1,
+            fulfilmentStatus: 1,
+
+          },
+        },
+
+        {
+          $sort: sortingArray,
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: pageSize,
+        },
+      ]).allowDiskUse(true);
+
+     
+
+      // success
+      return this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        {
+          result: poList,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalPO,
+          },
+        },
+        this.messageTypes.poListFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+
+  getPendingStockTransferList = async (req, res) => {
+    try {
+      var userId = mongoose.Types.ObjectId(req.user._id);
+      var page = req.query.page || 1,
+        sortingArray = {},
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
+          if (res.success) return res.data;
+          else return 10;
+        });
+      let skip = parseInt(page - 1) * pageSize;
+      sortingArray["pickingStatus"] = -1;
+      sortingArray["delivery_date"] = -1;
+      let todaysDate = moment().format("YYYY-MM-DD");
+      let todaysEndDate = moment().format("YYYY-MM-DD");
+      info("Get Stock Transfer details !");
+      let query = {
+        plant: req.user.plant ? req.user.plant.toString() : "", //consider data type
+        // end_of_validity_period: { $gte: todaysDate },
+        // start_of_validity_period: { $lte: todaysDate },
+        $or: [{ po_document_type: 'ZWSI' }, { po_document_type: 'ZWST' }],
+        status: 1,
+        isDeleted: 0,
+        pickingFullfilmentStatus:{ $exists: true,$eq:1}
+        
+        // delivery_date:{$lte:todaysEndDate}//to-do
+      };
+      if (req.query.poNumber) {
+        query.po_number = {
+          $regex: req.query.poNumber,
+          $options: "i",
+        };
+      }
+      // get the total PO
+      let totalPO = await Model.countDocuments(query);
+      var poList = await Model.aggregate([
+        {
+          $match: query,
+        },
+
+
+        {
+          $project: {
+            po_number: 1,
+            vendor_no: 1,
+            vendor_name: 1,
+            itemCount: { $size: "$item" },
+            poReceivingId: "$poDetails",
+            receivingStatus: 1,
+            fulfilmentStatus: 1,
+
+          },
+        },
+
+        {
+          $sort: sortingArray,
+        },
+        {
+          $skip: skip,
+        },
+        {
+          $limit: pageSize,
+        },
+      ]).allowDiskUse(true);
+
+      // success
+      return this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        {
+          result: poList,
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: totalPO,
+          },
+        },
+        this.messageTypes.poListFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+  updateStoFullfilmentStatus = async (stoOrderId, stoItem, pickedItem, delivery_date) => {
+    try {
+
+      info(`Updating STO Info ! ${stoOrderId}`);
+      console.log('pickedItem', pickedItem)
+      let isUpdated;
+      // suppliedQuantity 
+      // console.log(JSON.stringify(invData))
+      let tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
+      let deliverDate = delivery_date || tomorrow;
+      // moment(new Date()).format('YYYY-MM-DD')
+
+      let stoFullfilmentStatus = 2;
+      stoItem.forEach(async (sItem, i) => {
+        pickedItem.forEach(async (item, i) => {
+          let itemFullfilmentStatus = 1
+          if (sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.quantity) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+            if (item.pickedQuantity == (parseFloat(sItem.quantity) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+              itemFullfilmentStatus = 2
+            } else {
+              stoFullfilmentStatus = 1
+
+            }
+          
+
+
+            stoItem[i].fulfillmentStatus = itemFullfilmentStatus;
+
+
+
+            isUpdated = await Model.findOneAndUpdate({
+              '_id': mongoose.Types.ObjectId(stoOrderId), 'item.item_no': item.item_no
+
+            }, {
+              $set: {
+
+                'item.$.fulfillmentStatus': itemFullfilmentStatus,
+
+              },
+              $inc: {
+
+                'item.$.suppliedQty': parseFloat(item.pickedQuantity ? item.pickedQuantity : 0),
+              }
+            });
+           
+          } else if ((sItem.fulfillmentStatus ? sItem.fulfillmentStatus : 0) <= 1) {
+            stoFullfilmentStatus = 1
+
+          }
+        }
+        )
+
+      })
+    
+      let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({
+        '_id': mongoose.Types.ObjectId(stoOrderId)
+      }, {
+        $set: {
+          // 'req_del_date':deliverDate,
+          'pickingFullfilmentStatus': stoFullfilmentStatus,
+
+        }
+
+      });
+      console.log(isUpdated, isUpdatedfulfillmentStatus)
+      if (isUpdatedfulfillmentStatus) {
+        info('Sales order Status updated! !');
+        return {
+          success: true,
+          data: {
+            'isUpdatedfulfillmentStatus': isUpdatedfulfillmentStatus,
+            'fulfillmentStatus': stoFullfilmentStatus
+          }
+        };
+      } else {
+        error('Failed to update STO STATUS! ');
+        return {
+          success: false,
+        };
+      }
+
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
+
 }
 
 // exporting the modules

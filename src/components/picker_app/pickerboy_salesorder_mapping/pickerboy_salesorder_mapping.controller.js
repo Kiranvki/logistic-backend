@@ -976,7 +976,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       let searchObject = {
 
 
-        'isStartedPicking': true,
+        'isItemPicked':true,
         'isStartedPicking': true,
         'invoiceDetail.isInvoice': false,
         'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId)
@@ -1030,13 +1030,6 @@ class pickerboySalesOrderMappingController extends BaseController {
         $limit: pageSize
       },
       {
-        $project: {
-          'salesOrderId': 1,
-          'pickerBoyId': 1,
-          'InvoiceId': 1,
-          'state': 1,
-        }
-      }, {
         $lookup: {
           from: 'salesorders',
           let: {
@@ -1058,6 +1051,9 @@ class pickerboySalesOrderMappingController extends BaseController {
                 'otherChargesTaxInclusive': 1,
                 'customerType': 1,
                 'salesOrderId': 1,
+                'pickingDate':1,
+                'updatedAt':1,
+                'created_at':1,
                 'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
 
               }
@@ -1066,10 +1062,24 @@ class pickerboySalesOrderMappingController extends BaseController {
           as: 'salesOrdersDetails'
         }
       },
+      {
+        $project: {
+          'salesOrderId': 1,
+          'pickerBoyId': 1,
+          'InvoiceId': 1,
+          'state': 1,
+          'sales_order_no':1,
+          'pickingDate':1,
+          'orderDate':{$arrayElemAt: ['$salesOrdersDetails.created_at',0]},
+          'deliveryDate':{$arrayElemAt: ['$salesOrdersDetails.updatedAt',0]},
+          'invoiceDate':{$arrayElemAt: ['$salesOrdersDetails.updatedAt',0]}, 
+          'numberOfItems':{$arrayElemAt: ['$salesOrdersDetails.numberOfItems',0]}
+        }
+      }
 
       ]).allowDiskUse(true)
       // success
-      if (true) {
+      if (salesOrderList.length) {
         return this.success(req, res, this.status.HTTP_OK, {
 
           results: salesOrderList,
@@ -1090,6 +1100,7 @@ class pickerboySalesOrderMappingController extends BaseController {
   }
 
 
+  
   // Internal Function get pickerboy sales order mapping details
   getDetails = (pickerBoySalesOrderMappingId) => {
     try {
@@ -1128,6 +1139,90 @@ class pickerboySalesOrderMappingController extends BaseController {
       }
     }
   }
+
+
+    // Internal Function get picking Status / Delivery Number  details
+    getPickingDetails = (pickerBoySalesOrderMappingId) => {
+      try {
+        info('Get SO Picking Details !');
+  
+        // get details 
+        return Model.findOne({
+          _id: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
+   
+          delivery_no:{$ne:'N/A'},
+          isDeleted: 0
+        }).lean().then((res) => {
+          if (res && !_.isEmpty(res)) {
+            return {
+              success: true,
+              data: res
+            }
+          } else {
+            error('Error Searching Data in PickerBoy Order Mapping DB!');
+            return {
+              success: false
+            }
+          }
+        }).catch(err => {
+          error(err);
+          return {
+            success: false,
+            error: err
+          }
+        });
+  
+        // catch any runtime error 
+      } catch (err) {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      }
+    }
+  
+       // Internal Function get invoice detail 
+       getInvoiceDetails = (pickerBoySalesOrderMappingId) => {
+        try {
+          info('Get SO Picking Details !');
+    
+          // get details 
+          return Model.findOne({
+            _id: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
+            'invoiceDetail.isInvoice':true,
+            delivery_no:{$ne:'N/A'},
+            isDeleted: 0
+          }).lean().then((res) => {
+            if (res && !_.isEmpty(res)) {
+              return {
+                success: true,
+                data: res
+              }
+            } else {
+              error('Error Searching Data in PickerBoy Order Mapping DB!');
+              return {
+                success: false
+              }
+            }
+          }).catch(err => {
+            error(err);
+            return {
+              success: false,
+              error: err
+            }
+          });
+    
+          // catch any runtime error 
+        } catch (err) {
+          error(err);
+          return {
+            success: false,
+            error: err
+          }
+        }
+      }
+  
 
   // Internal Function get  sales order  details
   getSalesOrderDetails = (saleOrderId) => {
@@ -1181,8 +1276,8 @@ class pickerboySalesOrderMappingController extends BaseController {
         skip = parseInt(page - 1) * pageSize,
         locationId = req.user.locationId || 0, // locationId 
         cityId = req.user.cityId || 'N/A', // cityId 
-        searchDate = req.body.searchDate || '';
-
+        searchDate = req.query.searchDate || req.body.searchDate || '';
+console.log(searchDate)
       // let startOfTheDay = moment().set({
       //   h: 0,
       //   m: 0,
@@ -1198,12 +1293,12 @@ class pickerboySalesOrderMappingController extends BaseController {
       //   millisecond: 0
       // }).toDate();
       let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
-      let yasterdayDate = moment(new Date()).subtract(1, 'days').format('YYYY-MM-DD')
+      let yasterdayDate = moment(new Date()).subtract(3, 'days').format('YYYY-MM-DD')
 
       if (searchDate && !_.isEmpty(searchDate)) {
         // console.log('he');
-        startOfTheDay = moment(searchDate).format('YYYY-MM-DD');
-        yasterdayDate = moment(searchDate).subtract(1, 'days').format('YYYY-MM-DD')
+        startOfTheDay = moment(searchDate, "DD-MM-YYYY").format('YYYY-MM-DD');
+        yasterdayDate = moment(searchDate, "DD-MM-YYYY").subtract(1, 'days').format('YYYY-MM-DD')
 
         // startOfTheDay = moment(searchDate, 'DD-MM-YYYY').set({
         //   h: 0,
@@ -1238,6 +1333,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       // finding the  data from the db 
       let salesOrderData = await SalesOrderCtrl.getPartialSalesOrder(salesQueryDetails);
       // success
+      console.log(salesOrderData)
       if (salesOrderData.success) {
         return this.success(req, res, this.status.HTTP_OK, {
           results: salesOrderData.data,
@@ -1597,6 +1693,7 @@ class pickerboySalesOrderMappingController extends BaseController {
 
 
       // 2021-03-29
+   
       let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
       let yasterdayDate = moment(new Date()).subtract(3, 'days').format('YYYY-MM-DD')
 
@@ -2014,8 +2111,6 @@ class pickerboySalesOrderMappingController extends BaseController {
   // fix require
 
 
-  getOrderDetail = async (pickerBoyOrderMappingId) => {
-    return Model.getOrderByPickerBoyId(pickerBoyOrderMappingId);
 
 
   getInvoices = async (req, res, next) => {
@@ -2606,6 +2701,196 @@ class pickerboySalesOrderMappingController extends BaseController {
       }
     }
   }
+
+
+    // getOrderHistoryByPickerBoyID
+    getPendingOrderAndInvoices = async (req, res, next) => {
+      try {
+        info('Get History  Order details !');
+  
+        // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = req.query
+        // let sortingArray = {};
+        // sortingArray[sortBy] = -1;
+        // let skip = parseInt(page - 1) * pageSize;
+        // get the query params
+        let page = req.query.page || 1,
+          pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+          searchKey = '',//req.query.search || '',
+          sortBy = req.query.sortBy || 'req_del_date',
+          orderid = req.params.orderid,
+          sortingArray = {};
+        sortingArray[sortBy] = -1;
+        let skip = parseInt(page - 1) * pageSize;
+  
+        // item count missing
+        let searchObject = {
+          // 'pickerBoyId': mongoose.Types.ObjectId(req.user._id), //req.user._id,
+          'salesOrderId': mongoose.Types.ObjectId(orderid),
+          'invoiceDetail.isInvoice': true
+          // 'isPacked': 0,
+          // 'fulfillmentStatus': 0,
+          // 'locationId': parseInt(locationId),
+          // 'cityId': cityId,
+  
+          // 'req_del_date': {
+  
+          //   '$lte': startOfTheDay
+          // }
+        };
+  
+        // creating a match object
+        if (searchKey !== '')
+          searchObject = {
+            ...searchObject,
+            '$or': [{
+              'customerName': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }, {
+              'customerCode': {
+                $regex: searchKey,
+                $options: 'is'
+              }
+            }]
+          };
+        // console.log(...searchObject)
+        let totalCount = await Model.aggregate([{
+          $match:
+            searchObject
+  
+        },
+        {
+          $count: 'sum'
+        }
+        ]).allowDiskUse(true);
+  
+        // calculating the total number of applications for the given scenario
+        if (totalCount[0] !== undefined)
+          totalCount = totalCount[0].sum;
+        else
+          totalCount = 0;
+  
+        // get list  
+        let salesOrderList = await Model.aggregate([{
+          $match: {
+            ...searchObject
+          }
+        },
+        {
+          $lookup: {
+            from: 'invoicemasters',
+            localField: 'invoiceDetail.invoice.invoiceDbId',
+            foreignField: '_id',
+            as: 'invoice'
+  
+          }
+        },
+        {
+          $lookup: {
+            from: 'salesorders',
+            localField: 'salesOrderId',
+            foreignField: '_id',
+            as: 'orderDetails'
+  
+          }
+        },
+        { $unwind: '$invoice' },
+        { $unwind: '$salesOrderId' },
+        {
+          $group: {
+            _id: '$sales_order_no', invoice: {
+              $push: {
+                'invoiceId': '$invoiceDetail.invoice.invoiceId',
+                'suppliedQty': { '$sum': '$invoice.itemSupplied.suppliedQty' }, 'item_no': '$invoice.itemSupplied.item_no',
+                'invoicedbid': '$invoiceDetail.invoice.invoiceDbId', 'date': '$invoice.createdAt'
+              }
+            },
+            'customerName': { '$first': '$invoice.customerName' },
+            'deliveryDate': { $first: '$delivery_date' },
+            'item':{ $first:{ $first: '$orderDetails.item' }},
+            'salesOrderId':{ $first:{ $first: '$orderDetails._id' }},
+            'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
+          }
+        }
+        
+  
+  
+          , {
+          $sort: sortingArray
+        }, {
+          $skip: skip
+        }, {
+          $limit: pageSize
+        },
+        {
+          $project: {
+            'onlineReferenceNo': 1,
+            'customerCode': 1,
+            'customerName': 1,
+            'customerType': 1,
+            'shippingId': 1,
+            'cityId': 1,
+            'plant': 1,
+            'pickerboyOrderMappingId':1,
+            'sales_order_no': 1,
+            'state': 1,
+            'invoiceDetail.invoice.invoiceId': 1,
+            'deliveryDate': 1,
+            'salesOrderId': 1,
+            'fulfillmentStatus': 1,
+            'delivery_date': 1,
+            'pickingDate': 1,
+            'shipping_point': 1,
+            'invoice': 1,
+            'sold_to_party': 1,
+            'orderDetails':1,
+            'item':1
+            // 'numberOfItems': { $cond: { if: { $isArray: "$invoice.itemSupplied" }, then: { $size: "$invoice.itemSupplied" }, else: "NA" } }
+          }
+        }
+  
+        ]).allowDiskUse(true)
+        // console.log(salesOrderList)
+        // return {
+        //   success: true,
+        //   data: salesOrderList,
+        //   total: totalCount
+        // };
+      console.log(salesOrderList)
+        if (salesOrderList.length > 0) {
+          salesOrderList[0]['item'].forEach((item, j) => {
+            console.log(item,parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
+            salesOrderList[0]['item'][j]['qty'] = (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0))
+            // if ((item.fulfillmentStatus ? item.fulfillmentStatus : 0) == 2) {
+              // console.log(todaysOrderData[i]['item'][j])
+              // todaysOrderData[i]['item'].splice(j, 1)
+             
+           
+  
+            // }
+          })
+          _.remove(salesOrderList[0]['item'], { 'fulfillmentStatus': 2 })
+          return this.success(req, res, this.status.HTTP_OK, {
+            results: salesOrderList[0],
+            pageMeta: {
+              skip: parseInt(skip),
+              pageSize: pageSize,
+              total: salesOrderList.length  //item
+            }
+          }, this.messageTypes.historyFetchedSuccessfully);
+        }
+        else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedHistoryDetails);
+  
+  
+        // catch any runtime error 
+      } catch (err) {
+        error(err);
+        return {
+          success: false,
+        }
+      }
+    }
 
 
   getInvoiceDetailById = async (req,res,next) =>{

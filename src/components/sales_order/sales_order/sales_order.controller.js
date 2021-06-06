@@ -351,12 +351,19 @@ class areaSalesManagerController extends BaseController {
         }
       }
       ]).allowDiskUse(true)
-
+if(salesOrderList.length>0){
       return {
         success: true,
         data: salesOrderList,
         total: totalCount
       };
+    }else{
+      return {
+        success: false,
+        data: salesOrderList,
+      
+      };
+    }
 
       // catch any runtime error 
     } catch (err) {

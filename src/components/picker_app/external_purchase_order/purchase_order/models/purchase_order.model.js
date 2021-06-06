@@ -76,6 +76,11 @@ const purchaseOrder = new Schema(
       type: Number,
       default: 0,
     },
+   
+      pickingFullfilmentStatus:{
+        type:Number,
+        default:0
+      },
     //2 partially fulfilled
     //1 fullfilled
 
@@ -98,6 +103,10 @@ const purchaseOrder = new Schema(
     },
     item: [
       {
+        fulfillmentStatus:{
+          type:Number,
+          default:0
+        },
         item_no: {
           type: String,
         },
@@ -145,6 +154,10 @@ const purchaseOrder = new Schema(
         },
         pending_qty: {
           type: Number,
+        },
+        suppliedQty:{
+          type:Number,
+          default:0
         },
         received_qty: {
           type: Number,

@@ -9,6 +9,7 @@ module.exports = {
     salesOrderNotFound: 'salesOrder Not Fetched !',
     poListFetched: 'Purchase order fetched Successfully !',
     purchaseOrderIdInvalidEitherDeletedOrDeactivated: 'Purchase Order Id is either deleted or deactivated !',
+    stoIdOrItemNoInvalidEitherDeletedOrDeactivated: 'Stock Transfer Id Or Item Number is either deleted or deactivated !',
     purchaseOrderReceivingIdEitherDeletedOrDeactivated: 'Purchase Order Receiving Id is either deleted or deactivated !',
     invalidPurchaseOrderId: 'The Purchase Order id is Invalid !',
     purchaseOrderAlreadyAddedInReceivingState: 'Purchase Order  Already Added in Receiving State!',
@@ -21,6 +22,7 @@ module.exports = {
     emptyBucketList: 'Bucket list is empty',
     bucketListFetchedSuccessfully: 'Bucket List is fetched Successfully',
     invalidPurchaseOrderId:"Invalid Purchase Order Id",
+    invalidStoId:"Invalid Stock Transfer Id",
     invalidPurchaseOrderGRNId:"Invalid Purchase Order GRN Id",
     receivedQuantityGreaterThanQty:"Received quantity cant be greater than quantity to be received",
     invalidPurchaseOrderReceivingId:"Invalid Purchase Order Receiving Id",
@@ -36,5 +38,6 @@ module.exports = {
     errorInGettingVendorDetails:"Error in getting vendor details",
     vendorDetailsNotFound:"Vendor Details not Found",
     poDetailsNotFound:"Purchase order details not found",
+    PickingAllocationGeneratedSuccesfully:"Picking Allocation Generated Successfully"
 
 };

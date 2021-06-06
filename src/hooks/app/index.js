@@ -67,6 +67,16 @@ module.exports = {
   storeStiGRNDetailsIntoDB:require('./storeStiGRNDetailsIntoDB'),
   getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate:require('./getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate'),
   generateStiGRN:require('./generateStiGRN'),
-
-
+  getStoDetail:require('./getStoDetail'),
+  isSTOAlreadyInPickingState:require('./isSTOAlreadyInPickingState'),
+  getPickedStoDetail:require('./getPickedStoDetail'),
+  generatePickingAllocationForSto:require('./generatePickingAllocationForSto'),
+  getPickedSTOItemDetail:require('./getPickedItemDetailSto'),
+  updateOutboundDeliveryToDb:require('./updateOutboundDeliveryToDb'),
+  isPickingAlreadyGenerated:require('./isPickingAlreadyGenerated'),
+  isInvoiceAlreadyGenerated:require('./isInvoiceAlreadyGenerated'),
+  isSTOItemAlreadyAdded:require('./isSTOItemAlreadyAdded'),
+  updateStoInvoiceToDB:require('./updateStoInvoiceToDB'),
+  checkIsInPickingState:require('./checkIsInPickingState'),
+  checkIsValidPicking:require('./checkIsValidPicking')
 }

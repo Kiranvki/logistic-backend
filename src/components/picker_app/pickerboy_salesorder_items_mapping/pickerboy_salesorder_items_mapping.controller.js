@@ -455,6 +455,7 @@ class pickerSalesOrderMappingController extends BaseController {
     try {
       let OrderData = req.body.orderDetail,
         pickedItem = OrderData['itemDetail'];
+        req.body.delivery_detail['data']['retryCount']=0;
       // invoiceDetail = req.body.invoice_detail['data'][0]
       let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
         deliveryDetail = req.body.delivery_detail['data'] || undefined;
@@ -533,16 +534,18 @@ class pickerSalesOrderMappingController extends BaseController {
         $match: {
           'invoiceDetail.isInvoice': false,
           'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
+          'state':1,
           $or: [
             {
               'isSapError':
 
                 { $exists: true, $ne: 'DNE' }
-            },
-            {
-              'isSapError': { $exists: false }
+            }
+            // {
+            //   'isSapError': { $exists: false }
 
-            }],
+            // }
+          ],
           'fullfilment': fullfilment,
           'delivery_no': {
             $ne: 'N/A'
@@ -560,7 +563,9 @@ class pickerSalesOrderMappingController extends BaseController {
           'delivery_no': 1,
           'sales_order_no': 1,
           'delivery_date': 1,
-          'fullfilment': 1
+          'fullfilment': 1,
+         
+            'itemCount': '$$ROOT.fullfilment'
 
 
         }

@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
     pickStatus,
     responseObj;
   
-    if(requestFromUrl.includes('/picking/getstocktransfer')){
+    if(requestFromUrl.includes('/purchaseOrder/')){
       pickStatus = await stoDetailsCtrl.getPickingStatus(req.user._id)
      
    
@@ -44,25 +44,11 @@ module.exports = async (req, res, next) => {
     pickStatus = await pickerBoySalesOrderMappingCtrl.getOrderDetailByPickerBoyId(req.user._id)
   
     }
+    console.log(pickStatus)
     if(pickStatus.success){
-      if(requestFromUrl.includes('/picking/getstocktransfer')){
-      responseObj = {
-        'isPicking':true,
-        'stoDetailsId':pickStatus.data._id,
-        'stoId':pickStatus.data.stoDbId
-
-    }
-  }
-       else{
-      responseObj = {
-        'isPicking':true,
-        'pickBoySalesOrderMappingId':pickStatus.data._id,
-        'salesOrderId':pickStatus.data.salesOrderId
   
-    }
-  }
         error('IN PICKING STATE !');
-        return Response.errors(req, res, StatusCodes.HTTP_FOUND,JSON.stringify({'message':MessageTypes.salesOrder.pickerBoyAlreadyInPickingState,'data':responseObj}));
+        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,'Already In Picking State.Please Complete the onGoing Picking First');
 
     }else{
     // move on 

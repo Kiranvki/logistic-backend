@@ -44,7 +44,7 @@ module.exports = async (req,res,next) => {
 
     // get the data from SAP
     
-    // req.body.invoice_detail = {
+    // req.body.invoice_detail['data'] = [{
     //     "invoice_no": "0083000742",
     //     "billing_type": "X001",
     //     "sales_Org": 2000,
@@ -78,7 +78,7 @@ module.exports = async (req,res,next) => {
     //             "ugst_pr": "0.00 ",
     //             "total_amount": "0.00 "
     //         }]
-    //     }
+    //     }]
 
     req.body.invoice_detail = await request.post(url)
       .send(obj)

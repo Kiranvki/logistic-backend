@@ -3,13 +3,14 @@
 const invoiceMasterModel = require('../../components/picker_app/invoice_master/models/invoice_master.model');
 // Responses & others utils 
 
-const pickerBoyOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model')
+const pickerBoyOrderMappingModel = require('../../components/picker_app/external_purchase_order/stock_transfer_picking_details/models/stock_transfer_picking_details.model')
 const invoicePickerBoySalesOrderMappingctrl = require('../../components/picker_app/invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller')
 const Response = require('../../responses/response');
 const _ = require('lodash');
 const StatusCodes = require('../../facades/response');
 const MessageTypes = require('../../responses/types');
 const Exceptions = require('../../exceptions/Handler');
+const mongoose = require('mongoose');
 const {
     error,
     info
@@ -21,12 +22,15 @@ const {
 module.exports = async (req, res, next) => {
     try {
         info('Updating SAP Invoice Detail to DB !');
-
+console.log(req.body)
         let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
-            deliveryDetail = req.body.delivery_detail || undefined, // getting the SAP delivery Detail
+            deliveryDetail = req.body.deliveryDetail || undefined, // getting the SAP delivery Detail
             invoiceDetail = req.body.invoice_detail['data'][0] || undefined,
             OrderData = req.body.orderDetail,
            total_quantity = 0,
+           invoiceResponsePayload = JSON.stringify(req.body.invoice_detail['data']),
+              invoiceRequestPayload = JSON.stringify(req.body.invoiceRequestPayload),
+           stoPickingId = req.params.stoPickingId,
             total_quantity_demanded = 0,
            total_amount = 0,
            total_tax = 0,
@@ -42,7 +46,7 @@ module.exports = async (req, res, next) => {
           total_tax += parseFloat(data['taxable_value']);
           total_discount += parseFloat(data['discount_amount']);
           total_net_value += parseFloat(data['total_amount']);
-
+console.log('data',data)
           invoiceItemSuppliedArr.push({
       
               'item_no':data['item_no'],
@@ -108,19 +112,26 @@ module.exports = async (req, res, next) => {
             
             })
         })  
+     
 
             let invoiceObj = {
-             'soId': OrderData['pickerBoySalesOrderMappingId']['sales_order_no'],
-            //  OrderData['pickerBoySalesOrderMappingId']['delivery_date']
-              'fullfiled':fullfiled, //fullfiled
-              'so_db_id': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
+       
+              
+              'stoPoNumber':deliveryDetail['stoNumber'],
+              'stockTransferDbId':deliveryDetail['stoDbId'],
+              'stockTransferDeliveryDate':new Date(),
+
+            //  'soId': OrderData['pickerBoySalesOrderMappingId']['sales_order_no'],
+            // //  OrderData['pickerBoySalesOrderMappingId']['delivery_date']
+            //   'fullfiled':fullfiled, //fullfiled
+            //   'so_db_id': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
             
-              'so_deliveryDate': OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
-              'shipping_point':OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
-           
-              'deliveryNo':req.body.deliveryNumber,
-              'cityId': OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
-              'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
+            //   'so_deliveryDate': OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
+              'shipping_point':deliveryDetail['shipping_plant'],
+              'deliveryFrom':deliveryDetail['shipping_plant'],
+            //   'deliveryNo':req.body.deliveryNumber,
+              'cityId': deliveryDetail['plant'],
+            //   'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
             
               'companyDetails':
               {
@@ -224,7 +235,7 @@ module.exports = async (req, res, next) => {
           
                 'paymentTerms': invoiceDetail['payment_terms'], //payment_terms
           
-                'deliveryFrom': OrderData['pickerBoySalesOrderMappingId']['shipping_point'] //shipping_point
+                // 'deliveryFrom': OrderData['pickerBoySalesOrderMappingId']['shipping_point'] //shipping_point
             
               },
             
@@ -303,7 +314,7 @@ module.exports = async (req, res, next) => {
             'pan': customerDataFromMicroService.data['panNumber'],
             'gstNo': customerDataFromMicroService.data['gstNumber'],
             'email': customerDataFromMicroService.data['email'],
-            'cityId': customerDataFromMicroService.data['city'],
+            'cityId': customerDataFromMicroService.data['city']||deliveryDetail['shipping_plant'],
             'country':customerDataFromMicroService.data['country'],
           }
         
@@ -338,27 +349,28 @@ module.exports = async (req, res, next) => {
             let data = await invoiceMasterModel.addInvoice(invoiceObj)
            
            
-        let invoiceSalesOrderMappingObject = {
-          'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId,
-           'salesOrderId':OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
-          invoiceId: data._id,
-          // salesOrderId:deliveryDetail['salesOrderId']       //basketItemData.data[0].salesOrderId
-          // createdBy: req.user.email||'aks'
-        }
+      
 
 
-        let UpdatePickerBoyOrderMappingInvDetail = {
-          'fullfiled':fullfiled,
-          'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
-          'pickerBoySalesOrderMappingId':req.params.pickerBoyOrderMappingId,
-           'salesOrderId':OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'],
-          'isInvoice':true,
-          'invoiceId':data['_id'],
-            'invoice_no':invoiceDetail['invoice_no']
-          }
-          await pickerBoyOrderMappingModel.updateInvoiceDetail(pickerBoyOrderMappingId,UpdatePickerBoyOrderMappingInvDetail)
+        let UpdatePickerBoyOrderMappingInvDetail =  [{ _id: mongoose.Types.ObjectId(stoPickingId) }, {
+            $set: {
+      
+       
+          'invoiceDetail.isInvoice':true,
+          'invoiceDetail.invoice.invoiceDbId':data['_id'],
+            'invoiceDetail.invoice.invoice_no':invoiceDetail['invoice_no'],
+            'invoiceDetail.invoice.invoiceDate':new Date(),
+            'isSapError':'INVS',
+            'pickingStatus':4
+          }, $inc: { invoiceRetryCount: 1 } ,
+          $push: {
+            invoiceResponsePayload: invoiceResponsePayload,
+              invoiceRequestPayload: invoiceRequestPayload,
+             
+          }}]
+          await pickerBoyOrderMappingModel.updateStatus(UpdatePickerBoyOrderMappingInvDetail)
 
-        await invoicePickerBoySalesOrderMappingctrl.create(invoiceSalesOrderMappingObject);
+        // await invoicePickerBoySalesOrderMappingctrl.create(invoiceSalesOrderMappingObject);
           
            
             if (data && !_.isEmpty(data)) 

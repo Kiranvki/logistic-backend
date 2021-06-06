@@ -23,7 +23,7 @@ const {
   isValidSalesOrder,  // check is valid sales order id 
   isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
   checkWhetherItsAValidPickerUpdate, //check whether its a valid picker profile update
-
+  checkIsValidPicking,
   checkIsInPickingState
 } = require('../../../hooks/app');
 
@@ -116,6 +116,7 @@ function userRoutes() {
     closed.route('/:type/start-pick/:saleOrderId').patch(
       [joiStartPickSalesOrder], // joi validation
       verifyAppToken,  // verify app token
+      checkIsValidPicking,
       isValidSalesOrder, //check whether the valid salesOrder Id
       isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
       ctrl.pickingState // get controller 
@@ -173,6 +174,17 @@ function userRoutes() {
       ctrl.getOrderHistoryAndInvoices
       // getHistoryOfSalesOrder // history SO/invoice status
     );
+
+    closed.route('/pending/:type/detail/:orderid').get(
+      // [joiHistoryOfSO], // joi history SO
+      // verifyAppToken,   // verify app token
+      ctrl.getPendingOrderAndInvoices
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
+
+
+
+    
 
 
 

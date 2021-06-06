@@ -40,7 +40,9 @@ const {
   fetchInvoice,
   updateInvoiceSAPDataToDB,
   isValidItemQuantity,
-  getDeliveryNumber
+  getDeliveryNumber,
+  isPickingAlreadyGenerated,
+  isInvoiceAlreadyGenerated
 
 } = require('../../../hooks/app');
 
@@ -74,11 +76,13 @@ function userRoutes() {
     //generate picking allocation(delivery#) and then generate invoice for the generated delivery#
     closed.route('/generate/invoice/:pickerBoyOrderMappingId').get(  //change to patch
       // [joiInvValidate],
+     
+      isInvoiceAlreadyGenerated,
       getPickedItemDetail,
       getDeliveryNumber, //fetch already store delivery number from db
                  // generateDelivery,
                 // updateSapDeliveryDetail,
-      // generateInvoice, //generate invoice for the delivery number
+      generateInvoice, //generate invoice for the delivery number
       fetchInvoice, //fetch generated invoice from sap
       updateInvoiceSAPDataToDB, //save the invoice detail to application db
       ctrl.generateInv
@@ -89,6 +93,8 @@ function userRoutes() {
     //generate picking allocation(delivery#) 
     closed.route('/generate/pickingallocation/:pickerBoyOrderMappingId').patch(  //change to patch
       // [joiInvValidate],
+      isPickingAlreadyGenerated,
+   
       getPickedItemDetail,  //get item list added in the basket
       generateDelivery,  //generate picking for the SO
       updateSapDeliveryDetail, //save the response to db

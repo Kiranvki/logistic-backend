@@ -1,5 +1,5 @@
 // Controller
-const pickerSalesOrderItemMappingCtrl = require('../../components/picker_app/pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
+const stoPickingDetailsCtrl = require('../../components/picker_app/external_purchase_order/stock_transfer_picking_details/stock_transfer_picking_details.controller');
 
 // Responses & others utils 
 const Response = require('../../responses/response');
@@ -17,22 +17,24 @@ module.exports = async (req, res, next) => {
     try {
         info('Check whether the item alread added for the saleOrderId or not');
         let objectId = mongoose.Types.ObjectId; // object id
-        let mappingId = req.body.pickerBoySalesOrderMappingId || req.params.pickerBoySalesOrderMappingId || req.body.stoPickingId || req.params.stoPickingId, // get the pickerBoySalesOrderMappingId
-        quantity = req.body.quantity || req.body.qty
+        let stoPickingId = req.body.stoPickingId || req.params.stoPickingId; // get the pickerBoySalesOrderMappingId
         let item_no = req.body.item_no; //get the itemId
         // mongoose valid id 
-        if (objectId.isValid(mappingId)) {
+        if (objectId.isValid(stoPickingId)) {
 
-            // if Item qty greater than 0
-            if (parseInt(quantity)>0) {
-                info('Item Quantity is valid!')
+            // check whether the sale Order id is unique or not
+            let isValidItemAdded = await stoPickingDetailsCtrl.getAddedItemDetails(stoPickingId, item_no)
+
+            // if Item added or not
+            if (!isValidItemAdded.success) {
+                info('Item not added')
                 next();
             } else {
-                error('Invalid Item Quantity!');
-                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.invalidItemQuantity);
+                error('Item already added!');
+                return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.itemAlreadyAdded);
             }
         } else {
-            error('Invalid Item Number !');
+            error('The STOCK TRANSFER ID is Invalid !');
             return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.invalidSalesOrderId);
         }
 

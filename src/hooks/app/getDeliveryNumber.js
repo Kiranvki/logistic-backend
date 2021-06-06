@@ -2,7 +2,7 @@
 
 const pickerBoySalesOrderItemMappingCtrl = require('../../components/picker_app/pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller'); // pickerboy SO Item mapping ctrl
 const pickerBoySalesOrderMappingCtrl = require('../../components/picker_app/pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller'); // pickerboy SO mapping ctrl
-
+const stockTransferPickingDetailCtrl = require('../../components/picker_app/external_purchase_order/stock_transfer_picking_details/stock_transfer_picking_details.controller');
 // Responses & others utils 
 const Response = require('../../responses/response');
 const StatusCodes = require('../../facades/response');
@@ -32,22 +32,26 @@ const {
 module.exports = async (req, res, next) => {
   try {
     info('Getting the item detail !');
+    let requestFromUrl = req.url,
+    deliveryDetail;
 
-    // get all the salesman who are not checked out 
-  
-    let deliveryNumber = await pickerBoySalesOrderMappingCtrl.getDeliveryNumberByPickerOrderId(req.params.pickerBoyOrderMappingId)
-  
-    console.log('deliveryNumber',deliveryNumber)
-    if (deliveryNumber.success) {
+    // get the delivery number against which will be generated 
+  if(requestFromUrl.includes('/stocktransfer/generateInvoice/')){
+    deliveryDetail = await stockTransferPickingDetailCtrl.getDeliveryNumberByPickerOrderId(req.params.stoPickingId)
+  }else{
+    deliveryDetail = await pickerBoySalesOrderMappingCtrl.getDeliveryNumberByPickerOrderId(req.params.pickerBoyOrderMappingId)
+  }
+    
+    if (deliveryDetail.success) {
       
-      
-      req.body.deliveryNumber = deliveryNumber['data']['delivery_no']
+      info(`Delivery Number is ${deliveryDetail.data['delivery_no']}`)
+      req.body.deliveryDetail = deliveryDetail['data']
       
    
         return next()
       
     }else{
-error('DELIVERY NUMBER NOT EXIST.')
+      error('DELIVERY NUMBER NOT EXIST.')
       return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,"DELIVERY NUMBER NOT EXIST OR INVOICE ALREADY GENERATED!");
     }
 

@@ -28,7 +28,7 @@ module.exports = {
     itemUpdatedSuccessfully: 'Item Updated Successfully !',
     itemNotUpdated: 'Error! Updating Item !',
     //picker sales order mapping id
-    salesOrderAlreadyAddedInPickerState: 'Sales Order  Already Added in Picker State!',
+    salesOrderAlreadyAddedInPickerState: 'Sales Order  Already Added in Picking State!',
     deliveryDateUpdateFailedForSelesOrder: 'Delivery Date Update Failed For Sales Order!',
     succesfullUpdateDeliveryDateForSelesOrder: 'Succesfully Updated Delivery Date For Sales Order!',
     invalidPickerBoySalesOrderMappingId: 'The Picker Boy Sales Order Mapping Id is Invalid !',

@@ -16,5 +16,7 @@ module.exports = {
   vehicleModel: require('./vehicleModel'),
   purchaseOrder: require('./purchaseOrder'), // invoice
   stockTransferIn: require('./stockTransferIn'), // invoice
+  stockTransferOut: require('./stockTransferOut'), // invoice
+
 
 };

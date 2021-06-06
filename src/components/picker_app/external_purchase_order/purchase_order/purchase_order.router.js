@@ -11,6 +11,7 @@ const {
 
 // hooks
 const {
+  checkIsInPickingState,
   isInvoiceGenerated, // check whether the invoice is already generated
 } = require("../../../../hooks/app");
 
@@ -64,6 +65,23 @@ function purchaseOrderRoutes() {
       verifyAppToken, // verify app user token
       ctrl.filteredPODetails // post controller
     );
+    
+    closed.route("/picking/getstocktransfer").get(
+    
+      verifyAppToken,
+      checkIsInPickingState,
+      ctrl.getStockTransferList // get controller
+    );
+
+
+    closed.route("/picking/getpendingstocktransfer").get(
+    
+      verifyAppToken,
+      ctrl.getPendingStockTransferList // get controller
+    );
+
+
+    
   };
 }
 
