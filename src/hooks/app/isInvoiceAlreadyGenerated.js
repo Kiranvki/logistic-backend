@@ -19,7 +19,7 @@ module.exports = async (req, res, next) => {
     try {
         info('Check whether the invoice generated and details exist for the stock transfer or not');
         let objectId = mongoose.Types.ObjectId; // object id
-        let id = req.body.pickerBoySalesOrderMappingId || req.params.pickerBoySalesOrderMappingId || req.params.stoPickingId; // get the sale order id 
+        let id = req.body.pickerBoyOrderMappingId || req.params.pickerBoyOrderMappingId || req.params.stoPickingId; // get the sale order id 
         let isValidStoPickingId,
         requestFromUrl = req.url;
 

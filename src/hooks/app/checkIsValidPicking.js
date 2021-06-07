@@ -35,8 +35,8 @@ module.exports = async (req, res, next) => {
     let requestFromUrl = req.url,
     pickStatus,
     responseObj;
-  
-    if(requestFromUrl.includes('/purchaseOrder/')){
+   
+    if(requestFromUrl.includes('/stocktransfer/')){
       pickStatus = await stoDetailsCtrl.getPickingStatus(req.user._id)
      
    

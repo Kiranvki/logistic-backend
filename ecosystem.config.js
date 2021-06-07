@@ -169,6 +169,7 @@ module.exports = {
       'PURCHASE_ORDER_END_POINT': 'masterToNosqlApplication_Purchase',
       'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
       'isClusterRequired':1,
+      'sapStoOutboundDelivery' : 'http://52.172.31.130:50100/RESTAdapter/waycool_qua/sto_outbound_delivery',
       'sapPickingAllocation' : 'http://13.71.71.184:50100/RESTAdapter/waycool_prod/Picking_Allocation_Creation',
       'sapInvoiceGenerate':'http://13.71.71.184:50100/RESTAdapter/waycool_prod/invoice_sto_create',
       'sapInvoiceFetch' : 'http://13.71.71.184:50100/RESTAdapter/waycool_prod/invoice_sto_get',

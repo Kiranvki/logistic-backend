@@ -51,7 +51,7 @@ function stockTransferPickingDetailRouter() {
       verifyAppToken,
       joiStartpicking,
       checkIsValidPicking,
-      isSTOAlreadyInPickingState,
+      // isSTOAlreadyInPickingState,
       getStoDetail,
       ctrl.startPicking
     );
@@ -84,7 +84,7 @@ function stockTransferPickingDetailRouter() {
     // Generate picking_allocation
     closed.route('/stocktransfer/generateDelivery/:stoPickingId').get(
       verifyAppToken,
-      joiGenerateDelivery,
+      // joiGenerateDelivery,
       isPickingAlreadyGenerated,
       getPickedSTOItemDetail,
       getStoDetail,
@@ -97,7 +97,7 @@ function stockTransferPickingDetailRouter() {
     // generate Invoice
     closed.route('/stocktransfer/generateInvoice/:stoPickingId').get(
       verifyAppToken,
-      joiGenerateInvoice,
+      // joiGenerateInvoice,
       isInvoiceAlreadyGenerated,
       getDeliveryNumber,
       generateInvoice,
@@ -141,10 +141,10 @@ function stockTransferPickingDetailRouter() {
 
     );
 
-    // get ongoing Order
+    // get pending Order
     closed.route('/stocktransfer/pending/detail/:orderid').get(
       verifyAppToken,
-      joiPendingOrderDetail,
+      // joiPendingOrderDetail,
 
       ctrl.getPendingOrderAndInvoices
 

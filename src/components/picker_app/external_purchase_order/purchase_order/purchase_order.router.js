@@ -80,7 +80,14 @@ function purchaseOrderRoutes() {
       ctrl.getPendingStockTransferList // get controller
     );
 
+    closed.route("/getdetails/:orderId").get(
+    
+      verifyAppToken,
+      ctrl.getSTOPODetails // get controller
+    );
 
+
+    
     
   };
 }

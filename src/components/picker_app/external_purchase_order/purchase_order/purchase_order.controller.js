@@ -238,6 +238,74 @@ class purchaseController extends BaseController {
     }
   };
 
+
+  getSTOPODetails = async (req, res) => {
+    try {
+      info("Get STO order  details !");
+      var poDetails = await Model.aggregate([
+        {
+          $match: {
+            status: 1,
+            isDeleted: 0,
+            _id: mongoose.Types.ObjectId(req.params.orderId),
+          },
+        },
+        {
+          $project: {
+            po_number: 1,
+            vendor_no: 1,
+            vendor_name: 1,
+            "item._id": 1,
+            "item.item_no": 1,
+            "item.material_no": 1,
+            "item.material_description": 1,
+            "item.quantity": 1,
+            "item.net_price": 1,
+            "item.suppliedQty": 1,
+            "item.mrp": 1,
+            "item.uom":1,
+            "item.fulfillmentStatus":1,
+            pending_qty: 1,
+            received_qty: 1,
+            delivery_date: 1,
+          },
+        },
+      ]).allowDiskUse(true);
+
+      // success
+      if (poDetails.length > 0) {
+        poDetails[0]['item'].forEach((item, j) => {
+          console.log(item.quantity, parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.quantity) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
+          poDetails[0]['item'][j]['quantity'] = (parseFloat(item.quantity) - parseFloat(item.suppliedQty ? item.suppliedQty : 0))
+
+        })
+
+
+        _.remove(poDetails[0]['item'], { 'fulfillmentStatus': 2 })
+
+      return this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        poDetails,
+        this.messageTypes.poListFetched
+      );
+      }
+        else return this.errors(req, res, this.status.HTTP_CONFLICT, 'Unable to fetch stock transfer details');
+      
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
   // startPickUP = async (req, res) => {
   //   try {
   //     info("Get Purchase order  details !", req.body, req.query, req.params);
@@ -765,8 +833,8 @@ class purchaseController extends BaseController {
           else return 10;
         });
       let skip = parseInt(page - 1) * pageSize;
-      sortingArray["pickingStatus"] = -1;
-      sortingArray["delivery_date"] = -1;
+      // sortingArray["pickingStatus"] = -1;
+      sortingArray["_id"] = -1;
       let todaysDate = moment().format("YYYY-MM-DD");
       let todaysEndDate = moment().format("YYYY-MM-DD");
       info("Get Stock Transfer details !");

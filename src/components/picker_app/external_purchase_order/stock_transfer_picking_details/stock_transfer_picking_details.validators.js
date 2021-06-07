@@ -30,7 +30,7 @@ const schemas = {
     stoPickingId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Purchase order  receiving Id")
+      .label("Purchase order  picking Id")
       .required()
       .options({
         language: {
@@ -47,7 +47,7 @@ const schemas = {
     stoPickingId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Purchase order  receiving Id")
+      .label("Purchase order  order picking Id")
       .required()
       .options({
         language: {
@@ -64,7 +64,7 @@ const schemas = {
     stoPickingId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Purchase order  receiving Id")
+      .label("Purchase order  picking Id")
       .required()
       .options({
         language: {
@@ -81,7 +81,7 @@ const schemas = {
     stoPickingId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Purchase order  receiving Id")
+      .label("Purchase order picking Id")
       .required()
       .options({
         language: {
@@ -98,7 +98,7 @@ const schemas = {
     stoPickingId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Purchase order  receiving Id")
+      .label("Purchase order  picking Id")
       .required()
       .options({
         language: {
@@ -112,10 +112,10 @@ const schemas = {
   }),
 
   pendingOrderDetail: Joi.object().keys({
-    stoPickingId: Joi.string()
+    orderid: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Purchase order  receiving Id")
+      .label("Purchase order Id")
       .required()
       .options({
         language: {
@@ -271,7 +271,7 @@ module.exports = {
 
     // validating the schema
     schema
-      .validate({ params: req.params, body: req.body }, option)
+      .validate({ params: req.params.stoPickingId, body: req.body }, option)
       .then(() => {
         next();
         // if error occured

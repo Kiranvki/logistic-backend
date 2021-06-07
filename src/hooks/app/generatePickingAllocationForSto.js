@@ -49,7 +49,7 @@ module.exports = async (req, res, next) => {
       obj['request']['item'].push({
         'item_no': item['item_no'],
         'quantity': (item['pickedQuantity']).toString(),
-        'unit_of_measure': item['unit_of_measure'] || 'KG'
+        'unit_of_measure': item['uom'] || 'KG'
 
 
 
@@ -62,64 +62,64 @@ module.exports = async (req, res, next) => {
 
 
     // get the data from SAP
-    // req.body.delivery_detail = await request.post(url)
-    //   .send(obj)
-    //   .timeout({
-    //     response: 65000, // Wait 10 seconds for the server to start sending,
-    //     deadline: 65000, // but allow 1 minute for the file to finish loading.
-    //   })
-    //   .retry(1)
-    //   .then((res, body) => {
+    req.body.delivery_detail = await request.post(url)
+      .send(obj)
+      .timeout({
+        response: 65000, // Wait 10 seconds for the server to start sending,
+        deadline: 65000, // but allow 1 minute for the file to finish loading.
+      })
+      .retry(1)
+      .then((res, body) => {
 
-    //     // checking whether the user is authentic
-    //     if (res.status === 200) {
-    //       info('Document Generated Successfully !');
-    //       return {
-    //         success: true,
-    //         data: res.body.response,
-    //       };
-    //     } else {
-    //       error('Error Updating Server !');
-    //       return {
-    //         success: false,
-    //         error: 'Error Updating Server !'
-    //       };
-    //     }
-    //     // catch any runtime error
-    //   }, (err) => {
-    //     error(err);
-    //     if (err.timeout) {
-    //       return {
-    //         success: false,
-    //         error: 'API timeout'
-    //       };
-    //     } else {
-    //       return {
-    //         success: false,
-    //         error: err
-    //       };
-    //     }
-    //   });
+        // checking whether the user is authentic
+        if (res.status === 200) {
+          info('Document Generated Successfully !');
+          return {
+            success: true,
+            data: res.body.response,
+          };
+        } else {
+          error('Error Updating Server !');
+          return {
+            success: false,
+            error: 'Error Updating Server !'
+          };
+        }
+        // catch any runtime error
+      }, (err) => {
+        error(err);
+        if (err.timeout) {
+          return {
+            success: false,
+            error: 'API timeout'
+          };
+        } else {
+          return {
+            success: false,
+            error: err
+          };
+        }
+      });
 
     // 300000442
     //800000515
 
 
-    req.body.delivery_detail =
-    {
-              success: true,
-              data:  {
+//     req.body.delivery_detail =
+//     {
+//               success: true,
+//               data:  {
 
     
   
-          "outbound_delivery_no": "0800000962",
+//           "outbound_delivery_no": "0800000962",
   
-          "flag": "S"
+//           "flag": "S"
   
       
   
-  }
-}
+//   }
+// }
     // catch any runtime error 
   } catch (e) {
     error(e);
@@ -140,17 +140,21 @@ module.exports = async (req, res, next) => {
   } else {
     if (req.body.delivery_detail['success'] && req.body.delivery_detail['data']['flag'] === 'E') {
       info('Failed to generate delivery NO.')
-      let isResponseUpdated = stoPickingDetailModel.findOneAndUpdate({
+      let isResponseUpdated = await stoPickingDetailModel.findOneAndUpdate({
         '_id': stoPickingId
       }, {
         $set: {
-          'pickingAllocationResponsePayload': JSON.stringify(req.body.delivery_detail),
-          'pickingAllocationRequestPayload': JSON.stringify(obj),
+         
           'isItemPicked': false,
           'isStartedPicking': false,
           'state': 1,
           'isDeleted': 1,
           'isSapError': 'DNE' //DNE->delivery_no error
+        },$push:{
+          'pickingAllocationResponsePayload': JSON.stringify(req.body.delivery_detail),
+          'pickingAllocationRequestPayload': JSON.stringify(obj)
+        },$inc:{
+          deliveryRetryCount:1
         }
       })
       // //fixed require
@@ -161,18 +165,21 @@ module.exports = async (req, res, next) => {
       // status code changes check required
       return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,JSON.stringify(...req.body.delivery_detail['data']['remarks']) +','+MessageTypes.salesOrder.pickerBoySalesOrderDeliveryNumberAlreadyGenerated);
     } else {
-   let isResponseUpdated = stoPickingDetailModel.findOneAndUpdate({
+   let isResponseUpdated = await stoPickingDetailModel.findOneAndUpdate({
       '_id': stoPickingId
     }, {
       $set: {
-        'picking_allocation_response': JSON.stringify(req.body.delivery_detail),
-        'picking_allocation_request': JSON.stringify(obj),
         'isItemPicked': false,
-        'isStartedPicking': false,
-        'state': 1,
-        'isDeleted': 1,
-        'isSapError': 'DNE' //DNE->delivery_no error
-      }
+          'isStartedPicking': false,
+          'state': 1,
+          'isDeleted': 1,
+          'isSapError': 'DNE' //DNE->delivery_no error
+        },$push:{
+          'pickingAllocationResponsePayload': JSON.stringify(req.body.delivery_detail),
+          'pickingAllocationRequestPayload': JSON.stringify(obj)
+        },$inc:{
+          deliveryRetryCount:1
+        }
     })
       // //fixed require
       // await pickerBoyOrderItemMappingModel.update({ 'pickerBoySalesOrderMappingId': req.params.pickerBoyOrderMappingId }, { $set: { 'isDeleted': 1 } })
