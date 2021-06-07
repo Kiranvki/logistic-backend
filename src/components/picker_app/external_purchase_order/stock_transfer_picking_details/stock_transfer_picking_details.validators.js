@@ -9,8 +9,8 @@ const Response = require("../../../../responses/response");
 // add joi schema
 const schemas = {
   // joi apicker boy start receiving
-  startReceiving: Joi.object().keys({
-    poId: Joi.string()
+  startpicking: Joi.object().keys({
+    STOID: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
       .label("Purchase order Id")
@@ -26,8 +26,93 @@ const schemas = {
       }),
   }),
   // joi receiving list after doing start pick or for resuming reciving sti
-  joiReceivingList: Joi.object().keys({
-    poReceivingId: Joi.string()
+  picking: Joi.object().keys({
+    stoPickingId: Joi.string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .label("Purchase order  receiving Id")
+      .required()
+      .options({
+        language: {
+          string: {
+            regex: {
+              base: "should be a valid mongoose Id.",
+            },
+          },
+        },
+      }),
+  }),
+
+  bucketdetail: Joi.object().keys({
+    stoPickingId: Joi.string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .label("Purchase order  receiving Id")
+      .required()
+      .options({
+        language: {
+          string: {
+            regex: {
+              base: "should be a valid mongoose Id.",
+            },
+          },
+        },
+      }),
+  }),
+
+  generateDelivery: Joi.object().keys({
+    stoPickingId: Joi.string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .label("Purchase order  receiving Id")
+      .required()
+      .options({
+        language: {
+          string: {
+            regex: {
+              base: "should be a valid mongoose Id.",
+            },
+          },
+        },
+      }),
+  }),
+
+  generateInvoice: Joi.object().keys({
+    stoPickingId: Joi.string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .label("Purchase order  receiving Id")
+      .required()
+      .options({
+        language: {
+          string: {
+            regex: {
+              base: "should be a valid mongoose Id.",
+            },
+          },
+        },
+      }),
+  }),
+
+  historyDetail: Joi.object().keys({
+    stoPickingId: Joi.string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .label("Purchase order  receiving Id")
+      .required()
+      .options({
+        language: {
+          string: {
+            regex: {
+              base: "should be a valid mongoose Id.",
+            },
+          },
+        },
+      }),
+  }),
+
+  pendingOrderDetail: Joi.object().keys({
+    stoPickingId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
       .label("Purchase order  receiving Id")
@@ -43,7 +128,7 @@ const schemas = {
       }),
   }),
 }
- 
+
 // joi options
 const options = {
   // generic option
@@ -66,9 +151,9 @@ const options = {
 
 module.exports = {
   // exports validate admin signin
-  startReceiving: (req, res, next) => {
+  joiStartpicking: (req, res, next) => {
     // getting the schemas
-    let schema = schemas.startReceiving;
+    let schema = schemas.startpicking;
     let option = options.basic;
 
     // validating the schema
@@ -89,9 +174,9 @@ module.exports = {
       });
   },
 
-  joiReceivingList: (req, res, next) => {
+  joiResumePicking: (req, res, next) => {
     // getting the schemas
-    let schema = schemas.joiReceivingList;
+    let schema = schemas.picking;
     let option = options.basic;
 
     // validating the schema
@@ -111,7 +196,8 @@ module.exports = {
         Response.joierrors(req, res, err);
       });
   },
-  joiReceivingItem: (req, res, next) => {
+
+  joiPickingItem: (req, res, next) => {
     // getting the schemas
     let schema = schemas.joiReceivingItem;
     let option = options.basic;
@@ -155,4 +241,121 @@ module.exports = {
         Response.joierrors(req, res, err);
       });
   },
+  joiBucketdetail: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.bucketdetail;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate({ params: req.params, body: req.body }, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
+  joiGenerateDelivery: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.generateDelivery;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate({ params: req.params, body: req.body }, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
+  joiGenerateInvoice: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.generateInvoice;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate({ params: req.params, body: req.body }, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
+  joiHistoryDetail: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.historyDetail;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate({ params: req.params, body: req.body }, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
+  joiPendingOrderDetail: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.pendingOrderDetail;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate({ params: req.params, body: req.body }, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
 };
+
+
+

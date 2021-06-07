@@ -6,10 +6,13 @@ const poCtrl = require("../purchase_order/purchase_order.controller");
 
 // custom joi validation
 const {
-  startReceiving,
-  joiReceivingList,
-  joiReceivingItem,
-  joiScanItem
+  joiStartpicking,
+  joiResumePicking,
+  joiPickingItem,
+  joiGenerateDelivery,
+  joiGenerateInvoice,
+  joiHistoryDetail,
+  joiPendingOrderDetail,
 } = require("./stock_transfer_picking_details.validators");
 
 // hooks
@@ -46,8 +49,9 @@ function stockTransferPickingDetailRouter() {
     //Create an entry STO picking detail Collection / CReate Cart or Bucket
     closed.route('/stocktransfer/startpicking/:STOID').patch(
       verifyAppToken,
+      joiStartpicking,
       checkIsValidPicking,
-      // isSTOAlreadyInPickingState,
+      isSTOAlreadyInPickingState,
       getStoDetail,
       ctrl.startPicking
     );
@@ -62,6 +66,7 @@ function stockTransferPickingDetailRouter() {
     //resume picking api
     closed.route('/stocktransfer/picking/:stoPickingId').get(
       verifyAppToken,
+      joiResumePicking,
 
       ctrl.getPickedItemStatus
     );
@@ -79,6 +84,7 @@ function stockTransferPickingDetailRouter() {
     // Generate picking_allocation
     closed.route('/stocktransfer/generateDelivery/:stoPickingId').get(
       verifyAppToken,
+      joiGenerateDelivery,
       isPickingAlreadyGenerated,
       getPickedSTOItemDetail,
       getStoDetail,
@@ -86,11 +92,12 @@ function stockTransferPickingDetailRouter() {
       updateOutboundDeliveryToDb,
       ctrl.generateStoDelivery
     );
-    
+
 
     // generate Invoice
     closed.route('/stocktransfer/generateInvoice/:stoPickingId').get(
       verifyAppToken,
+      joiGenerateInvoice,
       isInvoiceAlreadyGenerated,
       getDeliveryNumber,
       generateInvoice,
@@ -101,51 +108,53 @@ function stockTransferPickingDetailRouter() {
     );
 
 
-        // get History
-        closed.route('/stocktransfer/history').get(
-          verifyAppToken,
-        
-          ctrl.getHistory
-    
-        );
+    // get History
+    closed.route('/stocktransfer/history').get(
+      verifyAppToken,
 
-           // get History detail
-           closed.route('/stocktransfer/history/detail/:stoPickingId').get(
-            verifyAppToken,
-          
-            ctrl.getOrderHistoryAndInvoices
-      
-          );
+      ctrl.getHistory
 
-           // get ongoing Order
-           closed.route('/stocktransfer/ongoing').get(
-            verifyAppToken,
-          
-            ctrl.getOnGoing
-      
-          );
+    );
 
-                // get ongoing Order
-                closed.route('/stocktransfer/pending/invoice').get(
-                  verifyAppToken,
-                
-                  ctrl.getPendingInvoices
-            
-                );
+    // get History detail
+    closed.route('/stocktransfer/history/detail/:stoPickingId').get(
+      verifyAppToken,
+      joiHistoryDetail,
 
-                          // get ongoing Order
-                          closed.route('/stocktransfer/pending/detail/:orderid').get(
-                            // verifyAppToken,
-                          
-                            ctrl.getPendingOrderAndInvoices
-                      
-                          );
+      ctrl.getOrderHistoryAndInvoices
 
-                
+    );
 
-                
+    // get ongoing Order
+    closed.route('/stocktransfer/ongoing').get(
+      verifyAppToken,
 
-        
+      ctrl.getOnGoing
+
+    );
+
+    // get ongoing Order
+    closed.route('/stocktransfer/pending/invoice').get(
+      verifyAppToken,
+
+      ctrl.getPendingInvoices
+
+    );
+
+    // get ongoing Order
+    closed.route('/stocktransfer/pending/detail/:orderid').get(
+      verifyAppToken,
+      joiPendingOrderDetail,
+
+      ctrl.getPendingOrderAndInvoices
+
+    );
+
+
+
+
+
+
   }
 }
 

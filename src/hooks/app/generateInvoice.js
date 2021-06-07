@@ -104,69 +104,69 @@ module.exports = async (req, res, next) => {
     //         }]
     //     }
 
-    // req.body.invoice_detail = await request.post(url)
-    //   .send(obj)
-    //   .timeout({
-    //     response: 65000, // Wait 10 seconds for the server to start sending,
-    //     deadline: 65000, // but allow 1 minute for the file to finish loading.
-    //   })
-    //   .retry(1)
-    //   .then((res, body) => {
+    req.body.invoice_detail = await request.post(url)
+      .send(obj)
+      .timeout({
+        response: 65000, // Wait 10 seconds for the server to start sending,
+        deadline: 65000, // but allow 1 minute for the file to finish loading.
+      })
+      .retry(1)
+      .then((res, body) => {
 
-    //     // checking whether the user is authentic
-    //     if (res.status === 200) {
-    //       info('Invoice Generated Successfully !');
-    //       console.log('invoice data', res.body.response)
-    //       return {
+        // checking whether the user is authentic
+        if (res.status === 200) {
+          info('Invoice Generated Successfully !');
+          console.log('invoice data', res.body.response)
+          return {
 
-    //         success: true,
-    //         data: res.body.response,
-    //       };
-    //     } else {
-    //       error('Error Updating Server !');
-    //       return {
-    //         success: false,
-    //         error: 'Picking successful but invoice creation failed.Please check directly if invoice is created!'
-    //       };
-    //     }
-    //     // catch any runtime error
-    //   }, (err) => {
-    //     error(err);
-    //     if (err.timeout) {
-    //       return {
-    //         success: false,
-    //         error: 'Picking Successful and invoice creation timed out.Please check directly if invoice is created.'
-    //       };
-    //     } else {
-    //       return {
-    //         success: false,
-    //         error: err
-    //       };
-    //     }
-    //   });
+            success: true,
+            data: res.body.response,
+          };
+        } else {
+          error('Error Updating Server !');
+          return {
+            success: false,
+            error: 'Picking successful but invoice creation failed.Please check directly if invoice is created!'
+          };
+        }
+        // catch any runtime error
+      }, (err) => {
+        error(err);
+        if (err.timeout) {
+          return {
+            success: false,
+            error: 'Picking Successful and invoice creation timed out.Please check directly if invoice is created.'
+          };
+        } else {
+          return {
+            success: false,
+            error: err
+          };
+        }
+      });
 
-  req.body.invoice_detail = {
-      'success':true
-    }
-  req.body.invoice_detail['data'] = {
+//   req.body.invoice_detail = {
+//       'success':true
+//     }
+//   req.body.invoice_detail['data'] = {
 
    
 
-        "invoice_no": "0900000471",
+//         "invoice_no": "0900000471",
 
-        "reference_key": 1234,
+//         "reference_key": 1234,
 
-        "flag": "S",
+//         "flag": "S",
 
-        "remarks": [
+//         "remarks": [
 
-            "Document 0900000471 has been saved."
+//             "Document 0900000471 has been saved."
 
-        ]
+//         ]
 
     
 
-}
+// }
 
 
 

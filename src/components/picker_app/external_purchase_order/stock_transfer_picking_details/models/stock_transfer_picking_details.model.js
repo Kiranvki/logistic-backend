@@ -11,36 +11,36 @@ const stockTransferPickingDetailSchema = new Schema(
         select: ['fullName', 'employeeId'],
       },
     },
-    invoiceRetryCount:{
-      type:Number,
-      default:-1
+    invoiceRetryCount: {
+      type: Number,
+      default: -1
     },
-    deliveryRetryCount:{
-      type:Number,
-      default:-1
+    deliveryRetryCount: {
+      type: Number,
+      default: -1
     },
-    delivery_no:{
-      type:String,
-      default:'N/A'
+    delivery_no: {
+      type: String,
+      default: 'N/A'
 
     },
-    pickingAllocationDate:{
-      type:Date
+    pickingAllocationDate: {
+      type: Date
     },
-// true when item is added into the bucket
-    isItemPicked:{
-      type:Boolean,
-      default:false
+    // true when item is added into the bucket
+    isItemPicked: {
+      type: Boolean,
+      default: false
 
     },
-// true when STO PO is selected/added into the picking state
-    isStartedPicking:{
-      type:Boolean,
-      default:false
+    // true when STO PO is selected/added into the picking state
+    isStartedPicking: {
+      type: Boolean,
+      default: false
     },
-  
-    
-      // 4 initiated Picking
+
+
+    // 4 initiated Picking
     // 3 added itms to  cart
     //2 if fullfillment status is partially fulfilled and  grn is generated
     //1 if fullfillment status is  fulfilled and  grn is generated
@@ -48,18 +48,18 @@ const stockTransferPickingDetailSchema = new Schema(
       type: Number,
       default: 4,
     },
-    
-  
 
-      //1 partially fulfilled
+
+
+    //1 partially fulfilled
     //2 fullfilled
     fullfilment: {
       type: Number,
       default: 0,
     },
- 
 
-  
+
+
     status: {
       type: Number,
       default: 1,
@@ -72,17 +72,17 @@ const stockTransferPickingDetailSchema = new Schema(
       type: String,
       default: 'N/A'
     }],
-    stoNumber:{
-      type:String
+    stoNumber: {
+      type: String
     },
-    plant:{
-      type:String
+    plant: {
+      type: String
     },
-    shipping_plant:{
-      type:String
+    shipping_plant: {
+      type: String
     },
-    vendor_name:{
-      type:String
+    vendor_name: {
+      type: String
     },
     stoDbId: {
       required: true,
@@ -94,13 +94,14 @@ const stockTransferPickingDetailSchema = new Schema(
     },
     item: [
 
-      {is_item_picked:{
-        type:Boolean,
-        default:true
-      },
-      fullfilment:{
-        type:Number
-      },
+      {
+        is_item_picked: {
+          type: Boolean,
+          default: true
+        },
+        fullfilment: {
+          type: Number
+        },
         is_edited: {
           type: Number,
         },
@@ -156,7 +157,7 @@ const stockTransferPickingDetailSchema = new Schema(
           type: Number,
           default: 0,
         },
-     
+
         rejected_qty: {
           type: Number,
         },
@@ -168,43 +169,43 @@ const stockTransferPickingDetailSchema = new Schema(
         },
       },
     ],
-    isSapError:{
-        type:String
+    isSapError: {
+      type: String
     },
-    pickingAllocationRequestPayload:[{
-        type:String
+    pickingAllocationRequestPayload: [{
+      type: String
     }],
-    pickingAllocationResponsePayload:[{
-        type:String
+    pickingAllocationResponsePayload: [{
+      type: String
     }],
-    invoiceRequestPayload:[{
-        type:String
+    invoiceRequestPayload: [{
+      type: String
     }],
-    invoiceResponsePayload:[{
-        type:String
+    invoiceResponsePayload: [{
+      type: String
     }],
     invoiceDetail: {
       isInvoiceRequest: {
         type: Boolean,
         default: false  //true->restrict picker boy
-  
+
       },
       isInvoice: {
         type: Boolean,
         default: false
-  
+
       },
       invoice: {
         invoiceDbId: {
           type: mongoose.Types.ObjectId,
-  
+
         },
         invoice_no: {
           type: String,
           default: null
         },
-        invoiceDate:{
-          type:Date
+        invoiceDate: {
+          type: Date
         }
       }
     }
@@ -231,71 +232,73 @@ class stockTransferPickingDetailClass {
       {
         '_id': pickerBoyOrderMappingData._id
       }
-    },{
-      $lookup:{
-        'from':'purchase_order',
-        'let':{'id':'$stoDbId'},
-        'pipeline':[{
-          $match:{
-            '$expr' : {'$eq' : ['$_id','$$id']}
+    }, {
+      $lookup: {
+        'from': 'purchase_order',
+        'let': { 'id': '$stoDbId' },
+        'pipeline': [{
+          $match: {
+            '$expr': { '$eq': ['$_id', '$$id'] }
           }
         },
-      {$project:{
-        "id": 1,
-        
-        "po_document_type":1,
-        "company_code": 1,
-      
-        "purchase_organisation": 1,
-        "purchase_group": 1,
-        "document_date": 1,
-        "delivery_date": 1,
-        
-        
-       
-    
-        "created_at": 1,
-       
-   
-        "vendor_name":1,
-        "item":1
-      
-      }}],
-        'as':'stoDetails'
+        {
+          $project: {
+            "id": 1,
+
+            "po_document_type": 1,
+            "company_code": 1,
+
+            "purchase_organisation": 1,
+            "purchase_group": 1,
+            "document_date": 1,
+            "delivery_date": 1,
+
+
+
+
+            "created_at": 1,
+
+
+            "vendor_name": 1,
+            "item": 1
+
+          }
+        }],
+        'as': 'stoDetails'
 
       }
     },
     {
-      $project:{
+      $project: {
         "pickingStatus": 1,
-            "fullfilment": 1,
-           
-            "pickerBoyId": 1,
-            "stoNumber": 1,
-            "stoDbId": 1,
-            "pickingDate": 1,
-            "plant": 1,
-            "shipping_plant": 1,
-            "item": '$stoDetails.item',
-            "id": {$arrayElemAt:['$stoDetails.id',0]},
-           
-            "po_document_type": {$arrayElemAt:["$stoDetails.po_document_type",0]},
-            "company_code": {$arrayElemAt:["$stoDetails.company_code",0]},
-            "vendor_no": {$arrayElemAt:["$stoDetails.vendor_no",0]},
-            "purchase_organisation": {$arrayElemAt:['$stoDetails.purchase_organisation',0]},
-            "purchase_group": {$arrayElemAt:['$stoDetails.purchase_group',0]},
-            "document_date": {$arrayElemAt:['$stoDetails.document_date',0]},
-            "delivery_date": {$arrayElemAt:['$stoDetails.delivery_date',0]},
-            
-           
-            
-            "vendor_name": {$arrayElemAt:['$stoDetails.vendor_name',0]},
-            
-            "orderDate": {$arrayElemAt:['$stoDetails.created_at',0]}
+        "fullfilment": 1,
+
+        "pickerBoyId": 1,
+        "stoNumber": 1,
+        "stoDbId": 1,
+        "pickingDate": 1,
+        "plant": 1,
+        "shipping_plant": 1,
+        "item": '$stoDetails.item',
+        "id": { $arrayElemAt: ['$stoDetails.id', 0] },
+
+        "po_document_type": { $arrayElemAt: ["$stoDetails.po_document_type", 0] },
+        "company_code": { $arrayElemAt: ["$stoDetails.company_code", 0] },
+        "vendor_no": { $arrayElemAt: ["$stoDetails.vendor_no", 0] },
+        "purchase_organisation": { $arrayElemAt: ['$stoDetails.purchase_organisation', 0] },
+        "purchase_group": { $arrayElemAt: ['$stoDetails.purchase_group', 0] },
+        "document_date": { $arrayElemAt: ['$stoDetails.document_date', 0] },
+        "delivery_date": { $arrayElemAt: ['$stoDetails.delivery_date', 0] },
+
+
+
+        "vendor_name": { $arrayElemAt: ['$stoDetails.vendor_name', 0] },
+
+        "orderDate": { $arrayElemAt: ['$stoDetails.created_at', 0] }
       }
     }
-  ]
-  );
+    ]
+    );
 
 
   }
@@ -377,12 +380,12 @@ class stockTransferPickingDetailClass {
 
   }
 
-  static async addItem(id,itemDetail){
-    let isExist = await this.count({ '_id':mongoose.Types.ObjectId(id),'isDeleted': 0 });
-    if(isExist){
+  static async addItem(id, itemDetail) {
+    let isExist = await this.count({ '_id': mongoose.Types.ObjectId(id), 'isDeleted': 0 });
+    if (isExist) {
 
-      return await this.update({  '_id':mongoose.Types.ObjectId(id),'isDeleted': 0 },{$set:{isItemPicked:true},$push:{'item':itemDetail}})
-      
+      return await this.update({ '_id': mongoose.Types.ObjectId(id), 'isDeleted': 0 }, { $set: { isItemPicked: true }, $push: { 'item': itemDetail } })
+
     }
     // let obj = await new this(orderObjItem).save()
     return await this(orderObjItem).save();
@@ -391,161 +394,165 @@ class stockTransferPickingDetailClass {
   }
 
 
-  static async getOrderDetailPickedByPickerBoyId(pickerBoyId){
-   return await this.aggregate([{
+  static async getOrderDetailPickedByPickerBoyId(pickerBoyId) {
+    return await this.aggregate([{
       $match:
       {
         'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
-        isItemPicked:true,
-    // true when STO PO is selected/added into the picking state
-        isStartedPicking:true
+        isItemPicked: true,
+        // true when STO PO is selected/added into the picking state
+        isStartedPicking: true
       }
-    },{
-      $lookup:{
-        'from':'purchase_order',
-        'let':{'id':'$stoDbId'},
-        'pipeline':[{
-          $match:{
-            '$expr' : {'$eq' : ['$_id','$$id']}
+    }, {
+      $lookup: {
+        'from': 'purchase_order',
+        'let': { 'id': '$stoDbId' },
+        'pipeline': [{
+          $match: {
+            '$expr': { '$eq': ['$_id', '$$id'] }
           }
         },
-      {$project:{
-        "id": 1,
-        
-        "po_document_type":1,
-        "company_code": 1,
-      
-        "purchase_organisation": 1,
-        "purchase_group": 1,
-        "document_date": 1,
-        "delivery_date": 1,
-        
-        
-      
-        "created_at": 1,
-       
-   
-        "vendor_name":1,
-        "item":1
-      
-      }}],
-        'as':'stoDetails'
+        {
+          $project: {
+            "id": 1,
+
+            "po_document_type": 1,
+            "company_code": 1,
+
+            "purchase_organisation": 1,
+            "purchase_group": 1,
+            "document_date": 1,
+            "delivery_date": 1,
+
+
+
+            "created_at": 1,
+
+
+            "vendor_name": 1,
+            "item": 1
+
+          }
+        }],
+        'as': 'stoDetails'
 
       }
     },
     {
-      $project:{
+      $project: {
         "pickingStatus": 1,
-            "fullfilment": 1,
-           
-            "pickerBoyId": 1,
-            "stoNumber": 1,
-            "stoDbId": 1,
-            "pickingDate": 1,
-            "plant": 1,
-            "shipping_plant": 1,
-            "item": 1,
-            'orderItem':{$arrayElemAt:['$stoDetails.item',0]},
-            "id": {$arrayElemAt:['$stoDetails.id',0]},
-           
-            "po_document_type": {$arrayElemAt:["$stoDetails.po_document_type",0]},
-            "company_code": {$arrayElemAt:["$stoDetails.company_code",0]},
-            "vendor_no": {$arrayElemAt:["$stoDetails.vendor_no",0]},
-            "purchase_organisation": {$arrayElemAt:['$stoDetails.purchase_organisation',0]},
-            "purchase_group": {$arrayElemAt:['$stoDetails.purchase_group',0]},
-            "document_date": {$arrayElemAt:['$stoDetails.document_date',0]},
-            "delivery_date": {$arrayElemAt:['$stoDetails.delivery_date',0]},
-            
-           
-            
-            "vendor_name": {$arrayElemAt:['$stoDetails.vendor_name',0]},
-            
-            "orderDate": {$arrayElemAt:['$stoDetails.created_at',0]}
+        "fullfilment": 1,
+
+        "pickerBoyId": 1,
+        "stoNumber": 1,
+        "stoDbId": 1,
+        "pickingDate": 1,
+        "plant": 1,
+        "shipping_plant": 1,
+        "item": 1,
+        'orderItem': { $arrayElemAt: ['$stoDetails.item', 0] },
+        "id": { $arrayElemAt: ['$stoDetails.id', 0] },
+
+        "po_document_type": { $arrayElemAt: ["$stoDetails.po_document_type", 0] },
+        "company_code": { $arrayElemAt: ["$stoDetails.company_code", 0] },
+        "vendor_no": { $arrayElemAt: ["$stoDetails.vendor_no", 0] },
+        "purchase_organisation": { $arrayElemAt: ['$stoDetails.purchase_organisation', 0] },
+        "purchase_group": { $arrayElemAt: ['$stoDetails.purchase_group', 0] },
+        "document_date": { $arrayElemAt: ['$stoDetails.document_date', 0] },
+        "delivery_date": { $arrayElemAt: ['$stoDetails.delivery_date', 0] },
+
+
+
+        "vendor_name": { $arrayElemAt: ['$stoDetails.vendor_name', 0] },
+
+        "orderDate": { $arrayElemAt: ['$stoDetails.created_at', 0] }
       }
     }
-  ]
-  );
+    ]
+    );
 
   }
 
 
-  static async getPickedItemStatus(stoPickingId){
+  static async getPickedItemStatus(stoPickingId) {
     return await this.aggregate([{
-       $match:
-       {
-         '_id': mongoose.Types.ObjectId(stoPickingId)
-       }
-     },{
-       $lookup:{
-         'from':'purchase_order',
-         'let':{'id':'$stoDbId'},
-         'pipeline':[{
-           $match:{
-             '$expr' : {'$eq' : ['$_id','$$id']}
-           }
-         },
-       {$project:{
-         "id": 1,
-         
-         "po_document_type":1,
-         "company_code": 1,
-       
-         "purchase_organisation": 1,
-         "purchase_group": 1,
-         "document_date": 1,
-         "delivery_date": 1,
-         
-         
-       
-         "created_at": 1,
-        
-    
-         "vendor_name":1,
-         "item":1
-       
-       }}],
-         'as':'stoDetails'
- 
-       }
-     },
-     {
-       $project:{
-         "pickingStatus": 1,
-             "fullfilment": 1,
-            
-             "pickerBoyId": 1,
-             "stoNumber": 1,
-             "stoDbId": 1,
-             "pickingDate": 1,
-             "plant": 1,
-             "shipping_plant": 1,
-             "item": 1,
-             'orderItem':{$arrayElemAt:['$stoDetails.item',0]},
-             "id": {$arrayElemAt:['$stoDetails.id',0]},
-            
-             "po_document_type": {$arrayElemAt:["$stoDetails.po_document_type",0]},
-             "company_code": {$arrayElemAt:["$stoDetails.company_code",0]},
-             "vendor_no": {$arrayElemAt:["$stoDetails.vendor_no",0]},
-             "purchase_organisation": {$arrayElemAt:['$stoDetails.purchase_organisation',0]},
-             "purchase_group": {$arrayElemAt:['$stoDetails.purchase_group',0]},
-             "document_date": {$arrayElemAt:['$stoDetails.document_date',0]},
-             "delivery_date": {$arrayElemAt:['$stoDetails.delivery_date',0]},
-             
-            
-             
-             "vendor_name": {$arrayElemAt:['$stoDetails.vendor_name',0]},
-             
-             "orderDate": {$arrayElemAt:['$stoDetails.created_at',0]}
-       }
-     }
-   ]
-   );
- 
-   }
+      $match:
+      {
+        '_id': mongoose.Types.ObjectId(stoPickingId)
+      }
+    }, {
+      $lookup: {
+        'from': 'purchase_order',
+        'let': { 'id': '$stoDbId' },
+        'pipeline': [{
+          $match: {
+            '$expr': { '$eq': ['$_id', '$$id'] }
+          }
+        },
+        {
+          $project: {
+            "id": 1,
+
+            "po_document_type": 1,
+            "company_code": 1,
+
+            "purchase_organisation": 1,
+            "purchase_group": 1,
+            "document_date": 1,
+            "delivery_date": 1,
+
+
+
+            "created_at": 1,
+
+
+            "vendor_name": 1,
+            "item": 1
+
+          }
+        }],
+        'as': 'stoDetails'
+
+      }
+    },
+    {
+      $project: {
+        "pickingStatus": 1,
+        "fullfilment": 1,
+
+        "pickerBoyId": 1,
+        "stoNumber": 1,
+        "stoDbId": 1,
+        "pickingDate": 1,
+        "plant": 1,
+        "shipping_plant": 1,
+        "item": 1,
+        'orderItem': { $arrayElemAt: ['$stoDetails.item', 0] },
+        "id": { $arrayElemAt: ['$stoDetails.id', 0] },
+
+        "po_document_type": { $arrayElemAt: ["$stoDetails.po_document_type", 0] },
+        "company_code": { $arrayElemAt: ["$stoDetails.company_code", 0] },
+        "vendor_no": { $arrayElemAt: ["$stoDetails.vendor_no", 0] },
+        "purchase_organisation": { $arrayElemAt: ['$stoDetails.purchase_organisation', 0] },
+        "purchase_group": { $arrayElemAt: ['$stoDetails.purchase_group', 0] },
+        "document_date": { $arrayElemAt: ['$stoDetails.document_date', 0] },
+        "delivery_date": { $arrayElemAt: ['$stoDetails.delivery_date', 0] },
+
+
+
+        "vendor_name": { $arrayElemAt: ['$stoDetails.vendor_name', 0] },
+
+        "orderDate": { $arrayElemAt: ['$stoDetails.created_at', 0] }
+      }
+    }
+    ]
+    );
+
+  }
 
 
   static async updateStatus(updateQuery) {
-  console.log(...updateQuery)
+    console.log(...updateQuery)
     let stoPickingDetails = await this.findOneAndUpdate(...updateQuery);
     return stoPickingDetails;
 

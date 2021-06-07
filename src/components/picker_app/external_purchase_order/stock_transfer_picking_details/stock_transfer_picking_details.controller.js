@@ -154,7 +154,7 @@ class stockTransferPickingDetailController extends BaseController {
         $project: {
           'items': "$data.item",
           '_id': '$_id',
-          'stoDbId':{ $arrayElemAt: ['$data.stoDbId',0]},
+          'stoDbId': { $arrayElemAt: ['$data.stoDbId', 0] },
           'plant': { $arrayElemAt: ['$data.plant', 0] },
           'stoNumber': { $arrayElemAt: ['$data.stoNumber', 0] },
           'shipping_plant': { $arrayElemAt: ['$data.shipping_plant', 0] }
@@ -174,7 +174,7 @@ class stockTransferPickingDetailController extends BaseController {
               'item': res[0]['items'], 'id': res[0]['_id'], plant: res[0]['plant'],
               'shipping_plant': res[0]['shipping_plant'],
               'stoNumber': res[0]['stoNumber'],
-              'stoDbId':res[0]['stoDbId']
+              'stoDbId': res[0]['stoDbId']
             }
 
 
@@ -264,7 +264,7 @@ class stockTransferPickingDetailController extends BaseController {
         taxable_value: req.body.stoDetails.orderDetail.taxable_value,
         discount_amount: req.body.stoDetails.orderDetail.discount_amount,
         discount_perc: req.body.stoDetails.orderDetail.discount_perc,
-        pending_qty: req.body.stoDetails.orderDetail.quantity - (req.body.qty+req.body.stoDetails.orderDetail.suppliedQty?req.body.stoDetails.orderDetail.suppliedQty:0),
+        pending_qty: req.body.stoDetails.orderDetail.quantity - (req.body.qty + req.body.stoDetails.orderDetail.suppliedQty ? req.body.stoDetails.orderDetail.suppliedQty : 0),
         pickedQuantity: req.body.qty,
         remarks: req.body.remarks,
         date_of_manufacturing: req.body.stoDetails.orderDetail.delivery_date
@@ -371,7 +371,7 @@ class stockTransferPickingDetailController extends BaseController {
           { 'delivery_no': { $ne: 'N/A' } },
           { 'invoiceDetail.isInvoice': false }
         ]
-      }, {'delivery_no':1,'fullfilment':1,'vendor_name':1,'shipping_plant':1,'plant':1,'delivery_date':1,'stoDbId':1,'stoNumber':1}).lean().then((res) => {
+      }, { 'delivery_no': 1, 'fullfilment': 1, 'vendor_name': 1, 'shipping_plant': 1, 'plant': 1, 'delivery_date': 1, 'stoDbId': 1, 'stoNumber': 1 }).lean().then((res) => {
 
         if (res && !_.isEmpty(res)) {
           return {
@@ -461,10 +461,10 @@ class stockTransferPickingDetailController extends BaseController {
       // get details 
       return Model.findOne({
         _id: mongoose.Types.ObjectId(pickerBoyStoMappingId),
-      
+
         delivery_no: { $ne: 'N/A' },
         isDeleted: 0
-      },'_id delivery_no flag remarks deliveryRetryCount').lean().then((res) => {
+      }, '_id delivery_no flag remarks deliveryRetryCount').lean().then((res) => {
         if (res && !_.isEmpty(res)) {
           return {
             success: true,
@@ -495,10 +495,10 @@ class stockTransferPickingDetailController extends BaseController {
   }
 
 
-  gerPendingInvoices = async (req,res,next)=>{
-    
+  gerPendingInvoices = async (req, res, next) => {
+
     try {
-   
+
 
       info('Fetching Pending Invoices !');
       var userId = mongoose.Types.ObjectId(req.user._id);
@@ -515,22 +515,22 @@ class stockTransferPickingDetailController extends BaseController {
       let todaysEndDate = moment().format("YYYY-MM-DD");
       info("Get Stock Transfer details !");
       let query = {
-     
+
         $and: [
-         { pickerBoyId: mongoose.Types.ObjectId(userId)},
+          { pickerBoyId: mongoose.Types.ObjectId(userId) },
           {
-            delivery_no:{$ne:'N/A'}
+            delivery_no: { $ne: 'N/A' }
           },
           {
-            'invoiceDetail.isInvoice':false
+            'invoiceDetail.isInvoice': false
           }
 
 
-       
-         ], 
+
+        ],
         status: 1,
         isDeleted: 0,
-        
+
         // delivery_date:{$lte:todaysEndDate}//to-do
       };
 
@@ -681,8 +681,8 @@ class stockTransferPickingDetailController extends BaseController {
   generateStoDelivery = async (req, res, next) => {
 
     let pickedItem = req.body.pickedStoDetails.item,
-    stoId=req.body.pickedStoDetails.stoDbId,
-    orderDetail = req.body.stoDetails
+      stoId = req.body.pickedStoDetails.stoDbId,
+      orderDetail = req.body.stoDetails
     // console.log('test',pickedItem,stoId)
     // req.body.delivery_detail
     console.log(orderDetail)
@@ -691,13 +691,13 @@ class stockTransferPickingDetailController extends BaseController {
     try {
       let OrderData = req.body.orderDetail;
       //   pickedItem = OrderData['itemDetail'];
-      console.log('OrderData',OrderData)
+      console.log('OrderData', OrderData)
       // req.body.delivery_detail['data']['deliveryRetryCount'] = 0;
-      
+
       // invoiceDetail = req.body.invoice_detail['data'][0]
       // let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
       let deliveryDetail = req.body.delivery_detail['data'] || undefined,
-      stoPickingId = req.params.stoPickingId;
+        stoPickingId = req.params.stoPickingId;
 
 
       //update delivery date  suppliedQty
@@ -730,48 +730,49 @@ class stockTransferPickingDetailController extends BaseController {
 
   }
 
-  getHistory = async (req,res,next)=>{
+  getHistory = async (req, res, next) => {
     try {
       let page = req.query.page || 1,
-      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-      searchKey = req.query.searchKey || '',
-      sortBy = req.query.sortBy || 'createdAt',
-      skip = parseInt(page - 1) * pageSize,
-      locationId = 0, // locationId req.user.locationId || 
-      cityId = 'N/A', // cityId req.user.cityId ||
-      searchDate = req.query.searchDate || '',
-      type = req.params.type,
-      plant = req.user.plant,
-      sortingArray = {};
-    sortingArray[sortBy] = -1;
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+        searchDate = req.query.searchDate || '',
+        type = req.params.type,
+        plant = req.user.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
       let pickerBoyId = req.user._id,
-      historyData;
+        historyData;
       let queryObj = [{
         $match: {
           pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
-          $or:[{
-            'invoiceDetail.isInvoice':true
-          },{'invoiceDetail.isInvoiceRequest':true}]
+          $or: [{
+            'invoiceDetail.isInvoice': true
+          }, { 'invoiceDetail.isInvoiceRequest': true }]
         }
 
-      },  {
+      }, {
         $project: {
-        
+
           'plant': 1,
-          'delivery_no':1,
+          'delivery_no': 1,
           'state': 1,
           'invoiceDetail.invoice.invoice_no': 1,
           'pickingDate': 1,
           'stoNumber': 1,
           'fulfillmentStatus': 1,
           'delivery_date': 1,
-         
+
           'shipping_plant': 1,
-          'stoDbId':1,
-          'pickingStatus':1,
+          'stoDbId': 1,
+          'pickingStatus': 1,
 
           'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
-        }},   {
+        }
+      }, {
         $sort: {
           '_id': -1
         }
@@ -782,76 +783,78 @@ class stockTransferPickingDetailController extends BaseController {
       }]
 
 
-          // creating a match object
-          if (searchKey !== '')
-          pipeline = [{
-            $match: {
-              pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
-              $or:[{
-                'invoiceDetail.isInvoice':true
-              },{'invoiceDetail.isInvoiceRequest':true}]
-            }
-    
-          },
-              {$or: [{
-                'delivery_no': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }, {
-                'stoNumber': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }, {
-                'sold_to_party_description': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }, {
-                'customer_type': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }]
-  
-  
-            },
-            {
-              $project: {
-              
-                'plant': 1,
-                'delivery_no':1,
-                'state': 1,
-                'invoiceDetail.invoice.invoiceId': 1,
-                'pickingDate': 1,
-                'stoNumber': 1,
-                'fulfillmentStatus': 1,
-                'delivery_date': 1,
-               
-                'shipping_plant': 1,
-                'stoDbId':1,
-                'pickingStatus':1,
-      
-                'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
-              }}
-          ,
-          {
-            $sort: {
-              '_id': -1
-            }
-          },
-          {
-            $skip: (pageSize * (page - 1))
-          }, {
-            $limit: pageSize
+      // creating a match object
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
+            pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
+            $or: [{
+              'invoiceDetail.isInvoice': true
+            }, { 'invoiceDetail.isInvoiceRequest': true }]
           }
-          ];
-    
-      
-      historyData =await Model.aggregate(queryObj);
 
-      
+        },
+        {
+          $or: [{
+            'delivery_no': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'stoNumber': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'sold_to_party_description': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customer_type': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+
+
+        },
+        {
+          $project: {
+
+            'plant': 1,
+            'delivery_no': 1,
+            'state': 1,
+            'invoiceDetail.invoice.invoiceId': 1,
+            'pickingDate': 1,
+            'stoNumber': 1,
+            'fulfillmentStatus': 1,
+            'delivery_date': 1,
+
+            'shipping_plant': 1,
+            'stoDbId': 1,
+            'pickingStatus': 1,
+
+            'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
+          }
+        }
+          ,
+        {
+          $sort: {
+            '_id': -1
+          }
+        },
+        {
+          $skip: (pageSize * (page - 1))
+        }, {
+          $limit: pageSize
+        }
+        ];
+
+
+      historyData = await Model.aggregate(queryObj);
+
+
 
       info('History detail fetch succesfully !');
       if (historyData.length) {
@@ -868,7 +871,7 @@ class stockTransferPickingDetailController extends BaseController {
           ,
           this.stockTransferOutmessageTypes.historyDetailFetchedSuccessfully);
       }
-     
+
 
 
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.stockTransferOutmessageTypes.historyDetailFetchedFailed);
@@ -883,217 +886,218 @@ class stockTransferPickingDetailController extends BaseController {
   }
 
 
-    // getOrderHistoryByPickerBoyID
-    getOrderHistoryAndInvoices = async (req, res, next) => {
-      try {
-        info('Get History  Order details !');
-  
-        // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = req.query
-        // let sortingArray = {};
-        // sortingArray[sortBy] = -1;
-        // let skip = parseInt(page - 1) * pageSize;
-        // get the query params
-        let page = req.query.page || 1,
-          pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-          searchKey = '',//req.query.search || '',
-          sortBy = req.query.sortBy || 'req_del_date',
-          orderid = req.params.stoPickingId,
-          sortingArray = {};
-        sortingArray[sortBy] = -1;
-        let skip = parseInt(page - 1) * pageSize;
-  
-        // item count missing
-        let searchObject = {
-    
-          '_id': mongoose.Types.ObjectId(orderid),
-          'invoiceDetail.isInvoice': true
-      
-        };
-  
-        // creating a match object
-        if (searchKey !== '')
-          searchObject = {
-            ...searchObject,
-            '$or': [{
-              'customerName': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }, {
-              'customerCode': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }]
-          };
-        // console.log(...searchObject)
-        let totalCount = await Model.aggregate([{
-          $match:
-            searchObject
-  
-        },
-        {
-          $count: 'sum'
-        }
-        ]).allowDiskUse(true);
-  
-        // calculating the total number of applications for the given scenario
-        if (totalCount[0] !== undefined)
-          totalCount = totalCount[0].sum;
-        else
-          totalCount = 0;
-  
-        // get list  
-        let stockTransferDetail = await Model.aggregate([{
-          $match: {
-            ...searchObject
-          }
-        },
-        {
-          $lookup: {
-            from: 'invoicemasters',
-            localField: 'invoiceDetail.invoice.invoiceDbId',
-            foreignField: '_id',
-            as: 'invoice'
-  
-          }
-        },
-        {
-          $lookup: {
-            from: 'purchase_order',
-            localField: 'stoDbId',
-            foreignField: '_id',
-            as: 'stockTransferDetails'
-  
-          }
-        },
-        { $unwind: '$invoice' },
-        { $unwind: '$stoDbId' },
-        {
-          $group: {
-            _id: '$stoNumber', invoice: {
-              $push: {
-                'invoiceId': '$invoiceDetail.invoice.invoiceId',
-                'suppliedQty': { '$sum': '$invoice.itemSupplied.suppliedQty' }, 'item_no': '$invoice.itemSupplied.item_no',
-                'invoicedbid': '$invoiceDetail.invoice.invoiceDbId', 'date': '$invoice.createdAt'
-              }
-            },
-            'customerName': { '$first': '$invoice.customerName' },
-            'deliveryDate': { $first: '$delivery_date' },
-            'pickingStatus':{ $first: '$pickingStatus' },
-            'pickerboyOrderMappingId': { $first:'$_id' },
-            'fullfilmentStatus':{ $first:{ $first:'$stockTransferDetails.pickingFullfilmentStatus' }},
-            'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
-          }
-        }
-  
-  
-          , {
-          $sort: sortingArray
-        }, {
-          $skip: skip
-        }, {
-          $limit: pageSize
-        },
-        {
-          $project: {
-            'onlineReferenceNo': 1,
-            'customerCode': 1,
-            'customerName': 1,
-            'customerType': 1,
-            'shippingId': 1,
-            'cityId': 1,
-            'plant': 1,
-            'stoDbId': 1,
-            'state': 1,
-            'invoiceDetail.invoice.invoiceId': 1,
-            'deliveryDate': 1,
-            'pickingStatus':1,
-            'stoDbId': 1,
-            'fullfilmentStatus': 1,
-            'delivery_date': 1,
-            'pickingDate': 1,
-            'shipping_point': 1,
-            'invoice': 1,
-            'sold_to_party': 1,
-            'pickerboyOrderMappingId': 1,
-           
-            // 'numberOfItems': { $cond: { if: { $isArray: "$invoice.itemSupplied" }, then: { $size: "$invoice.itemSupplied" }, else: "NA" } }
-          }
-        }
-  
-        ]).allowDiskUse(true)
-        // console.log(salesOrderList)
-        // return {
-        //   success: true,
-        //   data: salesOrderList,
-        //   total: totalCount
-        // };
-        if (stockTransferDetail.length > 0) {
-          return this.success(req, res, this.status.HTTP_OK, {
-            results: stockTransferDetail[0],
-            pageMeta: {
-              skip: parseInt(skip),
-              pageSize: pageSize,
-              total: stockTransferDetail.length  //item
+  // getOrderHistoryByPickerBoyID
+  getOrderHistoryAndInvoices = async (req, res, next) => {
+    try {
+      info('Get History  Order details !');
+
+      // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = req.query
+      // let sortingArray = {};
+      // sortingArray[sortBy] = -1;
+      // let skip = parseInt(page - 1) * pageSize;
+      // get the query params
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = '',//req.query.search || '',
+        sortBy = req.query.sortBy || 'req_del_date',
+        orderid = req.params.stoPickingId,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // item count missing
+      let searchObject = {
+
+        '_id': mongoose.Types.ObjectId(orderid),
+        'invoiceDetail.isInvoice': true
+
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'customerName': {
+              $regex: searchKey,
+              $options: 'is'
             }
-          }, this.messageTypes.historyFetchedSuccessfully);
+          }, {
+            'customerCode': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+      // console.log(...searchObject)
+      let totalCount = await Model.aggregate([{
+        $match:
+          searchObject
+
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let stockTransferDetail = await Model.aggregate([{
+        $match: {
+          ...searchObject
         }
-        else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedHistoryDetails);
-  
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        return {
-          success: false,
+      },
+      {
+        $lookup: {
+          from: 'invoicemasters',
+          localField: 'invoiceDetail.invoice.invoiceDbId',
+          foreignField: '_id',
+          as: 'invoice'
+
+        }
+      },
+      {
+        $lookup: {
+          from: 'purchase_order',
+          localField: 'stoDbId',
+          foreignField: '_id',
+          as: 'stockTransferDetails'
+
+        }
+      },
+      { $unwind: '$invoice' },
+      { $unwind: '$stoDbId' },
+      {
+        $group: {
+          _id: '$stoNumber', invoice: {
+            $push: {
+              'invoiceId': '$invoiceDetail.invoice.invoiceId',
+              'suppliedQty': { '$sum': '$invoice.itemSupplied.suppliedQty' }, 'item_no': '$invoice.itemSupplied.item_no',
+              'invoicedbid': '$invoiceDetail.invoice.invoiceDbId', 'date': '$invoice.createdAt'
+            }
+          },
+          'customerName': { '$first': '$invoice.customerName' },
+          'deliveryDate': { $first: '$delivery_date' },
+          'pickingStatus': { $first: '$pickingStatus' },
+          'pickerboyOrderMappingId': { $first: '$_id' },
+          'fullfilmentStatus': { $first: { $first: '$stockTransferDetails.pickingFullfilmentStatus' } },
+          'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
         }
       }
+
+
+        , {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'onlineReferenceNo': 1,
+          'customerCode': 1,
+          'customerName': 1,
+          'customerType': 1,
+          'shippingId': 1,
+          'cityId': 1,
+          'plant': 1,
+          'stoDbId': 1,
+          'state': 1,
+          'invoiceDetail.invoice.invoiceId': 1,
+          'deliveryDate': 1,
+          'pickingStatus': 1,
+          'stoDbId': 1,
+          'fullfilmentStatus': 1,
+          'delivery_date': 1,
+          'pickingDate': 1,
+          'shipping_point': 1,
+          'invoice': 1,
+          'sold_to_party': 1,
+          'pickerboyOrderMappingId': 1,
+
+          // 'numberOfItems': { $cond: { if: { $isArray: "$invoice.itemSupplied" }, then: { $size: "$invoice.itemSupplied" }, else: "NA" } }
+        }
+      }
+
+      ]).allowDiskUse(true)
+      // console.log(salesOrderList)
+      // return {
+      //   success: true,
+      //   data: salesOrderList,
+      //   total: totalCount
+      // };
+      if (stockTransferDetail.length > 0) {
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: stockTransferDetail[0],
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: stockTransferDetail.length  //item
+          }
+        }, this.messageTypes.historyFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedHistoryDetails);
+
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+      }
     }
+  }
 
 
-  getOnGoing = async (req,res,next)=>{
+  getOnGoing = async (req, res, next) => {
     try {
       let page = req.query.page || 1,
-      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-      searchKey = req.query.searchKey || '',
-      sortBy = req.query.sortBy || 'createdAt',
-      skip = parseInt(page - 1) * pageSize,
-      locationId = 0, // locationId req.user.locationId || 
-      cityId = 'N/A', // cityId req.user.cityId ||
-      searchDate = req.query.searchDate || '',
-      type = req.params.type,
-      plant = req.user.plant,
-      sortingArray = {};
-    sortingArray[sortBy] = -1;
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+        searchDate = req.query.searchDate || '',
+        type = req.params.type,
+        plant = req.user.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
       let pickerBoyId = req.user._id,
-      ongoingData;
+        ongoingData;
       let queryObj = [{
         $match: {
           pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
-          isItemPicked:true,
-          isStartedPicking:true
-      
+          isItemPicked: true,
+          isStartedPicking: true
+
         }
 
-      },  {
+      }, {
         $project: {
-        
+
           'plant': 1,
-         
-       
-         
+
+
+
           'pickingDate': 1,
           'stoNumber': 1,
-      
+
           'delivery_date': 1,
-         
+
           'shipping_plant': 1,
-          'stoDbId':1,
-          'pickingStatus':1,
+          'stoDbId': 1,
+          'pickingStatus': 1,
 
           'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
-        }},   {
+        }
+      }, {
         $sort: {
           '_id': -1
         }
@@ -1104,75 +1108,77 @@ class stockTransferPickingDetailController extends BaseController {
       }]
 
 
-          // creating a match object
-          if (searchKey !== '')
-          pipeline = [{
-            $match: {
-              pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
-              isItemPicked:true,
-              isStartedPicking:true
-            }
-    
-          },
-              {$or: [{
-                'delivery_no': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }, {
-                'stoNumber': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }, {
-                'sold_to_party_description': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }, {
-                'customer_type': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }]
-  
-  
-            },
-            {
-              $project: {
-              
-                'plant': 1,
-         
-       
-         
-                'pickingDate': 1,
-                'stoNumber': 1,
-            
-                'delivery_date': 1,
-               
-                'shipping_plant': 1,
-                'stoDbId':1,
-                'pickingStatus':1,
-      
-                'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
-                 }}
-          ,
-          {
-            $sort: {
-              '_id': -1
-            }
-          },
-          {
-            $skip: (pageSize * (page - 1))
-          }, {
-            $limit: pageSize
+      // creating a match object
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
+            pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
+            isItemPicked: true,
+            isStartedPicking: true
           }
-          ];
-    
-      
-      ongoingData =await Model.aggregate(queryObj);
 
-      
+        },
+        {
+          $or: [{
+            'delivery_no': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'stoNumber': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'sold_to_party_description': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customer_type': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+
+
+        },
+        {
+          $project: {
+
+            'plant': 1,
+
+
+
+            'pickingDate': 1,
+            'stoNumber': 1,
+
+            'delivery_date': 1,
+
+            'shipping_plant': 1,
+            'stoDbId': 1,
+            'pickingStatus': 1,
+
+            'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
+          }
+        }
+          ,
+        {
+          $sort: {
+            '_id': -1
+          }
+        },
+        {
+          $skip: (pageSize * (page - 1))
+        }, {
+          $limit: pageSize
+        }
+        ];
+
+
+      ongoingData = await Model.aggregate(queryObj);
+
+
 
       info('ON GOING detail fetch succesfully !');
       if (ongoingData.length) {
@@ -1189,8 +1195,8 @@ class stockTransferPickingDetailController extends BaseController {
           ,
           this.stockTransferOutmessageTypes.ongoingDetailFetchedSuccessfully);
       }
-     
-    
+
+
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.stockTransferOutmessageTypes.ongoingDetailFetchedFailed);
 
 
@@ -1202,51 +1208,53 @@ class stockTransferPickingDetailController extends BaseController {
 
   }
 
-  getPendingInvoices = async (req,res,next)=>{
+  getPendingInvoices = async (req, res, next) => {
     try {
       let page = req.query.page || 1,
-      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-      searchKey = req.query.searchKey || '',
-      stoDbId = req.params.stoDbId,
-      sortBy = req.query.sortBy || 'createdAt',
-      skip = parseInt(page - 1) * pageSize,
-      locationId = 0, // locationId req.user.locationId || 
-      cityId = 'N/A', // cityId req.user.cityId ||
-      searchDate = req.query.searchDate || '',
-      type = req.params.type,
-      plant = req.user.plant,
-      sortingArray = {};
-    sortingArray[sortBy] = -1;
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+        stoDbId = req.params.stoDbId,
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+        searchDate = req.query.searchDate || '',
+        type = req.params.type,
+        plant = req.user.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
       let pickerBoyId = req.user._id,
-      pendingInvoicesData;
+        pendingInvoicesData;
       let queryObj = [{
         $match: {
           pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
-        'invoiceDetail.isInvoice':false,
-        'delivery_no':{$ne:'N/A'
-      },
-   
-      
+          'invoiceDetail.isInvoice': false,
+          'delivery_no': {
+            $ne: 'N/A'
+          },
+
+
         }
 
-      },  {
+      }, {
         $project: {
-        
+
           'plant': 1,
-         
-       
-         
+
+
+
           'pickingDate': 1,
           'stoNumber': 1,
-      
+
           'delivery_date': 1,
-          'delivery_no':1,
+          'delivery_no': 1,
           'shipping_plant': 1,
-          'stoDbId':1,
-          'pickingStatus':1,
+          'stoDbId': 1,
+          'pickingStatus': 1,
 
           'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
-        }},   {
+        }
+      }, {
         $sort: {
           '_id': -1
         }
@@ -1257,75 +1265,77 @@ class stockTransferPickingDetailController extends BaseController {
       }]
 
 
-          // creating a match object
-          if (searchKey !== '')
-          pipeline = [{
-            $match: {
-              pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
-              isItemPicked:true,
-              isStartedPicking:true
-            }
-    
-          },
-              {$or: [{
-                'delivery_no': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }, {
-                'stoNumber': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }, {
-                'sold_to_party_description': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }, {
-                'customer_type': {
-                  $regex: searchKey,
-                  $options: 'is'
-                }
-              }]
-  
-  
-            },
-            {
-              $project: {
-              
-                'plant': 1,
-         
-       
-         
-                'pickingDate': 1,
-                'stoNumber': 1,
-            
-                'delivery_date': 1,
-               
-                'shipping_plant': 1,
-                'stoDbId':1,
-                'pickingStatus':1,
-      
-                'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
-                 }}
-          ,
-          {
-            $sort: {
-              '_id': -1
-            }
-          },
-          {
-            $skip: (pageSize * (page - 1))
-          }, {
-            $limit: pageSize
+      // creating a match object
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
+            pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
+            isItemPicked: true,
+            isStartedPicking: true
           }
-          ];
-    
-      
-      pendingInvoicesData =await Model.aggregate(queryObj);
 
-      
+        },
+        {
+          $or: [{
+            'delivery_no': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'stoNumber': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'sold_to_party_description': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customer_type': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+
+
+        },
+        {
+          $project: {
+
+            'plant': 1,
+
+
+
+            'pickingDate': 1,
+            'stoNumber': 1,
+
+            'delivery_date': 1,
+
+            'shipping_plant': 1,
+            'stoDbId': 1,
+            'pickingStatus': 1,
+
+            'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
+          }
+        }
+          ,
+        {
+          $sort: {
+            '_id': -1
+          }
+        },
+        {
+          $skip: (pageSize * (page - 1))
+        }, {
+          $limit: pageSize
+        }
+        ];
+
+
+      pendingInvoicesData = await Model.aggregate(queryObj);
+
+
 
       info('ON GOING detail fetch succesfully !');
       if (pendingInvoicesData.length) {
@@ -1342,8 +1352,8 @@ class stockTransferPickingDetailController extends BaseController {
           ,
           this.stockTransferOutmessageTypes.pendingInvoicesFetchedSuccessfully);
       }
-     
-    
+
+
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.stockTransferOutmessageTypes.pendingInvoiceFetchedFailed);
 
 
@@ -1389,9 +1399,9 @@ class stockTransferPickingDetailController extends BaseController {
 
   generateStoInvoice = async (req, res, next) => {
 
-  
+
     try {
-      let invData =  req.body.invDetail
+      let invData = req.body.invDetail
       // invoiceDetail = req.body.invoice_detail['data'][0]
 
 
@@ -1440,193 +1450,193 @@ class stockTransferPickingDetailController extends BaseController {
   }
 
 
-    // getOrderHistoryByPickerBoyID
-    getPendingOrderAndInvoices = async (req, res, next) => {
-      try {
-        info('Get History  Order details !');
-  
-        // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = req.query
-        // let sortingArray = {};
-        // sortingArray[sortBy] = -1;
-        // let skip = parseInt(page - 1) * pageSize;
-        // get the query params
-        let page = req.query.page || 1,
-          pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-          searchKey = '',//req.query.search || '',
-          sortBy = req.query.sortBy || 'req_del_date',
-          orderid = req.params.orderid,
-          sortingArray = {};
-        sortingArray[sortBy] = -1;
-        let skip = parseInt(page - 1) * pageSize;
-  
-        // item count missing
-        let searchObject = {
-          // 'pickerBoyId': mongoose.Types.ObjectId(req.user._id), //req.user._id,
-          'stoDbId': mongoose.Types.ObjectId(orderid),
-          'invoiceDetail.isInvoice': true
-          // 'isPacked': 0,
-          // 'fulfillmentStatus': 0,
-          // 'locationId': parseInt(locationId),
-          // 'cityId': cityId,
-  
-          // 'req_del_date': {
-  
-          //   '$lte': startOfTheDay
-          // }
-        };
-  
-        // creating a match object
-        if (searchKey !== '')
-          searchObject = {
-            ...searchObject,
-            '$or': [{
-              'customerName': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }, {
-              'customerCode': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }]
-          };
-        // console.log(...searchObject)
-        let totalCount = await Model.aggregate([{
-          $match:
-            searchObject
-  
-        },
-        {
-          $count: 'sum'
-        }
-        ]).allowDiskUse(true);
-  
-        // calculating the total number of applications for the given scenario
-        if (totalCount[0] !== undefined)
-          totalCount = totalCount[0].sum;
-        else
-          totalCount = 0;
-  
-        // get list  
-        let orderDetail = await Model.aggregate([{
-          $match: {
-            ...searchObject
-          }
-        },
-        {
-          $lookup: {
-            from: 'invoicemasters',
-            localField: 'invoiceDetail.invoice.invoiceDbId',
-            foreignField: '_id',
-            as: 'invoice'
-  
-          }
-        },
-        {
-          $lookup: {
-            from: 'purchase_order',
-            localField: 'stoDbId',
-            foreignField: '_id',
-            as: 'stockTransferDetails'
-  
-          }
-        },
-        { $unwind: '$invoice' },
-        { $unwind: '$stoDbId' },
-        {
-          $group: {
-            _id: '$stoNumber', invoice: {
-              $push: {
-                'invoice_no': '$invoiceDetail.invoice.invoice_no',
-                'suppliedQty': { '$sum': '$invoice.itemSupplied.suppliedQty' }, 'item_no': '$invoice.itemSupplied.item_no',
-                'invoicedbid': '$invoiceDetail.invoice.invoiceDbId', 'date': '$invoice.createdAt'
-              }
-            },
-            'customerName': { '$first': '$invoice.customerName' },
-            'deliveryDate': { $first: '$delivery_date' },
-            'item':{ $first:{ $first: '$stockTransferDetails.item' }},
-            'stockTransferId':{ $first:{ $first: '$stockTransferDetails._id' }},
-            'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
-          }
-        }
-        
-  
-  
-          , {
-          $sort: sortingArray
-        }, {
-          $skip: skip
-        }, {
-          $limit: pageSize
-        },
-        {
-          $project: {
-            'onlineReferenceNo': 1,
-            'customerCode': 1,
-            'customerName': 1,
-            'customerType': 1,
-            'shippingId': 1,
-            'cityId': 1,
-            'plant': 1,
-  
-            'stoDbId': 1,
-            'state': 1,
-            'invoiceDetail.invoice.invoiceId': 1,
-            'deliveryDate': 1,
-            'stoDbId': 1,
-            'fulfillmentStatus': 1,
-            'delivery_date': 1,
-            'pickingDate': 1,
-            'shipping_point': 1,
-            'invoice': 1,
-            'sold_to_party': 1,
-            'stockTransferId':1,
-            'item':1
-            // 'numberOfItems': { $cond: { if: { $isArray: "$invoice.itemSupplied" }, then: { $size: "$invoice.itemSupplied" }, else: "NA" } }
-          }
-        }
-  
-        ]).allowDiskUse(true)
-        // console.log(salesOrderList)
-        // return {
-        //   success: true,
-        //   data: salesOrderList,
-        //   total: totalCount
-        // };
-   
-        if (orderDetail.length > 0) {
-          orderDetail[0]['item'].forEach((item, j) => {
-            console.log(item.quantity,parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.quantity)-parseInt(item.suppliedQty?item.suppliedQty:0)))
-            orderDetail[0]['item'][j]['quantity'] = (parseFloat(item.quantity) - parseFloat(item.suppliedQty ? item.suppliedQty : 0))
-  
-          })
-       
-           
-            _.remove(orderDetail[0]['item'], { 'fulfillmentStatus': 2 })
+  // getOrderHistoryByPickerBoyID
+  getPendingOrderAndInvoices = async (req, res, next) => {
+    try {
+      info('Get History  Order details !');
 
-     
-          return this.success(req, res, this.status.HTTP_OK, {
-            results: orderDetail[0],
-            pageMeta: {
-              skip: parseInt(skip),
-              pageSize: pageSize,
-              total: orderDetail.length  //item
+      // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = req.query
+      // let sortingArray = {};
+      // sortingArray[sortBy] = -1;
+      // let skip = parseInt(page - 1) * pageSize;
+      // get the query params
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = '',//req.query.search || '',
+        sortBy = req.query.sortBy || 'req_del_date',
+        orderid = req.params.orderid,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // item count missing
+      let searchObject = {
+        // 'pickerBoyId': mongoose.Types.ObjectId(req.user._id), //req.user._id,
+        'stoDbId': mongoose.Types.ObjectId(orderid),
+        'invoiceDetail.isInvoice': true
+        // 'isPacked': 0,
+        // 'fulfillmentStatus': 0,
+        // 'locationId': parseInt(locationId),
+        // 'cityId': cityId,
+
+        // 'req_del_date': {
+
+        //   '$lte': startOfTheDay
+        // }
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'customerName': {
+              $regex: searchKey,
+              $options: 'is'
             }
-          }, this.messageTypes.historyFetchedSuccessfully);
+          }, {
+            'customerCode': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+      // console.log(...searchObject)
+      let totalCount = await Model.aggregate([{
+        $match:
+          searchObject
+
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let orderDetail = await Model.aggregate([{
+        $match: {
+          ...searchObject
         }
-        else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedHistoryDetails);
-  
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        return {
-          success: false,
+      },
+      {
+        $lookup: {
+          from: 'invoicemasters',
+          localField: 'invoiceDetail.invoice.invoiceDbId',
+          foreignField: '_id',
+          as: 'invoice'
+
+        }
+      },
+      {
+        $lookup: {
+          from: 'purchase_order',
+          localField: 'stoDbId',
+          foreignField: '_id',
+          as: 'stockTransferDetails'
+
+        }
+      },
+      { $unwind: '$invoice' },
+      { $unwind: '$stoDbId' },
+      {
+        $group: {
+          _id: '$stoNumber', invoice: {
+            $push: {
+              'invoice_no': '$invoiceDetail.invoice.invoice_no',
+              'suppliedQty': { '$sum': '$invoice.itemSupplied.suppliedQty' }, 'item_no': '$invoice.itemSupplied.item_no',
+              'invoicedbid': '$invoiceDetail.invoice.invoiceDbId', 'date': '$invoice.createdAt'
+            }
+          },
+          'customerName': { '$first': '$invoice.customerName' },
+          'deliveryDate': { $first: '$delivery_date' },
+          'item': { $first: { $first: '$stockTransferDetails.item' } },
+          'stockTransferId': { $first: { $first: '$stockTransferDetails._id' } },
+          'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
         }
       }
+
+
+
+        , {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'onlineReferenceNo': 1,
+          'customerCode': 1,
+          'customerName': 1,
+          'customerType': 1,
+          'shippingId': 1,
+          'cityId': 1,
+          'plant': 1,
+
+          'stoDbId': 1,
+          'state': 1,
+          'invoiceDetail.invoice.invoiceId': 1,
+          'deliveryDate': 1,
+          'stoDbId': 1,
+          'fulfillmentStatus': 1,
+          'delivery_date': 1,
+          'pickingDate': 1,
+          'shipping_point': 1,
+          'invoice': 1,
+          'sold_to_party': 1,
+          'stockTransferId': 1,
+          'item': 1
+          // 'numberOfItems': { $cond: { if: { $isArray: "$invoice.itemSupplied" }, then: { $size: "$invoice.itemSupplied" }, else: "NA" } }
+        }
+      }
+
+      ]).allowDiskUse(true)
+      // console.log(salesOrderList)
+      // return {
+      //   success: true,
+      //   data: salesOrderList,
+      //   total: totalCount
+      // };
+
+      if (orderDetail.length > 0) {
+        orderDetail[0]['item'].forEach((item, j) => {
+          console.log(item.quantity, parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.quantity) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
+          orderDetail[0]['item'][j]['quantity'] = (parseFloat(item.quantity) - parseFloat(item.suppliedQty ? item.suppliedQty : 0))
+
+        })
+
+
+        _.remove(orderDetail[0]['item'], { 'fulfillmentStatus': 2 })
+
+
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: orderDetail[0],
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: orderDetail.length  //item
+          }
+        }, this.messageTypes.historyFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedHistoryDetails);
+
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+      }
     }
-  
+  }
+
 
 
 
