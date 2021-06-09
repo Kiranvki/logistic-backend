@@ -317,7 +317,7 @@ module.exports = {
 
     // validating the schema
     schema
-      .validate({ params: req.params, body: req.body }, option)
+      .validate(req.params, option)
       .then(() => {
         next();
         // if error occured

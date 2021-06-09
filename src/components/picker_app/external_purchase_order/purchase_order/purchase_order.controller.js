@@ -874,7 +874,21 @@ class purchaseController extends BaseController {
         {
           $match: query,
         },
+{$unwind:'$item'},
+{
+  '$match': {
+   '$or':[  {'item.fulfillmentStatus':{ $exists: false }},{'item.fulfillmentStatus':{$exists:true,$ne:2}}]
+  }
+},
 
+{ $group: { '_id': '$_id',
+ po_number: { "$first":'$po_number'},
+vendor_no: { "$first":'$vendor_no'},
+vendor_name: { "$first":'$vendor_name'},
+poReceivingId: { "$first":'$poReceivingId'},
+receivingStatus: { "$first":'$receivingStatus'},
+fulfilmentStatus: { "$first":'$fulfillmentStatus'},
+ 'item': { $push: '$item' } } },
 
         {
           $project: {
@@ -882,9 +896,9 @@ class purchaseController extends BaseController {
             vendor_no: 1,
             vendor_name: 1,
             itemCount: { $size: "$item" },
-            poReceivingId: "$poDetails",
-            receivingStatus: 1,
-            fulfilmentStatus: 1,
+      
+  
+            fulfilmentStatus: {$ifNull: ['$fulfilmentStatus',0]},
 
           },
         },

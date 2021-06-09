@@ -289,7 +289,7 @@ class stockTransferPickingDetailController extends BaseController {
         // orderDetail = orderDetail[0]
 
         // changes required quadratic
-        if ( orderDetail && orderDetail['orderItem'].length > 0 && orderDetail['item'].length >= 0) {
+        if (orderDetail && orderDetail['orderItem'].length > 0 && orderDetail['item'].length >= 0) {
           orderDetail['orderItem'].forEach((x, i) => {
 
             orderDetail['orderItem'][i].is_item_picked = false;
@@ -304,7 +304,7 @@ class stockTransferPickingDetailController extends BaseController {
           })
           orderDetail['item'] = undefined
         }
-      
+
 
         return this.success(req, res, this.status.HTTP_OK, orderDetail, this.messageTypes.salesOrderAddedInPackingStage);
       } else {
@@ -345,18 +345,18 @@ class stockTransferPickingDetailController extends BaseController {
 
 
         orderDetail['item'] = undefined
-      
-          orderDetail['orderItem'].forEach((item, j) => {
-            console.log(item.quantity, parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.quantity) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
-            if(item.is_item_picked){
-              orderDetail['orderItem'][j]['quantity'] = (parseFloat(item.pending_qty))
-            }else{
-              orderDetail['orderItem'][j]['quantity'] = (parseFloat(item.quantity) - parseFloat(item.suppliedQty ? item.suppliedQty : 0))
-            }
-          })
-  
-  
-          _.remove(orderDetail['orderItem'], { 'fulfillmentStatus': 2 })
+
+        orderDetail['orderItem'].forEach((item, j) => {
+          console.log(item.quantity, parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.quantity) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
+          if (item.is_item_picked) {
+            orderDetail['orderItem'][j]['quantity'] = (parseFloat(item.pending_qty))
+          } else {
+            orderDetail['orderItem'][j]['quantity'] = (parseFloat(item.quantity) - parseFloat(item.suppliedQty ? item.suppliedQty : 0))
+          }
+        })
+
+
+        _.remove(orderDetail['orderItem'], { 'fulfillmentStatus': 2 })
 
         console.log(orderDetail)
 
@@ -770,7 +770,7 @@ class stockTransferPickingDetailController extends BaseController {
 
       }, {
         $project: {
-
+          '_id': 1,
           'plant': 1,
           'delivery_no': 1,
           'state': 1,
@@ -999,8 +999,8 @@ class stockTransferPickingDetailController extends BaseController {
           'deliveryDate': { $first: '$delivery_date' },
           'pickingStatus': { $first: '$pickingStatus' },
           'pickerboyOrderMappingId': { $first: '$_id' },
-          'invoice_no':{ $first: '$invoice_no' },
-          'invoicedbid':{ $first: '$invoicedbid' },
+          'invoice_no': { $first: '$invoice_no' },
+          'invoicedbid': { $first: '$invoicedbid' },
           'fullfilmentStatus': { $first: { $first: '$stockTransferDetails.pickingFullfilmentStatus' } },
           'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
         }
