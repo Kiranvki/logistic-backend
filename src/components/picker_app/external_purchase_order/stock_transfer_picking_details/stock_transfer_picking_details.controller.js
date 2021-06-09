@@ -356,7 +356,7 @@ class stockTransferPickingDetailController extends BaseController {
         })
 
 
-        _.remove(orderDetail['orderItem'], { 'fulfillmentStatus': 2 })
+        _.remove(orderDetail['orderItem'], { 'pickingFullfilmentStatus': 2 })
 
         console.log(orderDetail)
 
@@ -570,7 +570,7 @@ class stockTransferPickingDetailController extends BaseController {
             itemCount: { $size: "$item" },
             stoNumber: 1,
             delivery_no: 1,
-            fulfilmentStatus: 1,
+            'fullfilmentStatus': '$ROOT.pickingFullfilmentStatus',
 
           },
         },
@@ -777,7 +777,7 @@ class stockTransferPickingDetailController extends BaseController {
           'invoiceDetail.invoice.invoice_no': 1,
           'pickingDate': 1,
           'stoNumber': 1,
-          'fulfillmentStatus': 1,
+          'fullfilmentStatus': '$ROOT.pickingFullfilmentStatus',
           'delivery_date': 1,
 
           'shipping_plant': 1,
@@ -842,7 +842,7 @@ class stockTransferPickingDetailController extends BaseController {
             'invoiceDetail.invoice.invoiceId': 1,
             'pickingDate': 1,
             'stoNumber': 1,
-            'fulfillmentStatus': 1,
+            'fullfilmentStatus': '$ROOT.pickingFullfilmentStatus',
             'delivery_date': 1,
 
             'shipping_plant': 1,
@@ -1601,7 +1601,7 @@ class stockTransferPickingDetailController extends BaseController {
           'invoiceDetail.invoice.invoiceId': 1,
           'deliveryDate': 1,
           'stoDbId': 1,
-          'fulfillmentStatus': 1,
+          'pickingFullfilmentStatus': 1,
           'delivery_date': 1,
           'pickingDate': 1,
           'shipping_point': 1,
@@ -1629,7 +1629,7 @@ class stockTransferPickingDetailController extends BaseController {
         })
 
 
-        _.remove(orderDetail[0]['item'], { 'fulfillmentStatus': 2 })
+        _.remove(orderDetail[0]['item'], { 'pickingFullfilmentStatus': 2 })
 
 
         return this.success(req, res, this.status.HTTP_OK, {

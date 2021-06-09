@@ -848,9 +848,9 @@ class purchaseController extends BaseController {
           {
             $or: [{ po_document_type: 'ZWSI' }, { po_document_type: 'ZWST' }]
           }, {
-            $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
+            $or: [{ 'pickingFullfilmentStatus': { $exists: true, $ne: 2 } }, {
 
-              'fulfillmentStatus': { $exists: false }
+              'pickingFullfilmentStatus': { $exists: false }
             }]
           }
 
@@ -887,7 +887,7 @@ vendor_no: { "$first":'$vendor_no'},
 vendor_name: { "$first":'$vendor_name'},
 poReceivingId: { "$first":'$poReceivingId'},
 receivingStatus: { "$first":'$receivingStatus'},
-fulfilmentStatus: { "$first":'$fulfillmentStatus'},
+fulfilmentStatus: { "$first":'$pickingFullfilmentStatus'},
  'item': { $push: '$item' } } },
 
         {
