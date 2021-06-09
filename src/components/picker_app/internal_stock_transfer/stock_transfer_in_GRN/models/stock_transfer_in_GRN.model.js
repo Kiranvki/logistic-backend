@@ -49,14 +49,13 @@ const stockTransferInGRN = new Schema(
     grnSequence: {
       type: Number,
     },
-    supplierDetails: {
-      supply_plant_city: {
+    supply_plant_city: {
         type: String,
       },
-      supply_plant_name: {
+    supply_plant_name: {
         type: String,
       },
-    },
+    
     supply_plant: {
       type: String,
     },
@@ -83,6 +82,12 @@ const stockTransferInGRN = new Schema(
     isDeleted: {
       type: Number,
       default: 0,
+    },
+    resDetails: {
+      type: String,
+    },
+    reqDetails: {
+      type: String,
     },
     item: [
       {

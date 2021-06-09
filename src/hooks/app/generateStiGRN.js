@@ -1,5 +1,7 @@
 const request = require("request-promise");
 const moment = require("moment");
+const Model = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_GRN/models/stock_transfer_in_GRN.model");
+const grnCtrl = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_GRN/stock_transfer_in_GRN.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -10,12 +12,9 @@ const { error, info } = require("../../utils").logging;
 const stiGRNGenerateUrl =
   (process.env.sapBaseUrl || "") + (process.env.stiGRNGenerateUrl || "");
 
-var hitSapApiOfGRN = async (stiReceivingDetails, stiDetails) => {
+var hitSapApiOfGRN = async (req, stiReceivingDetails, stiDetails) => {
   try {
-    let body = createRequestObject(
-      stiReceivingDetails,
-      stiDetails
-    );
+    let body = createRequestObject(req, stiReceivingDetails, stiDetails);
     let options = {
       method: "POST",
       uri: stiGRNGenerateUrl,
@@ -26,14 +25,29 @@ var hitSapApiOfGRN = async (stiReceivingDetails, stiDetails) => {
       body: body,
     };
     console.log(options);
-
-    return await request(options);
+    try {
+      req.body.grnApiOptions = options;
+      return await request(options);
+    } catch (err) {
+      let insertedRecord = await grnCtrl.set({
+        status: 2,
+        isDeleted: 0,
+        stiId:stiDetails._id,
+        reqDetails: JSON.stringify(options),
+        resDetails: JSON.stringify(err),
+        po_number: stiDetails.po_number,
+        stiReceivingId: stiReceivingDetails._id,
+        delivery_no: stiDetails.delivery_no,
+      });
+      console.log(insertedRecord);
+      throw err;
+    }
   } catch (err) {
     console.log(err);
     throw err;
   }
 };
-var createRequestObject = (stiReceivingDetails, stiDetails) => {
+var createRequestObject = (req, stiReceivingDetails, stiDetails) => {
   let itemArray = [];
   let todaysDate = moment()
     .set({
@@ -48,8 +62,8 @@ var createRequestObject = (stiReceivingDetails, stiDetails) => {
       material_no: item.material,
       movement_type: "101",
       quantity: item.received_qty,
-      delivery_item: item.higher_level_item||item.delivery_item_no,
-      devlivery_no:stiDetails.delivery_no,
+      delivery_item: item.higher_level_item || item.delivery_item_no,
+      devlivery_no: stiDetails.delivery_no,
       po_number: stiDetails.po_number,
       po_item: item.po_item,
       plant: item.receiving_plant,
@@ -73,6 +87,7 @@ module.exports = async (req, res, next) => {
     let stiDetails = req.body.stiDetails;
     try {
       let sapGrnResponse = await hitSapApiOfGRN(
+        req,
         stiReceivingDetails,
         stiDetails
       );
@@ -85,6 +100,17 @@ module.exports = async (req, res, next) => {
         next();
       } else {
         //to-do remove comment
+        let insertedRecord = await grnCtrl.set({
+          status: 2,
+          isDeleted: 0,
+          stiId:stiDetails._id,
+          reqDetails: JSON.stringify(req.body.grnApiOptions),
+          resDetails: JSON.stringify(sapGrnResponse),
+          po_number: stiDetails.po_number,
+          stiReceivingId: stiReceivingDetails._id,
+          delivery_no: stiDetails.delivery_no,
+        });
+        console.log(insertedRecord);
         info(sapGrnResponse, "sapGrnResponse-------");
         return Response.errors(
           req,
