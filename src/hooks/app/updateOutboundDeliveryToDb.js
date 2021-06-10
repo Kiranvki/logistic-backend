@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
                     delivery_no: deliveryDetail.outbound_delivery_no,
                     remarks: remarks,
                     
-                    pickingStatus: 2 ,
+                    pickingStatus: 3 ,
                     isSapError: isSapError,
                     isItemPicked:false,
                     isStartedPicking:false

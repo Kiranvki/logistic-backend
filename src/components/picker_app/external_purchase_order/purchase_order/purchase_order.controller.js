@@ -9,6 +9,7 @@ const request = require("request-promise");
 const BasicCtrl = require("../../../basic_config/basic_config.controller");
 const BaseController = require("../../../baseController");
 const Model = require("./models/purchase_order.model");
+const stockPickingDetailsModel = require("../stock_transfer_picking_details/models/stock_transfer_picking_details.model")
 const mongoose = require("mongoose");
 const _ = require("lodash");
 const { error, info } = require("../../../../utils").logging;
@@ -263,8 +264,8 @@ class purchaseController extends BaseController {
             "item.net_price": 1,
             "item.suppliedQty": 1,
             "item.mrp": 1,
-            "item.uom":1,
-            "item.fulfillmentStatus":1,
+            "item.uom": 1,
+            "item.fulfillmentStatus": 1,
             pending_qty: 1,
             received_qty: 1,
             delivery_date: 1,
@@ -283,16 +284,16 @@ class purchaseController extends BaseController {
 
         _.remove(poDetails[0]['item'], { 'fulfillmentStatus': 2 })
 
-      return this.success(
-        req,
-        res,
-        this.status.HTTP_OK,
-        poDetails,
-        this.messageTypes.poListFetched
-      );
+        return this.success(
+          req,
+          res,
+          this.status.HTTP_OK,
+          poDetails,
+          this.messageTypes.poListFetched
+        );
       }
-        else return this.errors(req, res, this.status.HTTP_CONFLICT, 'Unable to fetch stock transfer details');
-      
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, 'Unable to fetch stock transfer details');
+
 
       // catch any runtime error
     } catch (err) {
@@ -839,12 +840,12 @@ class purchaseController extends BaseController {
       let todaysEndDate = moment().format("YYYY-MM-DD");
       info("Get Stock Transfer details !");
       let query = {
-       //consider data type
+        //consider data type
         // end_of_validity_period: { $gte: todaysDate },
         // start_of_validity_period: { $lte: todaysDate },
-       
+
         $and: [
-         { shiping_plant: req.user.plant ? req.user.plant.toString() : ""},
+          { shiping_plant: req.user.plant ? req.user.plant.toString() : "" },
           {
             $or: [{ po_document_type: 'ZWSI' }, { po_document_type: 'ZWST' }]
           }, {
@@ -855,11 +856,11 @@ class purchaseController extends BaseController {
           }
 
 
-       
-         ], 
+
+        ],
         status: 1,
         isDeleted: 0,
-        
+
         // delivery_date:{$lte:todaysEndDate}//to-do
       };
       if (req.query.poNumber) {
@@ -874,21 +875,25 @@ class purchaseController extends BaseController {
         {
           $match: query,
         },
-{$unwind:'$item'},
-{
-  '$match': {
-   '$or':[  {'item.fulfillmentStatus':{ $exists: false }},{'item.fulfillmentStatus':{$exists:true,$ne:2}}]
-  }
-},
+        { $unwind: '$item' },
+        {
+          '$match': {
+            '$or': [{ 'item.fulfillmentStatus': { $exists: false } }, { 'item.fulfillmentStatus': { $exists: true, $ne: 2 } }]
+          }
+        },
 
-{ $group: { '_id': '$_id',
- po_number: { "$first":'$po_number'},
-vendor_no: { "$first":'$vendor_no'},
-vendor_name: { "$first":'$vendor_name'},
-poReceivingId: { "$first":'$poReceivingId'},
-receivingStatus: { "$first":'$receivingStatus'},
-fulfilmentStatus: { "$first":'$pickingFullfilmentStatus'},
- 'item': { $push: '$item' } } },
+        {
+          $group: {
+            '_id': '$_id',
+            po_number: { "$first": '$po_number' },
+            vendor_no: { "$first": '$vendor_no' },
+            vendor_name: { "$first": '$vendor_name' },
+            poReceivingId: { "$first": '$poReceivingId' },
+            receivingStatus: { "$first": '$receivingStatus' },
+            fulfilmentStatus: { "$first": '$pickingFullfilmentStatus' },
+            'item': { $push: '$item' }
+          }
+        },
 
         {
           $project: {
@@ -896,9 +901,9 @@ fulfilmentStatus: { "$first":'$pickingFullfilmentStatus'},
             vendor_no: 1,
             vendor_name: 1,
             itemCount: { $size: "$item" },
-      
-  
-            fulfilmentStatus: {$ifNull: ['$fulfilmentStatus',0]},
+
+
+            fulfilmentStatus: { $ifNull: ['$fulfilmentStatus', 0] },
 
           },
         },
@@ -914,7 +919,7 @@ fulfilmentStatus: { "$first":'$pickingFullfilmentStatus'},
         },
       ]).allowDiskUse(true);
 
-     
+
 
       // success
       return this.success(
@@ -967,8 +972,8 @@ fulfilmentStatus: { "$first":'$pickingFullfilmentStatus'},
         $or: [{ po_document_type: 'ZWSI' }, { po_document_type: 'ZWST' }],
         status: 1,
         isDeleted: 0,
-        pickingFullfilmentStatus:{ $exists: true,$eq:1}
-        
+        pickingFullfilmentStatus: { $exists: true, $eq: 1 }
+
         // delivery_date:{$lte:todaysEndDate}//to-do
       };
       if (req.query.poNumber) {
@@ -1060,7 +1065,7 @@ fulfilmentStatus: { "$first":'$pickingFullfilmentStatus'},
               stoFullfilmentStatus = 1
 
             }
-          
+
 
 
             stoItem[i].fulfillmentStatus = itemFullfilmentStatus;
@@ -1081,7 +1086,7 @@ fulfilmentStatus: { "$first":'$pickingFullfilmentStatus'},
                 'item.$.suppliedQty': parseFloat(item.pickedQuantity ? item.pickedQuantity : 0),
               }
             });
-           
+
           } else if ((sItem.fulfillmentStatus ? sItem.fulfillmentStatus : 0) <= 1) {
             stoFullfilmentStatus = 1
 
@@ -1090,7 +1095,8 @@ fulfilmentStatus: { "$first":'$pickingFullfilmentStatus'},
         )
 
       })
-    
+
+      // temp fixed
       let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({
         '_id': mongoose.Types.ObjectId(stoOrderId)
       }, {
@@ -1101,6 +1107,8 @@ fulfilmentStatus: { "$first":'$pickingFullfilmentStatus'},
         }
 
       });
+
+      // temp fixed end API restructure pending
       console.log(isUpdated, isUpdatedfulfillmentStatus)
       if (isUpdatedfulfillmentStatus) {
         info('Sales order Status updated! !');

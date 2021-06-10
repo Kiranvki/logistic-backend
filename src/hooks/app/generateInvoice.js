@@ -172,7 +172,7 @@ module.exports = async (req, res, next) => {
 
   if (req.body.invoice_detail['success'] && (req.body.invoice_detail['data'] ? req.body.invoice_detail['data']['invoice_no'] : false)) {
     req.body.invoiceRequestPayload = obj;
-   
+    req.body.deliveryNumber = req.body.deliveryDetail['delivery_no']
     return next()
 
   } else {
@@ -187,7 +187,7 @@ module.exports = async (req, res, next) => {
           'isItemPicked': false,
           'isStartedPicking': false,
           'state': 1,
-          'isDeleted': 1,
+          // 'isDeleted': 1,
           'isSapError': 'INVE' //INVE->invoice error
         },$push:{
           'invoiceResponsePayload': JSON.stringify(req.body.invoice_detail),
@@ -208,7 +208,7 @@ module.exports = async (req, res, next) => {
         'isItemPicked': false,
         'isStartedPicking': false,
         'state': 1,
-        'isDeleted': 1,
+        // 'isDeleted': 1,
         'isSapError': 'INVE' //INVE->invoice error
       }
     })

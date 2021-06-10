@@ -347,7 +347,7 @@ class stockTransferPickingDetailController extends BaseController {
         orderDetail['item'] = undefined
 
         orderDetail['orderItem'].forEach((item, j) => {
-          console.log(item.quantity, parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.quantity) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
+          // console.log(item.quantity, parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.quantity) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
           if (item.is_item_picked) {
             orderDetail['orderItem'][j]['quantity'] = (parseFloat(item.pending_qty))
           } else {
@@ -356,7 +356,7 @@ class stockTransferPickingDetailController extends BaseController {
         })
 
 
-        _.remove(orderDetail['orderItem'], { 'pickingFullfilmentStatus': 2 })
+        _.remove(orderDetail['orderItem'], { 'fulfillmentStatus': 2 })
 
         console.log(orderDetail)
 
@@ -385,7 +385,7 @@ class stockTransferPickingDetailController extends BaseController {
           { 'delivery_no': { $ne: 'N/A' } },
           { 'invoiceDetail.isInvoice': false }
         ]
-      }, { 'delivery_no': 1, 'fullfilment': 1, 'vendor_name': 1, 'shipping_plant': 1, 'plant': 1, 'delivery_date': 1, 'stoDbId': 1, 'stoNumber': 1 }).lean().then((res) => {
+      }, { 'delivery_no': 1, 'fullfilment': 1, 'vendor_name': 1, 'shipping_plant': 1, 'plant': 1, 'delivery_date': 1, 'stoDbId': 1, 'stoNumber': 1, 'item.material_description': 1, 'item.material_no': 1 }).lean().then((res) => {
 
         if (res && !_.isEmpty(res)) {
           return {
@@ -570,7 +570,7 @@ class stockTransferPickingDetailController extends BaseController {
             itemCount: { $size: "$item" },
             stoNumber: 1,
             delivery_no: 1,
-            'fullfilmentStatus': '$ROOT.pickingFullfilmentStatus',
+            'fullfilmentStatus': 1,
 
           },
         },
@@ -716,13 +716,22 @@ class stockTransferPickingDetailController extends BaseController {
 
       //update delivery date  suppliedQty
       // console.log('delivery', OrderData['itemDetail'])
-      let soUpdateFullfilemt = await poCtrl.updateStoFullfilmentStatus(stoId, orderDetail['item'], pickedItem, req.body.deliveryDate)
+      let soUpdateFullfilemt = await poCtrl.updateStoFullfilmentStatus(stoId, orderDetail['item'], pickedItem, req.body.deliveryDate, stoPickingId)
 
       let pickingDetail = await this.getPickingDetails(stoPickingId)
 
       info('Picking Allocation is created !');
       if (pickingDetail.success) {
-        console.log('success')
+        info('successfully updated delivery and fullfilment status.')
+        let updateQuery = [{ _id: mongoose.Types.ObjectId(stoPickingId) }, {
+          $set: {
+
+            fullfilment: soUpdateFullfilemt.data['fulfillmentStatus'],
+
+          }
+        }]
+
+        await Model.updateStatus(updateQuery)
 
 
 
@@ -777,7 +786,7 @@ class stockTransferPickingDetailController extends BaseController {
           'invoiceDetail.invoice.invoice_no': 1,
           'pickingDate': 1,
           'stoNumber': 1,
-          'fullfilmentStatus': '$ROOT.pickingFullfilmentStatus',
+          'fullfilmentStatus': 1,
           'delivery_date': 1,
 
           'shipping_plant': 1,
@@ -842,7 +851,7 @@ class stockTransferPickingDetailController extends BaseController {
             'invoiceDetail.invoice.invoiceId': 1,
             'pickingDate': 1,
             'stoNumber': 1,
-            'fullfilmentStatus': '$ROOT.pickingFullfilmentStatus',
+            'fullfilmentStatus': 1,
             'delivery_date': 1,
 
             'shipping_plant': 1,
@@ -1237,6 +1246,7 @@ class stockTransferPickingDetailController extends BaseController {
         searchDate = req.query.searchDate || '',
         type = req.params.type,
         plant = req.user.plant,
+        fullfilment = parseInt(req.query.fullfilment) || 2,
         sortingArray = {};
       sortingArray[sortBy] = -1;
       let pickerBoyId = req.user._id,
@@ -1248,6 +1258,8 @@ class stockTransferPickingDetailController extends BaseController {
           'delivery_no': {
             $ne: 'N/A'
           },
+
+          'fullfilment': fullfilment,
 
 
         }
@@ -1601,7 +1613,7 @@ class stockTransferPickingDetailController extends BaseController {
           'invoiceDetail.invoice.invoiceId': 1,
           'deliveryDate': 1,
           'stoDbId': 1,
-          'pickingFullfilmentStatus': 1,
+          'fullfilment': 1,
           'delivery_date': 1,
           'pickingDate': 1,
           'shipping_point': 1,
@@ -1623,13 +1635,13 @@ class stockTransferPickingDetailController extends BaseController {
 
       if (orderDetail.length > 0) {
         orderDetail[0]['item'].forEach((item, j) => {
-          console.log(item.quantity, parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.quantity) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
+          // console.log(item.quantity, parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.quantity) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
           orderDetail[0]['item'][j]['quantity'] = (parseFloat(item.quantity) - parseFloat(item.suppliedQty ? item.suppliedQty : 0))
 
         })
 
 
-        _.remove(orderDetail[0]['item'], { 'pickingFullfilmentStatus': 2 })
+        _.remove(orderDetail[0]['item'], { 'fulfillmentStatus': 2 })
 
 
         return this.success(req, res, this.status.HTTP_OK, {

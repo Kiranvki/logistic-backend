@@ -976,7 +976,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       let searchObject = {
 
 
-        'isItemPicked':true,
+        'isItemPicked': true,
         'isStartedPicking': true,
         'invoiceDetail.isInvoice': false,
         'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId)
@@ -1051,9 +1051,9 @@ class pickerboySalesOrderMappingController extends BaseController {
                 'otherChargesTaxInclusive': 1,
                 'customerType': 1,
                 'salesOrderId': 1,
-                'pickingDate':1,
-                'updatedAt':1,
-                'created_at':1,
+                'pickingDate': 1,
+                'updatedAt': 1,
+                'created_at': 1,
                 'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
 
               }
@@ -1068,12 +1068,12 @@ class pickerboySalesOrderMappingController extends BaseController {
           'pickerBoyId': 1,
           'InvoiceId': 1,
           'state': 1,
-          'sales_order_no':1,
-          'pickingDate':1,
-          'orderDate':{$arrayElemAt: ['$salesOrdersDetails.created_at',0]},
-          'deliveryDate':{$arrayElemAt: ['$salesOrdersDetails.updatedAt',0]},
-          'invoiceDate':{$arrayElemAt: ['$salesOrdersDetails.updatedAt',0]}, 
-          'numberOfItems':{$arrayElemAt: ['$salesOrdersDetails.numberOfItems',0]}
+          'sales_order_no': 1,
+          'pickingDate': 1,
+          'orderDate': { $arrayElemAt: ['$salesOrdersDetails.created_at', 0] },
+          'deliveryDate': { $arrayElemAt: ['$salesOrdersDetails.updatedAt', 0] },
+          'invoiceDate': { $arrayElemAt: ['$salesOrdersDetails.updatedAt', 0] },
+          'numberOfItems': { $arrayElemAt: ['$salesOrdersDetails.numberOfItems', 0] }
         }
       }
 
@@ -1100,7 +1100,7 @@ class pickerboySalesOrderMappingController extends BaseController {
   }
 
 
-  
+
   // Internal Function get pickerboy sales order mapping details
   getDetails = (pickerBoySalesOrderMappingId) => {
     try {
@@ -1141,88 +1141,88 @@ class pickerboySalesOrderMappingController extends BaseController {
   }
 
 
-    // Internal Function get picking Status / Delivery Number  details
-    getPickingDetails = (pickerBoySalesOrderMappingId) => {
-      try {
-        info('Get SO Picking Details !');
-  
-        // get details 
-        return Model.findOne({
-          _id: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
-   
-          delivery_no:{$ne:'N/A'},
-          isDeleted: 0
-        }).lean().then((res) => {
-          if (res && !_.isEmpty(res)) {
-            return {
-              success: true,
-              data: res
-            }
-          } else {
-            error('Error Searching Data in PickerBoy Order Mapping DB!');
-            return {
-              success: false
-            }
-          }
-        }).catch(err => {
-          error(err);
+  // Internal Function get picking Status / Delivery Number  details
+  getPickingDetails = (pickerBoySalesOrderMappingId) => {
+    try {
+      info('Get SO Picking Details !');
+
+      // get details 
+      return Model.findOne({
+        _id: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
+
+        delivery_no: { $ne: 'N/A' },
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
           return {
-            success: false,
-            error: err
+            success: true,
+            data: res
           }
-        });
-  
-        // catch any runtime error 
-      } catch (err) {
+        } else {
+          error('Error Searching Data in PickerBoy Order Mapping DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
         error(err);
         return {
           success: false,
           error: err
         }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
       }
     }
-  
-       // Internal Function get invoice detail 
-       getInvoiceDetails = (pickerBoySalesOrderMappingId) => {
-        try {
-          info('Get SO Picking Details !');
-    
-          // get details 
-          return Model.findOne({
-            _id: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
-            'invoiceDetail.isInvoice':true,
-            delivery_no:{$ne:'N/A'},
-            isDeleted: 0
-          }).lean().then((res) => {
-            if (res && !_.isEmpty(res)) {
-              return {
-                success: true,
-                data: res
-              }
-            } else {
-              error('Error Searching Data in PickerBoy Order Mapping DB!');
-              return {
-                success: false
-              }
-            }
-          }).catch(err => {
-            error(err);
-            return {
-              success: false,
-              error: err
-            }
-          });
-    
-          // catch any runtime error 
-        } catch (err) {
-          error(err);
+  }
+
+  // Internal Function get invoice detail 
+  getInvoiceDetails = (pickerBoySalesOrderMappingId) => {
+    try {
+      info('Get SO Picking Details !');
+
+      // get details 
+      return Model.findOne({
+        _id: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
+        'invoiceDetail.isInvoice': true,
+        delivery_no: { $ne: 'N/A' },
+        isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
           return {
-            success: false,
-            error: err
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in PickerBoy Order Mapping DB!');
+          return {
+            success: false
           }
         }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
       }
-  
+    }
+  }
+
 
   // Internal Function get  sales order  details
   getSalesOrderDetails = (saleOrderId) => {
@@ -1277,7 +1277,7 @@ class pickerboySalesOrderMappingController extends BaseController {
         locationId = req.user.locationId || 0, // locationId 
         cityId = req.user.cityId || 'N/A', // cityId 
         searchDate = req.query.searchDate || req.body.searchDate || '';
-console.log(searchDate)
+      console.log(searchDate)
       // let startOfTheDay = moment().set({
       //   h: 0,
       //   m: 0,
@@ -1693,7 +1693,7 @@ console.log(searchDate)
 
 
       // 2021-03-29
-   
+
       let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
       let yasterdayDate = moment(new Date()).subtract(3, 'days').format('YYYY-MM-DD')
 
@@ -1736,7 +1736,7 @@ console.log(searchDate)
 
               }
             },
-            {'sales_document_type':{$ne:'ZBRD'}}, {
+            { 'sales_document_type': { $ne: 'ZBRD' } }, {
               $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
 
                 'fulfillmentStatus': { $exists: false }
@@ -1750,7 +1750,16 @@ console.log(searchDate)
                 { 'item': { $exists: true, $not: { $size: 0 } } },
                 { 'assets': { $exists: true, $not: { $size: 0 } } }
               ]
-            }]
+            },
+            {
+              $or: [{ 'overall_status': { $exists: true, $ne: 'Completely processed' } }, {
+
+                'overall_status': { $exists: false }
+              }]
+            }
+
+
+          ]
 
 
         }
@@ -1777,7 +1786,7 @@ console.log(searchDate)
 
                 }
               },
-              {'sales_document_type':{$ne:'ZBRD'}}, {
+              { 'sales_document_type': { $ne: 'ZBRD' } }, {
                 $or: [{ 'fulfillmentStatus': { $ne: 2 } }, {
 
                   'fulfillmentStatus': { $exists: false }
@@ -2002,7 +2011,7 @@ console.log(searchDate)
     }
   }
 
- 
+
   updateItemPickStatus = async (id, status) => {
 
     return await Model.updateIsItemPickedStatus(id, status);
@@ -2208,41 +2217,41 @@ console.log(searchDate)
         }
       }
         , {
-          $project: {
+        $project: {
 
-            'state': 1,
-            'remarks': 1,
-            'shipping_point': 1,
-            'delivery_no': 1,
-            'delivery_date': 1,
-            'sales_order_no': 1,
-            'salesOrderId': 1,
-            'pickerBoyId': 1,
-            'createdBy': 1,
-            'pickingDate': 1,
-            'createdAt': 1,
-            'updatedAt': 1,
+          'state': 1,
+          'remarks': 1,
+          'shipping_point': 1,
+          'delivery_no': 1,
+          'delivery_date': 1,
+          'sales_order_no': 1,
+          'salesOrderId': 1,
+          'pickerBoyId': 1,
+          'createdBy': 1,
+          'pickingDate': 1,
+          'createdAt': 1,
+          'updatedAt': 1,
 
-            'invoice_request': 1,
-            'invoice_response': 1,
-            'picking_allocation_request': 1,
-            'picking_allocation_response': 1,
-            'isSapError': 1,
-            'cityId': { $first: '$invoice.cityId' },
-            'customerName': { $first: '$invoice.customerName' },
-            'companyDetails': { $first: '$invoice.companyDetails' },
-            'payerDetails': { $first: '$invoice.payerDetails' },
-            'shippingDetails': { $first: '$invoice.shippingDetails' },
-            'invoiceDetails': { $first: '$invoice.invoiceDetails' },
-            'invoiceDate': { $first: '$invoice.invoiceDate' },
-            'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
-            'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
-            'totalAmount': { $first: '$invoice.totalAmount' },
-            'totalTax': { $first: '$invoice.totalTax' },
-            'totalDiscount': { $first: '$invoice.totalDiscount' },
-            'totalNetValue': { $first: '$invoice.totalNetValue' },
-            'itemSupplied': { $first: '$invoice.itemSupplied' }
-          }
+          'invoice_request': 1,
+          'invoice_response': 1,
+          'picking_allocation_request': 1,
+          'picking_allocation_response': 1,
+          'isSapError': 1,
+          'cityId': { $first: '$invoice.cityId' },
+          'customerName': { $first: '$invoice.customerName' },
+          'companyDetails': { $first: '$invoice.companyDetails' },
+          'payerDetails': { $first: '$invoice.payerDetails' },
+          'shippingDetails': { $first: '$invoice.shippingDetails' },
+          'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+          'invoiceDate': { $first: '$invoice.invoiceDate' },
+          'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+          'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+          'totalAmount': { $first: '$invoice.totalAmount' },
+          'totalTax': { $first: '$invoice.totalTax' },
+          'totalDiscount': { $first: '$invoice.totalDiscount' },
+          'totalNetValue': { $first: '$invoice.totalNetValue' },
+          'itemSupplied': { $first: '$invoice.itemSupplied' }
+        }
       },
       {
         $sort: {
@@ -2288,42 +2297,42 @@ console.log(searchDate)
           }
         }
           , {
-            $project: {
+          $project: {
 
 
-              'state': 1,
-              'remarks': 1,
-              'shipping_point': 1,
-              'delivery_no': 1,
-              'delivery_date': 1,
-              'sales_order_no': 1,
-              'salesOrderId': 1,
-              'pickerBoyId': 1,
-              'createdBy': 1,
-              'pickingDate': 1,
-              'createdAt': 1,
-              'updatedAt': 1,
+            'state': 1,
+            'remarks': 1,
+            'shipping_point': 1,
+            'delivery_no': 1,
+            'delivery_date': 1,
+            'sales_order_no': 1,
+            'salesOrderId': 1,
+            'pickerBoyId': 1,
+            'createdBy': 1,
+            'pickingDate': 1,
+            'createdAt': 1,
+            'updatedAt': 1,
 
-              'invoice_request': 1,
-              'invoice_response': 1,
-              'picking_allocation_request': 1,
-              'picking_allocation_response': 1,
-              'isSapError': 1,
-              'cityId': { $first: '$invoice.cityId' },
-              'customerName': { $first: '$invoice.customerName' },
-              'companyDetails': { $first: '$invoice.companyDetails' },
-              'payerDetails': { $first: '$invoice.payerDetails' },
-              'shippingDetails': { $first: '$invoice.shippingDetails' },
-              'invoiceDetails': { $first: '$invoice.invoiceDetails' },
-              'invoiceDate': { $first: '$invoice.invoiceDate' },
-              'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
-              'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
-              'totalAmount': { $first: '$invoice.totalAmount' },
-              'totalTax': { $first: '$invoice.totalTax' },
-              'totalDiscount': { $first: '$invoice.totalDiscount' },
-              'totalNetValue': { $first: '$invoice.totalNetValue' },
-              'itemSupplied': { $first: '$invoice.itemSupplied' }
-            }
+            'invoice_request': 1,
+            'invoice_response': 1,
+            'picking_allocation_request': 1,
+            'picking_allocation_response': 1,
+            'isSapError': 1,
+            'cityId': { $first: '$invoice.cityId' },
+            'customerName': { $first: '$invoice.customerName' },
+            'companyDetails': { $first: '$invoice.companyDetails' },
+            'payerDetails': { $first: '$invoice.payerDetails' },
+            'shippingDetails': { $first: '$invoice.shippingDetails' },
+            'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+            'invoiceDate': { $first: '$invoice.invoiceDate' },
+            'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+            'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+            'totalAmount': { $first: '$invoice.totalAmount' },
+            'totalTax': { $first: '$invoice.totalTax' },
+            'totalDiscount': { $first: '$invoice.totalDiscount' },
+            'totalNetValue': { $first: '$invoice.totalNetValue' },
+            'itemSupplied': { $first: '$invoice.itemSupplied' }
+          }
         },
         {
           $sort: {
@@ -2705,209 +2714,209 @@ console.log(searchDate)
   }
 
 
-    // getOrderHistoryByPickerBoyID
-    getPendingOrderAndInvoices = async (req, res, next) => {
-      try {
-        info('Get History  Order details !');
-  
-        // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = req.query
-        // let sortingArray = {};
-        // sortingArray[sortBy] = -1;
-        // let skip = parseInt(page - 1) * pageSize;
-        // get the query params
-        let page = req.query.page || 1,
-          pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
-          searchKey = '',//req.query.search || '',
-          sortBy = req.query.sortBy || 'req_del_date',
-          orderid = req.params.orderid,
-          sortingArray = {};
-        sortingArray[sortBy] = -1;
-        let skip = parseInt(page - 1) * pageSize;
-  
-        // item count missing
-        let searchObject = {
-          // 'pickerBoyId': mongoose.Types.ObjectId(req.user._id), //req.user._id,
-          'salesOrderId': mongoose.Types.ObjectId(orderid),
-          'invoiceDetail.isInvoice': true
-          // 'isPacked': 0,
-          // 'fulfillmentStatus': 0,
-          // 'locationId': parseInt(locationId),
-          // 'cityId': cityId,
-  
-          // 'req_del_date': {
-  
-          //   '$lte': startOfTheDay
-          // }
-        };
-  
-        // creating a match object
-        if (searchKey !== '')
-          searchObject = {
-            ...searchObject,
-            '$or': [{
-              'customerName': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }, {
-              'customerCode': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }]
-          };
-        // console.log(...searchObject)
-        let totalCount = await Model.aggregate([{
-          $match:
-            searchObject
-  
-        },
-        {
-          $count: 'sum'
-        }
-        ]).allowDiskUse(true);
-  
-        // calculating the total number of applications for the given scenario
-        if (totalCount[0] !== undefined)
-          totalCount = totalCount[0].sum;
-        else
-          totalCount = 0;
-  
-        // get list  
-        let salesOrderList = await Model.aggregate([{
-          $match: {
-            ...searchObject
-          }
-        },
-        {
-          $lookup: {
-            from: 'invoicemasters',
-            localField: 'invoiceDetail.invoice.invoiceDbId',
-            foreignField: '_id',
-            as: 'invoice'
-  
-          }
-        },
-        {
-          $lookup: {
-            from: 'salesorders',
-            localField: 'salesOrderId',
-            foreignField: '_id',
-            as: 'orderDetails'
-  
-          }
-        },
-        { $unwind: '$invoice' },
-        { $unwind: '$salesOrderId' },
-        {
-          $group: {
-            _id: '$sales_order_no', invoice: {
-              $push: {
-                'invoiceId': '$invoiceDetail.invoice.invoiceId',
-                'suppliedQty': { '$sum': '$invoice.itemSupplied.suppliedQty' }, 'item_no': '$invoice.itemSupplied.item_no',
-                'invoicedbid': '$invoiceDetail.invoice.invoiceDbId', 'date': '$invoice.createdAt'
-              }
-            },
-            'customerName': { '$first': '$invoice.customerName' },
-            'deliveryDate': { $first: '$delivery_date' },
-            'item':{ $first:{ $first: '$orderDetails.item' }},
-            'salesOrderId':{ $first:{ $first: '$orderDetails._id' }},
-            'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
-          }
-        }
-        
-  
-  
-          , {
-          $sort: sortingArray
-        }, {
-          $skip: skip
-        }, {
-          $limit: pageSize
-        },
-        {
-          $project: {
-            'onlineReferenceNo': 1,
-            'customerCode': 1,
-            'customerName': 1,
-            'customerType': 1,
-            'shippingId': 1,
-            'cityId': 1,
-            'plant': 1,
-            'pickerboyOrderMappingId':1,
-            'sales_order_no': 1,
-            'state': 1,
-            'invoiceDetail.invoice.invoiceId': 1,
-            'deliveryDate': 1,
-            'salesOrderId': 1,
-            'fulfillmentStatus': 1,
-            'delivery_date': 1,
-            'pickingDate': 1,
-            'shipping_point': 1,
-            'invoice': 1,
-            'sold_to_party': 1,
-            'orderDetails':1,
-            'item':1
-            // 'numberOfItems': { $cond: { if: { $isArray: "$invoice.itemSupplied" }, then: { $size: "$invoice.itemSupplied" }, else: "NA" } }
-          }
-        }
-  
-        ]).allowDiskUse(true)
-        // console.log(salesOrderList)
-        // return {
-        //   success: true,
-        //   data: salesOrderList,
-        //   total: totalCount
-        // };
-      console.log(salesOrderList)
-        if (salesOrderList.length > 0) {
-          salesOrderList[0]['item'].forEach((item, j) => {
-            console.log(item,parseInt(item.suppliedQty?item.suppliedQty:0),(parseInt(item.qty)-parseInt(item.suppliedQty?item.suppliedQty:0)))
-            salesOrderList[0]['item'][j]['qty'] = (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0))
-            // if ((item.fulfillmentStatus ? item.fulfillmentStatus : 0) == 2) {
-              // console.log(todaysOrderData[i]['item'][j])
-              // todaysOrderData[i]['item'].splice(j, 1)
-             
-           
-  
-            // }
-          })
-          _.remove(salesOrderList[0]['item'], { 'fulfillmentStatus': 2 })
-          return this.success(req, res, this.status.HTTP_OK, {
-            results: salesOrderList[0],
-            pageMeta: {
-              skip: parseInt(skip),
-              pageSize: pageSize,
-              total: salesOrderList.length  //item
+  // getOrderHistoryByPickerBoyID
+  getPendingOrderAndInvoices = async (req, res, next) => {
+    try {
+      info('Get History  Order details !');
+
+      // let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = req.query
+      // let sortingArray = {};
+      // sortingArray[sortBy] = -1;
+      // let skip = parseInt(page - 1) * pageSize;
+      // get the query params
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = '',//req.query.search || '',
+        sortBy = req.query.sortBy || 'req_del_date',
+        orderid = req.params.orderid,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      // item count missing
+      let searchObject = {
+        // 'pickerBoyId': mongoose.Types.ObjectId(req.user._id), //req.user._id,
+        'salesOrderId': mongoose.Types.ObjectId(orderid),
+        'invoiceDetail.isInvoice': true
+        // 'isPacked': 0,
+        // 'fulfillmentStatus': 0,
+        // 'locationId': parseInt(locationId),
+        // 'cityId': cityId,
+
+        // 'req_del_date': {
+
+        //   '$lte': startOfTheDay
+        // }
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'customerName': {
+              $regex: searchKey,
+              $options: 'is'
             }
-          }, this.messageTypes.historyFetchedSuccessfully);
+          }, {
+            'customerCode': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+      // console.log(...searchObject)
+      let totalCount = await Model.aggregate([{
+        $match:
+          searchObject
+
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let salesOrderList = await Model.aggregate([{
+        $match: {
+          ...searchObject
         }
-        else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedHistoryDetails);
-  
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        return {
-          success: false,
+      },
+      {
+        $lookup: {
+          from: 'invoicemasters',
+          localField: 'invoiceDetail.invoice.invoiceDbId',
+          foreignField: '_id',
+          as: 'invoice'
+
+        }
+      },
+      {
+        $lookup: {
+          from: 'salesorders',
+          localField: 'salesOrderId',
+          foreignField: '_id',
+          as: 'orderDetails'
+
+        }
+      },
+      { $unwind: '$invoice' },
+      { $unwind: '$salesOrderId' },
+      {
+        $group: {
+          _id: '$sales_order_no', invoice: {
+            $push: {
+              'invoiceId': '$invoiceDetail.invoice.invoiceId',
+              'suppliedQty': { '$sum': '$invoice.itemSupplied.suppliedQty' }, 'item_no': '$invoice.itemSupplied.item_no',
+              'invoicedbid': '$invoiceDetail.invoice.invoiceDbId', 'date': '$invoice.createdAt'
+            }
+          },
+          'customerName': { '$first': '$invoice.customerName' },
+          'deliveryDate': { $first: '$delivery_date' },
+          'item': { $first: { $first: '$orderDetails.item' } },
+          'salesOrderId': { $first: { $first: '$orderDetails._id' } },
+          'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
         }
       }
+
+
+
+        , {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'onlineReferenceNo': 1,
+          'customerCode': 1,
+          'customerName': 1,
+          'customerType': 1,
+          'shippingId': 1,
+          'cityId': 1,
+          'plant': 1,
+          'pickerboyOrderMappingId': 1,
+          'sales_order_no': 1,
+          'state': 1,
+          'invoiceDetail.invoice.invoiceId': 1,
+          'deliveryDate': 1,
+          'salesOrderId': 1,
+          'fulfillmentStatus': 1,
+          'delivery_date': 1,
+          'pickingDate': 1,
+          'shipping_point': 1,
+          'invoice': 1,
+          'sold_to_party': 1,
+          'orderDetails': 1,
+          'item': 1
+          // 'numberOfItems': { $cond: { if: { $isArray: "$invoice.itemSupplied" }, then: { $size: "$invoice.itemSupplied" }, else: "NA" } }
+        }
+      }
+
+      ]).allowDiskUse(true)
+      // console.log(salesOrderList)
+      // return {
+      //   success: true,
+      //   data: salesOrderList,
+      //   total: totalCount
+      // };
+      console.log(salesOrderList)
+      if (salesOrderList.length > 0) {
+        salesOrderList[0]['item'].forEach((item, j) => {
+          console.log(item, parseInt(item.suppliedQty ? item.suppliedQty : 0), (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0)))
+          salesOrderList[0]['item'][j]['qty'] = (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0))
+          // if ((item.fulfillmentStatus ? item.fulfillmentStatus : 0) == 2) {
+          // console.log(todaysOrderData[i]['item'][j])
+          // todaysOrderData[i]['item'].splice(j, 1)
+
+
+
+          // }
+        })
+        _.remove(salesOrderList[0]['item'], { 'fulfillmentStatus': 2 })
+        return this.success(req, res, this.status.HTTP_OK, {
+          results: salesOrderList[0],
+          pageMeta: {
+            skip: parseInt(skip),
+            pageSize: pageSize,
+            total: salesOrderList.length  //item
+          }
+        }, this.messageTypes.historyFetchedSuccessfully);
+      }
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchedHistoryDetails);
+
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+      }
     }
+  }
 
 
-  getInvoiceDetailById = async (req,res,next) =>{
-    
+  getInvoiceDetailById = async (req, res, next) => {
+
   }
 
 
 
 
   getInvoice = async (req, res, next) => {
-    
+
     try {
 
       info('Getting the Invoice !!!');
-      
+
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
         searchKey = req.query.searchKey || '',
@@ -3217,21 +3226,21 @@ console.log(searchDate)
 
 
 
-  getInvoices = async (req,res,next) => {
-    
+  getInvoices = async (req, res, next) => {
+
     try {
 
       info('Getting the todays Order !!!');
-      
+
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
         searchKey = req.query.searchKey || '',
-        
+
         sortBy = req.query.sortBy || 'createdAt',
         skip = parseInt(page - 1) * pageSize,
         locationId = 0, // locationId req.user.locationId || 
         cityId = 'N/A', // cityId req.user.cityId ||
-        
+
         startDate = req.query.startDate || moment().subtract(100, 'days').set({
           h: 0,
           m: 0,
@@ -3248,9 +3257,9 @@ console.log(searchDate)
         // plant = req.body.plant,
         sortingArray = {};
       sortingArray[sortBy] = -1;
-    console.log(startDate,endDate)
-  
-   
+      console.log(startDate, endDate)
+
+
       if (startDate && !_.isEmpty(startDate)) {
 
 
@@ -3261,7 +3270,7 @@ console.log(searchDate)
           millisecond: 0
         }).toDate();
 
-    
+
       }
 
       if (endDate && !_.isEmpty(endDate)) {
@@ -3274,78 +3283,81 @@ console.log(searchDate)
           millisecond: 0
         }).toDate();
 
-    
+
       }
       info('Get Invoices !');
-      
-      let pipeline= [{
-        $match:{
-          'createdAt':{$gte:startDate,$lte:endDate},
-          'isStartedPicking':false,
-          'isItemPicked':false,
-         
-        
-        
-      
-      }
-      },
-      {$lookup:{
-        from:'invoicemasters',
-        let:{
-          id:'$invoiceDetail.invoice.invoiceDbId'
-        },
-        pipeline:[{
-          $match:{
-            $expr: {
-            $eq:['$$id','$_id']
-            }
-         
-          }
-          
+
+      let pipeline = [{
+        $match: {
+          'createdAt': { $gte: startDate, $lte: endDate },
+          'isStartedPicking': false,
+          'isItemPicked': false,
+
+
+
+
         }
-      ],
-        as: "invoice"
-      
-      }
-      }
-      ,{$project:{
-        
-        'state': 1,
-        'remarks': 1,
-        'shipping_point':1,
-        'delivery_no': 1,
-        'delivery_date':1,
-        'sales_order_no':1,
-        'salesOrderId':1,
-        'pickerBoyId': 1,
-        'createdBy': 1,
-        'pickingDate': 1,
-        'createdAt': 1,
-        'updatedAt': 1,
-        
-        'invoice_request': 1,
-        'invoice_response': 1,
-        'picking_allocation_request':1,
-        'picking_allocation_response':1,
-        'isSapError': 1,
-        'cityId': { $first:'$invoice.cityId'},
-        'customerName': { $first:'$invoice.customerName'},
-        'companyDetails': { $first:'$invoice.companyDetails'},
-        'payerDetails': { $first:'$invoice.payerDetails'},
-        'shippingDetails': { $first:'$invoice.shippingDetails'},
-        'invoiceDetails': { $first:'$invoice.invoiceDetails'},
-        'invoiceDate':  { $first:'$invoice.invoiceDate'},
-        'totalQuantitySupplied': { $first:'$invoice.totalQuantitySupplied'},
-        'totalQuantityDemanded': { $first:'$invoice.totalQuantityDemanded'},
-        'totalAmount': { $first:'$invoice.totalAmount'},
-        'totalTax': { $first:'$invoice.totalTax'},
-        'totalDiscount': { $first:'$invoice.totalDiscount'},
-        'totalNetValue': { $first:'$invoice.totalNetValue'},
-        'itemSupplied': { $first:'$invoice.itemSupplied'}
-      }},
+      },
       {
-        $sort:{
-          'createdAt':-1
+        $lookup: {
+          from: 'invoicemasters',
+          let: {
+            id: '$invoiceDetail.invoice.invoiceDbId'
+          },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $eq: ['$$id', '$_id']
+              }
+
+            }
+
+          }
+          ],
+          as: "invoice"
+
+        }
+      }
+        , {
+          $project: {
+
+            'state': 1,
+            'remarks': 1,
+            'shipping_point': 1,
+            'delivery_no': 1,
+            'delivery_date': 1,
+            'sales_order_no': 1,
+            'salesOrderId': 1,
+            'pickerBoyId': 1,
+            'createdBy': 1,
+            'pickingDate': 1,
+            'createdAt': 1,
+            'updatedAt': 1,
+
+            'invoice_request': 1,
+            'invoice_response': 1,
+            'picking_allocation_request': 1,
+            'picking_allocation_response': 1,
+            'isSapError': 1,
+            'cityId': { $first: '$invoice.cityId' },
+            'customerName': { $first: '$invoice.customerName' },
+            'companyDetails': { $first: '$invoice.companyDetails' },
+            'payerDetails': { $first: '$invoice.payerDetails' },
+            'shippingDetails': { $first: '$invoice.shippingDetails' },
+            'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+            'invoiceDate': { $first: '$invoice.invoiceDate' },
+            'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+            'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+            'totalAmount': { $first: '$invoice.totalAmount' },
+            'totalTax': { $first: '$invoice.totalTax' },
+            'totalDiscount': { $first: '$invoice.totalDiscount' },
+            'totalNetValue': { $first: '$invoice.totalNetValue' },
+            'itemSupplied': { $first: '$invoice.itemSupplied' }
+          }
+      },
+      {
+        $sort: {
+          'createdAt': -1
         }
       }
         // status: 1,
@@ -3353,82 +3365,85 @@ console.log(searchDate)
       ]
 
 
-     
+
       if (searchKey !== '')
- pipeline= [{
-  $match:{
-    'createdAt':{$gte:startDate,$lte:endDate},
-    'isStartedPicking':false,
-    'isItemPicked':false,
-   
-  
-  
+        pipeline = [{
+          $match: {
+            'createdAt': { $gte: startDate, $lte: endDate },
+            'isStartedPicking': false,
+            'isItemPicked': false,
 
-}
-},
-{$lookup:{
-  from:'invoicemasters',
-  let:{
-    id:'$invoiceDetail.invoice.invoiceDbId'
-  },
-  pipeline:[{
-    $match:{
-      $expr: {
-      $eq:['$$id','$_id']
-      }
-   
-    }
-    
-  }
-],
-  as: "invoice"
 
-}
-}
-,{$project:{
-  
-  
-  'state': 1,
-  'remarks': 1,
-  'shipping_point':1,
-  'delivery_no': 1,
-  'delivery_date':1,
-  'sales_order_no':1,
-  'salesOrderId':1,
-  'pickerBoyId': 1,
-  'createdBy': 1,
-  'pickingDate': 1,
-  'createdAt': 1,
-  'updatedAt': 1,
-  
-  'invoice_request': 1,
-  'invoice_response': 1,
-  'picking_allocation_request':1,
-  'picking_allocation_response':1,
-  'isSapError': 1,
-  'cityId': { $first:'$invoice.cityId'},
-  'customerName': { $first:'$invoice.customerName'},
-  'companyDetails': { $first:'$invoice.companyDetails'},
-  'payerDetails': { $first:'$invoice.payerDetails'},
-  'shippingDetails': { $first:'$invoice.shippingDetails'},
-  'invoiceDetails': { $first:'$invoice.invoiceDetails'},
-  'invoiceDate':  { $first:'$invoice.invoiceDate'},
-  'totalQuantitySupplied': { $first:'$invoice.totalQuantitySupplied'},
-  'totalQuantityDemanded': { $first:'$invoice.totalQuantityDemanded'},
-  'totalAmount': { $first:'$invoice.totalAmount'},
-  'totalTax': { $first:'$invoice.totalTax'},
-  'totalDiscount': { $first:'$invoice.totalDiscount'},
-  'totalNetValue': { $first:'$invoice.totalNetValue'},
-  'itemSupplied': { $first:'$invoice.itemSupplied'}
-}},
-{
-  $sort:{
-    'createdAt':-1
-  }
-}
-  // status: 1,
-  // isDeleted: 0
-]
+
+
+          }
+        },
+        {
+          $lookup: {
+            from: 'invoicemasters',
+            let: {
+              id: '$invoiceDetail.invoice.invoiceDbId'
+            },
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ['$$id', '$_id']
+                }
+
+              }
+
+            }
+            ],
+            as: "invoice"
+
+          }
+        }
+          , {
+            $project: {
+
+
+              'state': 1,
+              'remarks': 1,
+              'shipping_point': 1,
+              'delivery_no': 1,
+              'delivery_date': 1,
+              'sales_order_no': 1,
+              'salesOrderId': 1,
+              'pickerBoyId': 1,
+              'createdBy': 1,
+              'pickingDate': 1,
+              'createdAt': 1,
+              'updatedAt': 1,
+
+              'invoice_request': 1,
+              'invoice_response': 1,
+              'picking_allocation_request': 1,
+              'picking_allocation_response': 1,
+              'isSapError': 1,
+              'cityId': { $first: '$invoice.cityId' },
+              'customerName': { $first: '$invoice.customerName' },
+              'companyDetails': { $first: '$invoice.companyDetails' },
+              'payerDetails': { $first: '$invoice.payerDetails' },
+              'shippingDetails': { $first: '$invoice.shippingDetails' },
+              'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+              'invoiceDate': { $first: '$invoice.invoiceDate' },
+              'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+              'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+              'totalAmount': { $first: '$invoice.totalAmount' },
+              'totalTax': { $first: '$invoice.totalTax' },
+              'totalDiscount': { $first: '$invoice.totalDiscount' },
+              'totalNetValue': { $first: '$invoice.totalNetValue' },
+              'itemSupplied': { $first: '$invoice.itemSupplied' }
+            }
+        },
+        {
+          $sort: {
+            'createdAt': -1
+          }
+        }
+          // status: 1,
+          // isDeleted: 0
+        ]
 
 
       // get details 
@@ -3444,14 +3459,14 @@ console.log(searchDate)
 
           try {
             // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
-              const csv = json2csv.parse(result)
-              res.attachment(`report-${moment(startDate).format('DD:MM:YY')}-${moment(endDate).format('DD:MM:YY')}.csv`)
-              res.status(200).send(csv)
+            const csv = json2csv.parse(result)
+            res.attachment(`report-${moment(startDate).format('DD:MM:YY')}-${moment(endDate).format('DD:MM:YY')}.csv`)
+            res.status(200).send(csv)
           } catch (error) {
-              console.log('error:', error.message)
-              res.status(500).send(error.message)
+            console.log('error:', error.message)
+            res.status(500).send(error.message)
           }
-       
+
 
           // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
         } else {
@@ -3483,13 +3498,13 @@ console.log(searchDate)
       // catch any runtime error 
     } catch (err) {
       error(err);
-     return this.errors(
+      return this.errors(
         req,
         res,
         this.status.HTTP_INTERNAL_SERVER_ERROR,
         this.exceptions.internalServerErr(req, err)
       );
-        // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
 

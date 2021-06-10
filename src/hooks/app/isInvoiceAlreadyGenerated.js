@@ -20,7 +20,7 @@ module.exports = async (req, res, next) => {
         info('Check whether the invoice generated and details exist for the stock transfer or not');
         let objectId = mongoose.Types.ObjectId; // object id
         let id = req.body.pickerBoyOrderMappingId || req.params.pickerBoyOrderMappingId || req.params.stoPickingId; // get the sale order id 
-        let isValidStoPickingId,
+        let isValidPickingId,
         requestFromUrl = req.url;
 
         // mongoose valid id 
@@ -28,12 +28,12 @@ module.exports = async (req, res, next) => {
 
             // check whether the sale Order id is unique or not
             if(requestFromUrl.includes('/stocktransfer/generateInvoice/')){
-             isValidStoPickingId = await stockTransferPickingDetailCtrl.getInvoiceDetails(id)
+                isValidPickingId = await stockTransferPickingDetailCtrl.getInvoiceDetails(id)
             }else{
-            isValidStoPickingId = await pickerboySalesOrderMappingController.getInvoiceDetails(id)
+                isValidPickingId = await pickerboySalesOrderMappingController.getInvoiceDetails(id)
             }
             // 
-            if (isValidStoPickingId.success) {
+            if (isValidPickingId.success) {
                 info('Valid PickerBoy SalesOrder Mapping Id')
 
                 info('Invoice already generated')
@@ -43,7 +43,7 @@ module.exports = async (req, res, next) => {
 
 
                 // let invoiceData = invoicePickerSO.data[0].invoiceDetails[0];
-                return Response.errors(req, res, StatusCodes.HTTP_FOUND, JSON.stringify({data:isValidStoPickingId['data']['invoiceDetail'], message:MessageTypes.invoice.invoiceAlreadyDone}))
+                return Response.errors(req, res, StatusCodes.HTTP_FOUND, JSON.stringify({data:isValidPickingId['data']['invoiceDetail'], message:MessageTypes.invoice.invoiceAlreadyDone}))
 
 
 

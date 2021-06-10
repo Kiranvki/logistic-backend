@@ -65,9 +65,9 @@ function purchaseOrderRoutes() {
       verifyAppToken, // verify app user token
       ctrl.filteredPODetails // post controller
     );
-    
+
     closed.route("/picking/getstocktransfer").get(
-    
+
       verifyAppToken,
       checkIsInPickingState,
       ctrl.getStockTransferList // get controller
@@ -75,20 +75,20 @@ function purchaseOrderRoutes() {
 
 
     closed.route("/picking/getpendingstocktransfer").get(
-    
+
       verifyAppToken,
       ctrl.getPendingStockTransferList // get controller
     );
 
     closed.route("/getdetails/:orderId").get(
-    
+
       verifyAppToken,
       ctrl.getSTOPODetails // get controller
     );
 
 
-    
-    
+
+
   };
 }
 

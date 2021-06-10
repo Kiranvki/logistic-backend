@@ -118,7 +118,7 @@ module.exports = async (req, res, next) => {
               'so_deliveryDate': OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
               'shipping_point':OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
            
-              'deliveryNo':req.body.deliveryNumber,
+              'deliveryNo':req.body.deliveryNumber||'N/A',
               'cityId': OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
               'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
             

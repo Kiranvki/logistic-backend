@@ -129,7 +129,7 @@ module.exports = async (req, res, next) => {
           'isItemPicked': false,
           'isStartedPicking': false,
           'state': 1,
-          'isDeleted': 1,
+          // 'isDeleted': 1,
           'isSapError': 'DNE' //DNE->delivery_no error
         }
       })
@@ -148,7 +148,7 @@ module.exports = async (req, res, next) => {
           'isItemPicked': false,
           'isStartedPicking': false,
           'state': 1,
-          'isDeleted': 1,
+          // 'isDeleted': 1,
           'isSapError': 'DNE' //DNE->delivery_no error
         }
       })

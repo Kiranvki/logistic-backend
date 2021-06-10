@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
     console.log('Hitting SAP server for Generating the delivery Number *> ', url);
     var obj = {
       'request': {
-        'purchse_order_no':stoNumber ,
+        'purchase_order_no':stoNumber ,
         'due_date': date,
         'shipping_point': shipping_plant,
         'item': []
@@ -148,7 +148,7 @@ module.exports = async (req, res, next) => {
           'isItemPicked': false,
           'isStartedPicking': false,
           'state': 1,
-          'isDeleted': 1,
+          // 'isDeleted': 1,
           'isSapError': 'DNE' //DNE->delivery_no error
         },$push:{
           'pickingAllocationResponsePayload': JSON.stringify(req.body.delivery_detail),
@@ -172,7 +172,7 @@ module.exports = async (req, res, next) => {
         'isItemPicked': false,
           'isStartedPicking': false,
           'state': 1,
-          'isDeleted': 1,
+          // 'isDeleted': 1,
           'isSapError': 'DNE' //DNE->delivery_no error
         },$push:{
           'pickingAllocationResponsePayload': JSON.stringify(req.body.delivery_detail),

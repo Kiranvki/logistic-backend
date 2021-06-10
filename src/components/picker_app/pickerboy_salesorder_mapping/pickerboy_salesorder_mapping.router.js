@@ -15,7 +15,7 @@ const {
   joiOngoingDelivery, // joi ongoing sales order details
   joiPendingDelivery, //  joi pending SO
   joiHistoryOfSO, // joi history of SO
- 
+
 } = require('./pickerboy_salesorder_mapping.validators');
 
 // hooks 
@@ -85,7 +85,7 @@ function userRoutes() {
 
 
 
-    
+
 
     // get the single sale order details
     closed.route('/:type/detail/:orderId').get(
@@ -186,12 +186,12 @@ function userRoutes() {
 
 
 
-    
+
 
 
 
     open.route('/list/invoice-open').get(
-     
+
       // verifyAppToken,   // verify app token
       ctrl.getInvoices
 
