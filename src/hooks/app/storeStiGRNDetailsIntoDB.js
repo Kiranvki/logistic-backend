@@ -31,39 +31,39 @@ module.exports = async (req, res, next) => {
     let pickerBoyId = mongoose.Types.ObjectId(req.user._id);
     let receivedItemsMaterialNumber = [];
     var dateToday = new Date();
-    var stiDeliveryDate = stiDetails.delivery_date;
-    var vendorInvoiceNo = req.body.vendorInvoiceNumber;
+    var stiDeliveryDate = stiDetails.picking_date;
     let fulfilmentStatus = req.body.fulfilmentStatus;
 
-    //filtering basket items based on quantity as for 0 quantity GRN cant be generated
+    //filtering basket items based on delivery_quantity as for 0 delivery_quantity GRN cant be generated
     for (let i = 0; i < stiReceivingDetails.item.length; i++) {
       let item = stiReceivingDetails.item[i];
       receivedItemsMaterialNumber.push(item.material);
 
       stiReceivingDetails.item[i].pending_qty =
-        item.quantity - (item.received_qty ? item.received_qty : 0);
+        item.delivery_quantity - (item.received_qty ? item.received_qty : 0);
     }
     req.body.receivedItemsMaterialNumber = receivedItemsMaterialNumber;
 
     let grnCreateData = {
       sapGrnNo: req.body.sapGrnNo,
       stiReceivingId: stiReceivingDetails._id,
+      stiId:stiDetails._id,
       po_number: stiDetails.po_number,
+      delivery_no:stiDetails.delivery_no,
       receivingStatus:
         fulfilmentStatus == FULFILMENTSTATUS.fulfilled
           ? FULFILMENTSTATUS.fulfilled
           : FULFILMENTSTATUS.partial,
       fulfilmentStatus: fulfilmentStatus,
-      document_date: stiDetails.document_date,
-      delivery_date: stiDeliveryDate,
-      delivery_date_array: stiDetails.delivery_date_array,
-      stiAmount: stiReceivingDetails.total,
-      netTotal: stiReceivingDetails.netValue,
-      totalTaxAmount: stiReceivingDetails.totalTax,
-      discount: stiReceivingDetails.totalDiscount,
+      picking_date: stiDeliveryDate,
+      picking_date_array: stiDetails.picking_date_array,
       generatedBy: pickerBoyId,
       item: stiReceivingDetails.item,
-      
+      receiving_plant:stiDetails.receiving_plant,
+      supply_plant:stiDetails.supply_plant,
+      supply_plant_name:stiDetails.supply_plant_name,
+      supply_plant_city:stiDetails.supply_plant_city,
+
     };
     var grnDetails = await Model.create(grnCreateData);
     let grnNo = `GRN${dateToday.getFullYear()}${pad(

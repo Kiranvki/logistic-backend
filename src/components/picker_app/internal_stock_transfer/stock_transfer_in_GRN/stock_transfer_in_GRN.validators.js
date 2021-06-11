@@ -27,10 +27,7 @@ const schemas = {
         }),
     },
     body: {
-      vendorInvoiceNumber: Joi.string()
-        .trim()
-        .label("Vendor Invoice Number")
-        .required(),
+      
     },
   }),
 

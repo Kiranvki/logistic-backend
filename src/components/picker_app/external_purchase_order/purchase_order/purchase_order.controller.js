@@ -54,6 +54,25 @@ class purchaseController extends BaseController {
         start_of_validity_period: { $lte: todaysDate },
         status: 1,
         isDeleted: 0,
+        po_document_type: {
+          $nin: [
+            "ZFPO",
+            "ZNDR",
+            "ZNFV",
+            "ZWAS",
+            "ZWBD",
+            "ZWDI",
+            "ZWIO",
+            "ZWPO",
+            "ZWRE",
+            "ZWSO",
+            "ZWSU",
+            "ZNPD",
+            "ZWPD",
+            "ZNPO",
+          ],
+        },
+
         // delivery_date:{$lte:todaysEndDate}//to-do
       };
       if (req.query.poNumber) {
@@ -121,6 +140,7 @@ class purchaseController extends BaseController {
         },
         {
           $match: {
+            itemCount: { $gt: 0 },
             $or: [
               {
                 "poReceivingId.pickerBoyId": userId,
@@ -150,6 +170,9 @@ class purchaseController extends BaseController {
         });
         order.itemCount = count;
         delete order.item;
+      });
+      poList = poList.filter((order) => {
+        return order && order.itemCount && order.itemCount > 0;
       });
       // success
       return this.success(
@@ -538,9 +561,10 @@ class purchaseController extends BaseController {
         };
       }
       if (req.query.date) {
-        query["delivery_date"] = moment.utc(new Date(req.query.date)).utcOffset("+05:30").format(
-          "YYYY-MM-DD"
-        );
+        query["delivery_date"] = moment
+          .utc(new Date(req.query.date))
+          .utcOffset("+05:30")
+          .format("YYYY-MM-DD");
       }
       if (type == "history") {
         query.receivingStatus = 1;
@@ -622,6 +646,7 @@ class purchaseController extends BaseController {
                   $project: {
                     _id: 1,
                     pickerBoyId: 1,
+                    receivingDate: "$createdAt",
                   },
                 },
               ],

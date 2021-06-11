@@ -40,7 +40,7 @@ module.exports = async (req, res, next) => {
           res,
           StatusCodes.HTTP_CONFLICT,
           MessageTypes.stockTransferIn
-            .stockTransferReceivingIdEitherDeletedOrDeactivated
+            .stiReceivingIdEitherDeletedOrDeactivated
         );
       }
     } else {

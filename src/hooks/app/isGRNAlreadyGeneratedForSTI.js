@@ -21,6 +21,8 @@ module.exports = async (req, res, next) => {
       // check whether the sale Order id is already added or not
       let stiGrnDetails = await stiGrnController.get({
         stiReceivingId: stiReceivingId,
+        status:1,
+        isDeleted:0
       });
 
       // if sales order Id is not added

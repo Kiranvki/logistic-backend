@@ -108,6 +108,7 @@ class stockTransferReceivingDetailsController extends BaseController {
         select: {
           po_number: 1,
             delivery_no: 1,
+            supply_plant: 1,
           supply_plant_city: 1,
           supply_plant_name: 1,
           picking_date: 1,

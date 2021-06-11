@@ -67,6 +67,7 @@ module.exports = {
   storeStiGRNDetailsIntoDB:require('./storeStiGRNDetailsIntoDB'),
   getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate:require('./getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate'),
   generateStiGRN:require('./generateStiGRN'),
+<<<<<<< HEAD
   getStoDetail:require('./getStoDetail'),
   isSTOAlreadyInPickingState:require('./isSTOAlreadyInPickingState'),
   getPickedStoDetail:require('./getPickedStoDetail'),
@@ -80,5 +81,8 @@ module.exports = {
   checkIsInPickingState:require('./checkIsInPickingState'),
   checkIsValidPicking:require('./checkIsValidPicking'),
   isValidPickingDate:require('./isValidPickingDate')
+=======
+  isValidPickingDate:require('./isValidPickingDate'),
+>>>>>>> ca07f302794cae6dea58d4e82da9b4d3190ecd74
 
 }

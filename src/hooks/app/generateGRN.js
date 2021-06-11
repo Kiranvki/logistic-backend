@@ -1,5 +1,6 @@
 const request = require("request-promise");
 const moment = require("moment");
+const grnCtrl = require("../../components/picker_app/external_purchase_order/purchase_orderGRN/purchase_orderGRN.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -11,9 +12,10 @@ const { error, info } = require("../../utils").logging;
 const grnGenerateUrl =
   (process.env.sapBaseUrl || "") + (process.env.grnGenerateUrl || "");
 
-var hitSapApiOfGRN = async (poReceivingDetails, poDetails, vendorInvoiceNo) => {
+var hitSapApiOfGRN = async (req,poReceivingDetails, poDetails, vendorInvoiceNo) => {
   try {
     let body = createRequestObject(
+      req,
       poReceivingDetails,
       poDetails,
       vendorInvoiceNo
@@ -28,14 +30,29 @@ var hitSapApiOfGRN = async (poReceivingDetails, poDetails, vendorInvoiceNo) => {
       body: body,
     };
     console.log(options);
-
-    return await request(options);
+    try{
+      req.body.grnApiOptions=options;
+      return await request(options);
+    }catch(err){
+      let insertedRecord = await grnCtrl.set({
+        status: 2,
+        isDeleted: 0,
+        poId:poDetails._id,
+        reqDetails: JSON.stringify(options),
+        resDetails: JSON.stringify(err),
+        po_number: poDetails.po_number,
+        poReceivingId: poReceivingDetails._id,
+      });
+      console.log(insertedRecord);
+      throw err;
+    }
   } catch (err) {
+
     console.log(err);
     throw err;
   }
 };
-var createRequestObject = (poReceivingDetails, poDetails, vendorInvoiceNo) => {
+var createRequestObject = (req,poReceivingDetails, poDetails, vendorInvoiceNo) => {
   let itemArray = [];
   let todaysDate = moment()
     .set({
@@ -76,6 +93,7 @@ module.exports = async (req, res, next) => {
     var vendorInvoiceNo = req.body.vendorInvoiceNumber;
     try {
       let sapGrnResponse = await hitSapApiOfGRN(
+        req,
         poReceivingDetails,
         poDetails,
         vendorInvoiceNo
@@ -88,6 +106,16 @@ module.exports = async (req, res, next) => {
         req.body.sapGrnNo = sapGrnResponse.response.material_document_no;
         next();
       } else {
+        let insertedRecord = await grnCtrl.set({
+          status: 2,
+          isDeleted: 0,
+          poId:poDetails._id,
+          reqDetails: JSON.stringify(req.body.grnApiOptions),
+          resDetails: JSON.stringify(sapGrnResponse),
+          po_number: poDetails.po_number,
+          poReceivingId: poReceivingDetails._id,
+        });
+        console.log(insertedRecord);
         //to-do remove comment
         info(sapGrnResponse, "sapGrnResponse-------");
         return Response.errors(

@@ -14,7 +14,7 @@ const {
   isValidSTIRecIdForGrnGetDetails,
   getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate,
   getSTIDetails,
-  storeGRNDetailsIntoDB,
+  storeStiGRNDetailsIntoDB,
   generateStiGRN,
 } = require("../../../../hooks/app");
 
@@ -26,7 +26,7 @@ function stockTransferInRoutes() {
   //open, closed
   return (open, closed) => {
     // generating invoice
-    closed.route("/:stiId/generate-grn/:stiReceivingId").post(
+    closed.route("/:stiId/receiving-details/:stiReceivingId/generate-grn").post(
       [joistiGenerateGRN], // joi validation
       verifyAppToken,
       isGRNAlreadyGeneratedForSTI,
@@ -34,12 +34,12 @@ function stockTransferInRoutes() {
       getSTIDetails,
       getSTIFulfilmentStatusAndCheckUpcomingDeliveryDate,
       generateStiGRN,
-      storeGRNDetailsIntoDB,
+      storeStiGRNDetailsIntoDB,
       ctrl.updateGRNDetails // stist controller
     );
 
     // getting  invoice details
-    closed.route("/grn-details/:grnId").get(
+    closed.route("/:stiId/grn-details/:grnId").get(
       [joigrnId], // joi validation
       verifyAppToken,
       isValidSTIgrnId,

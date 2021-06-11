@@ -153,6 +153,17 @@ class stockTransferReceivingDetailsController extends BaseController {
       };
     }
   };
+  set = async (record) => {
+    try {
+      return await Model.create(record);
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err,
+      };
+    }
+  };
   
 }
 

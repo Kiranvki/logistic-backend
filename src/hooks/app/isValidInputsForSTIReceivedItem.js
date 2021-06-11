@@ -34,7 +34,7 @@ module.exports = async (req, res, next) => {
         stiReceivingItemDetails.data.length
       ) {
         if (
-          stiReceivingItemDetails.data[0].item.quantity != received_qty &&
+          stiReceivingItemDetails.data[0].item.delivery_quantity != received_qty &&
           !remarks
         ) {
           info("Remarks required");
@@ -45,7 +45,7 @@ module.exports = async (req, res, next) => {
             MessageTypes.stockTransferIn.requiredRemark
           );
         }
-        if (stiReceivingItemDetails.data[0].item.quantity < received_qty) {
+        if (stiReceivingItemDetails.data[0].item.delivery_quantity < received_qty) {
           info("Received quantity greter than required quantity");
           return Response.errors(
             req,
@@ -54,7 +54,7 @@ module.exports = async (req, res, next) => {
             MessageTypes.stockTransferIn.receivedQuantityGreaterThanQty
           );
         }
-        if (stiReceivingItemDetails.data[0].item.quantity == received_qty) {
+        if (stiReceivingItemDetails.data[0].item.delivery_quantity == received_qty) {
           req.body.remarks = "";
         }
         req.body.stiReceivingItemDetails = stiReceivingItemDetails.data[0];

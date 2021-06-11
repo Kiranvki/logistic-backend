@@ -100,6 +100,12 @@ const purchaseOrderGRN = new Schema(
       type: Number,
       default: 0,
     },
+    resDetails: {
+      type: String,
+    },
+    reqDetails: {
+      type: String,
+    },
     item: [
       {
         item_no: {
