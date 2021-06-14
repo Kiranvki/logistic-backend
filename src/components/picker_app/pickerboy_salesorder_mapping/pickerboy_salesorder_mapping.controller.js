@@ -1736,6 +1736,7 @@ class pickerboySalesOrderMappingController extends BaseController {
 
               }
             },
+           
             { 'sales_document_type': { $ne: 'ZBRD' } }, {
               $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
 
