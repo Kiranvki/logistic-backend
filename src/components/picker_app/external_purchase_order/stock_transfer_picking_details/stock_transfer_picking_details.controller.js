@@ -876,6 +876,12 @@ class stockTransferPickingDetailController extends BaseController {
 
 
       historyData = await Model.aggregate(queryObj);
+      let totalCount = await Model.countDocumentscountDocuments({
+        pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
+        $or: [{
+          'invoiceDetail.isInvoice': true
+        }, { 'invoiceDetail.isInvoiceRequest': true }]
+      })
 
 
 
@@ -888,7 +894,7 @@ class stockTransferPickingDetailController extends BaseController {
             pageMeta: {
               skip: parseInt(skip),
               pageSize: pageSize,
-              total: historyData.length  //item
+              total: totalCount  //item
             }
           }
           ,
@@ -1202,7 +1208,11 @@ class stockTransferPickingDetailController extends BaseController {
 
 
       ongoingData = await Model.aggregate(queryObj);
-
+      let totalCount = await Model.countDocumentscountDocuments({
+        pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
+        isItemPicked: true,
+        isStartedPicking: true
+      })
 
 
       info('ON GOING detail fetch succesfully !');
@@ -1214,7 +1224,7 @@ class stockTransferPickingDetailController extends BaseController {
             pageMeta: {
               skip: parseInt(skip),
               pageSize: pageSize,
-              total: ongoingData.length  //item
+              total: totalCount  //item
             }
           }
           ,
@@ -1298,10 +1308,16 @@ class stockTransferPickingDetailController extends BaseController {
         pipeline = [{
           $match: {
             pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
-            isItemPicked: true,
-            isStartedPicking: true
+            'invoiceDetail.isInvoice': false,
+            'delivery_no': {
+              $ne: 'N/A'
+            },
+  
+            'fullfilment': fullfilment,
+  
+  
           }
-
+  
         },
         {
           $or: [{
@@ -1362,6 +1378,17 @@ class stockTransferPickingDetailController extends BaseController {
 
 
       pendingInvoicesData = await Model.aggregate(queryObj);
+      let totalCount = await Model.countDocumentscountDocuments({
+        pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
+        'invoiceDetail.isInvoice': false,
+        'delivery_no': {
+          $ne: 'N/A'
+        },
+
+        'fullfilment': fullfilment,
+
+
+      })
 
 
 
@@ -1374,7 +1401,7 @@ class stockTransferPickingDetailController extends BaseController {
             pageMeta: {
               skip: parseInt(skip),
               pageSize: pageSize,
-              total: pendingInvoicesData.length  //item
+              total: totalCount  //item
             }
           }
           ,
