@@ -1121,6 +1121,14 @@ class purchaseController extends BaseController {
 
       })
 
+      _.remove(stoItem, { 'fulfillmentStatus': 2 })
+      // console.log('soFullfilmentStatus',soItem.length,soItem)
+      //fulfilled alternative
+      if(soItem.length==0){
+        stoFullfilmentStatus = 2
+      }else{
+        stoFullfilmentStatus = 1
+      }
       // temp fixed
       let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({
         '_id': mongoose.Types.ObjectId(stoOrderId)

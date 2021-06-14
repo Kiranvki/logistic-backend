@@ -184,7 +184,7 @@ class PickerBoyOrderMappingClass {
 
   static async updateDeliveryStatus(pickerBoyOrderMappingId, delivery_no, remarks) {
 
-    let orderPickerBoyMappingData = await this.findOneAndUpdate({ '_id': pickerBoyOrderMappingId }, { $set: { 'delivery_no': delivery_no, 'remarks': remarks, 'state': 2 } });
+    let orderPickerBoyMappingData = await this.findOneAndUpdate({ '_id': pickerBoyOrderMappingId }, { $set: { 'delivery_no': delivery_no, 'remarks': remarks, 'state': 3,'isItemPicked': false, 'isStartedPicking': false  } });
     return orderPickerBoyMappingData;
 
   }

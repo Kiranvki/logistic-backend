@@ -1897,8 +1897,8 @@ if(salesOrderList.length>0){
         pickedItem.forEach(async (item, i) => {
           let itemFullfilmentStatus = 1
           // item.qty=1
-          console.log(parseFloat(item.pickedQuantity),parseFloat(sItem.qty),parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))
-          console.log(sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0)))
+          // console.log(parseFloat(item.pickedQuantity),parseFloat(sItem.qty),parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))
+          // console.log(sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0)))
           if (sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
             if (item.pickedQuantity == (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
               itemFullfilmentStatus = 2
@@ -1911,7 +1911,7 @@ if(salesOrderList.length>0){
   
   soItem[i].fulfillmentStatus = itemFullfilmentStatus;
  
-
+  
 
             isUpdated = await Model.findOneAndUpdate({
               '_id': mongoose.Types.ObjectId(salesOrderId), 'item.item_no': item.item_no
@@ -1929,14 +1929,21 @@ if(salesOrderList.length>0){
             });
             // console.log(isUpdated)
           } else if ((sItem.fulfillmentStatus ? sItem.fulfillmentStatus : 0) <= 1) {
-            soFullfilmentStatus = 1
+            soFullfilmentStatus = 1 //fixed required in case of fullfiled
 
           }
         }
         )
 
       })
-      // console.log('soFullfilmentStatus',soFullfilmentStatus)
+      _.remove(soItem, { 'fulfillmentStatus': 2 })
+      // console.log('soFullfilmentStatus',soItem.length,soItem)
+      //fulfilled alternative
+      if(soItem.length==0){
+        soFullfilmentStatus = 2
+      }else{
+        soFullfilmentStatus = 1
+      }
       let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({
         '_id': mongoose.Types.ObjectId(salesOrderId)
       }, {
