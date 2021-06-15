@@ -876,7 +876,7 @@ class stockTransferPickingDetailController extends BaseController {
 
 
       historyData = await Model.aggregate(queryObj);
-      let totalCount = await Model.countDocumentscountDocuments({
+      let totalCount = await Model.countDocuments({
         pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
         $or: [{
           'invoiceDetail.isInvoice': true
