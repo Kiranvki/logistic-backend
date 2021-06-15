@@ -1208,7 +1208,7 @@ class stockTransferPickingDetailController extends BaseController {
 
 
       ongoingData = await Model.aggregate(queryObj);
-      let totalCount = await Model.countDocumentscountDocuments({
+      let totalCount = await Model.countDocuments({
         pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
         isItemPicked: true,
         isStartedPicking: true
@@ -1378,7 +1378,7 @@ class stockTransferPickingDetailController extends BaseController {
 
 
       pendingInvoicesData = await Model.aggregate(queryObj);
-      let totalCount = await Model.countDocumentscountDocuments({
+      let totalCount = await Model.countDocuments({
         pickerBoyId: mongoose.Types.ObjectId(pickerBoyId),
         'invoiceDetail.isInvoice': false,
         'delivery_no': {
