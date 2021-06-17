@@ -35,6 +35,9 @@ const warehouses = new Schema({
   street: {
     type: String,
   },
+  plant:{
+    type:String
+  },
   pincode: {
     type: 'Number'
   },

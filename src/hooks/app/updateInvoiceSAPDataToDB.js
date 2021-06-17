@@ -17,11 +17,18 @@ const {
 const {
   getCustomerDetails
 } = require('../../inter_service_api/dms_dashboard_v1/v1')
+
+
+//filter material name
+function getName(materialList, materialNo) {
+  let filteredMaterial = materialList.filter(data => data['material_no'] == materialNo)
+  return filteredMaterial.length > 0 ? filteredMaterial[0]['material_description'] : "N/A"
+}
 // exporting the hooks 
 module.exports = async (req, res, next) => {
     try {
         info('Updating SAP Invoice Detail to DB !');
-
+        
         let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
             deliveryDetail = req.body.delivery_detail || undefined, // getting the SAP delivery Detail
             invoiceDetail = req.body.invoice_detail['data'][0] || undefined,
@@ -56,7 +63,7 @@ module.exports = async (req, res, next) => {
             
         
         
-              'itemName': 'N/A',//data['itemName'], //not available
+              'itemName': getName(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'],data['material']),//data['itemName'], //not available
           
         
               'salePrice':(parseFloat(data['net_price'])/(parseFloat(data['qty'])>0?parseFloat(data['qty']):1)),                       //data['mrp_amount'],   // sap mrp_amount // change with selling_price
@@ -117,7 +124,7 @@ module.exports = async (req, res, next) => {
             
               'so_deliveryDate': OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
               'shipping_point':OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
-           
+           'orderDate':OrderData['pickerBoySalesOrderMappingId']['order_date'],
               'deliveryNo':req.body.deliveryNumber||'N/A',
               'cityId': OrderData['pickerBoySalesOrderMappingId']['shipping_point'],
               'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],

@@ -69,7 +69,7 @@ function purchaseOrderRoutes() {
     closed.route("/picking/getstocktransfer").get(
 
       verifyAppToken,
-      checkIsInPickingState,
+      // checkIsInPickingState,
       ctrl.getStockTransferList // get controller
     );
 

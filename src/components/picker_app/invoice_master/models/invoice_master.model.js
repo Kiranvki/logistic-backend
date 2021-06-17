@@ -24,6 +24,9 @@ const invoiceMaster = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'purchase_order'
   },
+  orderDate:{
+    type:String
+  },
 
   stockTransferDeliveryDate: {  //sap delivery_date
     type: Date

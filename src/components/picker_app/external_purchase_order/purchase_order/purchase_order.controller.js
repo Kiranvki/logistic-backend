@@ -274,6 +274,21 @@ class purchaseController extends BaseController {
             _id: mongoose.Types.ObjectId(req.params.orderId),
           },
         },
+        { $lookup:{
+          from:'warehouses',
+          localField:'plant',
+          foreignField:'plant',
+          as:'plant'
+          
+        }},
+        { $lookup:{
+          from:'warehouses',
+          localField:'shiping_plant',
+          foreignField:'plant',
+          as:'shiping_plant'
+          
+        }},
+       
         {
           $project: {
             po_number: 1,
@@ -292,6 +307,10 @@ class purchaseController extends BaseController {
             pending_qty: 1,
             received_qty: 1,
             delivery_date: 1,
+            'plantName':  {  "$first": '$plant.nameToDisplay' },
+            'plantCity':  {  "$first": '$plant.cityId' },
+            'shippingPlantName': { "$first": '$shiping_plant.nameToDisplay' },
+            'shippingPlantCity':  { "$first": '$shiping_plant.cityId' }
           },
         },
       ]).allowDiskUse(true);
@@ -906,7 +925,22 @@ class purchaseController extends BaseController {
             '$or': [{ 'item.fulfillmentStatus': { $exists: false } }, { 'item.fulfillmentStatus': { $exists: true, $ne: 2 } }]
           }
         },
-
+        { $lookup:{
+          from:'warehouses',
+          localField:'plant',
+          foreignField:'plant',
+          as:'plant'
+          
+        }},
+        { $lookup:{
+          from:'warehouses',
+          localField:'shiping_plant',
+          foreignField:'plant',
+          as:'shiping_plant'
+          
+        }},
+        
+// nameToDisplay  cityId
         {
           $group: {
             '_id': '$_id',
@@ -916,7 +950,11 @@ class purchaseController extends BaseController {
             poReceivingId: { "$first": '$poReceivingId' },
             receivingStatus: { "$first": '$receivingStatus' },
             fulfilmentStatus: { "$first": '$pickingFullfilmentStatus' },
-            'item': { $push: '$item' }
+            'item': { $push: '$item' },
+            'plantName': { "$first": {  "$first": '$plant.nameToDisplay' }},
+            'plantCity': { "$first": {  "$first": '$plant.cityId' }},
+            'shippingPlantName': { "$first": { "$first": '$shiping_plant.nameToDisplay' }},
+            'shippingPlantCity': { "$first": { "$first": '$shiping_plant.cityId' }}
           }
         },
 
@@ -925,7 +963,12 @@ class purchaseController extends BaseController {
             po_number: 1,
             vendor_no: 1,
             vendor_name: 1,
+            plant:1,
             itemCount: { $size: "$item" },
+            plantName:1,
+            plantCity:1,
+            shippingPlantName:1,
+            shippingPlantCity:1,
 
 
             fulfilmentStatus: { $ifNull: ['$fulfilmentStatus', 0] },
@@ -991,7 +1034,7 @@ class purchaseController extends BaseController {
       let todaysEndDate = moment().format("YYYY-MM-DD");
       info("Get Stock Transfer details !");
       let query = {
-        plant: req.user.plant ? req.user.plant.toString() : "", //consider data type
+        shiping_plant: req.user.plant ? req.user.plant.toString() : "", //consider data type
         // end_of_validity_period: { $gte: todaysDate },
         // start_of_validity_period: { $lte: todaysDate },
         $or: [{ po_document_type: 'ZWSI' }, { po_document_type: 'ZWST' }],
@@ -1013,6 +1056,21 @@ class purchaseController extends BaseController {
         {
           $match: query,
         },
+        { $lookup:{
+          from:'warehouses',
+          localField:'plant',
+          foreignField:'plant',
+          as:'plant'
+          
+        }},
+        { $lookup:{
+          from:'warehouses',
+          localField:'shiping_plant',
+          foreignField:'plant',
+          as:'shiping_plant'
+          
+        }},
+       
 
 
         {
@@ -1024,6 +1082,10 @@ class purchaseController extends BaseController {
             poReceivingId: "$poDetails",
             receivingStatus: 1,
             fulfilmentStatus: 1,
+            'plantName':  {  "$first": '$plant.nameToDisplay' },
+            'plantCity':  {  "$first": '$plant.cityId' },
+            'shippingPlantName': { "$first": '$shiping_plant.nameToDisplay' },
+            'shippingPlantCity':  { "$first": '$shiping_plant.cityId' }
 
           },
         },

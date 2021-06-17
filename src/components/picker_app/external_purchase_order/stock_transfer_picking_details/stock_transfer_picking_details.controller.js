@@ -1609,7 +1609,7 @@ class stockTransferPickingDetailController extends BaseController {
             }
           },
           'customerName': { '$first': '$invoice.customerName' },
-          'deliveryDate': { $first: '$delivery_date' },
+          'delivery_date': { $first: '$delivery_date' },
           'item': { $first: { $first: '$stockTransferDetails.item' } },
           'stockTransferId': { $first: { $first: '$stockTransferDetails._id' } },
           'sold_to_party': { $first: '$invoice.invoiceDetails.sold_to_party' }
@@ -1638,7 +1638,7 @@ class stockTransferPickingDetailController extends BaseController {
           'stoDbId': 1,
           'state': 1,
           'invoiceDetail.invoice.invoiceId': 1,
-          'deliveryDate': 1,
+          'delivery_date': 1,
           'stoDbId': 1,
           'fullfilment': 1,
           'delivery_date': 1,

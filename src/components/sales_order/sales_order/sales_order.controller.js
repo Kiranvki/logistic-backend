@@ -277,8 +277,9 @@ class areaSalesManagerController extends BaseController {
       let searchObject = {
         // 'isPacked': 0,
         'fulfillmentStatus': 1,
-        'plant': { '$eq': plant.toString() },
-        
+        'plant':  plant.toString() ,
+        'isDeleted':0,
+        'status':1,
         // 'locationId': parseInt(locationId),
         // 'cityId': cityId,
 
