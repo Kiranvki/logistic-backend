@@ -1802,6 +1802,12 @@ class pickerboySalesOrderMappingController extends BaseController {
                   { 'item': { $exists: true, $not: { $size: 0 } } },
                   { 'assets': { $exists: true, $not: { $size: 0 } } }
                 ]
+              },
+              {
+                $or: [{ 'overall_status': { $exists: true, $ne: 'Completely processed' } }, {
+  
+                  'overall_status': { $exists: false }
+                }]
               }],
 
 
