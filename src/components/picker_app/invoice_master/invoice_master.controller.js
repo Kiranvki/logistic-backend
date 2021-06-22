@@ -310,7 +310,7 @@ class invoiceMasterController extends BaseController {
           var salesOrderId = invoiceMappingDetails.data[0].saleOrderId;
 
           var salesOrderDetails = invoiceMappingDetails.data[0].so[0] || {};
-          var warehouseDetails =  salesOrderDetails.warehouse ||{}
+          var warehouseDetails =  (salesOrderDetails.warehouse && salesOrderDetails.warehouse[0] )||{}
           var invoiceDetails = invoiceMappingDetails.data[0].invoice[0] || {};
           let totalAmount=0;
           let totalTaxValue=0
