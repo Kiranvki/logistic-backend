@@ -889,7 +889,7 @@ class purchaseController extends BaseController {
         // start_of_validity_period: { $lte: todaysDate },
 
         $and: [
-          { shiping_plant: req.user.plant ? req.user.plant.toString() : "" },
+          { plant: req.user.plant ? req.user.plant.toString() : "" },
           {
             $or: [{ po_document_type: 'ZWSI' }, { po_document_type: 'ZWST' }]
           }, {
@@ -1034,7 +1034,7 @@ class purchaseController extends BaseController {
       let todaysEndDate = moment().format("YYYY-MM-DD");
       info("Get Stock Transfer details !");
       let query = {
-        shiping_plant: req.user.plant ? req.user.plant.toString() : "", //consider data type
+        plant: req.user.plant ? req.user.plant.toString() : "", //consider data type
         // end_of_validity_period: { $gte: todaysDate },
         // start_of_validity_period: { $lte: todaysDate },
         $or: [{ po_document_type: 'ZWSI' }, { po_document_type: 'ZWST' }],
