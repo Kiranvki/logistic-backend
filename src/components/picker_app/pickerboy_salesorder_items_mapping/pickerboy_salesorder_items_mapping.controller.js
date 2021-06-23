@@ -72,6 +72,7 @@ class pickerSalesOrderMappingController extends BaseController {
           'pickedQuantity': quantityAdded,
           'total_amount': req.body.itemDetail.total_amount,
           'totalQuantity': parseInt(req.body.itemDetail.qty),
+          'storage_location':req.body.itemDetail.storage_location?req.body.itemDetail.storage_location:"100",
           'requireQuantity': ((parseInt(req.body.itemDetail.qty)) - (parseInt(req.body.itemDetail.suppliedQty ? req.body.itemDetail.suppliedQty : 0))), //- parseInt(req.body.itemDetail.suppliedQty)),
           'suppliedQty': (parseInt(req.body.itemDetail.suppliedQty ? req.body.itemDetail.suppliedQty : 0)), //req.body.itemDetail.suppliedQty, //previous supplied
           // 'taxPercentage': req.body.itemDetail.taxPercentage,

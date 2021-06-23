@@ -61,6 +61,7 @@ module.exports = {
       'sapInvoiceGenerate':'http://52.172.31.130:50100/RESTAdapter/waycool_qua/invoice_sto_create',
       'sapInvoiceFetch' : 'http://52.172.31.130:50100/RESTAdapter/waycool_qua/invoice_sto_get',
       'vendorDetails':'waycool_qua/vendor_master_get',
+      'systemStockGet':'waycool_qua/system_stock_get'
     },
     env_staging: {
       'watch': false,
@@ -118,6 +119,7 @@ module.exports = {
       'sapInvoiceGenerate':'http://52.172.31.130:50100/RESTAdapter/waycool_qua/invoice_sto_create',
       'sapInvoiceFetch' : 'http://52.172.31.130:50100/RESTAdapter/waycool_qua/invoice_sto_get',
       'vendorDetails':'waycool_qua/vendor_master_get',
+      'systemStockGet':'waycool_qua/system_stock_get'
     },
     env_production: {
       'watch': false,
@@ -173,10 +175,11 @@ module.exports = {
       'STOCK_TRANSFER_IN_END_POINT': 'masterToNosqlApplication_Purchase',
       'SALES_ORDER_GET_ENDPOINT': 'masterToDMSSO',
       'isClusterRequired':1,
-      'sapStoOutboundDelivery' : 'http://52.172.31.130:50100/RESTAdapter/waycool_qua/sto_outbound_delivery',
+      'sapStoOutboundDelivery' : 'http://13.71.71.184:50100/RESTAdapter/waycool_prod/sto_outbound_delivery',
       'sapPickingAllocation' : 'http://13.71.71.184:50100/RESTAdapter/waycool_prod/Picking_Allocation_Creation',
       'sapInvoiceGenerate':'http://13.71.71.184:50100/RESTAdapter/waycool_prod/invoice_sto_create',
       'sapInvoiceFetch' : 'http://13.71.71.184:50100/RESTAdapter/waycool_prod/invoice_sto_get',
+      'systemStockGet':'waycool_prod/system_stock_get'
     }
   }]
 };

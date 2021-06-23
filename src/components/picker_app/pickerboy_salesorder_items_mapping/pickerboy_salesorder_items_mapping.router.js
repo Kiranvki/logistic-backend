@@ -42,7 +42,9 @@ const {
   isValidItemQuantity,
   getDeliveryNumber,
   isPickingAlreadyGenerated,
-  isInvoiceAlreadyGenerated
+  isInvoiceAlreadyGenerated,
+  getAvailableStock,
+  checkStockAvailability
 
 } = require('../../../hooks/app');
 
@@ -93,13 +95,17 @@ function userRoutes() {
     //generate picking allocation(delivery#) 
     closed.route('/generate/pickingallocation/:pickerBoyOrderMappingId').patch(  //change to patch
       // [joiInvValidate],
-      isPickingAlreadyGenerated,
+      // isPickingAlreadyGenerated,
    
       getPickedItemDetail,  //get item list added in the basket
+      getAvailableStock,
+      checkStockAvailability,
       generateDelivery,  //generate picking for the SO
       updateSapDeliveryDetail, //save the response to db
 
       ctrl.pickingAllocation
+    
+    
       // ctrl.getPickedItemByPickerOrderId
 
     );
