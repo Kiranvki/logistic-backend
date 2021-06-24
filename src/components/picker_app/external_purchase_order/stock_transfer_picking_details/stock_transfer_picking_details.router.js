@@ -36,7 +36,9 @@ const {
   updateStoInvoiceToDB,
   isSTOItemAlreadyAdded,
   isValidItemQuantity,
-  updateOutboundDeliveryToDb
+  updateOutboundDeliveryToDb,
+  getAvailableStock,
+  checkStockAvailability
 } = require("../../../../hooks/app");
 // auth
 const { verifyUserToken } = require("../../../../hooks/Auth");
@@ -87,6 +89,8 @@ function stockTransferPickingDetailRouter() {
       // joiGenerateDelivery,
       isPickingAlreadyGenerated,
       getPickedSTOItemDetail,
+      // getAvailableStock,
+      // checkStockAvailability,
       getStoDetail,
       generatePickingAllocationForSto,
       updateOutboundDeliveryToDb,

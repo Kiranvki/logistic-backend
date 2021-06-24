@@ -12,6 +12,8 @@ const BaseController = require('../../baseController');
 const Model = require('./models/sales_order.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
+
+var { Parser } = require('json2csv')
 const {
   error,
   info
@@ -2125,6 +2127,147 @@ if(salesOrderList.length>0){
     } catch (err) {
       error(err);
       //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+
+  getSalesOrderReport = async (req, res, next) => {
+
+    try {
+
+      info('Getting the todays Order !!!');
+
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+       
+     
+        startDate = req.query.startDate?moment(req.query.startDate, "DD-MM-YYYY").format('YYYY-MM-DD') : moment(new Date()).format('YYYY-MM-DD'),
+        endDate =  req.query.endDate?moment(req.query.endDate, "DD-MM-YYYY").format('YYYY-MM-DD') :moment(new Date()).format('YYYY-MM-DD'),
+     
+        // plant = req.body.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1,
+
+      
+      info('Get Sales Orders !');
+
+
+      let searchObject = [{
+        $match: {
+          'order_date': { $gte: startDate, $lte: endDate },
+     
+
+        }
+      },
+       
+      {
+        $sort: {
+          '_id': -1
+        }
+      }
+        // status: 1,
+        // isDeleted: 0
+      ]
+
+
+
+       // creating a match object
+      if (searchKey !== '')
+        searchObject = [{
+          $match: {
+            $and:[{
+              'order_date': { $gte: startDate, $lte: endDate }},
+              {$or: [{
+                'sales_order_no': {
+                  $regex: searchKey,
+                  $options: 'is'
+                }
+              }, {
+                'ship_to_party': {
+                  $regex: searchKey,
+                  $options: 'is'
+                }
+              }]}
+            ]
+       
+  
+  
+  
+  
+          }},
+        {
+          $sort: {
+            '_id': -1
+          }
+        }];
+
+      // get details 
+      return await Model.aggregate(searchObject).then((result) => {
+        console.log(result)
+        if (result && !_.isEmpty(result)) {
+          console.log(result)
+          // return {
+          //   success: true,
+          //   data: res
+          // }
+
+          const json2csv = new Parser()
+
+          try {
+            // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+            const csv = json2csv.parse(result)
+            res.attachment(`report-${moment(startDate).format('DD:MM:YY')}-${moment(endDate).format('DD:MM:YY')}.csv`)
+            res.status(200).send(csv)
+          } catch (error) {
+            console.log('error:', error.message)
+            res.status(500).send(error.message)
+          }
+
+
+          // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+        } else {
+          error('Error Searching Data in invoice DB!');
+          // return {
+          //   success: false
+          // }
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.invoicesDetailsNotFound
+          );
+        }
+      }).catch(err => {
+        error(err);
+        // return {
+        //   success: false,
+        //   error: err
+        // }
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.invoicesDetailsNotFound
+        );
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+      // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
 

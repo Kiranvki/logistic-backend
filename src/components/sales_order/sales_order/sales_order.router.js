@@ -49,6 +49,10 @@ function userRoutes() {
       ctrl.syncWithGoFrugal // get controller 
     );
 
+    open.route('/getsalesorder/report').get(
+      ctrl.getSalesOrderReport
+    )
+
     /*
     
         // sync with goFrugal  
