@@ -2233,7 +2233,7 @@ if(salesOrderList.length>0){
 
           // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
         } else {
-          error('Error Searching Data in invoice DB!');
+          error('Error Searching Data in SO DB!');
           // return {
           //   success: false
           // }
@@ -2241,7 +2241,7 @@ if(salesOrderList.length>0){
             req,
             res,
             this.status.HTTP_CONFLICT,
-            this.messageTypes.invoicesDetailsNotFound
+            "Sales Order Not Found"
           );
         }
       }).catch(err => {
@@ -2254,7 +2254,7 @@ if(salesOrderList.length>0){
           req,
           res,
           this.status.HTTP_CONFLICT,
-          this.messageTypes.invoicesDetailsNotFound
+          "Sales Order Not Found"
         );
       });
 
