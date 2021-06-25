@@ -35,9 +35,6 @@ const warehouses = new Schema({
   street: {
     type: String,
   },
-  plant:{
-    type:String
-  },
   pincode: {
     type: 'Number'
   },
@@ -54,6 +51,31 @@ const warehouses = new Schema({
     default: 0,
     enum: [0, 1]
   },
+  gstin: {
+    type: String,
+  },
+  fssai: {
+    type: String,
+  },
+  city: {
+    type: String,
+  },
+  street: {
+    type: String,
+  },
+  houseNumber: {
+    type: String,
+  },
+  country: {
+    type: String,
+  },
+  region: {
+    type: String,
+  },
+  cin: {
+    type: String,
+  },
+  
 }, {
   timestamps: true
 });
