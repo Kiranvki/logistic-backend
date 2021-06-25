@@ -3348,6 +3348,9 @@ class pickerboySalesOrderMappingController extends BaseController {
             'picking_allocation_request': 1,
             'picking_allocation_response': 1,
             'isSapError': 1,
+            'status':1,
+            "isDeleted":1,
+            "fulfillmentStatus":1,
             'cityId': { $first: '$invoice.cityId' },
             'customerName': { $first: '$invoice.customerName' },
             'companyDetails': { $first: '$invoice.companyDetails' },
@@ -3429,6 +3432,9 @@ class pickerboySalesOrderMappingController extends BaseController {
               'picking_allocation_request': 1,
               'picking_allocation_response': 1,
               'isSapError': 1,
+              'status':1,
+              "isDeleted":1,
+              "fulfillmentStatus":1,
               'cityId': { $first: '$invoice.cityId' },
               'customerName': { $first: '$invoice.customerName' },
               'companyDetails': { $first: '$invoice.companyDetails' },
@@ -3456,7 +3462,7 @@ class pickerboySalesOrderMappingController extends BaseController {
 
 
       // get details 
-      return await Model.aggregate(pipeline).then((result) => {
+      return await Model.aggregate(pipeline).allowDiskUse(true).then((result) => {
         // console.log(result)
         if (result && !_.isEmpty(result)) {
           // return {
