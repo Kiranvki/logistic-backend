@@ -2,6 +2,8 @@ const request = require("request-promise");
 const moment = require("moment");
 const Model = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_GRN/models/stock_transfer_in_GRN.model");
 const grnCtrl = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_GRN/stock_transfer_in_GRN.controller");
+const stiReceivingDetailsCtrl = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in_receiving_details/stock_transfer_in_receiving_details.controller");
+const stiCtrl = require("../../components/picker_app/internal_stock_transfer/stock_transfer_in/stock_transfer_in.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -11,6 +13,19 @@ const Exceptions = require("../../exceptions/Handler");
 const { error, info } = require("../../utils").logging;
 const stiGRNGenerateUrl =
   (process.env.sapBaseUrl || "") + (process.env.stiGRNGenerateUrl || "");
+
+var updateReceivingStatus = async (req, stiReceivingDetails, stiDetails)=>{
+  let resetPickingStatus = await stiReceivingDetailsCtrl.modifySti({
+    _id:stiReceivingDetails._id,status:1,isDeleted:0
+  },{
+      status:0,isDeleted:1
+  });
+  let resetPickingStatusSti = await stiCtrl.modifySti({
+    _id:stiDetails._id,status:1,isDeleted:0
+  },{
+    receivingStatus:0
+  });
+}
 
 var hitSapApiOfGRN = async (req, stiReceivingDetails, stiDetails) => {
   try {
@@ -40,6 +55,9 @@ var hitSapApiOfGRN = async (req, stiReceivingDetails, stiDetails) => {
         delivery_no: stiDetails.delivery_no,
       });
       console.log(insertedRecord);
+      await updateReceivingStatus(req,
+        stiReceivingDetails,
+        stiDetails)
       throw err;
     }
   } catch (err) {
@@ -112,6 +130,9 @@ module.exports = async (req, res, next) => {
         });
         console.log(insertedRecord);
         info(sapGrnResponse, "sapGrnResponse-------");
+        await updateReceivingStatus(req,
+          stiReceivingDetails,
+          stiDetails)
         return Response.errors(
           req,
           res,

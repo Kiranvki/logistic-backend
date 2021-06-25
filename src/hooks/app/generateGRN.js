@@ -1,6 +1,8 @@
 const request = require("request-promise");
 const moment = require("moment");
 const grnCtrl = require("../../components/picker_app/external_purchase_order/purchase_orderGRN/purchase_orderGRN.controller");
+const purchaseReceivingDetailsCtrl = require("../../components/picker_app/external_purchase_order/purchase_order_receiving_details/purchase_order_receiving_details.controller");
+const poCtrl = require("../../components/picker_app/external_purchase_order/purchase_order/purchase_order.controller");
 
 // Responses & others utils
 const Response = require("../../responses/response");
@@ -11,7 +13,18 @@ const mongoose = require("mongoose");
 const { error, info } = require("../../utils").logging;
 const grnGenerateUrl =
   (process.env.sapBaseUrl || "") + (process.env.grnGenerateUrl || "");
-
+var updateReceivingStatus =async(req,poReceivingDetails, poDetails)=>{
+  let resetPickingStatus = await purchaseReceivingDetailsCtrl.modifyPo({
+    _id:poReceivingDetails._id,status:1,isDeleted:0
+  },{
+      status:0,isDeleted:1
+  });
+  let resetPickingStatusPo = await poCtrl.modifyPo({
+    _id:poDetails._id,status:1,isDeleted:0
+  },{
+    receivingStatus:0
+  });
+}
 var hitSapApiOfGRN = async (req,poReceivingDetails, poDetails, vendorInvoiceNo) => {
   try {
     let body = createRequestObject(
@@ -43,6 +56,7 @@ var hitSapApiOfGRN = async (req,poReceivingDetails, poDetails, vendorInvoiceNo) 
         po_number: poDetails.po_number,
         poReceivingId: poReceivingDetails._id,
       });
+      await updateReceivingStatus(req,poReceivingDetails, poDetails);
       console.log(insertedRecord);
       throw err;
     }
@@ -116,6 +130,8 @@ module.exports = async (req, res, next) => {
           poReceivingId: poReceivingDetails._id,
         });
         console.log(insertedRecord);
+        await updateReceivingStatus(req,poReceivingDetails, poDetails);
+
         //to-do remove comment
         info(sapGrnResponse, "sapGrnResponse-------");
         return Response.errors(
