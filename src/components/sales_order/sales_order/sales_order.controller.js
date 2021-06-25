@@ -2164,8 +2164,16 @@ if(salesOrderList.length>0){
           'order_date': { $gte: startDate, $lte: endDate },
      
 
-        }
+        },
+      
       },
+      { $lookup:{
+        from:'warehouses',
+        localField:'plant',
+        foreignField:'plant',
+        as:'plant'
+        
+      }},
        
       {
         $sort: {
@@ -2202,6 +2210,13 @@ if(salesOrderList.length>0){
   
   
           }},
+          { $lookup:{
+            from:'warehouses',
+            localField:'plant',
+            foreignField:'plant',
+            as:'plant'
+            
+          }},
         {
           $sort: {
             '_id': -1
@@ -2210,9 +2225,9 @@ if(salesOrderList.length>0){
 
       // get details 
       return await Model.aggregate(searchObject).then((result) => {
-        console.log(result)
+  
         if (result && !_.isEmpty(result)) {
-          console.log(result)
+      
           // return {
           //   success: true,
           //   data: res
