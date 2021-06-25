@@ -24,6 +24,8 @@ module.exports = async (req, res, next) => {
       let poReceivingDetails = await poReceivingController.get({
         pickerBoyId: receiverId,
         receivingStatus: 4,
+        status:1,
+        isDeleted:0
       });
 
       // if sales order Id is not added
