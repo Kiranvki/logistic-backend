@@ -310,6 +310,7 @@ class invoiceMasterController extends BaseController {
           var salesOrderId = invoiceMappingDetails.data[0].saleOrderId;
 
           var salesOrderDetails = invoiceMappingDetails.data[0].so[0] || {};
+          var warehouseDetails =  (salesOrderDetails.warehouse && salesOrderDetails.warehouse[0] )||{}
           var invoiceDetails = invoiceMappingDetails.data[0].invoice[0] || {};
           let totalAmount=0;
           let totalTaxValue=0
@@ -355,7 +356,8 @@ class invoiceMasterController extends BaseController {
               totalDiscount:Number(invoiceDetails.totalDiscount),
               cgst:Math.round((totalTaxValue/2)*100)/100,
               sgst:Math.round((totalTaxValue/2)*100)/100,
-              gstNo:'NA'
+              gstNo:'NA',
+              warehouseDetails:warehouseDetails
             }
 
             // Set isInvoiceViewed to true on view invoice details
