@@ -2174,7 +2174,23 @@ if(salesOrderList.length>0){
         as:'plant'
         
       }},
-       
+       {$project:{
+        _id	:1,
+        'sales_document_type':1,
+        'sales_order_no':1,
+        'order_date':1,
+        'req_del_date':1,
+        'sold_to_party':1,
+        'overall_status':1,
+        'isDeleted':1,
+        'status':1,
+        'created_at':1,
+        'updated_at'	:1,
+        'Plant Name':{
+          "$first" : "$plant.nameToDisplay"
+        },
+        'fulfillmentStatus':1
+       }},
       {
         $sort: {
           '_id': -1
@@ -2217,6 +2233,23 @@ if(salesOrderList.length>0){
             as:'plant'
             
           }},
+          {$project:{
+            _id	:1,
+            'sales_document_type':1,
+            'sales_order_no':1,
+            'order_date':1,
+            'req_del_date':1,
+            'sold_to_party':1,
+            'overall_status':1,
+            'isDeleted':1,
+            'status':1,
+            'created_at':1,
+            'updated_at'	:1,
+            'Plant Name':{
+              "$first" : "$plant.nameToDisplay"
+            },
+            'fulfillmentStatus':1
+           }},
         {
           $sort: {
             '_id': -1
