@@ -70,6 +70,8 @@ class purchaseController extends BaseController {
             "ZNPD",
             "ZWPD",
             "ZNPO",
+            "ZWSI",
+            "ZWST"
           ],
         },
 
