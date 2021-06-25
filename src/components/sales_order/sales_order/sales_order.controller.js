@@ -2224,7 +2224,7 @@ if(salesOrderList.length>0){
         }];
 
       // get details 
-      return await Model.aggregate(searchObject).then((result) => {
+      return await Model.aggregate(searchObject).allowDiskUse(true).then((result) => {
   
         if (result && !_.isEmpty(result)) {
       
