@@ -306,6 +306,23 @@ class userController extends BaseController {
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+
+
+getName =async(plant)=>{
+  try {
+    info('Get Warehouse  !');
+
+    // get warehouse
+  let plantDetails = await Model.findOne({'plant':plant,'status':1,'isDeleted':0},'nameToDisplay').lean()
+
+    // is inserted 
+  return plantDetails?plantDetails['nameToDisplay']:'N/A';
+    // catch any runtime error 
+  } catch (err) {
+    error(err);
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  }
+}
 }
 
 // exporting the modules 

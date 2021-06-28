@@ -4,6 +4,7 @@ const invoiceMasterModel = require('../../components/picker_app/invoice_master/m
 // Responses & others utils 
 
 const pickerBoyOrderMappingModel = require('../../components/picker_app/external_purchase_order/stock_transfer_picking_details/models/stock_transfer_picking_details.model')
+const warehouseCtrl = require('../../components/assests/warehouse/warehouse.controller')
 const invoicePickerBoySalesOrderMappingctrl = require('../../components/picker_app/invoice_pickerboysalesorder_mapping/invoice_pickerboysalesorder_mapping.controller')
 const Response = require('../../responses/response');
 const _ = require('lodash');
@@ -30,6 +31,7 @@ function getName(materialList, materialNo) {
 module.exports = async (req, res, next) => {
   try {
     info('Updating SAP Invoice Detail to DB !');
+  
     // console.log('test',req.body.deliveryDetail['item'], getName(req.body.deliveryDetail['item'],'WC0001000103170254'))
     let pickerBoyOrderMappingId = req.params.pickerBoyOrderMappingId, // type 
       deliveryDetail = req.body.deliveryDetail || undefined, // getting the SAP delivery Detail
@@ -45,7 +47,9 @@ module.exports = async (req, res, next) => {
       total_tax = 0,
       total_discount = 0,
       total_net_value = 0,
-
+      shippingPlantName = warehouseCtrl.getName(deliveryDetail['shipping_plant']),
+      plantName = warehouseCtrl.getName(deliveryDetail['plant'])
+    
       fullfiled = deliveryDetail['fullfilment'] || 4,//completely fullfiled
       total_weight = 0;
     let customerDataFromMicroService = await getCustomerDetails(invoiceDetail['sold_to_party']);
@@ -139,13 +143,15 @@ module.exports = async (req, res, next) => {
       //   'so_deliveryDate': OrderData['pickerBoySalesOrderMappingId']['delivery_date'],
       'shipping_point': deliveryDetail['shipping_plant'],
       'deliveryFrom': deliveryDetail['plant'],
+      'plantName': plantName,
+      'shippingPlantName': shippingPlantName,
       'deliveryNo': req.body.deliveryNumber,
       'cityId': deliveryDetail['plant'],
       //   'customerName': OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['sold_to_party_description'],
 
       'companyDetails':
       {
-        'name': 'N/A',
+        'name': plantName,
         'address': 'N/A',
         'telephoneNo': 'N/A',
         'pinCode': 0,
@@ -170,7 +176,7 @@ module.exports = async (req, res, next) => {
 
       'shippingDetails':  //sold_to_party  //bill_to_party
       {
-        'name': deliveryDetail['vendor_name'],
+        'name': deliveryDetail['vendor_name']?deliveryDetail['vendor_name']:shippingPlantName,
         'address1': 'N/A',
         'address2': 'N/A',
         'address3': 'N/A',
@@ -316,7 +322,7 @@ module.exports = async (req, res, next) => {
     if (customerDataFromMicroService.success) {
 
       invoiceObj['shippingDetails'] = {
-        'name': customerDataFromMicroService.data['name'],
+        'name': shippingPlantName,
         'address1': customerDataFromMicroService.data['address1'],
         'address2': customerDataFromMicroService.data['address2'],
         'address3': customerDataFromMicroService.data['address3'],
@@ -337,7 +343,7 @@ module.exports = async (req, res, next) => {
     if (customerDataFromMicroService.success) {
 
       invoiceObj['shippingDetails'] = {
-        'name': customerDataFromMicroService.data['name'],
+        'name': shippingPlantName,
         'address1': customerDataFromMicroService.data['address1'],
         'address2': customerDataFromMicroService.data['address2'],
         'address3': customerDataFromMicroService.data['address3'],
@@ -345,7 +351,7 @@ module.exports = async (req, res, next) => {
         'pan': customerDataFromMicroService.data['panNumber'],
         'gstNo': customerDataFromMicroService.data['gstNumber'],
         'email': customerDataFromMicroService.data['email'],
-        'cityId': customerDataFromMicroService.data['city'],
+        'cityId': customerDataFromMicroService.data['city'] || deliveryDetail['shipping_plant'],
         'country': customerDataFromMicroService.data['country'],
       }
 
