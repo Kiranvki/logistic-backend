@@ -75,6 +75,9 @@ const warehouses = new Schema({
   cin: {
     type: String,
   },
+  plant:{
+    type:String
+  }
   
 }, {
   timestamps: true
