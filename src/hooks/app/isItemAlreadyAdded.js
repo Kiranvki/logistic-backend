@@ -18,7 +18,8 @@ module.exports = async (req, res, next) => {
         info('Check whether the item alread added for the saleOrderId or not');
         let objectId = mongoose.Types.ObjectId; // object id
         let pickerBoySalesOrderMappingId = req.body.pickerBoySalesOrderMappingId || req.params.pickerBoySalesOrderMappingId; // get the pickerBoySalesOrderMappingId
-        let item_no = req.body.item_no; //get the itemId
+        let item_no = req.body.item_no, //get the itemId
+        isEdit = req.query.isEdit||req.query.isedit||0;
         // mongoose valid id 
         if (objectId.isValid(pickerBoySalesOrderMappingId)) {
 
@@ -30,9 +31,13 @@ module.exports = async (req, res, next) => {
                 info('Item not added')
                 next();
             } else {
+                if(isEdit){
+                    next()
+                }else{
                 error('Item already added!');
                 return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.itemAlreadyAdded);
             }
+        }
         } else {
             error('The SaleOrder ID is Invalid !');
             return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.invalidSalesOrderId);
