@@ -44,7 +44,8 @@ const {
   isPickingAlreadyGenerated,
   isInvoiceAlreadyGenerated,
   getAvailableStock,
-  checkStockAvailability
+  checkStockAvailability,
+  isSingleItem
 
 } = require('../../../hooks/app');
 
@@ -135,6 +136,26 @@ function userRoutes() {
       verifyAppToken, // verify app token 
       ctrl.getBucketDetail // get controller 
     );
+
+    closed.route('/:type/remove/item/:pickerBoySalesOrderMappingId').patch(
+      //  [joiPickingValidate]
+      
+        verifyAppToken, // verify app token 
+        getPickedItemDetail,
+        isSingleItem, //check if only single item in bucket and prompt the user
+        ctrl.removeItemFromBucket // remove controller 
+      );
+
+
+
+    closed.route('/:type/clear/bucket/:pickerBoySalesOrderMappingId').get(
+        //  [joiPickingValidate]
+        
+          verifyAppToken, // verify app token 
+  
+          ctrl.clearBucket // clear bucket controller 
+        );
+
 
 
   };

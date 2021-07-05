@@ -82,6 +82,7 @@ module.exports = {
   isValidPickingDate:require('./isValidPickingDate'),
   isValidPickingDate:require('./isValidPickingDate'),
   getAvailableStock:require('./getAvailableStock'),
-  checkStockAvailability:require('./checkStockAvailability')
+  checkStockAvailability:require('./checkStockAvailability'),
+  isSingleItem:require('./isSingleItem')
 
 }

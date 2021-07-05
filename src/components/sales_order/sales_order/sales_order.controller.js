@@ -2158,7 +2158,7 @@ if(salesOrderList.length>0){
       
       info('Get Sales Orders !');
 
-
+      console.log(startDate,endDate)
       let searchObject = [{
         $match: {
           'order_date': { $gte: startDate, $lte: endDate },
@@ -2185,7 +2185,7 @@ if(salesOrderList.length>0){
         'isDeleted':1,
         'status':1,
         'created_at':1,
-        'updated_at'	:1,
+        'updated_at':1,
         'Plant Name':{
           "$first" : "$plant.nameToDisplay"
         },
@@ -2244,7 +2244,7 @@ if(salesOrderList.length>0){
             'isDeleted':1,
             'status':1,
             'created_at':1,
-            'updated_at'	:1,
+            'updated_at':1,
             'Plant Name':{
               "$first" : "$plant.nameToDisplay"
             },

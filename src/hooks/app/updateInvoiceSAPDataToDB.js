@@ -66,7 +66,8 @@ module.exports = async (req, res, next) => {
               'itemName': getName(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'],data['material']),//data['itemName'], //not available
           
         
-              'salePrice':(parseFloat(data['net_price'])/(parseFloat(data['qty'])>0?parseFloat(data['qty']):1)),                       //data['mrp_amount'],   // sap mrp_amount // change with selling_price
+              // salePrice:(parseFloat(data['net_price'])/(parseFloat(data['qty'])>0?parseFloat(data['qty']):1)),                       //data['mrp_amount'],   // sap mrp_amount // change with selling_price
+              'salePrice':data['unit_price'],
         
               'quantity': data['qty'],  
         

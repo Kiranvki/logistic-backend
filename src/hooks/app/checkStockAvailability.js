@@ -34,7 +34,7 @@ function isValidQuantity(pickedItem, availableStock) {
     let materialStock = availableStock.filter(item => {
         return (item['material_no'] == pickedItem['material_no'] && item['plant'] == pickedItem['plant'] && item['storage_location'] == pickedItem['storage_location'])
     })
-    console.log('test', materialStock)
+   
 
 
     if (materialStock.length && !_.isEmpty(materialStock)) {
@@ -95,6 +95,7 @@ module.exports = async (req, res, next) => {
 
 
         })
+        console.log('isAvailable',isAvailable)
 
          _.remove(isAvailable, { 'status': true })
 
