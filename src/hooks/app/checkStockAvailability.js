@@ -95,6 +95,7 @@ module.exports = async (req, res, next) => {
 
 
         })
+       
         console.log('isAvailable',isAvailable)
 
          _.remove(isAvailable, { 'status': true })

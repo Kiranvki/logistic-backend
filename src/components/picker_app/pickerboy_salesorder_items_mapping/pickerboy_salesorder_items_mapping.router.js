@@ -141,8 +141,8 @@ function userRoutes() {
       //  [joiPickingValidate]
       
         verifyAppToken, // verify app token 
-        getPickedItemDetail,
-        isSingleItem, //check if only single item in bucket and prompt the user
+      
+        // isSingleItem, //check if only single item in bucket and prompt the user
         ctrl.removeItemFromBucket // remove controller 
       );
 

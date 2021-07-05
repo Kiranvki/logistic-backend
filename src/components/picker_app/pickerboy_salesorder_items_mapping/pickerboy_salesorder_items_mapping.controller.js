@@ -49,12 +49,15 @@ class pickerSalesOrderMappingController extends BaseController {
       info('Add items after scanning  !');
       let pickerBoySalesOrderMappingId = mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId) || '',
         quantityAdded = req.body.quantity,
-        mrp_amount = parseInt(req.body.itemDetail.mrp_amount)
-
+        mrp_amount = parseInt(req.body.itemDetail.mrp_amount),
+        isEdit = parseInt(req.query.isEdit) || parseInt(req.query.isedit) || 0,
+         isInserted
       //itemID->material
       // console.log('name',req.body.itemDetail.sold_to_party_description)
       let dataToInsert = {
         'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
+        'isDeleted': 0,
+        'status': 1,
         'itemDetail': [{
           'item_no': req.body.item_no,
           // 'itemName': req.body.sold_to_party_description,
@@ -72,7 +75,7 @@ class pickerSalesOrderMappingController extends BaseController {
           'pickedQuantity': quantityAdded,
           'total_amount': req.body.itemDetail.total_amount,
           'totalQuantity': parseInt(req.body.itemDetail.qty),
-          'storage_location':req.body.itemDetail.storage_location?req.body.itemDetail.storage_location:"100",
+          'storage_location': req.body.itemDetail.storage_location ? req.body.itemDetail.storage_location : "100",
           'requireQuantity': ((parseInt(req.body.itemDetail.qty)) - (parseInt(req.body.itemDetail.suppliedQty ? req.body.itemDetail.suppliedQty : 0))), //- parseInt(req.body.itemDetail.suppliedQty)),
           'suppliedQty': (parseInt(req.body.itemDetail.suppliedQty ? req.body.itemDetail.suppliedQty : 0)), //req.body.itemDetail.suppliedQty, //previous supplied
           // 'taxPercentage': req.body.itemDetail.taxPercentage,
@@ -83,9 +86,17 @@ class pickerSalesOrderMappingController extends BaseController {
         'createdBy': req.user.email
 
       };
-
+console.log(isEdit)
       // inserting data into the db 
-      let isInserted = await Model.addItem(dataToInsert);
+      if (!isEdit) {
+         isInserted = await Model.addItem(dataToInsert);
+      } else {
+         isInserted = await Model.update({
+          'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
+          'isDeleted': 0,
+          'status': 1, "itemDetail.item_no": req.body.item_no
+        }, { $set: { "itemDetail.$.pickedQuantity": quantityAdded } });
+      }
 
 
       // console.log(orderDetail)
@@ -657,68 +668,69 @@ class pickerSalesOrderMappingController extends BaseController {
   }
 
 
-   // remove item from bucket
-   removeItemFromBucket = async(req,res,next)=>{
+  // remove item from bucket
+  removeItemFromBucket = async (req, res, next) => {
     // .update({pickerBoySalesOrderMappingId:ObjectId("60e2902e4b34ff0f0534a264")},{ $pull: { "itemDetail": { 'item_no': "000020" } } })
-    try{
+    try {
       info('Remove Bucket item!');
       let bucketId = req.params.pickerBoySalesOrderMappingId,
-      itemNumber = req.body.itemNumber,
-      materialNumber = req.body.materialNumber;
+        itemNumber = req.body.item_no;
+      // materialNumber = req.body.materialNumber;
       let isRemoved = await Model.update({
-        pickerBoySalesOrderMappingId:mongoose.Mongoose.Types.ObjectId(bucketId)
+        pickerBoySalesOrderMappingId: mongoose.Types.ObjectId(bucketId)
       },
-      { 
-        $pull: { "itemDetail": 
-        { 'item_no': itemNumber,'material_no': materialNumber}
-       } 
-      })
+        {
+          $pull: {
+            "itemDetail":
+              { 'item_no': { $in: itemNumber } }
+          }
+        })
 
-  if (isRemoved && !_.isEmpty(isRemoved)) {
-          // console.log('test',res['pickerBoySalesOrderMappingId'])
-          return this.success(req, res, this.status.HTTP_OK, 
-            {
-              results: orderDetail,
-         
-            }, 'Material Succesfully Removed from Bucket.');
-        } else {
-          error('Error while Removing Item from Bucket/Cart !');
-          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchBucketItemList);
-        }
-        
+      if (isRemoved && !_.isEmpty(isRemoved)) {
+        // console.log('test',res['pickerBoySalesOrderMappingId'])
+        return this.success(req, res, this.status.HTTP_OK,
+          {
+            results: isRemoved,
 
-    }catch(err){
+          }, 'Material Succesfully Removed from Bucket.');
+      } else {
+        error('Error while Removing Item from Bucket/Cart !');
+        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchBucketItemList);
+      }
+
+
+    } catch (err) {
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
 
 
-  clearBucket = async(req,res,next)=>{
-    try{
+  clearBucket = async (req, res, next) => {
+    try {
 
       info('Clear Bucket!')
-      let bucketId = req.body.pickerBoySalesOrderMappingId
-
-      let isBucketClear = await pickerBoySalesOrderModel.update({_id:mongoose.Mongoose.Types.ObjectId(bucketId)},
-      {$set:{isDeleted:1,status:0}})
+      let bucketId = req.params.pickerBoySalesOrderMappingId
+      console.log(bucketId)
+      let isBucketClear = await pickerBoySalesOrderModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(bucketId) },
+        { $set: { 'isDeleted': 1, 'status': 0 } })
 
       if (isBucketClear && !_.isEmpty(isBucketClear)) {
         // console.log('test',res['pickerBoySalesOrderMappingId'])
-        return this.success(req, res, this.status.HTTP_OK, 
+        return this.success(req, res, this.status.HTTP_OK,
           {
             results: isBucketClear,
-       
+
           }, 'Bucket Succesfully Removed.');
       } else {
         error('Error while Clearing Bucket/Cart !');
         return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.unableToFetchBucketItemList);
       }
 
-    }catch(err){
+    } catch (err) {
       error(err);
       this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
-  
+
 
     }
   }

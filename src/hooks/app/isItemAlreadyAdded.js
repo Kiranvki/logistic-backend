@@ -19,7 +19,7 @@ module.exports = async (req, res, next) => {
         let objectId = mongoose.Types.ObjectId; // object id
         let pickerBoySalesOrderMappingId = req.body.pickerBoySalesOrderMappingId || req.params.pickerBoySalesOrderMappingId; // get the pickerBoySalesOrderMappingId
         let item_no = req.body.item_no, //get the itemId
-        isEdit = req.query.isEdit||req.query.isedit||0;
+        isEdit = parseInt(req.query.isEdit)||parseInt(req.query.isedit)||0;
         // mongoose valid id 
         if (objectId.isValid(pickerBoySalesOrderMappingId)) {
 
