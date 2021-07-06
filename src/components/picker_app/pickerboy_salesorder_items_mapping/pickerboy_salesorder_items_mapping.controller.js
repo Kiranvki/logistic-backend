@@ -95,7 +95,7 @@ console.log(isEdit)
           'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
           'isDeleted': 0,
           'status': 1, "itemDetail.item_no": req.body.item_no
-        }, { $set: { "itemDetail.$.pickedQuantity": quantityAdded } });
+        }, { $set: { "itemDetail.$.pickedQuantity": quantityAdded ,'partialItemRemark': req.body.remarks} });
       }
 
 
