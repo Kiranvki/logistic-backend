@@ -83,6 +83,6 @@ module.exports = {
   isValidPickingDate:require('./isValidPickingDate'),
   getAvailableStock:require('./getAvailableStock'),
   checkStockAvailability:require('./checkStockAvailability'),
-  isSingleItem:require('./isSingleItem')
+  isClearBucket:require('./isClearBucket')
 
 }

@@ -644,7 +644,9 @@ class pickerboySalesOrderMappingController extends BaseController {
       // get the sale Order Details
       let salesOrderData = await Model.aggregate([{
         $match: {
-          '_id': mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId)
+          '_id': mongoose.Types.ObjectId(req.params.pickerBoySalesOrderMappingId),
+          'isDeleted':0,
+          'status':1
         }
       },
       {

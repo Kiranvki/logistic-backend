@@ -45,7 +45,7 @@ const {
   isInvoiceAlreadyGenerated,
   getAvailableStock,
   checkStockAvailability,
-  isSingleItem
+  isClearBucket
 
 } = require('../../../hooks/app');
 
@@ -142,7 +142,7 @@ function userRoutes() {
       
         verifyAppToken, // verify app token 
       
-        // isSingleItem, //check if only single item in bucket and prompt the user
+        isClearBucket, //check if removing item will clear the bucket
         ctrl.removeItemFromBucket // remove controller 
       );
 
