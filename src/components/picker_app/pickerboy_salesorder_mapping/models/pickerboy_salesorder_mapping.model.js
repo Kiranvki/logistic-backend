@@ -198,9 +198,9 @@ class PickerBoyOrderMappingClass {
   }
 
   static async getOrderByPickerBoyId(pickerBoyOrderMappingId) {
-    let isExist = await this.count({ '_id': pickerBoyOrderMappingId });
+    let isExist = await this.count({ '_id': pickerBoyOrderMappingId,'isDeleted': 0});
     if (isExist) {
-      let orderPickerBoyMappingData = await this.find({ '_id': pickerBoyOrderMappingId }).lean().populate('salesOrderId');
+      let orderPickerBoyMappingData = await this.find({ '_id': pickerBoyOrderMappingId,'isDeleted': 0 }).lean().populate('salesOrderId');
 
       return orderPickerBoyMappingData;
     }

@@ -156,7 +156,7 @@ class PickerBoySalesOrderItemsMappingClass{
     let isExist = await this.count({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId,'isDeleted': 0 });
     if(isExist){
 
-      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId},{$push:{'itemDetail':orderObjItem.itemDetail}})
+      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId,'isDeleted': 0},{$push:{'itemDetail':orderObjItem.itemDetail}})
       
     }
     // let obj = await new this(orderObjItem).save()
@@ -166,7 +166,7 @@ class PickerBoySalesOrderItemsMappingClass{
   }
 
   static async getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId) {
-    let isExist = await this.count({ 'pickerBoySalesOrderMappingId': mongoose.Types.ObjectId(pickerBoySalesOrderMappingId) });
+    let isExist = await this.count({ 'pickerBoySalesOrderMappingId': mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),'isDeleted': 0});
     if (isExist) {
 
       return await this.find({ 'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId, 'isDeleted': 0 }).lean()

@@ -1426,7 +1426,9 @@ class stockTransferPickingDetailController extends BaseController {
         $and: [
           { 'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId) },
           { 'isStartedPicking': true }, { 'isItemPicked': true },
-          { 'invoiceDetail.isInvoice': false }
+          { 'invoiceDetail.isInvoice': false },
+          {'isDeleted': 0},
+          {'status':1}
         ]
       }).lean().then((res) => {
 

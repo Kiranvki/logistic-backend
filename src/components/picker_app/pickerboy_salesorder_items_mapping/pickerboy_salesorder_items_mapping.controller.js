@@ -713,7 +713,7 @@ class pickerSalesOrderMappingController extends BaseController {
       let bucketId = req.params.pickerBoySalesOrderMappingId
       console.log(bucketId)
       let isBucketClear = await pickerBoySalesOrderModel.findOneAndUpdate({ _id: mongoose.Types.ObjectId(bucketId) },
-        { $set: { 'isDeleted': 1, 'status': 0 } })
+        { $set: { 'isDeleted': 1, 'status': 0,'isItemPicked':false,'isStartedPicking':false} })
 
       if (isBucketClear && !_.isEmpty(isBucketClear)) {
         // console.log('test',res['pickerBoySalesOrderMappingId'])
