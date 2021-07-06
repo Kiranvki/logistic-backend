@@ -86,7 +86,7 @@ class pickerSalesOrderMappingController extends BaseController {
         'createdBy': req.user.email
 
       };
-console.log(isEdit)
+
       // inserting data into the db 
       if (!isEdit) {
          isInserted = await Model.addItem(dataToInsert);
@@ -95,7 +95,7 @@ console.log(isEdit)
           'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId,
           'isDeleted': 0,
           'status': 1, "itemDetail.item_no": req.body.item_no
-        }, { $set: { "itemDetail.$.pickedQuantity": quantityAdded ,'partialItemRemark': req.body.remarks} });
+        }, { $set: { "itemDetail.$.pickedQuantity": quantityAdded ,'itemDetail.$.partialItemRemark': req.body.remarks} });
       }
 
 
