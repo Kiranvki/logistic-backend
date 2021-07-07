@@ -112,7 +112,8 @@ module.exports = async (req, res, next) => {
 
         } else {
             error('Material Not in Stock.')
-            return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, "Stock Not Available.", isAvailable);
+            // return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, "Stock Not Available.", isAvailable);
+            return Response.errors(req, res, StatusCodes.HTTP_FOUND,JSON.stringify({'message': "Stock Not Available.",'data':isAvailable}));
         }
 
 
