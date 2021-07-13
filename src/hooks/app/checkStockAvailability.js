@@ -83,7 +83,7 @@ module.exports = async (req, res, next) => {
 
 
         let orderDetail = req.body.orderDetail['itemDetail'],
-            stockDetail = req.body.materialStockDetail;
+            stockDetail = req.body.materialStockDetail|| [];
 
 
 

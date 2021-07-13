@@ -12,6 +12,7 @@ const {
   error,
   info
 } = require('../../utils').logging;
+const { stockCheck } = require('../../responses/types/index');
 
 // exporting the hooks 
 module.exports = async (req,res,next) => {
@@ -112,6 +113,7 @@ console.log('sap object material',obj)
   }else{
     //  Message pending
     //req.body.delivery_detail['error']
-    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.pickerBoySalesOrderFetchingInvoiceFailed);
+    error('Unable to fetch Stock Details.')
+    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, stockCheck.unableToFetchStockDetail);
   }
 };
