@@ -18,7 +18,7 @@ const { stockCheck } = require('../../responses/types/index');
 module.exports = async (req,res,next) => {
     let obj;
   try {
-    info(`Getting Invoice from SAP!`);
+    info(`Getting Stock detail from SAP!`);
     // console.log(req.body.invoice_detail['data']['invoice_no'])
 
     // console.log('generate delivery',  req.body.orderDetail)
@@ -36,7 +36,7 @@ module.exports = async (req,res,next) => {
 // console.log(req.body.orderDetail['itemDetail'])
 
 
-    console.log('Hitting SAP server for Generating the Invoice *> ', url);
+    console.log('Hitting SAP server for Stock Detail *> ', url);
      obj = {
         'request': {
             'material_no': [
@@ -64,7 +64,7 @@ module.exports = async (req,res,next) => {
         
         // checking whether the user is authentic
         if (res.status === 200) {
-          info('Invoice Generated Successfully !');
+          info('Stock Detail Fetched Successfully !');
           console.log('invoice data',res.body.response)
           return {
               
