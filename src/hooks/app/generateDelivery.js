@@ -124,13 +124,17 @@ module.exports = async (req, res, next) => {
         '_id': req.params.pickerBoyOrderMappingId
       }, {
         $set: {
-          'picking_allocation_response': JSON.stringify(req.body.delivery_detail),
-          'picking_allocation_request': JSON.stringify(obj),
+          
           'isItemPicked': false,
           'isStartedPicking': false,
           'state': 1,
           // 'isDeleted': 1,
           'isSapError': 'DNE' //DNE->delivery_no error
+        },$push:{
+          'picking_allocation_response': JSON.stringify(req.body.delivery_detail),
+          'picking_allocation_request': JSON.stringify(obj),
+        },$inc:{
+          deliveryRetryCount:1
         }
       })
       //fixed require
@@ -143,13 +147,17 @@ module.exports = async (req, res, next) => {
         '_id': req.params.pickerBoyOrderMappingId
       }, {
         $set: {
-          'picking_allocation_response': JSON.stringify(req.body.delivery_detail),
-          'picking_allocation_request': JSON.stringify(obj),
+          
           'isItemPicked': false,
           'isStartedPicking': false,
           'state': 1,
           // 'isDeleted': 1,
           'isSapError': 'DNE' //DNE->delivery_no error
+        },$push:{
+          'picking_allocation_response': JSON.stringify(req.body.delivery_detail),
+          'picking_allocation_request': JSON.stringify(obj),
+        },$inc:{
+          deliveryRetryCount:1
         }
       })
       //fixed require

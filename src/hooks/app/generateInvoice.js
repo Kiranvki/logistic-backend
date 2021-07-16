@@ -193,7 +193,7 @@ module.exports = async (req, res, next) => {
           'invoiceResponsePayload': JSON.stringify(req.body.invoice_detail),
           'invoiceRequestPayload': JSON.stringify(obj)
         },$inc:{
-          invoiceRetryCount:1
+          'invoiceRetryCount':1
         }
       })
 
@@ -203,14 +203,20 @@ module.exports = async (req, res, next) => {
       '_id': id
     }, {
       $set: {
-        'invoice_response': JSON.stringify(req.body.invoice_detail),
-        'invoice_request': JSON.stringify(obj),
+        
         'isItemPicked': false,
         'isStartedPicking': false,
         'state': 1,
         // 'isDeleted': 1,
         'isSapError': 'INVE' //INVE->invoice error
+      },$push:{
+        'invoice_response': JSON.stringify(req.body.invoice_detail),
+        'invoice_request': JSON.stringify(obj),
       }
+        ,$inc:{
+          'invoiceRetryCount':1
+        }
+      
     })
        //fixed require
        await pickerBoyOrderItemMappingModel.update({ 'pickerBoySalesOrderMappingId': req.params.pickerBoyOrderMappingId }, { $set: { 'isDeleted': 1 } })

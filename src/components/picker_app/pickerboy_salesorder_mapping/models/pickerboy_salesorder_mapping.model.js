@@ -27,6 +27,14 @@ const pickerBoyOrderMappingSchema = new Schema({
     require: true,
     default: false
   },
+  'invoiceRetryCount': {
+    type: Number,
+    default: -1
+  },
+  'deliveryRetryCount': {
+    type: Number,
+    default: -1
+  },
   'createdBy': {
     type: String,
   },
@@ -78,12 +86,13 @@ const pickerBoyOrderMappingSchema = new Schema({
   'state': {
     type: Number,
     default: 0,
-    enum: [0, 1, 2, 3]
+    enum: [0, 1, 2, 3,4]
     /**
      * state 0 : started picking order but no item picked
      * state 1 : packing
-     * state 2 : invoice generated
-     * state 3 : on boarded to vehicle
+     * state 2 : Delivery generated
+     * state 3 : invoice generated
+     * state 4 : on boarded to vehicle
      */
   },
   'fullfilment': {
@@ -94,18 +103,18 @@ const pickerBoyOrderMappingSchema = new Schema({
 
     default: 0
   },
-  'picking_allocation_response': {
+  'picking_allocation_response': [{
     type: String
-  },
-  'picking_allocation_request': {
+  }],
+  'picking_allocation_request': [{
     type: String
-  },
-  'invoice_response': {
+  }],
+  'invoice_response': [{
     type: String
-  },
-  'invoice_request': {
+  }],
+  'invoice_request': [{
     type: String
-  },
+  }],
   'remarks': [{
     type: String,
     default: 'N/A'
@@ -184,7 +193,7 @@ class PickerBoyOrderMappingClass {
 
   static async updateDeliveryStatus(pickerBoyOrderMappingId, delivery_no, remarks) {
 
-    let orderPickerBoyMappingData = await this.findOneAndUpdate({ '_id': pickerBoyOrderMappingId }, { $set: { 'delivery_no': delivery_no, 'remarks': remarks, 'state': 3,'isItemPicked': false, 'isStartedPicking': false  } });
+    let orderPickerBoyMappingData = await this.findOneAndUpdate({ '_id': pickerBoyOrderMappingId }, { $set: { 'delivery_no': delivery_no, 'remarks': remarks, 'state': 2,'isItemPicked': false, 'isStartedPicking': false  } });
     return orderPickerBoyMappingData;
 
   }
