@@ -28,9 +28,14 @@ module.exports = async (req, res, next) => {
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
     let sapBaseUrl = process.env.sapBaseUrl,
-    requestFromUrl = req.url,
-    deliveryDetail = req.body.deliveryDetail,
-    billing_date = moment(new Date()).format('YYYY-MM-DD'),  //new Date()
+    requestFromUrl = req.url;
+    if(requestFromUrl.includes('/generate/invoice/')){
+      let deliveryDetail = {'delivery_no':req.body.delivery_detail['data']['delivery_no']};
+    }else{
+      let deliveryDetail = req.body.deliveryDetail;
+    }
+    
+    let billing_date = moment(new Date()).format('YYYY-MM-DD'),  //new Date()
     actual_gi_date = moment(new Date()).format('YYYY-MM-DD'),  //new Date()
     planned_gi_date = moment(new Date()).format('YYYY-MM-DD'),
     id = req.params.stoPickingId || req.params.pickerBoyOrderMappingId;
@@ -173,6 +178,23 @@ module.exports = async (req, res, next) => {
   if (req.body.invoice_detail['success'] && (req.body.invoice_detail['data'] ? req.body.invoice_detail['data']['invoice_no'] : false)) {
     req.body.invoiceRequestPayload = obj;
     req.body.deliveryNumber = req.body.deliveryDetail['delivery_no']
+     //remove once sap stable
+     let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
+      '_id': req.params.pickerBoyOrderMappingId
+    }, {
+      $set: {
+        
+        'isSapError': 'INVS', //INVE->invoice Success,
+        'isItemPicked':false,
+        'isStartedPicking':false
+
+      },$push:{
+        'invoice_response': JSON.stringify(req.body.invoice_detail),
+        'invoice_request': JSON.stringify(obj)
+      }
+    })
+
+   
     return next()
 
   } else {
@@ -199,6 +221,7 @@ module.exports = async (req, res, next) => {
 
 
     }else{
+    
     let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
       '_id': id
     }, {
@@ -218,7 +241,12 @@ module.exports = async (req, res, next) => {
         }
       
     })
+if(requestFromUrl.includes('/generate/invoice/')){
+  let OrderData = req.body.orderDetail,
+  pickedItem = OrderData['itemDetail'];
+    let soUpdateFullfilemt = await sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityPickingStep(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], pickedItem)
        //fixed require
+}
        await pickerBoyOrderItemMappingModel.update({ 'pickerBoySalesOrderMappingId': req.params.pickerBoyOrderMappingId }, { $set: { 'isDeleted': 1 } })
 
 

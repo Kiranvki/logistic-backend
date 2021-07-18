@@ -416,7 +416,7 @@ class pickerSalesOrderMappingController extends BaseController {
       // invoiceDetail = req.body.invoice_detail['data'][0]
 
 
-      // sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], req.body.invoice_detail)
+      sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityOld(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], req.body.invoice_detail)
       //  salesOrderId: {
       //   _id: 606901f99429dd62745df225,
 

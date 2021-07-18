@@ -1883,6 +1883,99 @@ if(salesOrderList.length>0){
   }
 
 
+  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityOld = async(salesOrderId,soItem,invData)=>{
+    try {
+      info(`Updating SO Info ! ${salesOrderId}`);
+      let isUpdated;
+// suppliedQuantity 
+console.log(JSON.stringify(invData))
+let tomorrow  = moment().add(1,'days').format('YYYY-MM-DD');
+  // moment(new Date()).format('YYYY-MM-DD')
+  
+let soFullfilmentStatus = 2;
+soItem.forEach(async (sItem,i)=>{
+invData['data'][0]['item'].forEach(async (item,i)=>{
+  let itemFullfilmentStatus=1
+  // item.qty=1
+  if(sItem.item_no==item.item_no && item.qty<=(parseInt(sItem.qty)-parseInt(sItem.suppliedQty?sItem.suppliedQty:0))){
+  if(item.qty==(parseInt(sItem.qty)-parseInt(sItem.suppliedQty?sItem.suppliedQty:0))){
+    itemFullfilmentStatus=2
+  }else{
+    soFullfilmentStatus = 1
+
+  }
+  // console.log(item)
+ 
+  
+  soItem[i].fulfillmentStatus = itemFullfilmentStatus;
+   isUpdated = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId),'item.item_no':item.item_no
+
+}, {
+  $set:{
+  
+    'item.$.fulfillmentStatus':itemFullfilmentStatus,
+
+},
+$inc:{
+  
+  'item.$.suppliedQty':parseInt(item.qty?item.qty:0),
+}
+});
+  // console.log(isUpdated)
+}
+}
+)
+
+if((soItem[i].fulfillmentStatus?soItem[i].fulfillmentStatus:0)<=1){
+  soFullfilmentStatus = 1
+
+}
+
+})
+
+_.remove(soItem, { 'fulfillmentStatus': 2 })
+// console.log('soFullfilmentStatus',soItem.length,soItem)
+//fulfilled alternative
+if(soItem.length==0){
+  soFullfilmentStatus = 2
+}else{
+  soFullfilmentStatus = 1
+}
+// console.log('soFullfilmentStatus',soFullfilmentStatus)
+let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId)
+}, {
+  $set:{
+    'fulfillmentStatus':soFullfilmentStatus,
+    
+}
+
+});
+console.log(isUpdated,isUpdatedfulfillmentStatus)
+if(isUpdatedfulfillmentStatus){
+  info('SalesOrder Status updated! !');
+          return {
+            success: true,
+            data: isUpdatedfulfillmentStatus
+          };
+        } else {
+          error('Failed to update SALESORDER! ');
+          return {
+            success: false,
+          };
+        }
+   
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
+
 
   UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity = async (salesOrderId, soItem, pickedItem,delivery_date) => {
     try {

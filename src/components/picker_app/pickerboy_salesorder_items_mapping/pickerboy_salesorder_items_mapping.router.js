@@ -77,7 +77,7 @@ function userRoutes() {
     );
 
     //generate picking allocation(delivery#) and then generate invoice for the generated delivery#
-    closed.route('/generate/invoice/:pickerBoyOrderMappingId').get(  //change to patch
+    closed.route('/generate/invoiceV2/:pickerBoyOrderMappingId').get(  //change to patch
       // [joiInvValidate],
      
       isInvoiceAlreadyGenerated,
@@ -92,6 +92,20 @@ function userRoutes() {
       // ctrl.getPickedItemByPickerOrderId
 
     );
+
+    closed.route('/generate/invoice/:pickerBoyOrderMappingId').get(
+      // [joiInvValidate],
+      getPickedItemDetail,
+      generateDelivery,
+      updateSapDeliveryDetail,
+      generateInvoice,
+      fetchInvoice,
+      updateInvoiceSAPDataToDB,
+      ctrl.generateInv
+      // ctrl.getPickedItemByPickerOrderId
+      
+    );
+
 
     //generate picking allocation(delivery#) 
     closed.route('/generate/pickingallocation/:pickerBoyOrderMappingId').patch(  //change to patch
