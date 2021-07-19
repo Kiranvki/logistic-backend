@@ -710,6 +710,13 @@ class pickerboySalesOrderMappingController extends BaseController {
       }
       ])
 
+
+
+      salesOrderData[0].salesOrdersDetails.orderItems.forEach((items, i) => {
+        // console.log(items)
+        salesOrderData[0].salesOrdersDetails.orderItems[i]['qty'] = (parseInt(item.qty) - parseInt(item.suppliedQty ? item.suppliedQty : 0)).toString()
+      })
+
       // check if inserted 
       if (salesOrderData && !_.isEmpty(salesOrderData)) {
         return this.success(req, res, this.status.HTTP_OK, {

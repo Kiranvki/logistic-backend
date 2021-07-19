@@ -177,7 +177,7 @@ module.exports = async (req, res, next) => {
 
   if (req.body.invoice_detail['success'] && (req.body.invoice_detail['data'] ? req.body.invoice_detail['data']['invoice_no'] : false)) {
     req.body.invoiceRequestPayload = obj;
-    req.body.deliveryNumber = req.body.deliveryDetail['delivery_no']
+    req.body.deliveryNumber = deliveryDetail['delivery_no'];
      //remove once sap stable
      let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
       '_id': req.params.pickerBoyOrderMappingId

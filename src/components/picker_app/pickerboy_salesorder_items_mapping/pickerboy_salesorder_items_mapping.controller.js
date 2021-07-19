@@ -116,6 +116,7 @@ class pickerSalesOrderMappingController extends BaseController {
         if (orderDetail.length > 0 && itemAdded.length > 0) {
           orderDetail[0]['salesOrderId']['item'].forEach((x, i) => {
             //   console.log(x)
+            
             orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
             itemAdded[0]['itemDetail'].forEach((y, j) => {
               if (x.item_no === y.item_no) {
@@ -123,6 +124,7 @@ class pickerSalesOrderMappingController extends BaseController {
 
               }
             })
+            orderDetail[0]['salesOrderId']['item'][i]['qty'] = parseInt(orderDetail[0]['salesOrderId']['item'][i]['qty']-parseInt(orderDetail[0]['salesOrderId']['item'][i]['suppliedQty']?orderDetail[0]['salesOrderId']['item'][i]['suppliedQty']:0))
           })
         }
 
@@ -300,6 +302,7 @@ class pickerSalesOrderMappingController extends BaseController {
 
           orderDetail[0]['salesOrderId']['item'].forEach((x, i) => {
             //   console.log(x)
+            orderDetail[0]['salesOrderId']['item'][i]['qty'] = parseInt(orderDetail[0]['salesOrderId']['item'][i]['qty']-parseInt(orderDetail[0]['salesOrderId']['item'][i]['suppliedQty']?orderDetail[0]['salesOrderId']['item'][i]['suppliedQty']:0))
             orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
             if (itemAdded) {
               itemAdded[0]['itemDetail'].forEach((y, j) => {
@@ -425,19 +428,19 @@ class pickerSalesOrderMappingController extends BaseController {
       // requireQuantity: 1,
       // suppliedQty: 0,
       // }
-      //   req.body.invDetail['itemSupplied'].forEach((data,i)=>{
-      //   OrderData['itemDetail'].forEach((item,j) => {
-      //     // console.log('item_no',data.item_no,item.item_no)
-      //     if(data.item_no==item.item_no){
+        req.body.invDetail['itemSupplied'].forEach((data,i)=>{
+        OrderData['itemDetail'].forEach((item,j) => {
+          // console.log('item_no',data.item_no,item.item_no)
+          if(data.item_no==item.item_no){
 
-      //       req.body.invDetail['itemSupplied'][i]['material_description'] = item['itemName']
-      //     }
+            req.body.invDetail['itemSupplied'][i]['material_description'] = item['itemName']
+          }
 
 
 
-      //   })
+        })
 
-      // })
+      })
       // console.log(req.body.invDetail['itemSupplied'])
 
       info('Invoice Generated and updated to DB !');
