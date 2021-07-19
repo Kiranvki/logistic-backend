@@ -110,7 +110,7 @@ function userRoutes() {
     //generate picking allocation(delivery#) 
     closed.route('/generate/pickingallocation/:pickerBoyOrderMappingId').patch(  //change to patch
       // [joiInvValidate],
-      // isPickingAlreadyGenerated,
+      isPickingAlreadyGenerated,
    
       getPickedItemDetail,  //get item list added in the basket
       getAvailableStock,
