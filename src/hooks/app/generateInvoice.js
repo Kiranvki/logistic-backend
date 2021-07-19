@@ -30,9 +30,9 @@ module.exports = async (req, res, next) => {
     let sapBaseUrl = process.env.sapBaseUrl,
     requestFromUrl = req.url;
     if(requestFromUrl.includes('/generate/invoice/')){
-      let deliveryDetail = {'delivery_no':req.body.delivery_detail['data']['delivery_no']};
+      var deliveryDetail = {'delivery_no':req.body.delivery_detail['data']['delivery_no']};
     }else{
-      let deliveryDetail = req.body.deliveryDetail;
+      var deliveryDetail = req.body.deliveryDetail;
     }
     
     let billing_date = moment(new Date()).format('YYYY-MM-DD'),  //new Date()
