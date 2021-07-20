@@ -56,7 +56,7 @@ var hitSapApiOfGRN = async (req,poReceivingDetails, poDetails, vendorInvoiceNo) 
         po_number: poDetails.po_number,
         poReceivingId: poReceivingDetails._id,
       });
-      await updateReceivingStatus(req,poReceivingDetails, poDetails);
+      //await updateReceivingStatus(req,poReceivingDetails, poDetails);
       console.log(insertedRecord);
       throw err;
     }
@@ -130,7 +130,7 @@ module.exports = async (req, res, next) => {
           poReceivingId: poReceivingDetails._id,
         });
         console.log(insertedRecord);
-        await updateReceivingStatus(req,poReceivingDetails, poDetails);
+        //await updateReceivingStatus(req,poReceivingDetails, poDetails);
 
         //to-do remove comment
         info(sapGrnResponse, "sapGrnResponse-------");
