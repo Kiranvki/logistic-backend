@@ -309,6 +309,7 @@ class pickerSalesOrderMappingController extends BaseController {
                 if (x.item_no === y.item_no) {
 
                   orderDetail[0]['salesOrderId']['item'][i] = y;
+                  orderDetail[0]['salesOrderId']['item'][i]['qty']=y['totalQuantity'];
                   // orderDetail[0]['salesOrderId']['orderItems'][i].itemAmount=y.itemAmount;
 
                   // orderDetail[0]['salesOrderId']['orderItems'][i].isItemPicked=y.isItemPicked;
