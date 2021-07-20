@@ -302,7 +302,7 @@ class pickerSalesOrderMappingController extends BaseController {
 
           orderDetail[0]['salesOrderId']['item'].forEach((x, i) => {
             //   console.log(x)
-            orderDetail[0]['salesOrderId']['item'][i]['qty'] = parseInt(orderDetail[0]['salesOrderId']['item'][i]['qty']-parseInt(orderDetail[0]['salesOrderId']['item'][i]['suppliedQty']?orderDetail[0]['salesOrderId']['item'][i]['suppliedQty']:0))
+            orderDetail[0]['salesOrderId']['item'][i]['remainingQty'] = parseInt(orderDetail[0]['salesOrderId']['item'][i]['qty']-parseInt(orderDetail[0]['salesOrderId']['item'][i]['suppliedQty']?orderDetail[0]['salesOrderId']['item'][i]['suppliedQty']:0))
             orderDetail[0]['salesOrderId']['item'][i].isItemPicked = false;
             if (itemAdded) {
               itemAdded[0]['itemDetail'].forEach((y, j) => {
