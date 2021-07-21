@@ -88,7 +88,7 @@ function userRoutes() {
       generateInvoice, //generate invoice for the delivery number
       fetchInvoice, //fetch generated invoice from sap
       updateInvoiceSAPDataToDB, //save the invoice detail to application db
-      ctrl.generateInv
+      ctrl.generateInvV2
       // ctrl.getPickedItemByPickerOrderId
 
     );

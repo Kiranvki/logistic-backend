@@ -412,6 +412,57 @@ class pickerSalesOrderMappingController extends BaseController {
     }
   }
 
+   //Update SO status and inv detail.Check hooks for INV generate method
+   generateInvV2 = async (req, res, next) => {
+    try {
+      let OrderData = req.body.orderDetail
+      // invoiceDetail = req.body.invoice_detail['data'][0]
+
+
+      // sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityOld(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], req.body.invoice_detail)
+      //  salesOrderId: {
+      //   _id: 606901f99429dd62745df225,
+
+      // itemDetail{
+      //   totalQuantity: 1,
+      // requireQuantity: 1,
+      // suppliedQty: 0,
+      // }
+        req.body.invDetail['itemSupplied'].forEach((data,i)=>{
+        OrderData['itemDetail'].forEach((item,j) => {
+          // console.log('item_no',data.item_no,item.item_no)
+          if(data.item_no==item.item_no){
+
+            req.body.invDetail['itemSupplied'][i]['material_description'] = item['itemName']
+          }
+
+
+
+        })
+
+      })
+      // console.log(req.body.invDetail['itemSupplied'])
+
+      info('Invoice Generated and updated to DB !');
+      if (req.body.invDetail) {
+        return this.success(req, res, this.status.HTTP_OK,
+          // req.body.invoice_detail
+          req.body.invDetail,
+          this.messageTypes.InvoiceGeneratedSuccesfully);
+      }
+
+
+
+      else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.InvoiceUpdateFailed);
+
+
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
+
 
   //Update SO status and inv detail.Check hooks for INV generate method
   generateInv = async (req, res, next) => {
