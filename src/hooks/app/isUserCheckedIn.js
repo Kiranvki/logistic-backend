@@ -1,6 +1,6 @@
 // Controller
 const AttendanceCtrl = require('../../components/picker_app/onBoard/app_picker_user_attendance/app_picker_user_attendance.controller'); // attendance controller 
-const UserSessionCtrl = require('../../components/picker_app/onBoard/app_picker_user_session');
+const UserSessionCtrl = require('../../components/picker_app/onBoard/app_picker_user_session/app_picker_user_session.controller');
 
 // Responses & others utils 
 const Response = require('../../responses/response');
@@ -17,9 +17,9 @@ const {
 // exporting the hooks 
 module.exports = async (req, res, next) => {
   try {
-    info('Check whether the salesman id is valid or not !');
+    info('Check whether the pickery boy id is valid or not !');
     let objectId = mongoose.Types.ObjectId; // object id
-    let salesmanId = req.user._id; // get the salesman id 
+    let pickerBoyId = req.user._id; // get the picker id 
     // getting todays date 
     let date = new Date();
     let endOfTheDay = moment(date).set({
@@ -36,22 +36,22 @@ module.exports = async (req, res, next) => {
     }).toDate();
 
     // mongoose valid id 
-    if (objectId.isValid(salesmanId)) {
+    if (objectId.isValid(pickerBoyId)) {
 
       // check whether the email id is unique or not 
-      let salesmanAttendanceDetails = await AttendanceCtrl.getDetails(salesmanId, startOfTheDay, endOfTheDay)
+      let pickerBoyAttendanceDetails = await AttendanceCtrl.getDetails(pickerBoyId, startOfTheDay, endOfTheDay)
 
       // if email is unique
-      if (salesmanAttendanceDetails.success) {
-        info('Valid salesman')
+      if (pickerBoyAttendanceDetails.success) {
+        info('Valid pickerboy')
 
         // check if the user is already checked out
-        if (salesmanAttendanceDetails.data.attendanceLog && salesmanAttendanceDetails.data.attendanceLog.length) {
+        if (pickerBoyAttendanceDetails.data.attendanceLog && pickerBoyAttendanceDetails.data.attendanceLog.length) {
 
           // abstraction of data 
-          let attendanceId = salesmanAttendanceDetails.data._id;
-          let attendanceLogId = salesmanAttendanceDetails.data.attendanceLog[salesmanAttendanceDetails.data.attendanceLog.length - 1]._id;
-          let checkInTimeInMins = salesmanAttendanceDetails.data.attendanceLog[salesmanAttendanceDetails.data.attendanceLog.length - 1].checkInTimeInMins;
+          let attendanceId = pickerBoyAttendanceDetails.data._id;
+          let attendanceLogId = pickerBoyAttendanceDetails.data.attendanceLog[pickerBoyAttendanceDetails.data.attendanceLog.length - 1]._id;
+          let checkInTimeInMins = pickerBoyAttendanceDetails.data.attendanceLog[pickerBoyAttendanceDetails.data.attendanceLog.length - 1].checkInTimeInMins;
 
           // injecting into request body 
           req.body.attendanceId = attendanceId;
@@ -68,14 +68,14 @@ module.exports = async (req, res, next) => {
 
         // if user session not exist 
       } else {
-        error('INVALID salesman!');
-        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.appUserAttendance.salesmanNotCheckedIn);
+        error('INVALID pickerboy!');
+        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.appUserAttendance.pickerBoyNotCheckedIn);
       }
 
-      // if salesman id is invalid 
+      // if picker id is invalid
     } else {
-      error('The salesman ID is Invalid !');
-      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.appUserAttendance.invalidSalesmanId);
+      error('The pickerboy ID is Invalid !');
+      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.appUserAttendance.invalidPickerBoyId);
     }
 
     // catch any runtime error 

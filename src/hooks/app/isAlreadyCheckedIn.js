@@ -17,7 +17,7 @@ const {
 // exporting the hooks 
 module.exports = async (req, res, next) => {
   try {
-    info('Check whether the salesman id is valid or not !');
+    info('Check whether the picker boy id is valid or not !');
     const freezeTimeForToday = await BasicCtrl.GET_LAST_PERMITTED_CHECK_IN_TIME().then((res) => { if (res.success) return res.data; else return "10:20"; });
     let freezeTime = freezeTimeForToday.split(':');
 

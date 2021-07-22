@@ -1,3 +1,5 @@
+
+
 module.exports = {
-  sendData = 'Send DATA'
+  commonEmitters: require('./commonEmitters'),
 }

@@ -1,5 +1,5 @@
 module.exports = {
-  hitCronToGeneratePublishedBeatPlans: require('./hitCronToGeneratePublishedBeatPlans'), // hit cron to generate published beat plan from draft beat plan 
-  hitCronToSyncCustomerOthersDetails: require('./hitCronToSyncCustomerOthersDetails'), // hit cron to sync tally customer data 
-  hitTallyCustomerAccountsSync: require('./hitTallyCustomerAccountsSync'), // hit tally customer accounts sync
+  hitCronForAutoCheckoutAppUsers: require('./hitCronForAutoCheckoutAppUsers'), // hit Cron For Auto Checkout App Users
+  hitCronToSyncPurchaseOrderData: require('./hitCronToSyncPurchaseOrderData'), // hit cron for sync purchase order
+  hitCronToSyncSalesOrderData: require('./hitCronToSyncSalesOrderData') // hit cron for sync Salse order
 };

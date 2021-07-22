@@ -1,5 +1,5 @@
 // Controller
-const pickerBoyCtrl = require('../../components/picker_app/employee/picker_boy/picker_boy.controller');
+const pickerBoyCtrl = require('../../components/employee/picker_boy/picker_boy.controller');
 const pickerBoySessionCtrl = require('../../components/picker_app/onBoard/app_picker_user_session/app_picker_user_session.controller');
 
 // Responses & others utils 

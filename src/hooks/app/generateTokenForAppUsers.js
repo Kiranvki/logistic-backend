@@ -1,6 +1,5 @@
 // controller
 const BasicCtrl = require('../../components/basic_config/basic_config.controller');
-
 // Responses & others utils 
 const Response = require('../../responses/response');
 const StatusCodes = require('../../facades/response');
@@ -21,7 +20,8 @@ module.exports = async (req, res, next) => {
 
     const expiryTime = 24 * 60; // 24 hrs to mins 
     let jwtToken = '';
-
+    let warehouseDetails ={}
+    
     // get user data 
     if (req.body.isValidPickerBoy) {
       jwtToken = jwt.sign({
@@ -30,10 +30,16 @@ module.exports = async (req, res, next) => {
           employerName: req.body.isValidPickerBoy.employerName,
           contactMobile: req.body.isValidPickerBoy.contactMobile,
           cityId: req.body.isValidPickerBoy.cityId,
+          locationId: req.body.isValidPickerBoy.locationId,
           fullName: req.body.isValidPickerBoy.fullName,
-          email: req.body.isValidPickerBoy.email
+          email: req.body.isValidPickerBoy.email,
+          plant:req.body.isValidPickerBoy.plant, 
+          // plant_code:warehouseDetails.code
+
         })
       }, secret, { expiresIn: parseInt(expiryTime) * 60 });
+
+      // console.log(req.body.isValidPickerBoy.plant)
     } else return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, MessageTypes.userAuthentication.invalidLogin);
 
     // check whether the jwt is valid 

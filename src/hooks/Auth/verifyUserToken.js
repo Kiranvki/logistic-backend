@@ -1,5 +1,3 @@
-//const UserSessionCtrl = require('../../components/users/user_session/user_session.controller'); // user controller 
-
 // Responses & others utils 
 const Response = require('../../responses/response');
 const StatusCodes = require('../../facades/response');
@@ -11,6 +9,9 @@ const {
   error,
   info
 } = require('../../utils').logging;
+const {
+  getTokenDetails
+} = require('../../inter_service_api/user_server/v1');
 
 // exporting the hooks 
 module.exports = async (req, res, next) => {
@@ -41,6 +42,7 @@ module.exports = async (req, res, next) => {
       } else return payload;
     });
 
+    // check for payload 
     if (payload && payload.error && payload.error == 'tokenExpired') {
       return Response.errors(req, res, StatusCodes.HTTP_UNAUTHORIZED, MessageTypes.userAuthentication.tokenExpired);
     }
@@ -52,28 +54,32 @@ module.exports = async (req, res, next) => {
         ...JSON.parse(payload.data)
       };
 
-      let userDetails = await UserSessionCtrl.getTokenDetails(req.user.token) //requesting the data from token microservice
-      if (userDetails.success) {
-        if (req.user.email == userDetails.data.email) {
+      // verify token details 
+      let dataFromUserMicroService = await getTokenDetails(req.user.token) //requesting the data from token microservice
+
+      // if token verified successfully
+      if (dataFromUserMicroService.success) {
+        if (req.user.email == dataFromUserMicroService.data.email) {
           info('Injecting the data into the req body')
-          // req.body._id = req.user._id;  //adding the user ID into the request
-          // req.body.email = req.user.email  //adding the user email into the request
           return next();
         }
         else {
+          error('Unauthorised User !');
           return Response.errors(req, res, StatusCodes.HTTP_UNAUTHORIZED, MessageTypes.userAuthentication.unauthorizedUser);
         }
       }
       else {
+        error('Unauthorized User!');
         return Response.errors(req, res, StatusCodes.HTTP_UNAUTHORIZED, MessageTypes.userAuthentication.unauthorizedUser);
       }
-
-
     } else {
+      error('Unauthorized User!');
       return Response.errors(req, res, StatusCodes.HTTP_UNAUTHORIZED, MessageTypes.userAuthentication.unauthorizedUser);
     }
+
+    // catch any internal server error
   } catch (e) {
     error(e);
-    Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, Exceptions.internalServerErr(req, e));
+    return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, Exceptions.internalServerErr(req, e));
   }
 };

@@ -45,8 +45,6 @@ class pickerUserSessionController extends BaseController {
   // login authentication
   loginRequest = async (req, res) => {
     try {
-      console.log('hellp');
-
       info('OTP generation and DB entry !');
 
       // getting the salesman id 
@@ -184,7 +182,8 @@ class pickerUserSessionController extends BaseController {
             name: pickerBoyDetails.fullName,
             profilePic: pickerBoyDetails.profilePic,
             employeeId: pickerBoyDetails.employeeId,
-            city: pickerBoyDetails.cityId
+            city: pickerBoyDetails.cityId,
+            plant:pickerBoyDetails.plant
           }
         }, this.messageTypes.userLoggedInSuccessfully);
 
@@ -199,7 +198,7 @@ class pickerUserSessionController extends BaseController {
   // get valid user token 
   getUserToken = async (pickerBoyId) => {
     try {
-      info('Get the session key for the given salesman id !');
+      info('Get the session key for the given picker id !');
 
       // checking day object 
       if (pickerBoyId) {
