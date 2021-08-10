@@ -316,7 +316,7 @@ getName =async(plant)=>{
   let plantDetails = await Model.findOne({'plant':plant,'status':1,'isDeleted':0},'nameToDisplay').lean()
 
     // is inserted 
-  return plantDetails?plantDetails['nameToDisplay']:'N/A';
+  return plantDetails['nameToDisplay']?plantDetails['nameToDisplay']:'N/A';
     // catch any runtime error 
   } catch (err) {
     error(err);
