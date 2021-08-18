@@ -48,8 +48,8 @@ class DeliveryExecutivetrip extends BaseController {
     let pageNumber = req.query.page;
 
     let dateToday= moment(Date.now()).set({
-      h: 24,
-      m: 59,
+      h: 0,
+      m: 0,
       s: 0,
       millisecond: 0
     }).toDate();
@@ -76,7 +76,7 @@ class DeliveryExecutivetrip extends BaseController {
    
     ,{
       $project:{
-       _id:0,
+       
         deliveryDetails:0,
         vehicleId:0,
         checkedInId:0,
