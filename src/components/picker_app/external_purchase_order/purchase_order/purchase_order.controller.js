@@ -53,29 +53,31 @@ class purchaseController extends BaseController {
         end_of_validity_period: { $gte: todaysDate },
         start_of_validity_period: { $lte: todaysDate },
         status: 1,
-        isDeleted: 0,
-        po_document_type: {
-          $nin: [
-            "ZFPO",
-            "ZNDR",
-            "ZNFV",
-            "ZWAS",
-            "ZWBD",
-            "ZWDI",
-            "ZWIO",
-            "ZWPO",
-            "ZWRE",
-            "ZWSO",
-            "ZWSU",
-            "ZNPD",
-            "ZWPD",
-            "ZNPO",
-            "ZWSI",
-            "ZWST"
-          ],
-        },
-
-        // delivery_date:{$lte:todaysEndDate}//to-do
+        isDeleted: 0
+      };
+      // delivery_date:{$lte:todaysEndDate}//to-do
+      let ignoredDocumentType = [
+        "ZFPO",
+        "ZNDR",
+        "ZWAS",
+        "ZWBD",
+        "ZWDI",
+        "ZWIO",
+        "ZWPO",
+        "ZWRE",
+        "ZWSO",
+        "ZWSU",
+        "ZNPD",
+        "ZWPD",
+        "ZNPO",
+        "ZWSI",
+        "ZWST",
+      ];
+      if (query.plant != "1040") { // As requested bt Athullah
+        ignoredDocumentType.push("ZNFV");
+      }
+      query.po_document_type = {
+        $nin: ignoredDocumentType,
       };
       if (req.query.poNumber) {
         query.po_number = {
