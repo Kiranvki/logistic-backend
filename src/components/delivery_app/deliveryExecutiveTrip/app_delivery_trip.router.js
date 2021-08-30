@@ -157,7 +157,9 @@ closed.route('/trip/order/:type/:orderId/:phoneNumber').get(
         // verifyAppToken, // verify app token
           ctrl.getPendingTrip 
         );
-  
+
+
+
       
       
       

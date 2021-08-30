@@ -33,28 +33,16 @@ module.exports = async (req, res, next) => {
                 isValidPickingId = await pickerboySalesOrderMappingController.getInvoiceDetails(id)
             }
             // 
-            if (isValidPickingId.success) {
+            if (isValidPickingId.success && isValidPickingId.data.invoiceDetail.invoice.invoiceDbId) {
                 info('Valid PickerBoy SalesOrder Mapping Id')
 
-                info('Invoice already generated')
+                info('Invoice already generated and fetched.')
 
-                //get the invoice data and respond
-              
-                // if(isValidPickingId.data.invoiceDetail.invoice.invoiceId && isValidPickingId.data.invoiceDetail.isInvoice ==false){
-                 
-                 
-                    let isInvoiceFetch ='false';
-                    if(!isValidPickingId.data.invoiceDetail.invoice.invoiceDbId){
-                        isInvoiceFetch = 'true'
-
-                    }
-                   
-                //     return Response.errors(req, res, StatusCodes.HTTP_FOUND, JSON.stringify({data:isValidPickingId['data']['invoiceDetail'], message:MessageTypes.invoice.invoiceAlreadyDoneButFetchFailed,'isInvoiceFetch':isInvoiceFetch}))
-                // }
+               
 
 
-                // let invoiceData = invoicePickerSO.data[0].invoiceDetails[0];
-                return Response.errors(req, res, StatusCodes.HTTP_FOUND, JSON.stringify({data:isValidPickingId['data']['invoiceDetail'], message:MessageTypes.invoice.invoiceAlreadyDone,'isInvoiceFetch':isInvoiceFetch}))
+               
+                return Response.errors(req, res, StatusCodes.HTTP_FOUND, JSON.stringify({data:isValidPickingId['data']['invoiceDetail'], message:MessageTypes.invoice.invoiceAlreadyDone}))
 
 
 

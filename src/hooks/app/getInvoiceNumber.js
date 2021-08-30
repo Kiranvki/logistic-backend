@@ -1,3 +1,5 @@
+
+
 // Controller
 const stockTransferPickingDetailCtrl = require('../../components/picker_app/external_purchase_order/stock_transfer_picking_details/stock_transfer_picking_details.controller');
 const pickerboySalesOrderMappingController = require('../../components/picker_app/pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller');
@@ -34,27 +36,17 @@ module.exports = async (req, res, next) => {
             }
             // 
             if (isValidPickingId.success) {
-                info('Valid PickerBoy SalesOrder Mapping Id')
+                info('Invoice number fetched succesfully')
 
                 info('Invoice already generated')
+                req.body.invoice_detail= {'data':{}}
 
-                //get the invoice data and respond
+                req.body.invoice_detail['data']['invoice_no'] =   isValidPickingId.data.invoiceDetail.invoice.invoiceId
+                next();
+
+
+               
               
-                // if(isValidPickingId.data.invoiceDetail.invoice.invoiceId && isValidPickingId.data.invoiceDetail.isInvoice ==false){
-                 
-                 
-                    let isInvoiceFetch ='false';
-                    if(!isValidPickingId.data.invoiceDetail.invoice.invoiceDbId){
-                        isInvoiceFetch = 'true'
-
-                    }
-                   
-                //     return Response.errors(req, res, StatusCodes.HTTP_FOUND, JSON.stringify({data:isValidPickingId['data']['invoiceDetail'], message:MessageTypes.invoice.invoiceAlreadyDoneButFetchFailed,'isInvoiceFetch':isInvoiceFetch}))
-                // }
-
-
-                // let invoiceData = invoicePickerSO.data[0].invoiceDetails[0];
-                return Response.errors(req, res, StatusCodes.HTTP_FOUND, JSON.stringify({data:isValidPickingId['data']['invoiceDetail'], message:MessageTypes.invoice.invoiceAlreadyDone,'isInvoiceFetch':isInvoiceFetch}))
 
 
 
@@ -63,7 +55,7 @@ module.exports = async (req, res, next) => {
 
             } else {
                 //invoice not created,  creating new one
-                next();
+                return Response.errors(req, res, StatusCodes.HTTP_FOUND, 'Invoice number not available.Please Generate the invoice.');
 
             }
         } else {
