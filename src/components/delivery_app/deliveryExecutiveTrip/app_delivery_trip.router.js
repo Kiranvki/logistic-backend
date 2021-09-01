@@ -164,10 +164,6 @@ closed.route('/trip/order/:type/:orderId/:phoneNumber').get(
           ctrl.getPendingTrip 
         );
 
-<<<<<<< HEAD
-
-
-=======
         //get sale order by trip id
 
       closed.route('/:tripId/salesorders').get(
@@ -184,7 +180,6 @@ closed.route('/trip/order/:type/:orderId/:phoneNumber').get(
               ctrl.getInvoiceNumberbySo
           )
   
->>>>>>> 45c24760a213e8cd597c867a47958312e57c7b9a
       
       
       
