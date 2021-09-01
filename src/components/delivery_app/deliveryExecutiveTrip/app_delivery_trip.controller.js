@@ -1473,7 +1473,10 @@ getSalesOrdersbyTripID = async(req,res,next) =>{
      }},
       {$unwind: {path: "$invoice", preserveNullAndEmptyArrays: true}},
     {$project:{sold_to_party_description:"$salesorders.sold_to_party_description", sold_to_party:"$salesorders.sold_to_party",
-        shippingDetails:"$invoice.shippingDetails",
+        // shippingDetails:"$invoice.shippingDetails",
+        "address1":"$invoice.shippingDetails.address1",
+        "mobileNo":"$invoice.shippingDetails.mobileNo",
+        "cityId":"$invoice.shippingDetails.cityId",
           salesorders: { $cond: { if: { $isArray: "$salesorders.item" }, then: { $size: "$salesorders.item" }, else: "NA"}}
     }}
      ])
