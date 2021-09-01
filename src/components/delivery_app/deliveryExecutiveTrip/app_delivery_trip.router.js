@@ -19,6 +19,7 @@ const {
   isDeliveryAlreadyCheckedIn, // check whether the user already check In
   getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
   deliveryGenerateMonthDaysAndOtherMetaData, // generate month days and other meta data
+  isActiveDelivery
 } = require("../../../hooks/app");
 
 // auth
@@ -35,7 +36,8 @@ function tripsRoutes() {
     closed.route('/get-trip').get(
       verifyDeliveryAppToken,
         isValidDeliveryId,
-      
+        isActiveDelivery,
+      // verifyAppToken, // verify app token
         ctrl.getTripByDeliveryExecutiveId 
       );
 
