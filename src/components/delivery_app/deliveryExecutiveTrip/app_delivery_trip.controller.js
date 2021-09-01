@@ -15,8 +15,8 @@ const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model');
 const tripSalesOrders = require('../../MyTrip/assign_trip/model/salesOrder.model');
 const requestHttp = require('request');
 var async = require('async');
-import { type } from 'ramda';
-import { v4 as uuidv4 } from 'uuid';
+// import { type } from 'ramda';
+// import { v4 as uuidv4 } from 'uuid';
 const gpnModel = require('./model/gpn_model')
 
 
@@ -29,6 +29,7 @@ const request = require('request-promise');
 const mongoose = require('mongoose');
 const { ObjectId } = require('mongoose');
 var QRCode = require('qrcode');//QR code
+const { pipeline } = require('stream');
 
 // "pageMeta":{"skip":0,"pageSize":10,"total":96}}}
 
@@ -1416,9 +1417,121 @@ getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
 
 }
 
+getSalesOrdersbyTripID = async(req,res,next) =>{
+  try {
+  info("getting the salesOrder by trip Id");
+  
+  let tripId = req.params.tripId;
+  console.log("tripId", tripId);
+  let salesOrderlist = await tripModel.aggregate([
+    {$match:{'tripId':parseInt(req.params.tripId) }},
 
+    // {$project:{salesOrderId:1}},
+    // {$unwind: {path: "$salesOrderId"}},
+    // {$lookup:{
+    //     from: "salesorders",
+    //     let:{id: "$salesOrderId"},
+    //     pipeline:[
+    //         {
+    //             $match:{
+    //                 $expr:{$eq:["$_id","$$id"]}
+    //             }
+    //         }],
+    //         as: "salesorders",
+            
+    // }},
+    //  {$unwind: {path: "$salesorders"}},
+    //  {$project:{"CustomerName": "$salesorders.customerName","CustomerId": "$salesorders.customerId","location":"$salesorders.location",
+    //      salesorders: { $cond: { if: { $isArray: "$salesorders.orderItems" }, then: { $size: "$salesorders.orderItems" }, else: "NA"}}
+    //  }},     
+    // ])
 
+    {$project:{salesOrder:1}},
+     {$unwind: {path: "$salesOrder"}},
+     {$lookup:{
+         from: "salesorders",
+         let:{id: "$salesOrder"},
+         pipeline:[
+             {
+                 $match:{
+                     $expr:{$eq:["$_id","$$id"]}
+                 }
+             }],
+             as: "salesorders",
+            
+     }},
+       {$unwind: {path: "$salesorders", preserveNullAndEmptyArrays: false}},
+    {$lookup:{
+         from: "invoicemasters",
+         let:{id: "$salesOrder"},
+         pipeline:[
+             {
+                 $match:{
+                     $expr:{$eq:["$so_db_id","$$id"]}
+                 }
+             }],
+             as: "invoice",
+     }},
+      {$unwind: {path: "$invoice", preserveNullAndEmptyArrays: true}},
+    {$project:{sold_to_party_description:"$salesorders.sold_to_party_description", sold_to_party:"$salesorders.sold_to_party",
+        shippingDetails:"$invoice.shippingDetails",
+          salesorders: { $cond: { if: { $isArray: "$salesorders.item" }, then: { $size: "$salesorders.item" }, else: "NA"}}
+    }}
+     ])
+    console.log("salesOrderlist",salesOrderlist);
+    //on success 
+    if(salesOrderlist && !_.isEmpty(salesOrderlist)) {
+      this.success(req, res, this.status.HTTP_OK, 
+        salesOrderlist
+      , this.messageTypes.SalesOrderListByTripIdFetchedSuccessfully);
+  
+    }else {
+       return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.SalesOrderListByTripIdNotFetchedSuccessfully);
 
+    }
+
+  }
+  catch(err) {
+    error(err)
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+
+  }
+
+}
+
+getInvoiceNumberbySo = async(req,res,next) =>{
+  try {
+  info("getting the invoice numbers by sales orders");
+  
+  let so_id = req.params.salesorderId;
+  console.log("so_db_id", so_id);
+
+  let invoiceNumber = await invoiceMasterModel.aggregate([
+    {$match:{so_db_id:mongoose.Types.ObjectId(so_id) }},
+    // {$project: {_id:1}}
+    {$project: {customerName:1,"invoice": "$invoiceDetails.invoiceNo", "salesOrderNo": "$soId",
+    shippingDetails: 1, createdAt:1 }}
+])
+    console.log("invoiceNumber",invoiceNumber);
+    //on success 
+    if(invoiceNumber && !_.isEmpty(invoiceNumber)) {
+      this.success(req, res, this.status.HTTP_OK, 
+        invoiceNumber
+      , this.messageTypes.InoiceNumberBySoIdFetchedSuccessfully);
+  
+    }else {
+       return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.InoiceNumberBySoIdNotFetchedSuccessfully);
+
+    }
+
+  }
+  catch(err) {
+    error(err)
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+
+  }
+
+}
 
 
 getPendingTrip = async(req,res,next)=>{
