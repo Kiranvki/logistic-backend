@@ -19,7 +19,7 @@ const schemas = {
               }
             }
           }).required(),
-        tripid: Joi.string().trim().label('tripid').required().max(20)
+        tripid: Joi.string().trim().label('tripid').required().max(25)
       
     }),
     getOrderDetailVal: Joi.object().keys({

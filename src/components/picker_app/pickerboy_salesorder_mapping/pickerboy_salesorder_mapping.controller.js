@@ -1200,8 +1200,8 @@ class pickerboySalesOrderMappingController extends BaseController {
       return Model.findOne({
         _id: mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),
         'invoiceDetail.isInvoice': true,
-        delivery_no: { $ne: 'N/A' },
-        isDeleted: 0
+         delivery_no: { $ne: 'N/A' },
+         isDeleted: 0
       }).lean().then((res) => {
         if (res && !_.isEmpty(res)) {
           return {
@@ -2250,6 +2250,581 @@ class pickerboySalesOrderMappingController extends BaseController {
           'pickerBoyId': 1,
           'createdBy': 1,
           'pickingDate': 1,
+          'createdAt': 1,
+          'updatedAt': 1,
+
+          'invoice_request': 1,
+          'invoice_response': 1,
+          'picking_allocation_request': 1,
+          'picking_allocation_response': 1,
+          'isSapError': 1,
+          'cityId': { $first: '$invoice.cityId' },
+          'customerName': { $first: '$invoice.customerName' },
+          'companyDetails': { $first: '$invoice.companyDetails' },
+          'payerDetails': { $first: '$invoice.payerDetails' },
+          'shippingDetails': { $first: '$invoice.shippingDetails' },
+          'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+          'invoiceDate': { $first: '$invoice.invoiceDate' },
+          'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+          'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+          'totalAmount': { $first: '$invoice.totalAmount' },
+          'totalTax': { $first: '$invoice.totalTax' },
+          'totalDiscount': { $first: '$invoice.totalDiscount' },
+          'totalNetValue': { $first: '$invoice.totalNetValue' },
+          'itemSupplied': { $first: '$invoice.itemSupplied' }
+        }
+      },
+      {
+        $sort: {
+          'createdAt': -1
+        }
+      }
+        // status: 1,
+        // isDeleted: 0
+      ]
+
+
+
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
+            'createdAt': { $gte: startDate, $lte: endDate },
+            'isStartedPicking': false,
+            'isItemPicked': false,
+
+
+
+
+          }
+        },
+        {
+          $lookup: {
+            from: 'invoicemasters',
+            let: {
+              id: '$invoiceDetail.invoice.invoiceDbId'
+            },
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ['$$id', '$_id']
+                }
+
+              }
+
+            }
+            ],
+            as: "invoice"
+
+          }
+        }
+          , {
+          $project: {
+
+
+            'state': 1,
+            'remarks': 1,
+            'shipping_point': 1,
+            'delivery_no': 1,
+            'delivery_date': 1,
+            'sales_order_no': 1,
+            'salesOrderId': 1,
+            'pickerBoyId': 1,
+            'createdBy': 1,
+            'pickingDate': 1,
+            'createdAt': 1,
+            'updatedAt': 1,
+
+            'invoice_request': 1,
+            'invoice_response': 1,
+            'picking_allocation_request': 1,
+            'picking_allocation_response': 1,
+            'isSapError': 1,
+            'cityId': { $first: '$invoice.cityId' },
+            'customerName': { $first: '$invoice.customerName' },
+            'companyDetails': { $first: '$invoice.companyDetails' },
+            'payerDetails': { $first: '$invoice.payerDetails' },
+            'shippingDetails': { $first: '$invoice.shippingDetails' },
+            'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+            'invoiceDate': { $first: '$invoice.invoiceDate' },
+            'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+            'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+            'totalAmount': { $first: '$invoice.totalAmount' },
+            'totalTax': { $first: '$invoice.totalTax' },
+            'totalDiscount': { $first: '$invoice.totalDiscount' },
+            'totalNetValue': { $first: '$invoice.totalNetValue' },
+            'itemSupplied': { $first: '$invoice.itemSupplied' }
+          }
+        },
+        {
+          $sort: {
+            'createdAt': -1
+          }
+        }
+          // status: 1,
+          // isDeleted: 0
+        ]
+
+
+      // get details 
+      return await Model.aggregate(pipeline).then((result) => {
+        // console.log(result)
+        if (result && !_.isEmpty(result)) {
+          // return {
+          //   success: true,
+          //   data: res
+          // }
+
+          const json2csv = new Parser()
+
+          try {
+            // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+            const csv = json2csv.parse(result)
+            res.attachment(`report-${moment(startDate).format('DD:MM:YY')}-${moment(endDate).format('DD:MM:YY')}.csv`)
+            res.status(200).send(csv)
+          } catch (error) {
+            console.log('error:', error.message)
+            res.status(500).send(error.message)
+          }
+
+
+          // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+        } else {
+          error('Error Searching Data in invoice DB!');
+          // return {
+          //   success: false
+          // }
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.invoicesDetailsNotFound
+          );
+        }
+      }).catch(err => {
+        error(err);
+        // return {
+        //   success: false,
+        //   error: err
+        // }
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.invoicesDetailsNotFound
+        );
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+      // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+  getPickingAllocationReport = async (req, res, next) => {
+
+    try {
+
+      info('Getting the todays Order !!!');
+
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+
+        startDate = req.query.startDate || moment().subtract(100, 'days').set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        endDate = req.query.endDate || moment().set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        type = req.params.type,
+        // plant = req.body.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+      console.log(startDate, endDate)
+
+
+      if (startDate && !_.isEmpty(startDate)) {
+
+
+        startDate = moment(startDate, "DD-MM-YYYY").set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+
+      }
+
+      if (endDate && !_.isEmpty(endDate)) {
+
+
+        endDate = moment(endDate, "DD-MM-YYYY").set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+
+      }
+      info('Get Invoices !');
+
+      let pipeline = [{
+        $match: {
+          'createdAt': { $gte: startDate, $lte: endDate },
+          'isStartedPicking': false,
+          'isItemPicked': false,
+        
+
+
+
+
+        }
+      },
+      {
+        $lookup: {
+          from: 'invoicemasters',
+          let: {
+            id: '$invoiceDetail.invoice.invoiceDbId'
+          },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $eq: ['$$id', '$_id']
+              }
+
+            }
+
+          }
+          ],
+          as: "invoice"
+
+        }
+      }
+        , {
+        $project: {
+          'sales_order_no': 1,
+          'state': 1,
+          'remarks': 1,
+          'shipping_point': 1,
+          'delivery_no': 1,
+          // 'delivery_date': 1,
+          
+      
+       
+       
+          'picking Date': {$dateToString: { format: "%Y-%m-%d", date:'$pickingDate'  } },
+          'picking Time':{$dateToString: { format: "%H:%M", date: '$pickingDate'  } },
+          'createdAt': 1,
+          // 'updatedAt': 1,
+
+          // 'invoice_request': 1,
+          // 'invoice_response': 1,
+       
+          'isSapError': 1,
+          'Plant': { $first: '$invoice.cityId' },
+          'customerName': { $first: '$invoice.customerName' },
+          // 'companyDetails': { $first: '$invoice.companyDetails' },
+          // 'payerDetails': { $first: '$invoice.payerDetails' },
+          // 'shippingDetails': { $first: '$invoice.shippingDetails' },
+          // 'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+          'invoice Date':{$dateToString: { format: "%Y-%m-%d", date: { $first: '$invoice.invoiceDate' } } },
+          'invoice Time':{$dateToString: { format: "%H:%M", date: { $first: '$invoice.invoiceDate' } } },
+          'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+          'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+          // 'totalAmount': { $first: '$invoice.totalAmount' },
+          // 'totalTax': { $first: '$invoice.totalTax' },
+          // 'totalDiscount': { $first: '$invoice.totalDiscount' },
+          // 'totalNetValue': { $first: '$invoice.totalNetValue' },
+          'itemSupplied': { $first: '$invoice.itemSupplied' },
+          'picking_allocation_request': 1,
+          'picking_allocation_response': 1,
+        }
+      },
+      {
+        $sort: {
+          'createdAt': -1
+        }
+      }
+        // status: 1,
+        // isDeleted: 0
+      ]
+
+
+
+      if (searchKey !== '')
+        pipeline = [{
+          $match: {
+            'createdAt': { $gte: startDate, $lte: endDate },
+            'isStartedPicking': false,
+            'isItemPicked': false,
+
+
+
+
+          }
+        },
+        {
+          $lookup: {
+            from: 'invoicemasters',
+            let: {
+              id: '$invoiceDetail.invoice.invoiceDbId'
+            },
+            pipeline: [{
+              $match: {
+                $expr: {
+                  $eq: ['$$id', '$_id']
+                }
+
+              }
+
+            }
+            ],
+            as: "invoice"
+
+          }
+        }
+          , {
+          $project: {
+
+
+            'state': 1,
+            'remarks': 1,
+            'shipping_point': 1,
+            'delivery_no': 1,
+            'delivery_date': 1,
+            'sales_order_no': 1,
+            'salesOrderId': 1,
+            'pickerBoyId': 1,
+            'createdBy': 1,
+            'pickingDate': 1,
+            'createdAt': 1,
+            'updatedAt': 1,
+
+            'invoice_request': 1,
+            'invoice_response': 1,
+            'picking_allocation_request': 1,
+            'picking_allocation_response': 1,
+            'isSapError': 1,
+            'cityId': { $first: '$invoice.cityId' },
+            'customerName': { $first: '$invoice.customerName' },
+            'companyDetails': { $first: '$invoice.companyDetails' },
+            'payerDetails': { $first: '$invoice.payerDetails' },
+            'shippingDetails': { $first: '$invoice.shippingDetails' },
+            'invoiceDetails': { $first: '$invoice.invoiceDetails' },
+            'invoiceDate': { $first: '$invoice.invoiceDate' },
+            'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
+            'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
+            'totalAmount': { $first: '$invoice.totalAmount' },
+            'totalTax': { $first: '$invoice.totalTax' },
+            'totalDiscount': { $first: '$invoice.totalDiscount' },
+            'totalNetValue': { $first: '$invoice.totalNetValue' },
+            'itemSupplied': { $first: '$invoice.itemSupplied' }
+          }
+        },
+        {
+          $sort: {
+            'createdAt': -1
+          }
+        }
+          // status: 1,
+          // isDeleted: 0
+        ]
+
+
+      // get details 
+      return await Model.aggregate(pipeline).then((result) => {
+        // console.log(result)
+        if (result && !_.isEmpty(result)) {
+          // return {
+          //   success: true,
+          //   data: res
+          // }
+
+          const json2csv = new Parser()
+
+          try {
+            // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+            const csv = json2csv.parse(result)
+            res.attachment(`Picking allocation report-${moment(startDate).format('DD:MM:YY')}-${moment(endDate).format('DD:MM:YY')}.csv`)
+            res.status(200).send(csv)
+          } catch (error) {
+            console.log('error:', error.message)
+            res.status(500).send(error.message)
+          }
+
+
+          // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+        } else {
+          error('Error Searching Data in invoice DB!');
+          // return {
+          //   success: false
+          // }
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.invoicesDetailsNotFound
+          );
+        }
+      }).catch(err => {
+        error(err);
+        // return {
+        //   success: false,
+        //   error: err
+        // }
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.invoicesDetailsNotFound
+        );
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+      // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+  getComprehensiveSalesOrderReports = async (req, res, next) => {
+
+    try {
+
+      info('Getting the todays Order !!!');
+
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+
+        startDate = req.query.startDate || moment().subtract(100, 'days').set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        endDate = req.query.endDate || moment().set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate(),
+        type = req.params.type,
+        // plant = req.body.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1;
+      console.log(startDate, endDate)
+
+
+      if (startDate && !_.isEmpty(startDate)) {
+
+
+        startDate = moment(startDate, "DD-MM-YYYY").set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+
+      }
+
+      if (endDate && !_.isEmpty(endDate)) {
+
+
+        endDate = moment(endDate, "DD-MM-YYYY").set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0
+        }).toDate();
+
+
+      }
+      info('Get Invoices !');
+
+      let pipeline = [{
+        $match: {
+          'createdAt': { $gte: startDate, $lte: endDate },
+          'isStartedPicking': false,
+          'isItemPicked': false,
+
+
+
+
+        }
+      },
+      {
+        $lookup: {
+          from: 'invoicemasters',
+          let: {
+            id: '$invoiceDetail.invoice.invoiceDbId'
+          },
+          pipeline: [{
+            $match: {
+              $expr: {
+                $eq: ['$$id', '$_id']
+              }
+
+            }
+
+          }
+          ],
+          as: "invoice"
+
+        }
+      }
+        , {
+        $project: {
+
+          'state': 1,
+          'remarks': 1,
+          'shipping_point': 1,
+          'delivery_no': 1,
+          'invoice Number':{ $first: '$invoice.invoiceDetails.invoiceNo'},
+          
+          'delivery_date': 1,
+          'picking Date': {$dateToString: { format: "%Y-%m-%d", date:'$pickingDate'  } },
+          'picking Time':{$dateToString: { format: "%H:%M", date: '$pickingDate'  } },
+          'Invoice Date': {$dateToString: { format: "%Y-%m-%d", date: { $first: '$invoice.invoiceDetails.invoiceDate' }} },
+          'Invoice Time':{$dateToString: { format: "%H:%M", date: { $first:  '$invoice.invoiceDetails.invoiceDate' } }},
+          'sales_order_no': 1,
+          'salesOrderId': 1,
+          'pickerBoyId': 1,
+          'createdBy': 1,
+          
           'createdAt': 1,
           'updatedAt': 1,
 

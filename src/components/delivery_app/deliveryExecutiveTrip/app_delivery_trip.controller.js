@@ -15,8 +15,14 @@ const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model');
 const tripSalesOrders = require('../../MyTrip/assign_trip/model/salesOrder.model');
 const requestHttp = require('request');
 var async = require('async');
+<<<<<<< HEAD
+import { type } from 'ramda';
+import { v4 as uuidv4 } from 'uuid';
+import securityGenerateMonthDaysAndOtherMetaData from '../../../hooks/app/securityGenerateMonthDaysAndOtherMetaData';
+=======
 // import { type } from 'ramda';
 // import { v4 as uuidv4 } from 'uuid';
+>>>>>>> 45c24760a213e8cd597c867a47958312e57c7b9a
 const gpnModel = require('./model/gpn_model')
 
 
@@ -77,6 +83,7 @@ class DeliveryExecutivetrip extends BaseController {
    
     ,{
       $project:{
+<<<<<<< HEAD
        
         deliveryDetails:0,
         vehicleId:0,
@@ -93,8 +100,31 @@ class DeliveryExecutivetrip extends BaseController {
         isCompleteDeleiveryDone: 0,
         isPartialDeliveryDone: 0,
         returnedStockDetails: 0,
+=======
+      //  _id:0,
+      //   deliveryDetails:0,
+      //   vehicleId:0,
+      //   checkedInId:0,
+      //   rateCategoryId:0,
+        totalSpotSales:{ $cond: { if: { $isArray: "$spotSalesId" }, then: { $size: "$spotSalesId" }, else: "NA" } },
+        totalAssetTransfer:{ $cond: { if: { $isArray: "$assetTransfer" }, then: { $size: "$assetTransfer" }, else: "NA" } },
+        totalStockTransfer:{ $cond: { if: { $isArray: "$stockTransferIds" }, then: { $size: "$stockTransferIds" }, else: "NA" } },
+        totalSalesOrder:{ $cond: { if: { $isArray: "$salesOrderTripIds" }, then: { $size: "$salesOrderTripIds" }, else: "NA" } },
+        tripId:1,
+        tripIdAlias:1
+        // deliveryExecutiveId:0,
+        // invoice_db_id:0,
+        // invoiceNo:0,
+        // approvedBySecurityGuard: 0,
+        // isTripStarted: 0,
+        // isActive: 0,
+        // tripFinished: 0,
+        // isCompleteDeleiveryDone: 0,
+        // isPartialDeliveryDone: 0,
+        // returnedStockDetails: 0,
+>>>>>>> d2edf74c025f9ac3feb5b3126339cebfa146433a
       
-        __v:0
+        // __v:0
 
 
 
@@ -1047,7 +1077,7 @@ getHistoryByOrderType = async (req,res,next)=>{
 
   let pipeline = [{
     $match:{$and:[
-      {'deliveryExecutiveId':deliveryExecutiveId},
+      {'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
     {
       'isActive':0
     },
@@ -1299,7 +1329,7 @@ getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
   
     $match:{$and:[{
       
-        'deliveryExecutiveId':deliveryExecutiveId
+        'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
     },
     {'createdAt':{$lt:dateToday}
   }
@@ -1553,7 +1583,7 @@ getPendingTrip = async(req,res,next)=>{
 
   let pipeline = [{
     $match:{$and:[
-      {'deliveryExecutiveId':deliveryExecutiveId},
+      {'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
     {
       'isActive':0
     },
@@ -1640,6 +1670,11 @@ getPendingTrip = async(req,res,next)=>{
 
 
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> d2edf74c025f9ac3feb5b3126339cebfa146433a
 }
 
 

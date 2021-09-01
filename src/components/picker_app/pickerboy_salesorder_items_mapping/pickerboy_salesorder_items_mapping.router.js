@@ -45,7 +45,9 @@ const {
   isInvoiceAlreadyGenerated,
   getAvailableStock,
   checkStockAvailability,
-  isClearBucket
+  isClearBucket,
+  getInvoiceNumber,
+  isInvoiceAlreadyFetched
 
 } = require('../../../hooks/app');
 
@@ -87,6 +89,21 @@ function userRoutes() {
                 // updateSapDeliveryDetail,
       generateInvoice, //generate invoice for the delivery number
       fetchInvoice, //fetch generated invoice from sap
+      updateInvoiceSAPDataToDB, //save the invoice detail to application db
+      ctrl.generateInvV2
+      // ctrl.getPickedItemByPickerOrderId
+
+    );
+
+
+    closed.route('/fetch/invoiceV2/:pickerBoyOrderMappingId').get(  //change to patch
+      // [joiInvValidate],
+      isInvoiceAlreadyFetched,
+     
+      
+      getInvoiceNumber,
+      fetchInvoice, //fetch generated invoice from sap
+      getPickedItemDetail,
       updateInvoiceSAPDataToDB, //save the invoice detail to application db
       ctrl.generateInvV2
       // ctrl.getPickedItemByPickerOrderId
