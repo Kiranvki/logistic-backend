@@ -1,3 +1,5 @@
+const isActiveDelivery = require('./isActiveDelivery');
+
 module.exports = {
   // On boarding hooks 
   checkWhetherAValidPickerCrediantial: require('./checkWhetherAValidPickerCrediantial'),
@@ -83,6 +85,7 @@ module.exports = {
   isValidPickingDate:require('./isValidPickingDate'),
   getAvailableStock:require('./getAvailableStock'),
   checkStockAvailability:require('./checkStockAvailability'),
-  isClearBucket:require('./isClearBucket')
+  isClearBucket:require('./isClearBucket'),
+  isActiveDelivery:require('./isActiveDelivery')
 
 }

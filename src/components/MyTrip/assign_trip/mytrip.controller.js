@@ -1063,7 +1063,49 @@ class MyTrip extends BaseController {
         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
       }
     }
+
+
+
+    // fetch detail if trip active
+activeTripDetail = async (deliveryExecutiveId) => {
+  try {
+    info('Get Trip detail  details !');
+
+    
+
+    // get details 
+    return await tripModel.findOne({
+      'deliveryExecutiveId': mongoose.Types.ObjectId(deliveryExecutiveId),
+      'isTripStarted':1,
+      'isActive':1
+    }).lean().then((res) => {
+      if (res && !_.isEmpty(res)) {
+        return {
+          success: true,
+          data: res
+        }
+      } else {
+        error('Error Searching Data in trip DB!');
+        return {
+          success: false
+        }
+      }
+    }).catch(err => {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    });
+  
+
+} catch (err) {
+  error(err);
+  //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+}
+  
 };
+}
 
 module.exports = new MyTrip();
 
