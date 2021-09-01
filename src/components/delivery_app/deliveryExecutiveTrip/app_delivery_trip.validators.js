@@ -129,8 +129,19 @@ const schemas = {
                comments:Joi.string().trim().label('Comments').required().min(30)
             })
 
-          ).required()
-    })
+          ).required(),
+         
+    }),
+
+    joiTripId: Joi.object().keys({
+      
+      tripId: Joi.number().label('Trip Id').required()
+    }).required(),
+
+    joiSoId: Joi.object().keys({
+      
+      salesorderId: Joi.string().trim().label('sales order Id').min(20)
+    }).required(),
 
 };
 
@@ -325,6 +336,45 @@ let requestObj = {
 }
 
   schema.validate(requestObj, option).then(() => {
+      next();
+      // if error occured
+  }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+          error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+  });
+},
+joiTripId: (req, res, next) => {
+  // getting the schemas 
+  let schema = schemas.joiTripId;
+  let option = options.basic;
+  
+  // validating the schema 
+  schema.validate(req.params, option).then(() => {
+      next();
+      // if error occured
+  }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+          error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+  });
+},
+
+joiSoId: (req, res, next) => {
+  // getting the schemas 
+  let schema = schemas.joiSoId;
+  let option = options.basic;
+  
+  // validating the schema 
+  schema.validate(req.params, option).then(() => {
       next();
       // if error occured
   }).catch((err) => {
