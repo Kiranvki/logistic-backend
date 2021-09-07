@@ -599,10 +599,11 @@ class pickerSalesOrderMappingController extends BaseController {
 
       let pipeline = [{
         $match: {
-          'invoiceDetail.isInvoice': false,
+          
           'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
           'state': 1,
           $or: [
+            
             {
               'isSapError':
 

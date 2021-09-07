@@ -17,7 +17,7 @@ const {
 module.exports = async (req,res,next) => {
     let obj;
   try {
-    info(`Getting Invoice from SAP!`);
+    info(`Fetching Invoice from SAP!`);
     // console.log(req.body.invoice_detail['data']['invoice_no'])
 
     // console.log('generate delivery',  req.body.orderDetail)
@@ -28,7 +28,7 @@ module.exports = async (req,res,next) => {
     // let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';
     let url = process.env.sapInvoiceFetch;
 
-    console.log('Hitting SAP server for Generating the Invoice *> ', url);
+    console.log('Hitting SAP server for Fetching the Invoice *> ', url);
      obj = {
         "request": {
           
@@ -92,7 +92,7 @@ module.exports = async (req,res,next) => {
         
         // checking whether the user is authentic
         if (res.status === 200) {
-          info('Invoice Generated Successfully !');
+          info('Invoice Fetched Successfully !');
           console.log('invoice data',res.body.response)
           return {
               
@@ -155,6 +155,12 @@ console.log('sap invoice',obj)
   }else{
     //  Message pending
     //req.body.delivery_detail['error']
+    if(req.body.invoice_detail==undefined){
+      return Response.errors(req, res, StatusCodes.HTTP_FOUND, JSON.stringify({status:true,invoiceId:req.body.invoice_detail['data']['invoice_no'],invoiceStatus:'fetchfailed',"isInvoiceFetch":true}));
+    }
+      
+      // return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, JSON.stringify({status:true,invoiceId:req.body.invoice_detail['data']['invoice_no'],invoiceStatus:'fetchfailed',"isInvoiceFetch":true}));
+    // }
     return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.pickerBoySalesOrderFetchingInvoiceFailed);
   }
 };
