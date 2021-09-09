@@ -1745,7 +1745,7 @@ class pickerboySalesOrderMappingController extends BaseController {
 
               }
             },
-           
+           //DOCUMENT TYPE FILTER IS ADDED BY MAYANK.THEREFORE REMOVE FROM NODE SIDE
             // {'sales_document_type':{$ne:'ZBRD'}},
             // {'sales_document_type':{$ne:'ZRET'}},
             // {'sales_document_type':{$ne:'ZREB'}},
