@@ -1827,6 +1827,13 @@ class pickerboySalesOrderMappingController extends BaseController {
   
                   'overall_status': { $exists: false }
                 }]
+              },
+              {
+                $or: [{ 'orderCancelStatus': { $exists: true, $eq: 0 } },
+                 {
+  
+                  'orderCancelStatus': { $exists: false }
+                }]
               }],
 
 
@@ -1979,6 +1986,13 @@ class pickerboySalesOrderMappingController extends BaseController {
           $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
 
             'fulfillmentStatus': { $exists: false }
+          }]
+        },
+        {
+          $or: [{ 'orderCancelStatus': { $exists: true, $eq: 0 } },
+           {
+
+            'orderCancelStatus': { $exists: false }
           }]
         },
 
