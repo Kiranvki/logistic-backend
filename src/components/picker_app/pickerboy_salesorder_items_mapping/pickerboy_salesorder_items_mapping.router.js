@@ -47,7 +47,8 @@ const {
   checkStockAvailability,
   isClearBucket,
   getInvoiceNumber,
-  isInvoiceAlreadyFetched
+  isInvoiceAlreadyFetched,
+  invoiceFetchCounter
 
 } = require('../../../hooks/app');
 
@@ -105,6 +106,7 @@ function userRoutes() {
       fetchInvoice, //fetch generated invoice from sap
       getPickedItemDetail,
       updateInvoiceSAPDataToDB, //save the invoice detail to application db
+      invoiceFetchCounter,
       ctrl.generateInvV2
       // ctrl.getPickedItemByPickerOrderId
 

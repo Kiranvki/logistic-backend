@@ -132,6 +132,14 @@ const pickerBoyOrderMappingSchema = new Schema({
       default: false  //true->restrict picker boy
 
     },
+    'isManualFetch':{
+      type: Boolean,
+      default: false
+    },
+    'fetchCount':{
+      type: Number,
+      default: 0
+    },
     'isInvoice': {
       type: Boolean,
       default: false
@@ -249,6 +257,15 @@ class PickerBoyOrderMappingClass {
 
 
     let orderPickerBoyMappingData = await this.findOneAndUpdate({ '_id': pickerBoyOrderMappingId }, { $set: { 'invoiceDetail.isInvoice': invObject.isInvoice, 'invoiceDetail.invoice.invoiceId': invObject.invoice_no, 'invoiceDetail.invoice.invoiceDbId': invObject.invoiceId, 'isItemPicked': false, 'isStartedPicking': false, 'customerName': invObject.customerName, 'state': 3 } });
+    return orderPickerBoyMappingData;
+
+  }
+
+
+  static async updateInvoiceStatus(pickerBoyOrderMappingId) {
+   
+  
+    let orderPickerBoyMappingData = await this.findOneAndUpdate({ '_id': mongoose.Types.ObjectId(pickerBoyOrderMappingId) }, { $set: { 'invoiceDetail.isManualFetch': true},  $inc:{'invoiceDetail.fetchCount':1}} );
     return orderPickerBoyMappingData;
 
   }
