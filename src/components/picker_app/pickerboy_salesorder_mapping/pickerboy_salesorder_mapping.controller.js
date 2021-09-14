@@ -1462,7 +1462,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
         searchKey = req.query.searchKey || '',
-        sortBy = req.query.sortBy || 'req_del_date',
+        sortBy = req.query.sortBy || '_id',//'req_del_date',
         sortingArray = {};
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
