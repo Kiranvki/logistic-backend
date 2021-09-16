@@ -601,7 +601,7 @@ class pickerSalesOrderMappingController extends BaseController {
         $match: {
           
           'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
-          'state': 1,
+          'state': 2, //state 2 for delivery
           $or: [
             
             {

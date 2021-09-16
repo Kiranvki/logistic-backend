@@ -280,8 +280,8 @@ class areaSalesManagerController extends BaseController {
         // 'isPacked': 0,
         'fulfillmentStatus': 1,
         'plant':  plant.toString() ,
-        'isDeleted':0,
-        'status':1,
+        // 'isDeleted':0,
+        // 'status':1,
         // 'locationId': parseInt(locationId),
         // 'cityId': cityId,
 
