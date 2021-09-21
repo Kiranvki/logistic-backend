@@ -54,6 +54,18 @@ const invoiceMaster = new Schema({
   customerName: {
     type: String
   },
+  irn_no: {
+    type:String
+  },
+  signed_qrcode:  {
+    type:String
+  },
+  acknowledgement_number:  {
+    type:String
+  },
+  irn_status:  {
+    type:String
+  },
 
   'companyDetails':
   {

@@ -2188,12 +2188,18 @@ if(isUpdatedfulfillmentStatus){
       info('Get saleOrderId  details !');
 
       let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
-      let yasterdayDate = moment(new Date()).subtract(3, 'days').format('YYYY-MM-DD')
+      let yasterdayDate = moment(new Date()).subtract(6, 'days').format('YYYY-MM-DD')
 
       // get details 
       return await Model.findOne({
         '_id': mongoose.Types.ObjectId(saleOrderId),
-        'req_del_date':{$gte:yasterdayDate,$lte:startOfTheDay}
+        'order_date':{$gte:yasterdayDate,$lte:startOfTheDay},
+        'req_del_date':{
+          $lte:startOfTheDay
+        }
+        // orderCancelStatus:{
+        //   $lt:1
+        // }
         // status: 1,
         // isDeleted: 0
       }).lean().then((res) => {
