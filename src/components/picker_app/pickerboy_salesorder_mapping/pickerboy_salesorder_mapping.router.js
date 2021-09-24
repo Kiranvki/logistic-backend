@@ -185,6 +185,22 @@ function userRoutes() {
     );
 
 
+    open.route('/report/pickingallocation').get(
+
+      // verifyAppToken,   // verify app token
+      ctrl.getPickingAllocationReport
+
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
+
+
+    open.route('/report/comprehensive').get(
+
+      // verifyAppToken,   // verify app token
+      ctrl.getComprehensiveSalesOrderReports
+
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
 
 
 

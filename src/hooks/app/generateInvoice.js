@@ -183,10 +183,11 @@ module.exports = async (req, res, next) => {
       '_id': req.params.pickerBoyOrderMappingId
     }, {
       $set: {
-        
+        'invoiceDetail.invoice.invoiceId':req.body.invoice_detail['data']['invoice_no'],
         'isSapError': 'INVS', //INVE->invoice Success,
         'isItemPicked':false,
-        'isStartedPicking':false
+        'isStartedPicking':false,
+        'invoiceDetail.isInvoice':true
 
       },$push:{
         'invoice_response': JSON.stringify(req.body.invoice_detail),

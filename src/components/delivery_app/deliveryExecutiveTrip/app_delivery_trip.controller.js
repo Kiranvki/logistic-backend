@@ -17,6 +17,7 @@ const requestHttp = require('request');
 var async = require('async');
 import { type } from 'ramda';
 import { v4 as uuidv4 } from 'uuid';
+import securityGenerateMonthDaysAndOtherMetaData from '../../../hooks/app/securityGenerateMonthDaysAndOtherMetaData';
 const gpnModel = require('./model/gpn_model')
 
 
@@ -48,8 +49,8 @@ class DeliveryExecutivetrip extends BaseController {
     let pageNumber = req.query.page;
 
     let dateToday= moment(Date.now()).set({
-      h: 24,
-      m: 59,
+      h: 0,
+      m: 0,
       s: 0,
       millisecond: 0
     }).toDate();
@@ -76,24 +77,29 @@ class DeliveryExecutivetrip extends BaseController {
    
     ,{
       $project:{
-       _id:0,
-        deliveryDetails:0,
-        vehicleId:0,
-        checkedInId:0,
-        rateCategoryId:0,
-     
-        deliveryExecutiveId:0,
-        invoice_db_id:0,
-        invoiceNo:0,
-        approvedBySecurityGuard: 0,
-        isTripStarted: 0,
-        isActive: 0,
-        tripFinished: 0,
-        isCompleteDeleiveryDone: 0,
-        isPartialDeliveryDone: 0,
-        returnedStockDetails: 0,
+      //  _id:0,
+      //   deliveryDetails:0,
+      //   vehicleId:0,
+      //   checkedInId:0,
+      //   rateCategoryId:0,
+        totalSpotSales:{ $cond: { if: { $isArray: "$spotSalesId" }, then: { $size: "$spotSalesId" }, else: "NA" } },
+        totalAssetTransfer:{ $cond: { if: { $isArray: "$assetTransfer" }, then: { $size: "$assetTransfer" }, else: "NA" } },
+        totalStockTransfer:{ $cond: { if: { $isArray: "$stockTransferIds" }, then: { $size: "$stockTransferIds" }, else: "NA" } },
+        totalSalesOrder:{ $cond: { if: { $isArray: "$salesOrderTripIds" }, then: { $size: "$salesOrderTripIds" }, else: "NA" } },
+        tripId:1,
+        tripIdAlias:1
+        // deliveryExecutiveId:0,
+        // invoice_db_id:0,
+        // invoiceNo:0,
+        // approvedBySecurityGuard: 0,
+        // isTripStarted: 0,
+        // isActive: 0,
+        // tripFinished: 0,
+        // isCompleteDeleiveryDone: 0,
+        // isPartialDeliveryDone: 0,
+        // returnedStockDetails: 0,
       
-        __v:0
+        // __v:0
 
 
 
@@ -1047,7 +1053,7 @@ getHistoryByOrderType = async (req,res,next)=>{
 
   let pipeline = [{
     $match:{$and:[
-      {'deliveryExecutiveId':deliveryExecutiveId},
+      {'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
     {
       'isActive':0
     },
@@ -1299,7 +1305,7 @@ getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
   
     $match:{$and:[{
       
-        'deliveryExecutiveId':deliveryExecutiveId
+        'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
     },
     {'createdAt':{$lt:dateToday}
   }
@@ -1438,7 +1444,7 @@ getPendingTrip = async(req,res,next)=>{
 
   let pipeline = [{
     $match:{$and:[
-      {'deliveryExecutiveId':deliveryExecutiveId},
+      {'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)},
     {
       'isActive':0
     },
@@ -1519,6 +1525,11 @@ getPendingTrip = async(req,res,next)=>{
   // success(req, res, status, data = null, message = 'success')
 
 }
+
+
+
+
+
 
 
 

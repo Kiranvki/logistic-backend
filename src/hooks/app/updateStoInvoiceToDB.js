@@ -47,11 +47,12 @@ module.exports = async (req, res, next) => {
       total_tax = 0,
       total_discount = 0,
       total_net_value = 0,
-      shippingPlantName = warehouseCtrl.getName(deliveryDetail['shipping_plant']),
-      plantName = warehouseCtrl.getName(deliveryDetail['plant'])
+      shippingPlantName = await warehouseCtrl.getName(deliveryDetail['shipping_plant']),
+      plantName = await warehouseCtrl.getName(deliveryDetail['plant']),
     
       fullfiled = deliveryDetail['fullfilment'] || 4,//completely fullfiled
       total_weight = 0;
+      
     let customerDataFromMicroService = await getCustomerDetails(invoiceDetail['sold_to_party']);
     const invoiceItemSuppliedArr = []
     invoiceDetail['item'].forEach((data) => {
