@@ -1,19 +1,28 @@
 // auth
 const ctrl = require("./vehicleAttendance.controller");
 const { verifySecurityAppToken } = require("../../../hooks/app/Auth");
-const { joiVehicleList } = require('./vehicleAttendance.validator');
-const {isAlreadyCheckedIn, isVehicleCheckedIn} = require('../../../hooks')
-
+const { joiVehicleList } = require("./vehicleAttendance.validator");
+const {
+  isAlreadyCheckedIn,
+  isVehicleCheckedIn,
+  getAllCheckInVehicleDetails,
+} = require("../../../hooks");
 
 // exporting the vehicle routes
 function vehicleRoutes() {
   //open, closed
   return (open, closed) => {
- 
     closed.route("/vehicle/vehicle-list").get(
       joiVehicleList,
       // verifySecurityAppToken, // verify app user token
       ctrl.getAllVehicleListToCheckIn // controller function
+    );
+
+    closed.route("/vehicle/vehicle-waiting-list").get(
+      joiVehicleList,
+      // verifySecurityAppToken, // verify app user token
+      getAllCheckInVehicleDetails,
+      ctrl.checkedInVehicles // controller function
     );
 
     //check-in a vehicle
