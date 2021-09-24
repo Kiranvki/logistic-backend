@@ -68,7 +68,7 @@ module.exports = async (mobileNumber, otpTemplate, otp, expiryTime) => {
         .then((res) => {
           return {
             success: true,
-            data: JSON.parse(res.text)
+            data:{'request_id':res.text} //JSON.parse(res.text)
           }
           // catch any runtime error
         }, (err) => {
