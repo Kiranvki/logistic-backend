@@ -455,7 +455,7 @@ class vehicleInfoController extends BaseController {
       );
     }
   };
-  
+
   // get all Vehicle list which are checked in
   checkedInVehicles = async (req, res) => {
     try {
@@ -494,7 +494,7 @@ class vehicleInfoController extends BaseController {
         })
         .toDate();
 
-      // get the list of asm in the allocated city
+      // get the list of already checkedin Vehicles
       let searchObject = {
         isDeleted: 0,
         _id: {
@@ -528,178 +528,375 @@ class vehicleInfoController extends BaseController {
       });
 
       // get the Vehicle list
-      let vehicleList = await masterModel.aggregate([
-        {
-          $match: {
-            ...searchObject,
-          },
-        },
-        {
-          $sort: sortingArray,
-        },
-        {
-          $skip: skip,
-        },
-        {
-          $limit: pageSize,
-        },
-        {
-          $lookup: {
-            from: "ratecategorytransportervehiclemappings",
-            let: {
-              id: "$_id",
+      let vehicleList = await masterModel
+        .aggregate([
+          {
+            $match: {
+              ...searchObject,
             },
-            pipeline: [
-              {
-                $match: {
-                  // 'status': 1,
-                  isDeleted: 0,
-                  $expr: {
-                    $eq: ["$vehicleId", "$$id"],
-                  },
-                },
-              },
-              {
-                $project: {
-                  _id: 1,
-                  status: 1,
-                  isDeleted: 1,
-                  vehicleId: 1,
-                  transporterId: 1,
-                  rateCategoryId: 1,
-                },
-              },
-              {
-                $lookup: {
-                  from: "transporters",
-                  localField: "transporterId",
-                  foreignField: "_id",
-                  as: "transporter",
-                },
-              },
-              {
-                $unwind: {
-                  path: "$transporter",
-                  preserveNullAndEmptyArrays: true,
-                },
-              },
-              {
-                $lookup: {
-                  from: "ratecategorymodels",
-                  localField: "rateCategoryId",
-                  foreignField: "_id",
-                  as: "rateCategory",
-                },
-              },
-              {
-                $unwind: {
-                  path: "$rateCategory",
-                  preserveNullAndEmptyArrays: true,
-                },
-              },
-            ],
-            as: "transporterRateCategoryDetails",
           },
-        },
-        {
-          $unwind: {
-            path: "$transporterRateCategoryDetails",
-            preserveNullAndEmptyArrays: true,
+          {
+            $sort: sortingArray,
           },
-        },
-        {
-          $lookup: {
-            from: "vehicleattendances",
-            let: {
-              id: "$_id",
-            },
-            pipeline: [
-              {
-                $match: {
-                  // 'status': 1,
-                  isDeleted: 0,
-                  $expr: {
-                    $eq: ["$vehicleId", "$$id"],
-                  },
-                  dateOfAttendance: {
-                    $gte: startOfTheDay,
-                    $lte: endOfTheDay,
-                  },
-                },
+          {
+            $skip: skip,
+          },
+          {
+            $limit: pageSize,
+          },
+          {
+            $lookup: {
+              from: "ratecategorytransportervehiclemappings",
+              let: {
+                id: "$_id",
               },
-              {
-                $project: {
-                  //  '_id': 0,
-                  attendanceLog: 1,
-                  vehicleId: 1,
-                  dateOfAttendance: {
-                    $dateToString: {
-                      format: "%m-%d-%Y",
-                      date: "$dateOfAttendance",
-                      timezone: "+05:30",
+              pipeline: [
+                {
+                  $match: {
+                    // 'status': 1,
+                    isDeleted: 0,
+                    $expr: {
+                      $eq: ["$vehicleId", "$$id"],
                     },
                   },
                 },
-              },
-
-              { $unwind: "$attendanceLog" },
-              { $sort: { "attendanceLog.checkInDate": 1 } },
-              {
-                $group: {
-                  _id: "$_id",
-                  attendanceLog: { $push: "$attendanceLog" },
+                {
+                  $project: {
+                    _id: 1,
+                    status: 1,
+                    isDeleted: 1,
+                    vehicleId: 1,
+                    transporterId: 1,
+                    rateCategoryId: 1,
+                  },
                 },
+                {
+                  $lookup: {
+                    from: "transporters",
+                    localField: "transporterId",
+                    foreignField: "_id",
+                    as: "transporter",
+                  },
+                },
+                {
+                  $unwind: {
+                    path: "$transporter",
+                    preserveNullAndEmptyArrays: true,
+                  },
+                },
+                {
+                  $lookup: {
+                    from: "ratecategorymodels",
+                    localField: "rateCategoryId",
+                    foreignField: "_id",
+                    as: "rateCategory",
+                  },
+                },
+                {
+                  $unwind: {
+                    path: "$rateCategory",
+                    preserveNullAndEmptyArrays: true,
+                  },
+                },
+              ],
+              as: "transporterRateCategoryDetails",
+            },
+          },
+          {
+            $unwind: {
+              path: "$transporterRateCategoryDetails",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: "vehicleattendances",
+              let: {
+                id: "$_id",
               },
-              //   { $project: { 'attendanceLog': '$attendanceLog' } },
-            ],
-            as: "attendanceDetails",
-          },
-        },
-        {
-          $unwind: {
-            path: "$attendanceDetails",
-            preserveNullAndEmptyArrays: true,
-          },
-        },
+              pipeline: [
+                {
+                  $match: {
+                    // 'status': 1,
+                    isDeleted: 0,
+                    $expr: {
+                      $eq: ["$vehicleId", "$$id"],
+                    },
+                    dateOfAttendance: {
+                      $gte: startOfTheDay,
+                      $lte: endOfTheDay,
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    //  '_id': 0,
+                    attendanceLog: 1,
+                    vehicleId: 1,
+                    dateOfAttendance: {
+                      $dateToString: {
+                        format: "%m-%d-%Y",
+                        date: "$dateOfAttendance",
+                        timezone: "+05:30",
+                      },
+                    },
+                  },
+                },
 
-        // { $unwind: '$attendanceDetails.attendanceLog' },
-        // { $sort: { 'attendanceDetails.attendanceLog.checkInDate': 1 } },
-        // { $group: { _id: '$attendanceDetails._id', 'attendanceLog': { $push: '$attendanceDetails.attendanceLog' } } },
-        // // { $project: { 'attendanceDetails.attendanceLog': '$attendanceLog' } },
-
-        {
-          $project: {
-            _id: 1,
-            regNumber: 1,
-            vehicleType: 1,
-            vehicleModel: 1,
-            tonnage: 1,
-            status: 1,
-            'rateCategoryName': '$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName',
-            // rateCategoryDetails: "$transporterRateCategoryDetails.rateCategory",
-            // attendanceDetails: 1,
-            'attendanceLog': '$attendanceDetails.attendanceLog',
-            // transporterId: "$transporterRateCategoryDetails.transporter._id",
-            transporterName:
-              "$transporterRateCategoryDetails.transporter.vehicleDetails.name",
+                { $unwind: "$attendanceLog" },
+                { $sort: { "attendanceLog.checkInDate": 1 } },
+                {
+                  $group: {
+                    _id: "$_id",
+                    attendanceLog: { $push: "$attendanceLog" },
+                  },
+                },
+                //   { $project: { 'attendanceLog': '$attendanceLog' } },
+              ],
+              as: "attendanceDetails",
+            },
           },
-        },
-      ]).allowDiskUse(true);
+          {
+            $unwind: {
+              path: "$attendanceDetails",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+
+          { $unwind: "$attendanceDetails.attendanceLog" },
+          // { $sort: { 'attendanceDetails.attendanceLog.checkInDate': 1 } },
+          // { $group: { _id: '$attendanceDetails._id', 'attendanceLog': { $push: '$attendanceDetails.attendanceLog' } } },
+          // // { $project: { 'attendanceDetails.attendanceLog': '$attendanceLog' } },
+
+          {
+            $project: {
+              _id: 1,
+              regNumber: 1,
+              transporterName:
+                "$transporterRateCategoryDetails.transporter.vehicleDetails.name",
+              driverName: "$attendanceDetails.attendanceLog.driverName",
+              checkInTimeInMins:
+                "$attendanceDetails.attendanceLog.checkInTimeInMins",
+              // vehicleType: 1,
+              // rateCategoryName:
+              //   "$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName",
+              // vehicleModel: 1,
+              // tonnage: 1,
+              status: 1,
+              // rateCategoryDetails: "$transporterRateCategoryDetails.rateCategory",
+              // attendanceDetails: 1,
+              // transporterId: "$transporterRateCategoryDetails.transporter._id",
+            },
+          },
+        ])
+        .allowDiskUse(true);
 
       // success
-      return this.success(
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: vehicleList,
+        pageMeta: {
+          skip: parseInt(skip),
+          pageSize: pageSize,
+          total: totalVehicle,
+        },
+      });
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
         req,
         res,
-        this.status.HTTP_OK,
-        {
-          results: vehicleList,
-          pageMeta: {
-            skip: parseInt(skip),
-            pageSize: pageSize,
-            total: totalVehicle,
-          },
-        }
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
       );
+    }
+  };
+
+  checkedInVehicleDetais = async (req, res) => {
+    try {
+      info("Get the vehicle!");
+      // get the query params
+      let { vehicleId } = req.params;
+      let startOfTheDay = moment()
+        .set({
+          h: 0,
+          m: 0,
+          s: 0,
+          millisecond: 0,
+        })
+        .toDate();
+
+      // getting the end of the day
+      let endOfTheDay = moment()
+        .set({
+          h: 24,
+          m: 24,
+          s: 0,
+          millisecond: 0,
+        })
+        .toDate();
+
+      // get the Vehicle list
+      let vehicleList = await masterModel
+        .aggregate([
+          {
+            $match: {
+              isDeleted: 0,
+              _id: mongoose.Types.ObjectId(vehicleId),
+            },
+          },
+          {
+            $lookup: {
+              from: "ratecategorytransportervehiclemappings",
+              let: {
+                id: "$_id",
+              },
+              pipeline: [
+                {
+                  $match: {
+                    // 'status': 1,
+                    isDeleted: 0,
+                    $expr: {
+                      $eq: ["$vehicleId", "$$id"],
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    _id: 1,
+                    status: 1,
+                    isDeleted: 1,
+                    vehicleId: 1,
+                    transporterId: 1,
+                    rateCategoryId: 1,
+                  },
+                },
+                {
+                  $lookup: {
+                    from: "transporters",
+                    localField: "transporterId",
+                    foreignField: "_id",
+                    as: "transporter",
+                  },
+                },
+                {
+                  $unwind: {
+                    path: "$transporter",
+                    preserveNullAndEmptyArrays: true,
+                  },
+                },
+                {
+                  $lookup: {
+                    from: "ratecategorymodels",
+                    localField: "rateCategoryId",
+                    foreignField: "_id",
+                    as: "rateCategory",
+                  },
+                },
+                {
+                  $unwind: {
+                    path: "$rateCategory",
+                    preserveNullAndEmptyArrays: true,
+                  },
+                },
+              ],
+              as: "transporterRateCategoryDetails",
+            },
+          },
+          {
+            $unwind: {
+              path: "$transporterRateCategoryDetails",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+          {
+            $lookup: {
+              from: "vehicleattendances",
+              let: {
+                id: "$_id",
+              },
+              pipeline: [
+                {
+                  $match: {
+                    // 'status': 1,
+                    isDeleted: 0,
+                    $expr: {
+                      $eq: ["$vehicleId", "$$id"],
+                    },
+                    dateOfAttendance: {
+                      $gte: startOfTheDay,
+                      $lte: endOfTheDay,
+                    },
+                  },
+                },
+                {
+                  $project: {
+                    //  '_id': 0,
+                    attendanceLog: 1,
+                    vehicleId: 1,
+                    dateOfAttendance: {
+                      $dateToString: {
+                        format: "%m-%d-%Y",
+                        date: "$dateOfAttendance",
+                        timezone: "+05:30",
+                      },
+                    },
+                  },
+                },
+
+                { $unwind: "$attendanceLog" },
+                { $sort: { "attendanceLog.checkInDate": 1 } },
+                {
+                  $group: {
+                    _id: "$_id",
+                    attendanceLog: { $push: "$attendanceLog" },
+                  },
+                },
+                //   { $project: { 'attendanceLog': '$attendanceLog' } },
+              ],
+              as: "attendanceDetails",
+            },
+          },
+          {
+            $unwind: {
+              path: "$attendanceDetails",
+              preserveNullAndEmptyArrays: true,
+            },
+          },
+
+          { $unwind: "$attendanceDetails.attendanceLog" },
+          // { $sort: { 'attendanceDetails.attendanceLog.checkInDate': 1 } },
+          // { $group: { _id: '$attendanceDetails._id', 'attendanceLog': { $push: '$attendanceDetails.attendanceLog' } } },
+          // // { $project: { 'attendanceDetails.attendanceLog': '$attendanceLog' } },
+
+          {
+            $project: {
+              _id: 1,
+              regNumber: 1,
+              transporterName:
+                "$transporterRateCategoryDetails.transporter.vehicleDetails.name",
+              vehicleType: 1,
+              rateCategoryName:
+                "$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName",
+              // vehicleModel: 1,
+              tonnage: 1,
+              driverName: "$attendanceDetails.attendanceLog.driverName",
+              status: 1,
+              // rateCategoryDetails: "$transporterRateCategoryDetails.rateCategory",
+              // attendanceDetails: 1,
+              checkInTimeInMins:
+                "$attendanceDetails.attendanceLog.checkInTimeInMins",
+              // transporterId: "$transporterRateCategoryDetails.transporter._id",
+            },
+          },
+        ])
+        .allowDiskUse(true);
+
+      // success
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: vehicleList,
+      });
 
       // catch any runtime error
     } catch (err) {
