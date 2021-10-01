@@ -85,7 +85,7 @@ class DeliveryExecutivetrip extends BaseController {
         totalSpotSales:{ $cond: { if: { $isArray: "$spotSalesId" }, then: { $size: "$spotSalesId" }, else: "NA" } },
         totalAssetTransfer:{ $cond: { if: { $isArray: "$assetTransfer" }, then: { $size: "$assetTransfer" }, else: "NA" } },
         totalStockTransfer:{ $cond: { if: { $isArray: "$stockTransferIds" }, then: { $size: "$stockTransferIds" }, else: "NA" } },
-        totalSalesOrder:{ $cond: { if: { $isArray: "$salesOrderTripIds" }, then: { $size: "$salesOrderTripIds" }, else: "NA" } },
+        totalSalesOrder:{ $cond: { if: { $isArray: "$salesOrderId" }, then: { $size: "$salesOrderId" }, else: "NA" } },
         tripId:1,
         tripIdAlias:1
         // deliveryExecutiveId:0,

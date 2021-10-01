@@ -2,6 +2,7 @@ const BaseController = require("../../baseController");
 const BasicCtrl = require("../../basic_config/basic_config.controller");
 const masterModel = require("../../vehicle/vehicle_master/models/vehicle_master.model");
 const attendanceModel = require("../../vehicle/vehicle_attendance/models/vehicle_attendance.model");
+const tripModel = require("../../MyTrip/assign_trip/model/trip.model");
 
 const camelCase = require("camelcase");
 const mongoose = require("mongoose");
@@ -13,7 +14,7 @@ class vehicleInfoController extends BaseController {
   // constructor
   constructor() {
     super();
-    this.messageTypes = this.messageTypes.vehicle;
+    this.messageTypes = this.messageTypes.securityGuardApp;
   }
 
   // checkIn Vehicle
@@ -304,20 +305,14 @@ class vehicleInfoController extends BaseController {
         ])
         .allowDiskUse(true);
       // success
-      return this.success(
-        req,
-        res,
-        this.status.HTTP_OK,
-        {
-          results: vehicleList,
-          pageMeta: {
-            skip: parseInt(skip),
-            pageSize: pageSize,
-            total: totalVehicle,
-          },
-        }
-        // this.messageTypes.transporterFetched
-      );
+      return this.success(req, res, this.status.HTTP_OK, {
+        results: vehicleList,
+        pageMeta: {
+          skip: parseInt(skip),
+          pageSize: pageSize,
+          total: totalVehicle,
+        },
+      });
 
       // catch any runtime error
     } catch (err) {
@@ -906,6 +901,172 @@ class vehicleInfoController extends BaseController {
         res,
         this.status.HTTP_INTERNAL_SERVER_ERROR,
         this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+  getTripByVehicleNumber = async (req, res, next) => {
+    let pageNumber = req.query.page || 1,
+      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
+        if (res.success) return res.data;
+        else return 60;
+      }),
+      searchKey = req.query.search || "",
+      sortBy = req.query.sortBy || "createdAt",
+      sortingArray = {};
+
+    sortingArray[sortBy] = -1;
+
+    let dateToday = moment(Date.now())
+      .set({
+        h: 0,
+        m: 0,
+        s: 0,
+        millisecond: 0,
+      })
+      .toDate();
+
+    let searchObject = {
+      $or: [
+        {
+          "transporterDetails.vehicle": {
+            $regex: searchKey,
+            $options: "is",
+          },
+        },
+        {
+          vehicleModel: {
+            $regex: searchKey,
+            $options: "is",
+          },
+        },
+      ],
+    };
+
+    let pipeline = [
+      {
+        $match: {
+          $or: [
+            {
+              ...searchObject,
+            },
+            { createdAt: { $gte: dateToday } },
+          ],
+        },
+      },
+      {
+        $unwind: "$transporterDetails",
+      },
+      // {
+      //   "$lookup": {
+      //     from : "salesOrder",
+      //     let: {'id': "$salesOrderId"},
+      //     $match : {
+      //       '$expr' : {'$eq' : ['$_id','$$salesOrderId']}
+      //     },
+      //     "as": "salesOrder",
+      //   },
+      // },
+
+      {
+        $project: {
+          //  _id:0,
+          //   deliveryDetails:0,
+          //   vehicleId:0,
+          //   checkedInId:0,
+          //   rateCategoryId:0,
+          totalCrates: "$salesOrder",
+          vehicleNumber: "$transporterDetails.vehicle",
+          totalSpotSales: {
+            $cond: {
+              if: { $isArray: "$spotSalesId" },
+              then: { $size: "$spotSalesId" },
+              else: "NA",
+            },
+          },
+          totalAssetTransfer: {
+            $cond: {
+              if: { $isArray: "$assetTransfer" },
+              then: { $size: "$assetTransfer" },
+              else: "NA",
+            },
+          },
+          totalStockTransfer: {
+            $cond: {
+              if: { $isArray: "$stockTransferIds" },
+              then: { $size: "$stockTransferIds" },
+              else: "NA",
+            },
+          },
+          totalSalesOrder: {
+            $cond: {
+              if: { $isArray: "$salesOrderId" },
+              then: { $size: "$salesOrderId" },
+              else: "NA",
+            },
+          },
+          tripId: 1,
+        },
+      },
+
+      {
+        $skip: pageSize * (pageNumber - 1),
+      },
+      {
+        $limit: pageSize,
+      },
+    ];
+
+    let trip = await tripModel.aggregate(pipeline);
+    let crates = await tripModel.aggregate([
+      {
+        $lookup: {
+          from: "salesorders",
+          localField: "salesOrderId",
+          foreignField: "_id",
+          as: "salesOrder",
+        },
+      },
+      {
+        $project: {
+          totalCrate: { $sum: ["$salesOrder.crateIn"] },
+        },
+      },
+    ]);
+
+    let totalCount = await tripModel.count({
+      ...searchObject,
+    });
+    let data = {
+      results: trip,
+      pageMeta: {
+        skip: pageSize * (pageNumber - 1),
+        pageSize: pageSize,
+        total: totalCount,
+      },
+    };
+
+    try {
+      info("searching trip data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        data || [],
+        this.messageTypes.tripListFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.tripListNotFetched
       );
     }
   };

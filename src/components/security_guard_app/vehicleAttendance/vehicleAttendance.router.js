@@ -51,6 +51,12 @@ function vehicleRoutes() {
       isVehicleCheckedIn,
       ctrl.checkOutVehicle // controller function
     );
+
+    closed.route("/trip/vehicle-list").get(
+      joiVehicleList,
+      verifySecurityAppToken, // verify app user token
+      ctrl.getTripByVehicleNumber // controller function
+    );
   };
 }
 
