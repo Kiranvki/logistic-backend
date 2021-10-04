@@ -431,7 +431,8 @@ class pickerSalesOrderMappingController extends BaseController {
       // }
 
       //let qr
-      req.body.invDetail['signed_qrcode'] = await QRCode.toDataURL(JSON.stringify(req.body.invDetail['signed_qrcode']),{type:'terminal'});
+      console.log('req.body.invDetail',req.body.invDetail)
+      req.body.invDetail['invoiceDetails']['signed_qrcode'] = await QRCode.toDataURL(req.body.invDetail['invoiceDetails']['signed_qrcode'],{type:'terminal'});
         req.body.invDetail['itemSupplied'].forEach((data,i)=>{
         OrderData['itemDetail'].forEach((item,j) => {
           // console.log('item_no',data.item_no,item.item_no)

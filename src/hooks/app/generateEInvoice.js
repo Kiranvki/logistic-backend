@@ -37,7 +37,7 @@ module.exports = async (req, res, next) => {
     console.log('Hitting SAP server for Generating the E-invoice *> ', url);
     var obj = {
       'request': {
-        "invoice_no": "900000733"
+        "invoice_no":  req.body.invoice_detail['data']['invoice_no']//"900000733"
 
 
       }

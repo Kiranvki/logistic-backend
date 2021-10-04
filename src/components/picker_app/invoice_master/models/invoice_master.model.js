@@ -220,6 +220,39 @@ const invoiceMaster = new Schema({
     'payer': {  //sap payer
       type: String
     },
+    
+  'irn_no':{
+    type:String
+  },
+  'irn_status': {
+    type:String
+  },
+
+  'payment_terms_description':{
+    type:String
+  },
+  'error_details': {
+    type:String
+  },
+  "signed_invoice_no":{
+    type:String
+  },
+
+ 
+  "acknowledgement_date": {
+    type:String
+  },
+
+  'signed_qrcode': {
+    type:String
+  },
+  'acknowledgement_number':{
+    type:String
+  },
+  // 'Acknowledgement_Date':invoiceDetail['Acknowledgement_Number'],
+  
+  
+  
 
     'erpId': { //not reqwuirreed
       type: 'String',
