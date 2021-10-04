@@ -48,7 +48,9 @@ const {
   isClearBucket,
   getInvoiceNumber,
   isInvoiceAlreadyFetched,
-  invoiceFetchCounter
+  invoiceFetchCounter,
+  generateEInvoice,
+  getCustomerDetail
 
 } = require('../../../hooks/app');
 
@@ -89,9 +91,14 @@ function userRoutes() {
                  // generateDelivery,
                 // updateSapDeliveryDetail,
       generateInvoice, //generate invoice for the delivery number
+      getCustomerDetail,
+      generateEInvoice,
       fetchInvoice, //fetch generated invoice from sap
       updateInvoiceSAPDataToDB, //save the invoice detail to application db
       ctrl.generateInvV2
+      
+      
+      
       // ctrl.getPickedItemByPickerOrderId
 
     );
@@ -118,6 +125,7 @@ function userRoutes() {
       generateDelivery,
       updateSapDeliveryDetail,
       generateInvoice,
+      
       fetchInvoice,
       updateInvoiceSAPDataToDB,
       ctrl.generateInv

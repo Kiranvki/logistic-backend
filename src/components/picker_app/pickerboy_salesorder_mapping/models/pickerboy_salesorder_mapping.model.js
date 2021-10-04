@@ -126,6 +126,25 @@ const pickerBoyOrderMappingSchema = new Schema({
   }, 'isSapError': {
     type: String
   },
+
+  'irn_no':{
+    type:String
+  },
+  'error_details': {
+    type:String
+  },
+  "signed_invoice_no":{
+    type:String
+  },
+  "signed_qr_code":{
+    type:String
+  },
+  "Acknowledgement_Number": {
+    type:String
+  },
+  "Acknowledgement_Date": {
+    type:String
+  },
   'invoiceDetail': {
     'isInvoiceRequest': {
       type: Boolean,

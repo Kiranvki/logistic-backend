@@ -86,6 +86,8 @@ module.exports = {
   isClearBucket:require('./isClearBucket'),
   getInvoiceNumber:require('./getInvoiceNumber'),
   isInvoiceAlreadyFetched:require('./isInvoiceAlreadyFetched'),
-  invoiceFetchCounter:require('./invoiceFetchCounter')
+  invoiceFetchCounter:require('./invoiceFetchCounter'),
+  generateEInvoice:require('./generateEInvoice'),
+  getCustomerDetail:require('./getCustomerDetail')
 
 }

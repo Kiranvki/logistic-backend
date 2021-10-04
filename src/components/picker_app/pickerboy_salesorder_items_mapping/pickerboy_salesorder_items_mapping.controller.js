@@ -9,6 +9,7 @@ const pickerBoySalesOrderModel = require('../pickerboy_salesorder_mapping/models
 const BaseController = require('../../baseController');
 const Model = require('./models/pickerboy_salesorder_items_mapping.model');
 const mongoose = require('mongoose');
+var QRCode = require('qrcode');//QR code
 const _ = require('lodash');
 const moment = require('moment');
 
@@ -428,6 +429,9 @@ class pickerSalesOrderMappingController extends BaseController {
       // requireQuantity: 1,
       // suppliedQty: 0,
       // }
+
+      //let qr
+      req.body.invDetail['signed_qrcode'] = await QRCode.toDataURL(JSON.stringify(req.body.invDetail['signed_qrcode']),{type:'terminal'});
         req.body.invDetail['itemSupplied'].forEach((data,i)=>{
         OrderData['itemDetail'].forEach((item,j) => {
           // console.log('item_no',data.item_no,item.item_no)
