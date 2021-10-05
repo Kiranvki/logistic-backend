@@ -613,11 +613,11 @@ class pickerSalesOrderMappingController extends BaseController {
               'isSapError':
 
                 { $exists: true, $ne: 'DNE' }
-            }
-            // {
-            //   'isSapError': { $exists: false }
+            },
+            {
+              'isSapError': { $exists: false }
 
-            // }
+            }
           ],
           'fullfilment': fullfilment,
           'delivery_no': {
