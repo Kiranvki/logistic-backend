@@ -179,6 +179,12 @@ closed.route('/trip/order/:type/:orderId/:phoneNumber').get(
             verifyDeliveryAppToken,
               ctrl.getInvoiceNumberbySo
           )
+
+          closed.route('/trip/history/:salesorderId/invoiceList').get(
+            [joiSoId],
+            verifyDeliveryAppToken,
+              ctrl.getHistoryInvoiceListbySo
+          )
   
       
       

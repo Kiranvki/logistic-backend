@@ -10,7 +10,7 @@ const Response = require('../../../responses/response')
 
 const schemas = {
     getTripDetailVal: Joi.object().keys({
-        type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+        type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
             language: {
               string: {
                 regex: {
@@ -23,7 +23,7 @@ const schemas = {
       
     }),
     getOrderDetailVal: Joi.object().keys({
-      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
         language: {
           string: {
             regex: {
@@ -36,7 +36,7 @@ const schemas = {
       
     }),
     updateOrderDetailVal: Joi.object().keys({
-      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
         language: {
           string: {
             regex: {
@@ -96,7 +96,7 @@ const schemas = {
         tripid: Joi.number().label('tripid').required().min(1),
     }),
     getHistoryVal:Joi.object().keys({
-      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
         language: {
           string: {
             regex: {
@@ -108,7 +108,7 @@ const schemas = {
     }),
     updateDeliveryStatusVal:Joi.object().keys({
       
-      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
         language: {
           string: {
             regex: {

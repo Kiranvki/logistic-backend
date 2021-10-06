@@ -86,11 +86,8 @@ module.exports = {
   getAvailableStock:require('./getAvailableStock'),
   checkStockAvailability:require('./checkStockAvailability'),
   isClearBucket:require('./isClearBucket'),
-<<<<<<< HEAD
-  isActiveDelivery:require('./isActiveDelivery')
-=======
+  isActiveDelivery:require('./isActiveDelivery'),
   getInvoiceNumber:require('./getInvoiceNumber'),
   isInvoiceAlreadyFetched:require('./isInvoiceAlreadyFetched')
->>>>>>> d2edf74c025f9ac3feb5b3126339cebfa146433a
 
 }

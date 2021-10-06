@@ -15,14 +15,9 @@ const spotSalesModel= require('../../MyTrip/assign_trip/model/spotsales.model');
 const tripSalesOrders = require('../../MyTrip/assign_trip/model/salesOrder.model');
 const requestHttp = require('request');
 var async = require('async');
-<<<<<<< HEAD
 import { type } from 'ramda';
 import { v4 as uuidv4 } from 'uuid';
 import securityGenerateMonthDaysAndOtherMetaData from '../../../hooks/app/securityGenerateMonthDaysAndOtherMetaData';
-=======
-// import { type } from 'ramda';
-// import { v4 as uuidv4 } from 'uuid';
->>>>>>> 45c24760a213e8cd597c867a47958312e57c7b9a
 const gpnModel = require('./model/gpn_model')
 
 
@@ -52,7 +47,7 @@ class DeliveryExecutivetrip extends BaseController {
     let pageSize=100;
     let user = req.user, // user 
     deliveryExecutiveId = user._id
-    let pageNumber = req.query.page;
+    let pageNumber = req.query.page||1;
 
     let dateToday= moment(Date.now()).set({
       h: 0,
@@ -61,9 +56,9 @@ class DeliveryExecutivetrip extends BaseController {
       millisecond: 0
     }).toDate();
     
+    console.log("deliveryExecutiveId",deliveryExecutiveId);
     let pipeline = [{
 
-    
       $match:{$and:[{
         
           'deliveryExecutiveId':mongoose.Types.ObjectId(deliveryExecutiveId)
@@ -83,8 +78,7 @@ class DeliveryExecutivetrip extends BaseController {
    
     ,{
       $project:{
-<<<<<<< HEAD
-       
+       _id:0,
         deliveryDetails:0,
         vehicleId:0,
         checkedInId:0,
@@ -100,33 +94,7 @@ class DeliveryExecutivetrip extends BaseController {
         isCompleteDeleiveryDone: 0,
         isPartialDeliveryDone: 0,
         returnedStockDetails: 0,
-=======
-      //  _id:0,
-      //   deliveryDetails:0,
-      //   vehicleId:0,
-      //   checkedInId:0,
-      //   rateCategoryId:0,
-        totalSpotSales:{ $cond: { if: { $isArray: "$spotSalesId" }, then: { $size: "$spotSalesId" }, else: "NA" } },
-        totalAssetTransfer:{ $cond: { if: { $isArray: "$assetTransfer" }, then: { $size: "$assetTransfer" }, else: "NA" } },
-        totalStockTransfer:{ $cond: { if: { $isArray: "$stockTransferIds" }, then: { $size: "$stockTransferIds" }, else: "NA" } },
-        totalSalesOrder:{ $cond: { if: { $isArray: "$salesOrderTripIds" }, then: { $size: "$salesOrderTripIds" }, else: "NA" } },
-        tripId:1,
-        tripIdAlias:1
-        // deliveryExecutiveId:0,
-        // invoice_db_id:0,
-        // invoiceNo:0,
-        // approvedBySecurityGuard: 0,
-        // isTripStarted: 0,
-        // isActive: 0,
-        // tripFinished: 0,
-        // isCompleteDeleiveryDone: 0,
-        // isPartialDeliveryDone: 0,
-        // returnedStockDetails: 0,
->>>>>>> d2edf74c025f9ac3feb5b3126339cebfa146433a
-      
-        // __v:0
-
-
+          __v:0,
 
 
       }
@@ -549,14 +517,20 @@ spotSalesId:0
 
       // creating the push object 
       let updateObject = {
-        // 'orderItems.$.suppliedQty': dataObj.supplied_qty,
+        //'orderItems.$.suppliedQty': dataObj.supplied_qty,
         'orderItems.$.itemRemarks': dataObj.itemRemarks[0],
-        'caretCount':dataObj.caretCount
-        
-      };
+        'caretCount':dataObj.caretCount,
+        'itemId': dataObj.itemId
+       };
+       let quantity = await invoiceMasterModel.aggregate([{$match:{"itemSupplied._id":mongoose.Types.ObjectId(req.params.itemid)}},
+       {$project:{_id:0,"totalQuantity":"$itemSupplied.quantity","orderedQuantity":"$itemSupplied.requiredQuantity"}}])
+       
 
+      // console.log("quantity",quantity[0].totalQuantity, quantity[0].orderedQuantity)
+      //  let updatedOrderDetail = []
+      //  if(quantity[0].totalQuantity[0] < quantity[0].orderedQuantity[0]) {
       // updating the last login details 
-      let updatedOrderDetail = await Model.findOneAndUpdate({
+      let updatedOrderDetail = await Model.updateOne({
         'orderItems._id': mongoose.Types.ObjectId(req.params.itemid)
         
       },
@@ -566,14 +540,16 @@ spotSalesId:0
         
         'new': true
       });
-      console.log(updatedOrderDetail)
+    
+   
+      // console.log(updatedOrderDetail)
     try {
       info('updating order!');
       
   
       // success response 
       this.success(req, res, this.status.HTTP_OK, 
-        updatedOrderDetail || []
+        updatedOrderDetail
       , this.messageTypes.deliveryExecutiveOrderUpdatedSuccessfully);
 
       // catch any runtime error 
@@ -601,11 +577,8 @@ spotSalesId:0
     
     
     let isVerify = parseInt(req.query.verify)?parseInt(req.query.verify):0;
-
-
     // sales order update caret
     
-  
     let updatedOrderDetail = await salesOrderModel.update(
       {
         '_id': mongoose.Types.ObjectId(salesOrderId) 
@@ -618,16 +591,8 @@ spotSalesId:0
          }
    )
     
-
   //  sales order update end
-    
-    
-    
-    
-  
-
    
-    
     info('getting trip data!');
     let pipeline = [
       {$match:{
@@ -702,6 +667,7 @@ _id:0
       }
 
       let gpnData = await gpnModel.generateGpn(objToEncode)
+
       
       let qr = await QRCode.toDataURL(JSON.stringify(gpnData),{type:'terminal'}); //Generate Base64 encode QR code String
       let responseObj = {
@@ -709,8 +675,11 @@ _id:0
         'invoiceNumber':invoiceNumber,
         'invoiceId':invoiceId,
         'qr':qr,
+        'gpn':gpnData.gpn
 
       }
+
+
       // invoiceData[0]['qr']=Buffer.from(qr).toString('base64');
       // invoiceData[0]['qr'] = qr;
       // invoiceData[0]['isverify'] = isVerify||0;
@@ -745,18 +714,34 @@ _id:0
       {
         $match:{
           $or:[
-          {'_id':mongoose.Types.ObjectId(invoiceId)},
+        // {'_id':mongoose.Types.ObjectId(invoiceId)},
           {'invoiceDetails.invoiceNo':invoiceNo}
           ]
         }
-      },{
-        $lookup:{
-          from:'spotSales',
-          localField:'spotSalesId',
-          foreignField:'_id',
-          as:'spotSales'
-        }
-      }
+      },
+      {$lookup:{
+        from: "invoicemasters",
+        let:{id: "$salesOrder"},
+        pipeline:[
+            {
+                $match:{
+                    $expr:{$eq:["$so_db_id","$$id"]}
+                }
+            }],
+            as: "invoice",
+    }},
+     {$project:{so_db_id:1,"orderPlacedAt":"$createdAt","invoiceNo":"$invoiceDetails.invoiceNo","itemSupplied.itemId":1,"itemSupplied.suppliedQty":1,"itemSupplied.quantity":1,
+         "itemSupplied.itemName":1
+     }}
+      
+      // {
+      //   $lookup:{
+      //     from:'spotSales',
+      //     localField:'spotSalesId',
+      //     foreignField:'_id',
+      //     as:'spotSales'
+      //   }
+      // },
     ]
     let invoiceDetail = await invoiceMasterModel.aggregate(pipeline)
 
@@ -944,8 +929,8 @@ getInTrip = async (req,res,next)=>{
     ...[
       {
         $lookup:{
-          from:'tripSalesOrders',
-          localField:'salesOrderTripIds',
+          from:'trips',
+          localField:'salesOrder',
           foreignField:'_id',
           as:'order'
           
@@ -1022,7 +1007,7 @@ getInTrip = async (req,res,next)=>{
     {
       $project:{
 
-salesOrderId:0
+salesOrderId:1, 
   }}])
   }
 
@@ -1087,27 +1072,55 @@ getHistoryByOrderType = async (req,res,next)=>{
   
 }
   }]
-  if(type === 'saleorder' || type === 'salesOrder'){
+  if(type === 'salesorders' || type === 'salesOrder'){
   pipeline.push(
     ...[
-      {
-        $lookup:{
-          from:'salesorders',
-          localField:'salesOrderId',
-          foreignField:'_id',
-          as:'salesOrder'
+      {$project:{vehicleRegNumber:1,tripId:1,salesOrder:1,_id:0}},
+     {$lookup:{
+         from:"salesorders",
+         let:{'id':"$salesOrder"},
+         pipeline:[{
+             $match:{$expr:{$eq:["$_id","$$id"]}}
+         },
+             {$lookup:{
+             from:"invoicemasters",
+             let: {'id':"$_id"},
+             pipeline:[{
+             $match:{
+                 $expr:{$eq:["$so_db_id","$$id"]}
+             }},
+            
+             ],
+             as:"invoices"
+         }}],
+         as:"salesorder"
+     }},
+     {$unwind:{path:"$salesorder", preserveNullAndEmptyArrays:false}},
+     {$unwind:{path:"$salesorder.invoices",preserveNullAndEmptyArrays:false}},
+     {$group:{_id:"$tripId",vehicleRegNumber:{$first:"$vehicleRegNumber"},      
+         "customerName":{$first:"$salesorder.sold_to_party_description"},"address":{$first:"$salesorder.invoices.shippingDetails.address1"},"city":{$first:"$salesorder.invoices.shippingDetails.cityId"},
+         "noOfCrates":{$first:"$salesorder.crateIn"},"customerCode":{$first:"$salesorder.sold_to_party"},"mobileNo":{$first:"$salesorder.invoices.shippingDetails.mobileNo"},
+         saleOrders:{$sum:1}         
           
-        }
-      },{
-        $project:{
-          tripId:1,
-          salesOrder:1,
-          transporterDetails:1,
-          totalCrate: { $sum: ["$salesOrder.crateIn"] }
-        },
+     }},
+      // {
+      //   $lookup:{
+      //     from:'salesorders',
+      //     localField:'salesOrder',
+      //     foreignField:'_id',
+      //     as:'salesOrder'
+          
+      //   }
+      // },{
+      //   $project:{
+      //     tripId:1,
+      //     salesOrder:1,
+      //     transporterDetails:1,
+      //     totalCrate: { $sum: ["$salesOrder.crateIn"] }
+      //   },
         
     
-      },
+      // },
       {
             $skip:(pageSize*(pageNumber-1))
             },
@@ -1220,6 +1233,7 @@ getHistoryByOrderType = async (req,res,next)=>{
 
 
 updateItemStatusAndCaretOut = async (req,res,next)=>{
+  try {
   let _id = req.params.id;
   let crateOut = req.body.crateOut || req.body.crateout  || 0;
   let crateOutWithItem = req.body.crateOutWithItem || req.body.crateoutwithitem  || 0;
@@ -1231,8 +1245,7 @@ updateItemStatusAndCaretOut = async (req,res,next)=>{
   let caretDetailUpdated;
     // sales order update crate
 
-    try {
-      caretDetailUpdated = await salesOrderModel.update(
+      caretDetailUpdated = await salesOrderModel.updateOne(
         {
           '_id': mongoose.Types.ObjectId(_id)
         },{
@@ -1248,52 +1261,49 @@ updateItemStatusAndCaretOut = async (req,res,next)=>{
             })
 
     orderItems.forEach(async (item,index)=>{
-      
+      console.log("item====>",item);
+      console.log("orderItems==>",orderItems);
       let updateObj = {
-        'orderItems.$.itemDeliveryStatus':item.itemDeliveryStatus||item.itemdeliverystatus||0,
-        'orderItems.$.rejectedQuantity':item.RejectedQuantity||item.rejectedquantity||0,
-        'orderItems.$.comments':item.comments||item.Comments||''
+        'orderItems.itemDeliveryStatus':item.itemdeliverystatus?item.itemdeliverystatus:0,
+        'orderItems.rejectedQuantity':item.rejectedquantity ? item.rejectedquantity : 0,
+        'orderItems.comments':item.comments ? item.comments : ''
     
       }
+      console.log(updateObj);
     
-     
-         updatedOrderDetail = await salesOrderModel.update(
-          {
-            '_id': mongoose.Types.ObjectId(_id) ,
-            'orderItems._id':mongoose.Types.ObjectId(item.id)
-          
+      // updatedOrderDetail = await salesOrderModel.updateOne(
+      //   {
+      //     '_id': mongoose.Types.ObjectId(_id) ,
+      //     'orderItems[0].id':mongoose.Types.ObjectId(item.id)
+       
+      //   },
+      //   {$set: {...updateObj}},
+      
+      //   // {
+      //     //    $inc: 
+      //     //    {
+      //       //       'crateIn': -((crateOut + crateOutWithItem))
+      //       //     },
+      //       //     // 'orderItems.rejectedQuantity':RejecteditemQuantity,
+      //       //     // 'orderItems.itemDeliveryStatus':itemDeliveryStatus,
+      //       //     'crateOut':crateOut,
+      //       //     'crateOutWithItem':crateOutWithItem,
             
-          },
-          {$set: {...updateObj} 
-          // {
-          //    $inc: 
-          //    {
-          //       'crateIn': -((crateOut + crateOutWithItem))
-          //     },
-          //     // 'orderItems.rejectedQuantity':RejecteditemQuantity,
-          //     // 'orderItems.itemDeliveryStatus':itemDeliveryStatus,
-          //     'crateOut':crateOut,
-          //     'crateOutWithItem':crateOutWithItem,
-              
-          //     // {$set: {levels.$.questions.$: upQstnObj} 
+      //       //     // {$set: {levels.$.questions.$: upQstnObj} 
+            
+      //       //     // }
+      //       //   }
+      
+      //     )
+      //     //  sales order update end
+          
+      //   });
     
-          //     // }
-          //   }
-    
-    
-              
-             }
-       )
-        
-    
-      //  sales order update end
+      updatedOrderDetail = await salesOrderModel.updateOne({'_id': mongoose.Types.ObjectId(_id)},{$set:{...updateObj}})
+      
+      console.log("updatedOrderDetail",updatedOrderDetail)
+    })
 
-    });
-    
- 
-
-
- 
     info('Delivery Status Updating!');
     
 
@@ -1334,42 +1344,24 @@ getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
     {'createdAt':{$lt:dateToday}
   }
 ]
-        
-
-     
     }
     
-  }
-//   {
-//     $unwind: "$salesOrderId"
-// }
- 
-  ,{
-    $project:{
-     _id:0,
-      deliveryDetails:0,
-      vehicleId:0,
-      checkedInId:0,
-      rateCategoryId:0,
-   
-      deliveryExecutiveId:0,
-      invoice_db_id:0,
-      invoiceNo:0,
-      approvedBySecurityGuard: 0,
-      isTripStarted: 0,
-      isActive: 0,
-      tripFinished: 0,
-      isCompleteDeleiveryDone: 0,
-      isPartialDeliveryDone: 0,
-      returnedStockDetails: 0,
-    
-      __v:0
-
-
-
-
-    }
   },
+  {$project:{salesOrder:1,vehicleRegNumber:1,tripId:1}},
+   {$lookup:{
+       from: "salesorders",
+       let:{id: "$salesOrder"},
+       pipeline:[
+           {
+               $match:{
+                   $expr:{$eq:["$_id","$$id"]}
+               }
+           }],
+           as: "salesorders",
+   }},
+    {$unwind: {path: "$salesorders", preserveNullAndEmptyArrays: false}},
+    {$project:{tripId:1,vehicleRegNumber:1,"NoOfCrates":"$salesorders.crateIn", salesorders: { $cond: { if: { $isArray: "$salesorders.item" }, then: { $size: "$salesorders.item" }, else: "NA"}}
+  }},
 
   {
     $skip:(pageSize*(pageNumber-1))
@@ -1377,8 +1369,8 @@ getTripHistoryByDeliveryExecutiveId = async(req,res,next) =>{
     $limit:100
   },
   // {
-  //   $group: {
-  //     _id: '$_id',
+    //     _id: '$_id',
+    //   $group: {
   //     totalSales:{$sum:1},
   //     orders:{
   //       $push: '$$ROOT'
@@ -1454,28 +1446,7 @@ getSalesOrdersbyTripID = async(req,res,next) =>{
   console.log("tripId", tripId);
   let salesOrderlist = await tripModel.aggregate([
     {$match:{'tripId':parseInt(req.params.tripId) }},
-
-    // {$project:{salesOrderId:1}},
-    // {$unwind: {path: "$salesOrderId"}},
-    // {$lookup:{
-    //     from: "salesorders",
-    //     let:{id: "$salesOrderId"},
-    //     pipeline:[
-    //         {
-    //             $match:{
-    //                 $expr:{$eq:["$_id","$$id"]}
-    //             }
-    //         }],
-    //         as: "salesorders",
-            
-    // }},
-    //  {$unwind: {path: "$salesorders"}},
-    //  {$project:{"CustomerName": "$salesorders.customerName","CustomerId": "$salesorders.customerId","location":"$salesorders.location",
-    //      salesorders: { $cond: { if: { $isArray: "$salesorders.orderItems" }, then: { $size: "$salesorders.orderItems" }, else: "NA"}}
-    //  }},     
-    // ])
-
-    {$project:{salesOrder:1}},
+    {$project:{salesOrder:1,vehicleRegNumber:1}},
      {$unwind: {path: "$salesOrder"}},
      {$lookup:{
          from: "salesorders",
@@ -1487,7 +1458,6 @@ getSalesOrdersbyTripID = async(req,res,next) =>{
                  }
              }],
              as: "salesorders",
-            
      }},
        {$unwind: {path: "$salesorders", preserveNullAndEmptyArrays: false}},
     {$lookup:{
@@ -1502,12 +1472,12 @@ getSalesOrdersbyTripID = async(req,res,next) =>{
              as: "invoice",
      }},
       {$unwind: {path: "$invoice", preserveNullAndEmptyArrays: true}},
-    {$project:{sold_to_party_description:"$salesorders.sold_to_party_description", sold_to_party:"$salesorders.sold_to_party",
-        // shippingDetails:"$invoice.shippingDetails",
+    {$project:{salesOrder:1, vehicleRegNumber:1, sold_to_party_description:"$salesorders.sold_to_party_description", sold_to_party:"$salesorders.sold_to_party",
+        //shippingDetails:"$invoice.shippingDetails",
         "address1":"$invoice.shippingDetails.address1",
         "mobileNo":"$invoice.shippingDetails.mobileNo",
         "cityId":"$invoice.shippingDetails.cityId",
-          salesorders: { $cond: { if: { $isArray: "$salesorders.item" }, then: { $size: "$salesorders.item" }, else: "NA"}}
+        salesorders: { $cond: { if: { $isArray: "$salesorders.item" }, then: { $size: "$salesorders.item" }, else: "NA"}}
     }}
      ])
     console.log("salesOrderlist",salesOrderlist);
@@ -1536,19 +1506,39 @@ getInvoiceNumberbySo = async(req,res,next) =>{
   info("getting the invoice numbers by sales orders");
   
   let so_id = req.params.salesorderId;
-  console.log("so_db_id", so_id);
 
   let invoiceNumber = await invoiceMasterModel.aggregate([
     {$match:{so_db_id:mongoose.Types.ObjectId(so_id) }},
-    // {$project: {_id:1}}
     {$project: {customerName:1,"invoice": "$invoiceDetails.invoiceNo", "salesOrderNo": "$soId",
-    shippingDetails: 1, createdAt:1 }}
-])
-    console.log("invoiceNumber",invoiceNumber);
+    "shippingDetails.address1":1,"shippingDetails.cityId":1,"orderPlacedAt":"$createdAt" }}
+]);
+
+let invoiceData = [];
+for(let v of invoiceNumber) {
+  let gpnStatus = await gpnModel.aggregate([
+    {
+      $match:{$and:[{invoiceNumber:v.invoice},{isVerify:1}]}},
+      {$set: {"status":1}},{$project:{status:1}}
+    ]);
+invoiceData.push({
+  "_id": v._id,
+  "customerName": v.customerName,
+  "invoice": v.invoice,
+  "salesOrderNo":v.salesOrderNo,
+  "shippingDetails":v.shippingDetails,
+  "orderPlacedAt": v.orderPlacedAt,
+  "status": gpnStatus.length ? gpnStatus[0].status : 0
+})
+  
+  }
+
+  // console.log("invoice====>",invoiceData);
+  
     //on success 
     if(invoiceNumber && !_.isEmpty(invoiceNumber)) {
       this.success(req, res, this.status.HTTP_OK, 
-        invoiceNumber
+        invoiceData
+
       , this.messageTypes.InoiceNumberBySoIdFetchedSuccessfully);
   
     }else {
@@ -1556,7 +1546,7 @@ getInvoiceNumberbySo = async(req,res,next) =>{
 
     }
 
-  }
+}
   catch(err) {
     error(err)
     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
@@ -1665,16 +1655,83 @@ getPendingTrip = async(req,res,next)=>{
 
 }
 
+getHistoryInvoiceListbySo = async(req,res,next) =>{
+  try {
+  info("getting the invoice numbers History by sales orders");
+  
+  let so_id = req.params.salesorderId;
+
+  let invoiceNumber = await invoiceMasterModel.aggregate([
+    {$match:{so_db_id:mongoose.Types.ObjectId(so_id) }},
+    {$lookup:{
+      from: "salesorders",
+      let:{id: "$so_db_id"},
+      pipeline:[
+          {
+              $match:{
+                  $expr:{$eq:["$_id","$$id"]}
+              }
+          }],
+          as: "invoice",
+  }},
+  {$unwind:{path:"$invoice"}},
+    {$group: {_id:"$customerName",
+    "NoOfCrates":{$first:"$invoice.crateIn"},
+
+    invoices:{$push:{"invoice":"$invoiceDetails.invoiceNo","orderPlacedAt":"$createdAt","address1":"$shippingDetails.address1","city":"$shippingDetails.cityId",
+       "isDelivered":"$isDelivered"
+    }},
+    noOfSalesOrder:{$sum:1}
+    
+    }}
+]);
+
+// let invoiceData = [];
+// for(let v of invoiceNumber) { 
+//   await salesOrderModel.aggregate([
+//     {
+//       $match:{$and:[{invoiceNumber:v.invoice},{isVerify:1}]}},
+//       {$set: {"isDelivered":1}},{$project:{isDelivered:1}}
+//     ]);
+// invoiceData.push({
+//   "_id": v._id,
+//   "customerName": v.customerName,
+//   "invoice": v.invoice,
+//   "salesOrderNo":v.salesOrderNo,
+//   "shippingDetails":v.shippingDetails,
+//   "orderPlacedAt": v.orderPlacedAt,
+//   "isDelivered": v.isDelivered,
+// })
+  
+//   }
+
+  // console.log("invoice====>",invoiceData);
+  
+    //on success 
+    if(invoiceNumber && !_.isEmpty(invoiceNumber)) {
+      this.success(req, res, this.status.HTTP_OK, 
+        invoiceNumber
+
+      , this.messageTypes.InoiceNumberBySoIdFetchedSuccessfully);
+  
+    }else {
+       return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.InoiceNumberBySoIdNotFetchedSuccessfully);
+
+    }
+
+}
+  catch(err) {
+    error(err)
+    this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+
+  }
+
+}
 
 
 
 
 
-<<<<<<< HEAD
-=======
-
-
->>>>>>> d2edf74c025f9ac3feb5b3126339cebfa146433a
 }
 
 
