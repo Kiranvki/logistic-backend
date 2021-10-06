@@ -3,6 +3,7 @@ const BasicCtrl = require("../../basic_config/basic_config.controller");
 const masterModel = require("../../vehicle/vehicle_master/models/vehicle_master.model");
 const attendanceModel = require("../../vehicle/vehicle_attendance/models/vehicle_attendance.model");
 const tripModel = require("../../MyTrip/assign_trip/model/trip.model");
+const gpnModel = require("../../delivery_app/deliveryExecutiveTrip/model/gpn_model");
 
 const camelCase = require("camelcase");
 const mongoose = require("mongoose");
@@ -496,6 +497,8 @@ class vehicleInfoController extends BaseController {
           $in: alreadyCheckInVehicleIds,
         },
       };
+
+      console.log(searchObject);
 
       // creating a match object
       if (searchKey !== "")
@@ -1067,6 +1070,247 @@ class vehicleInfoController extends BaseController {
         this.status.HTTP_INTERNAL_SERVER_ERROR,
         this.exceptions.internalServerErr(req, err),
         this.messageTypes.tripListNotFetched
+      );
+    }
+  };
+
+  getTripDetailsByTripId = async (req, res, next) => {
+    let ID = parseInt(req.params.tripId);
+    info("getting trip data!");
+
+    let trip = await tripModel
+      .aggregate([
+        {
+          $match: { tripId: ID },
+        },
+        {
+          $project: {
+            vehicleRegNumber: 1,
+            deliveryExecutiveEmpCode: 1,
+            deliveryExecutiveName: 1,
+            tripId: 1,
+            salesOrder: 1,
+          },
+        },
+        {
+          $lookup: {
+            from: "salesorders",
+            let: { id: "$salesOrder" },
+            pipeline: [
+              {
+                $match: { $expr: { $eq: ["$_id", "$$id"] } },
+              },
+              {
+                $lookup: {
+                  from: "invoicemasters",
+                  let: { id: "$_id" },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: { $eq: ["$so_db_id", "$$id"] },
+                      },
+                    },
+                    {
+                      $lookup: {
+                        from: "gatepassnumbers",
+                        let: { id: "$invoiceDetails.invoiceNo" },
+                        pipeline: [
+                          {
+                            $match: {
+                              $expr: { $in: ["$$id", "$invoiceNumber"] },
+                            },
+                          },
+                        ],
+                        as: "gpnNumber",
+                      },
+                    },
+                  ],
+                  as: "invoices",
+                },
+              },
+            ],
+            as: "salesorder",
+          },
+        },
+        { $unwind: { path: "$salesorder", preserveNullAndEmptyArrays: false } },
+        {
+          $unwind: {
+            path: "$salesorder.invoices",
+            preserveNullAndEmptyArrays: false,
+          },
+        },
+        {
+          $group: {
+            _id: "$tripId",
+            vehicleRegNumber: { $first: "$vehicleRegNumber" },
+            deliveryExecutiveEmpCode: { $first: "$deliveryExecutiveEmpCode" },
+            deliveryExecutiveName: { $first: "$deliveryExecutiveName" },
+            tripId: { $first: "$tripId" },
+            salesOrder: { $first: "$salesOrder" },
+
+            //  numberOfItems: { $cond: { if: { $isArray: "$salesorder.invoices.itemSupplied" }, then: { $size: "$salesorder.invoices.itemSupplied" }, else: "NA"} },
+            customerName: { $first: "$salesorder.sold_to_party_description" },
+            address: { $first: "$salesorder.invoices.shippingDetails.address" },
+            city: { $first: "$salesorder.invoices.shippingDetails.cityId" },
+            noOfCrates: { $first: "$salesorder.crateIn" },
+            invoices: {
+              $push: {
+                invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
+                gpnNo: "$salesorder.invoices.gpnNumber.gpn",
+                gpnStatus: "$salesorder.invoices.gpnNumber.isVerify",
+              },
+            },
+          },
+        },
+      ])
+      .allowDiskUse(true);
+
+    let data = {
+      results: trip,
+    };
+
+    try {
+      info("getting vehicle trip data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        data || [],
+        this.messageTypes.tripDetailsFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.tripDetailsNotFetched
+      );
+    }
+  };
+
+  getGpnDetails = async (req, res, next) => {
+    let gpnId = req.params.gpn;
+    info("getting gpn details!");
+
+    let gpnDetails = await gpnModel
+      .aggregate([
+        { $match: { gpn: gpnId, isDeleted: 0 } },
+        {
+          $lookup: {
+            from: "invoicemasters",
+            let: { id: "$invoiceNumber" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $eq: [["$invoiceDetails.invoiceNo"], "$$id"] },
+                },
+              },
+              // {$project: {
+              //     "gpn": 1,
+
+              // }}
+            ],
+            as: "invoice",
+          },
+        },
+        { $unwind: "$invoice" },
+        {
+          $project: {
+            _id: 1,
+            invoiceNumber: "$invoice.invoiceDetails.invoiceNo",
+            // "itemSupplied": "$invoice.itemSupplied",
+            itemName: "$invoice.itemSupplied.itemName",
+          },
+        },
+      ])
+      .allowDiskUse(true);
+
+    let data = {
+      results: gpnDetails,
+    };
+
+    try {
+      info("getting gpn data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        data || [],
+        this.messageTypes.gpnDetailsFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.gpnDetailsNotFetched
+      );
+    }
+  };
+
+  verifyGpn = async (req, res) => {
+    try {
+      info("GPN STATUS CHANGE !");
+
+      let gpnId = req.params.gpn;
+
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          isVerify: 1,
+        },
+      };
+
+      // inserting data into the db
+      let isUpdated = await gpnModel.findOneAndUpdate(
+        {
+          gpn: gpnId,
+        },
+        dataToUpdate,
+        {
+          new: true,
+          upsert: false,
+          lean: true,
+        }
+      );
+
+      // check if inserted
+      if (isUpdated && !_.isEmpty(isUpdated))
+        return this.success(
+          req,
+          res,
+          this.status.HTTP_OK,
+          isUpdated,
+          this.messageTypes.gpnVerified
+        );
+      else
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.gpnNotVerified
+        );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
       );
     }
   };

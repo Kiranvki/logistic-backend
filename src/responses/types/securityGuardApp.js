@@ -1,5 +1,5 @@
 module.exports = {
-  attendanceMarkedSuccessfully: "User Checked In !",
+  attendanceMarkedSuccessfully: "Vehicle Checked In !",
   attendanceNotMarkedSuccessfully:
     "Attendance Not Marked Successfully, Please try again after sometime !",
   vehicleCheckedOut: 'Vehicle Checked Out Successfully !',
@@ -10,4 +10,11 @@ module.exports = {
   vehicleIdInvalidEitherDeletedOrDeactivated:
     "Vehicle Id is either deleted or deactivated !",
   invalidVehicleId: "The Vehicle id is Invalid !",
+  tripDetailsFetched: "Trip Details Fetched Successfully !",
+  tripDetailsNotFetched: "Trip Details not Fetched !",
+  gpnDetailsFetched: "GPN Details Fetched Successfully !",
+  gpnDetailsNotFetched: "GPN Details not Fetched !",
+  gpnVerified: "GPN verified Successfully",
+  gpnNotVerified: "GPN Not Verified"
+
 };
