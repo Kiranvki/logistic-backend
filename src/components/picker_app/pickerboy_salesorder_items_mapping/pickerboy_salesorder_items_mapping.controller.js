@@ -691,13 +691,28 @@ class pickerSalesOrderMappingController extends BaseController {
 
       let totalPendingInvoice = await pickerBoySalesOrderModel.aggregate([{
         $match: {
-          'invoiceDetail.isInvoice': false,
+          
           'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
-          'isSapError': 'INVE',
+          'state': 2, //state 2 for delivery
+          $or: [
+            
+            {
+              'isSapError':
+
+                { $exists: true, $ne: 'DNE' }
+            },
+            {
+              'isSapError': { $exists: false }
+
+            }
+          ],
           'fullfilment': fullfilment,
           'delivery_no': {
             $ne: 'N/A'
           }
+
+
+
 
 
         }
