@@ -286,7 +286,7 @@ class areaSalesManagerController extends BaseController {
         // 'cityId': cityId,
 
         'req_del_date': {
-          '$gte': yasterdayDate,
+          '$gt': yasterdayDate,
           '$lte': startOfTheDay
         }
       };
