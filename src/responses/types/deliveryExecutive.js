@@ -11,7 +11,12 @@ module.exports = {
     deliveryExecutiveHistoryDataFetchedSuccessfully: 'History Details Fetched Successfully.',
     deliveryExecutiveInTripDataFetchedSuccessfully: 'Intrip Data Fetched Successfully.',
     deliveryExecutiveDeliveryStatusUpdateSuccessfully: 'Delivery Status Updated Successfully.',
-    
+    SalesOrderListByTripIdFetchedSuccessfully: "Sales order list fetched successfully !",
+    SalesOrderListByTripIdNotFetchedSuccessfully: "No data found !",
+    InoiceNumberBySoIdFetchedSuccessfully: "Invoice Number fetched successfully !",
+    InoiceNumberBySoIdNotFetchedSuccessfully: "No data found !"
+
+
     
 
 

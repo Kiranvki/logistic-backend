@@ -5,7 +5,12 @@ const StatusCodes = require('../../facades/response');
 const MessageTypes = require('../../responses/types');
 const Exceptions = require('../../exceptions/Handler');
 const BasicCtrl = require('../../components/basic_config/basic_config.controller');
-   
+const sales_orderController = require('../../components/sales_order/sales_order/sales_order.controller');
+const moment = require('moment');
+const pickerBoyOrderMappingModel = require('../../components/picker_app/pickerboy_salesorder_mapping/models/pickerboy_salesorder_mapping.model');
+const pickerBoyOrderItemMappingModel = require('../../components/picker_app/pickerboy_salesorder_items_mapping/models/pickerboy_salesorder_items_mapping.model')
+const stoPickingDetailsModel = require('../../components/picker_app/external_purchase_order/stock_transfer_picking_details/models/stock_transfer_picking_details.model');
+
 
 // Responses & others utils 
 const {
@@ -14,34 +19,60 @@ const {
 } = require('../../utils').logging;
 
 // exporting the hooks 
-module.exports = async (req,res,next) => {
-    let obj;
+module.exports = async (req, res, next) => {
+  let obj;
   try {
     info(`Hitting the SAP for Generating Invoice !`);
-    let data = req.body.data;
-    let OrderData = req.body.delivery_detail
+    // let data = req.body.data;
+    // let OrderData = req.body.delivery_detail
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
-    let sapBaseUrl = 'http://52.172.31.130:50100/RESTAdapter/';
-
+    let sapBaseUrl = process.env.sapBaseUrl,
+    requestFromUrl = req.url;
+    if(requestFromUrl.includes('/generate/invoice/')){
+      var deliveryDetail = {'delivery_no':req.body.delivery_detail['data']['delivery_no']};
+    }else{
+      var deliveryDetail = req.body.deliveryDetail;
+    }
     
-console.log('delivery info',req.body.delivery_detail['data']['delivery_no'])
-    let url = sapBaseUrl + 'waycool_qua/invoice_sto_create';
+    let billing_date = moment(new Date()).format('YYYY-MM-DD'),  //new Date()
+    actual_gi_date = moment(new Date()).format('YYYY-MM-DD'),  //new Date()
+    planned_gi_date = moment(new Date()).format('YYYY-MM-DD'),
+    id = req.params.stoPickingId || req.params.pickerBoyOrderMappingId;
+
+
+    // let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';
+    let url = process.env.sapInvoiceGenerate;  //new Date()
 
     console.log('Hitting SAP server for Generating the Invoice *> ', url);
-     obj = {
+   
+
+    if(requestFromUrl.includes('/stocktransfer/generateInvoice/')){
+      obj = {
         "request": {
-           "delivery_no": req.body.delivery_detail['data']['delivery_no'],
-           "reference_key": "1234"
+          "delivery_no": deliveryDetail['delivery_no'],
+          "reference_key": "1234",
+          "billing_date": billing_date,
+          "actual_gi_date": actual_gi_date,
+          "planned_gi_date": planned_gi_date
         }
-     }
+      }
+
+    }else{
+      obj = {
+        "request": {
+          "delivery_no": deliveryDetail['delivery_no'],
+          "reference_key": "1234"
+        }
+      }
+    }
 
 
-console.log(obj)
-      
+    info(`Invoice Request Body - ${JSON.stringify(obj)}`)
+
 
     // get the data from SAP
-    
+
     // req.body.invoice_detail = {
     //     "invoice_no": "0083000742",
     //     "billing_type": "X001",
@@ -81,18 +112,18 @@ console.log(obj)
     req.body.invoice_detail = await request.post(url)
       .send(obj)
       .timeout({
-        response: 5000, // Wait 10 seconds for the server to start sending,
-        deadline: 5000, // but allow 1 minute for the file to finish loading.
+        response: 65000, // Wait 10 seconds for the server to start sending,
+        deadline: 65000, // but allow 1 minute for the file to finish loading.
       })
       .retry(1)
-      .then((res,body) => {
-        
+      .then((res, body) => {
+
         // checking whether the user is authentic
         if (res.status === 200) {
           info('Invoice Generated Successfully !');
-          console.log('invoice data',res.body.response)
+          console.log('invoice data', res.body.response)
           return {
-              
+
             success: true,
             data: res.body.response,
           };
@@ -100,7 +131,7 @@ console.log(obj)
           error('Error Updating Server !');
           return {
             success: false,
-            error:'Error Updating Server !'
+            error: 'Picking successful but invoice creation failed.Please check directly if invoice is created!'
           };
         }
         // catch any runtime error
@@ -109,7 +140,7 @@ console.log(obj)
         if (err.timeout) {
           return {
             success: false,
-            error: 'API timeout'
+            error: 'Picking Successful and invoice creation timed out.Please check directly if invoice is created.'
           };
         } else {
           return {
@@ -119,48 +150,150 @@ console.log(obj)
         }
       });
 
-// //     // catch any runtime error 
-  } catch (e) {
-    error(e);
-    return {
-      success: false,
-      error: e
-    };
+//   req.body.invoice_detail = {
+//       'success':true
+//     }
+//   req.body.invoice_detail['data'] = {
+
+   
+
+//         "invoice_no": "0900000471",
+
+//         "reference_key": 1234,
+
+//         "flag": "S",
+
+//         "remarks": [
+
+//             "Document 0900000471 has been saved."
+
+//         ]
+
+    
+
+// }
+
+
+
+  if (req.body.invoice_detail['success'] && (req.body.invoice_detail['data'] ? req.body.invoice_detail['data']['invoice_no'] : false)) {
+    req.body.invoiceRequestPayload = obj;
+    req.body.deliveryNumber = deliveryDetail['delivery_no'];
+     //remove once sap stable
+     let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
+      '_id': req.params.pickerBoyOrderMappingId
+    }, {
+      $set: {
+        'invoiceDetail.invoice.invoiceId':req.body.invoice_detail['data']['invoice_no'],
+        'isSapError': 'INVS', //INVE->invoice Success,
+        'isItemPicked':false,
+        'isStartedPicking':false,
+        'invoiceDetail.isInvoice':true
+
+      },$push:{
+        'invoice_response': JSON.stringify(req.body.invoice_detail),
+        'invoice_request': JSON.stringify(obj)
+      }
+    })
+
+   
+    return next()
+
+  } else {
+    if(requestFromUrl.includes('/stocktransfer/generateInvoice/')){
+
+      let isResponseAdded = await stoPickingDetailsModel.findOneAndUpdate({
+        '_id': id
+      }, {
+        $set: {
+      
+         
+          'isItemPicked': false,
+          'isStartedPicking': false,
+          'state': 1,
+          // 'isDeleted': 1,
+          'isSapError': 'INVE' //INVE->invoice error
+        },$push:{
+          'invoiceResponsePayload': JSON.stringify(req.body.invoice_detail),
+          'invoiceRequestPayload': JSON.stringify(obj)
+        },$inc:{
+          'invoiceRetryCount':1
+        }
+      })
+
+
+    }else{
+    
+    let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
+      '_id': id
+    }, {
+      $set: {
+        
+        'isItemPicked': false,
+        'isStartedPicking': false,
+        'state': 1,
+        // 'isDeleted': 1,
+        'isSapError': 'INVE' //INVE->invoice error
+      },$push:{
+        'invoice_response': JSON.stringify(req.body.invoice_detail),
+        'invoice_request': JSON.stringify(obj),
+      }
+        ,$inc:{
+          'invoiceRetryCount':1
+        }
+      
+    })
+if(requestFromUrl.includes('/generate/invoice/')){
+  let OrderData = req.body.orderDetail,
+  pickedItem = OrderData['itemDetail'];
+    let soUpdateFullfilemt = await sales_orderController.UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityPickingStep(OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['_id'], OrderData['pickerBoySalesOrderMappingId']['salesOrderId']['item'], pickedItem)
+       //fixed require
+}
+       await pickerBoyOrderItemMappingModel.update({ 'pickerBoySalesOrderMappingId': req.params.pickerBoyOrderMappingId }, { $set: { 'isDeleted': 1 } })
+
+
   }
+
+ 
+    //  Message pending
+    //req.body.delivery_detail['error']
+    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,JSON.stringify(...req.body.invoice_detail['data']['remarks']) +','+ MessageTypes.salesOrder.pickerBoySalesOrderInvoiceGeneratedFailed);
+  }
+
+  
+
+    // //     // catch any runtime error 
+  } catch (e) {
+    return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, 'Failed to generate STO invoice.');
+    error(e);
+    // return {
+    //   success: false,
+    //   error: e
+    // };
+  }
+}
 
 
   // error response
-//   {
-   
-//         "reference_key": 1234,
-//         "flag": "E",
-//         "remarks": [
-//             "Invoice has been initiated already for the delivery number800001000103170008",
-//             "Invoice has been initiated already for the delivery number800001000103170008",
-//             "Invoice has been initiated already for the delivery number800001000103170008",
-//             "Invoice has been initiated already for the delivery number800001000103170008"
-//         ]
-    
-// }
-// req.body.invoice_detail = {}
-console.log('sap invoice',req.body.invoice_detail)
-req.body.invoice_detail['success'] =true;
-// && req.body.invoice_detail['data']['flag']==='S'
+  //   {
 
-// req.body.invoice_detail['data']={
-//   invoice_no: '0900000239',
-//   reference_key: 1234,
-//   flag: 'E',
-//   remarks: [ 'G/L account 12100001 is not defined in chart of accounts 1000' ]
-// }
+  //         "reference_key": 1234,
+  //         "flag": "E",
+  //         "remarks": [
+  //             "Invoice has been initiated already for the delivery number800001000103170008",
+  //             "Invoice has been initiated already for the delivery number800001000103170008",
+  //             "Invoice has been initiated already for the delivery number800001000103170008",
+  //             "Invoice has been initiated already for the delivery number800001000103170008"
+  //         ]
 
+  // }
+  // req.body.invoice_detail = {}
+  // console.log('sap invoice',req.body.invoice_detail)
+  // req.body.invoice_detail['success'] =true;
+  // && req.body.invoice_detail['data']['flag']==='S'
 
-  if(req.body.invoice_detail['success'] && req.body.invoice_detail['data']['invoice_no']){
-    return next()
-
-  }else{
-    //  Message pending
-    //req.body.delivery_detail['error']
-    return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, MessageTypes.salesOrder.pickerBoySalesOrderInvoiceGeneratedFailed);
-  }
-};
+  // req.body.invoice_detail['data']={
+  //   invoice_no: '0900000239',
+  //   reference_key: 1234,
+  //   flag: 'E',
+  //   remarks: [ 'G/L account 12100001 is not defined in chart of accounts 1000' ]
+  // }

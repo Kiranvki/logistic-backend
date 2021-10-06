@@ -275,7 +275,7 @@ class areaSalesManagerController extends BaseController {
                   {
                     $match: {
                       '$expr': {
-                        '$eq': ['$_id', '$$id']
+                        '$eq': ['$_id', "$$id"]
                       }
                     }
                   },
@@ -296,6 +296,16 @@ class areaSalesManagerController extends BaseController {
                       }
                     }
                   },
+                  {
+                    $lookup: {
+                      from: "warehouses",
+                      let: { id: "$plant" },
+                      pipeline: [
+                        { $match: { $expr: { $eq: ["$plant", "$$id"] } } },
+                      ],
+                      as: "warehouse",
+                    },
+                  }
                 ],
                 as: 'so'
               }

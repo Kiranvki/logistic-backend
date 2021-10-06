@@ -10,7 +10,7 @@ const Response = require('../../../responses/response')
 
 const schemas = {
     getTripDetailVal: Joi.object().keys({
-        type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+        type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
             language: {
               string: {
                 regex: {
@@ -19,11 +19,11 @@ const schemas = {
               }
             }
           }).required(),
-        tripid: Joi.string().trim().label('tripid').required().max(20)
+        tripid: Joi.string().trim().label('tripid').required().max(25)
       
     }),
     getOrderDetailVal: Joi.object().keys({
-      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
         language: {
           string: {
             regex: {
@@ -36,7 +36,7 @@ const schemas = {
       
     }),
     updateOrderDetailVal: Joi.object().keys({
-      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
         language: {
           string: {
             regex: {
@@ -96,7 +96,7 @@ const schemas = {
         tripid: Joi.number().label('tripid').required().min(1),
     }),
     getHistoryVal:Joi.object().keys({
-      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
         language: {
           string: {
             regex: {
@@ -108,7 +108,7 @@ const schemas = {
     }),
     updateDeliveryStatusVal:Joi.object().keys({
       
-      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales').options({
+      type: Joi.string().trim().label('type').valid('salesorders', 'salesOrders','spotSales', 'spotsales','salesOrder').options({
         language: {
           string: {
             regex: {
@@ -129,8 +129,19 @@ const schemas = {
                comments:Joi.string().trim().label('Comments').required().min(30)
             })
 
-          ).required()
-    })
+          ).required(),
+         
+    }),
+
+    joiTripId: Joi.object().keys({
+      
+      tripId: Joi.number().label('Trip Id').required()
+    }).required(),
+
+    joiSoId: Joi.object().keys({
+      
+      salesorderId: Joi.string().trim().label('sales order Id').min(20)
+    }).required(),
 
 };
 
@@ -325,6 +336,45 @@ let requestObj = {
 }
 
   schema.validate(requestObj, option).then(() => {
+      next();
+      // if error occured
+  }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+          error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+  });
+},
+joiTripId: (req, res, next) => {
+  // getting the schemas 
+  let schema = schemas.joiTripId;
+  let option = options.basic;
+  
+  // validating the schema 
+  schema.validate(req.params, option).then(() => {
+      next();
+      // if error occured
+  }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+          error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+  });
+},
+
+joiSoId: (req, res, next) => {
+  // getting the schemas 
+  let schema = schemas.joiSoId;
+  let option = options.basic;
+  
+  // validating the schema 
+  schema.validate(req.params, option).then(() => {
       next();
       // if error occured
   }).catch((err) => {

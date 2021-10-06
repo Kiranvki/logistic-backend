@@ -947,12 +947,33 @@ class MyTrip extends BaseController {
           pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 10; }),
           sortBy = req.query.sortBy || 'createdAt',
           sortingArray = {};
-        sortingArray[sortBy] = -1;
+          sortingArray[sortBy] = -1;
         let skip = parseInt(page - 1) * pageSize;
+        let projection = {}
           // get the total customer
-        const totalAgencies = await pickerBoyOrderMappingModel.countDocuments({});
+        if (req.query.searchText && !req.query.searchText == '') {
+          projection = {...  {
+            '$or':  [ 
+                      { 'sales_order_no': { $regex: req.query.searchText, $options: 'i' } },
+                      { 'invoiceDetail.invoice.invoiceId': { $regex: req.query.searchText, $options: 'i' } }
+                    ]
+            }};
+        };
+
+        const totalAgencies = await pickerBoyOrderMappingModel.countDocuments({
+          ...projection,
+          'shipping_point': req.user.plant_id,
+          'invoiceDetail.isInvoice':true
+        });
 
         const getAllTripsWithSalesOrder = await pickerBoyOrderMappingModel.aggregate([
+          {
+            $match: {
+              ...projection,
+              'shipping_point': req.user.plant_id,
+              'invoiceDetail.isInvoice':true
+            }
+          },
           {
             $lookup: {
               from: 'salesorders',
@@ -995,10 +1016,32 @@ class MyTrip extends BaseController {
               },{
                 $project: {
                   "employerName": 1,
-                  "firstName": 1
+                  "firstName": 1,
+                  "fullName": 1,
+                  "plant": 1
                 }
               }],
               "as": "pickerBoyName"
+            }
+          },{
+            $lookup: {
+              from: 'invoicemasters',
+              let: {
+                'id': "$invoiceDetail.invoice.invoiceDbId"
+              },
+              pipeline: [{
+                $match: { 
+                  "$expr": {
+                     "$eq": ['$_id', '$$id']
+                    }
+                  }
+              },{
+                $project: {
+                  'customerName': 1,
+                  'isInvoiceViewed': 1
+                }
+              }],
+              as: 'invoiceDetails'
             }
           },{
             $sort: sortingArray
@@ -1020,7 +1063,49 @@ class MyTrip extends BaseController {
         this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, error));
       }
     }
+
+
+
+    // fetch detail if trip active
+activeTripDetail = async (deliveryExecutiveId) => {
+  try {
+    info('Get Trip detail  details !');
+
+    
+
+    // get details 
+    return await tripModel.findOne({
+      'deliveryExecutiveId': mongoose.Types.ObjectId(deliveryExecutiveId),
+      'isTripStarted':1,
+      'isActive':1
+    }).lean().then((res) => {
+      if (res && !_.isEmpty(res)) {
+        return {
+          success: true,
+          data: res
+        }
+      } else {
+        error('Error Searching Data in trip DB!');
+        return {
+          success: false
+        }
+      }
+    }).catch(err => {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    });
+  
+
+} catch (err) {
+  error(err);
+  //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+}
+  
 };
+}
 
 module.exports = new MyTrip();
 

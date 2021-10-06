@@ -1,7 +1,7 @@
 module.exports = {
-    grnCreated: 'Grn generated Successfully !',
-    grnAlreadyGenerated: 'Grn already generated !',
-    grnNotGenerated: 'Grn not generated !',
+    grnCreated: 'GRN generated Successfully !',
+    grnAlreadyGenerated: 'GRN already generated !',
+    grnNotGenerated: 'GRN not generated !',
     grnNotGeneratedinSAP: 'Error in posting GRN into the system',
     invoicesDetailsFetched: 'invoice Details Fetched Successfully !.',
     invoicesDetailsNotFound: 'invoice Details Not Fetched !',
@@ -9,6 +9,7 @@ module.exports = {
     salesOrderNotFound: 'salesOrder Not Fetched !',
     poListFetched: 'Purchase order fetched Successfully !',
     purchaseOrderIdInvalidEitherDeletedOrDeactivated: 'Purchase Order Id is either deleted or deactivated !',
+    stoIdOrItemNoInvalidEitherDeletedOrDeactivated: 'Stock Transfer Id Or Item Number is either deleted or deactivated !',
     purchaseOrderReceivingIdEitherDeletedOrDeactivated: 'Purchase Order Receiving Id is either deleted or deactivated !',
     invalidPurchaseOrderId: 'The Purchase Order id is Invalid !',
     purchaseOrderAlreadyAddedInReceivingState: 'Purchase Order  Already Added in Receiving State!',
@@ -21,6 +22,7 @@ module.exports = {
     emptyBucketList: 'Bucket list is empty',
     bucketListFetchedSuccessfully: 'Bucket List is fetched Successfully',
     invalidPurchaseOrderId:"Invalid Purchase Order Id",
+    invalidStoId:"Invalid Stock Transfer Id",
     invalidPurchaseOrderGRNId:"Invalid Purchase Order GRN Id",
     receivedQuantityGreaterThanQty:"Received quantity cant be greater than quantity to be received",
     invalidPurchaseOrderReceivingId:"Invalid Purchase Order Receiving Id",
@@ -32,6 +34,10 @@ module.exports = {
     upcomingDeliverDateMissing:"Upcoming Delivery Date is Missing",
     pastDateNotAllowedforUDD:"For Upcoming Deliver Date past date is not allowed",
     requiredRemark:"Remarks is required as entered quantity is not equal to quantity to be received",
-    alreadyHasOngoinOrder:"you already Have one Ongoing receiving Order.Please generate grn for that first.",
+    alreadyHasOngoinOrder:"you already Have one Ongoing receiving Order.Please generate GRN for that first.",
+    errorInGettingVendorDetails:"Error in getting vendor details",
+    vendorDetailsNotFound:"Vendor Details not Found",
+    poDetailsNotFound:"Purchase order details not found",
+    PickingAllocationGeneratedSuccesfully:"Picking Allocation Generated Successfully"
 
 };

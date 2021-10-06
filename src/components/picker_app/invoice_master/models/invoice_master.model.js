@@ -8,7 +8,7 @@ const invoiceMaster = new Schema({
   soId: {  //sales_order_no
     type: Number
   },
-  
+
   so_db_id: {
     type: Schema.Types.ObjectId,
     ref: 'salesOrder'
@@ -17,10 +17,33 @@ const invoiceMaster = new Schema({
   so_deliveryDate: {  //sap delivery_date
     type: Date
   },
+  stoPoNumber: {  //sto_po_no
+    type: Number
+  },
+  stockTransferDbId: {
+    type: Schema.Types.ObjectId,
+    ref: 'purchase_order'
+  },
+  orderDate:{
+    type:String
+  },
+
+  stockTransferDeliveryDate: {  //sap delivery_date
+    type: Date
+  },
+  deliveryNo: {
+    type: String
+  },
 
   isSelected: {
     type: Boolean,
     default: false
+  },
+  fullfilment: {
+    type: Number
+  },
+  shipping_point: {
+    type: String
   },
 
   'cityId': {
@@ -98,9 +121,22 @@ const invoiceMaster = new Schema({
     'name': {
       type: 'String',
     },
-    'address': {
+    'address1': {
       type: 'String',
     },
+    'address2': {
+      type: 'String',
+    },
+    'address3': {
+      type: 'String',
+    },
+    'pan': {
+      type: 'String',
+    },
+    'country': {
+      type: 'String',
+    },
+
     'mobileNo': {
       type: 'String',
     },
@@ -130,47 +166,47 @@ const invoiceMaster = new Schema({
     'sapID': { //invoice no
       type: 'String',
     },
-  
-    'billing_type':{ //sap field
-      type:String
+
+    'billing_type': { //sap field
+      type: String
     },
     'sales_Org': { //sap field
-      type:String
+      type: String
     },
-    'distribution_channel':{ //sap field
-      type:String
+    'distribution_channel': { //sap field
+      type: String
     },
     'division': { //sap field
-      type:Number
+      type: Number
     },
-   
+
     'customer_price_group': { //sap field
-      type:String
+      type: String
     },
     'customer_group': {  //sap field
-      type:String
+      type: String
     },
     'inco_terms': { //sap field
-      type:String
+      type: String
     },
     'payment_terms': {  //sap field
-      type:String
+      type: String
     },
     'company_code': {  //sap field
-      type:String
+      type: String
     },
     'account_assignment_group': { //sap field
-      type:String
+      type: String
     },
     'sold_to_party': {// SAP sold_to_party customer id
-      type:String
+      type: String
     },
-  
-    'bill_to_party':{  //sap field
-      type:String
+
+    'bill_to_party': {  //sap field
+      type: String
     },
-    'payer':{  //sap payer
-      type:String
+    'payer': {  //sap payer
+      type: String
     },
 
     'erpId': { //not reqwuirreed
@@ -264,20 +300,20 @@ const invoiceMaster = new Schema({
   'itemSupplied': [
     {
 
-      'item_no':{ //sap field row number
-        type:String
+      'item_no': { //sap field row number
+        type: String
       },
       'itemId': { //material
         type: String
       },
-      'item_category':{
-        type:String
+      'item_category': {
+        type: String
       },
-      'plant':{
-        type:String
+      'plant': {
+        type: String
       },
-      'uom':{
-        type:String
+      'uom': {
+        type: String
       },
 
 
@@ -288,7 +324,7 @@ const invoiceMaster = new Schema({
       'salePrice': {  // sap mrp_amount
         type: 'Number'
       },
-      'quantity': {  
+      'quantity': {
         type: 'Number'
       },
       'suppliedQty': { //sap  qty
@@ -305,25 +341,25 @@ const invoiceMaster = new Schema({
       'discountAmount': { //discount_amount
         type: 'String'
       },
-      'taxable_value':{  //taxable_value sap
-        type:String
+      'taxable_value': {  //taxable_value sap
+        type: String
       },
       'cgst_pr': {
-        type:String
+        type: String
       },
       'sgst_pr': {
-        type:String
+        type: String
       },
-      'igst_pr':{
-        type:String
+      'igst_pr': {
+        type: String
       },
       'ugst_pr': {
-        type:String
+        type: String
       },
 
 
-      'total_amount':{ //sap total_amount
-        type:String
+      'total_amount': { //sap total_amount
+        type: String
       },
       'freeQty': {
         type: 'Number'
@@ -355,12 +391,16 @@ const invoiceMaster = new Schema({
       },
     }
   ],
-  
+
   'totalWeight': {
     type: String
   },
   'seq': {
     type: Number
+  },
+  'isInvoiceViewed': {
+    type: Number,
+    default: 0
   }
 
 }, {
@@ -379,17 +419,17 @@ invoiceMaster.index({
 
 });
 
-class invoiceMasterClass{
-  static async addInvoice(obj){
-    let isExist = this.count({'invoiceDetails.invoice_no':obj.invoice_no})
-    console.log('from db',obj)
-    let invoiceDetail =  await new this(obj).save()
-    
+class invoiceMasterClass {
+  static async addInvoice(obj) {
+    let isExist = this.count({ 'invoiceDetails.invoice_no': obj.invoice_no })
+
+    let invoiceDetail = await new this(obj).save()
+    console.log('from db', invoiceDetail)
     return invoiceDetail.toObject()
-    
+
 
     // return await this.find({'_id':pickerBoyOrderMappingData._id}).populate('salesOrderId');
-    
+
 
   }
 }

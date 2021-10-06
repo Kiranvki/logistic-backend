@@ -12,6 +12,8 @@ const BaseController = require('../../baseController');
 const Model = require('./models/sales_order.model');
 const mongoose = require('mongoose');
 const _ = require('lodash');
+
+var { Parser } = require('json2csv')
 const {
   error,
   info
@@ -22,6 +24,7 @@ const {
   hitTallyCustomerAccountsSync,
   hitCustomerPaymentInvoiceSync,
 } = require('../../../third_party_api/self');
+const { pickerBoyAlreadyInPickingState } = require('../../../responses/types/salesOrder');
 
 // We are using timeout because the Flow is synchronised and inorder to get the final report we need to wait for 5 secs 
 class timeout {
@@ -122,7 +125,7 @@ class areaSalesManagerController extends BaseController {
       //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
-  updateSalesOrderStatus = async (saleOrderId,soStatus) => {
+  updateSalesOrderStatus = async (saleOrderId, soStatus) => {
     try {
       info('Get saleOrderId  details !');
 
@@ -267,7 +270,7 @@ class areaSalesManagerController extends BaseController {
   getPartialSalesOrder = async (salesQueryDetails) => {
     try {
       info('Get Partial Sales Order details !');
-      let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
+      let { plant,sortBy, page, pageSize, locationId, cityId, searchKey, yasterdayDate, startOfTheDay} = salesQueryDetails
       let sortingArray = {};
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
@@ -276,12 +279,15 @@ class areaSalesManagerController extends BaseController {
       let searchObject = {
         // 'isPacked': 0,
         'fulfillmentStatus': 1,
-        'locationId': parseInt(locationId),
-        'cityId': cityId,
+        'plant':  plant.toString() ,
+        'isDeleted':0,
+        'status':1,
+        // 'locationId': parseInt(locationId),
+        // 'cityId': cityId,
 
         'req_del_date': {
-          '$gte': startOfTheDay,
-          '$lte': endOfTheDay
+          '$gte': yasterdayDate,
+          '$lte': startOfTheDay
         }
       };
 
@@ -290,12 +296,17 @@ class areaSalesManagerController extends BaseController {
         searchObject = {
           ...searchObject,
           '$or': [{
-            'customerName': {
+            'sales_order_no': {
               $regex: searchKey,
               $options: 'is'
             }
           }, {
-            'customerCode': {
+            'ship_to_party': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          },{
+            'sold_to_party_description': {
               $regex: searchKey,
               $options: 'is'
             }
@@ -337,6 +348,115 @@ class areaSalesManagerController extends BaseController {
           'customerName': 1,
           'customerType': 1,
           'invoiceNo': 1,
+          'sales_order_no':1,
+          'fulfillmentStatus': 1,
+          'numberOfItems': { $cond: { if: { $isArray: "$item" }, then: { $size: "$item" }, else: "NA" } }
+        }
+      }
+      ]).allowDiskUse(true)
+if(salesOrderList.length>0){
+      return {
+        success: true,
+        data: salesOrderList,
+        total: totalCount
+      };
+    }else{
+      return {
+        success: false,
+        data: salesOrderList,
+      
+      };
+    }
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+      }
+    }
+  }
+
+
+
+  // Internal Function get the history sales order details 
+  getHistorySalesOrder = async (salesQueryDetails) => {
+    try {
+      info('Get History Sales Order details !');
+      let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
+      let sortingArray = {};
+      sortingArray[sortBy] = -1;
+      let skip = parseInt(page - 1) * pageSize;
+
+      console.log(startOfTheDay)
+      let searchObject = {
+        // 'isPacked': 0,
+        // 'fulfillmentStatus': 0,
+        // 'locationId': parseInt(locationId),
+        // 'cityId': cityId,
+
+        'req_del_date': {
+
+          '$lte': startOfTheDay
+        }
+      };
+
+      // creating a match object
+      if (searchKey !== '')
+        searchObject = {
+          ...searchObject,
+          '$or': [{
+            'customerName': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }, {
+            'customerCode': {
+              $regex: searchKey,
+              $options: 'is'
+            }
+          }]
+        };
+      console.log(...searchObject)
+      let totalCount = await Model.aggregate([{
+        $match:
+          searchObject
+
+      },
+      {
+        $count: 'sum'
+      }
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+
+      // get list  
+      let salesOrderList = await Model.aggregate([{
+        $match: {
+          ...searchObject
+        }
+      }, {
+        $sort: sortingArray
+      }, {
+        $skip: skip
+      }, {
+        $limit: pageSize
+      },
+      {
+        $project: {
+          'onlineReferenceNo': 1,
+          'customerCode': 1,
+          'customerName': 1,
+          'customerType': 1,
+          'shippingId': 1,
+          'cityId': 1,
+          'status': 1,
+          'invoiceNo': 1,
+          'req_del_date': 1,
           'fulfillmentStatus': 1,
           'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
         }
@@ -357,107 +477,6 @@ class areaSalesManagerController extends BaseController {
       }
     }
   }
-
-
-
-    // Internal Function get the history sales order details 
-    getHistorySalesOrder = async (salesQueryDetails) => {
-      try {
-        info('Get History Sales Order details !');
-        let { sortBy, page, pageSize, locationId, cityId, searchKey, startOfTheDay, endOfTheDay } = salesQueryDetails
-        let sortingArray = {};
-        sortingArray[sortBy] = -1;
-        let skip = parseInt(page - 1) * pageSize;
-  
-  console.log(startOfTheDay)
-        let searchObject = {
-          // 'isPacked': 0,
-          // 'fulfillmentStatus': 0,
-          // 'locationId': parseInt(locationId),
-          // 'cityId': cityId,
-  
-          'req_del_date': {
-          
-            '$lte': startOfTheDay
-          }
-        };
-  
-        // creating a match object
-        if (searchKey !== '')
-          searchObject = {
-            ...searchObject,
-            '$or': [{
-              'customerName': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }, {
-              'customerCode': {
-                $regex: searchKey,
-                $options: 'is'
-              }
-            }]
-          };
-          console.log(...searchObject)
-        let totalCount = await Model.aggregate([{
-          $match: 
-            searchObject
-          
-        },
-        {
-          $count: 'sum'
-        }
-        ]).allowDiskUse(true);
-  
-        // calculating the total number of applications for the given scenario
-        if (totalCount[0] !== undefined)
-          totalCount = totalCount[0].sum;
-        else
-          totalCount = 0;
-  
-        // get list  
-        let salesOrderList = await Model.aggregate([{
-          $match: {
-            ...searchObject
-          }
-        }, {
-          $sort: sortingArray
-        }, {
-          $skip: skip
-        }, {
-          $limit: pageSize
-        },
-        {
-          $project: {
-            'onlineReferenceNo': 1,
-            'customerCode': 1,
-            'customerName': 1,
-            'customerType': 1,
-            'shippingId':1,
-            'cityId':1,
-            'status':1,
-            'invoiceNo': 1,
-            'req_del_date':1,
-            'fulfillmentStatus': 1,
-            'numberOfItems': { $cond: { if: { $isArray: "$orderItems" }, then: { $size: "$orderItems" }, else: "NA" } }
-          }
-        }
-        ]).allowDiskUse(true)
-  
-        return {
-          success: true,
-          data: salesOrderList,
-          total: totalCount
-        };
-  
-        // catch any runtime error 
-      } catch (err) {
-        error(err);
-        return {
-          success: false,
-        }
-      }
-    }
 
   // get user details 
   get = async (req, res) => {
@@ -1732,68 +1751,68 @@ class areaSalesManagerController extends BaseController {
     }
   }
 
-  getOrderByDeliveryDate = async (searchObject)=>{
-    
-   try{
-    let totalCount = await Model.aggregate([{
-      $match: {
-        ...searchObject
-      }
-    },
-    {
-      $count: 'sum'
-    }
-    ]).allowDiskUse(true);
+  getOrderByDeliveryDate = async (searchObject) => {
 
-    // calculating the total number of applications for the given scenario
-    if (totalCount[0] !== undefined)
-      totalCount = totalCount[0].sum;
-    else
-      totalCount = 0;
-    return Model.aggregate([
-      {
-        '$match':{
+    try {
+      let totalCount = await Model.aggregate([{
+        $match: {
           ...searchObject
         }
+      },
+      {
+        $count: 'sum'
       }
-  ]).allowDiskUse(true)
-  .then((data) => {
-    if (data && data.length) {
+      ]).allowDiskUse(true);
+
+      // calculating the total number of applications for the given scenario
+      if (totalCount[0] !== undefined)
+        totalCount = totalCount[0].sum;
+      else
+        totalCount = 0;
+      return Model.aggregate([
+        {
+          '$match': {
+            ...searchObject
+          }
+        }
+      ]).allowDiskUse(true)
+        .then((data) => {
+          if (data && data.length) {
+            return {
+              total: totalCount,
+              success: true,
+              data: data
+            };
+          } else {
+            return {
+              success: false
+            }
+          }
+        })
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
       return {
-        total: totalCount,
-        success: true,
-        data: data
-      };
-    } else {
-      return {
-        success: false
+        success: false,
+        error: err
       }
     }
-  })
-
-// catch any runtime error
-} catch (err) {
-error(err);
-return {
-  success: false,
-  error: err
-}
-}
   }
 
-  UpdateSalesOrderFullfilmentStatus = async(salesOrderId,status)=>{
+  UpdateSalesOrderFullfilmentStatus = async (salesOrderId, status) => {
     try {
-      info(`Updating Customer Info ! ${salesOrderId}`);
+      info(`Updating SALESORDER FULLFILMENT STATUS ! ${salesOrderId}`);
 
       // get details 
-      return Model.findByIdAndUpdate(mongoose.Types.ObjectId(salesOrderId), { $set:{'fulfillmentStatus':status}}).lean().then((res) => {
+      return Model.findByIdAndUpdate(mongoose.Types.ObjectId(salesOrderId), { $set: { 'fulfillmentStatus': status } }).lean().then((res) => {
         if (res) {
           return {
             success: true,
             data: res
           };
         } else {
-          error('Customer Not Updated !');
+          error('SALESORDER Not Updated !');
           return {
             success: false,
           };
@@ -1816,40 +1835,45 @@ return {
     }
   }
 
+
+
+
+
+
   insertSalesOrderData = async (sapRawData) => {
-    try{
-      if(sapRawData && sapRawData.length > 0) {
-        const soNumberArrayFromSap = sapRawData.map( el => {
-          if(el) {
+    try {
+      if (sapRawData && sapRawData.length > 0) {
+        const soNumberArrayFromSap = sapRawData.map(el => {
+          if (el) {
             return el.sales_order_no
           }
         });
-  
+
         const soDataFromDb = await Model.find({
-          'sales_order_no':{
-            '$in':soNumberArrayFromSap
+          'sales_order_no': {
+            '$in': soNumberArrayFromSap
           }
-        },{
+        }, {
           "sales_order_no": 1
         });
-  
-        if(soDataFromDb.length > 0) {
-          const coNumberArrayFromdb = soDataFromDb.map( el => {
-            if(el) {
+
+        if (soDataFromDb.length > 0) {
+          const coNumberArrayFromdb = soDataFromDb.map(el => {
+            if (el) {
               return el.po_number
             }
           });
           const finalSOArray = sapRawData.filter((val) => {
             return coNumberArrayFromdb.indexOf(val.sales_order_no) == -1;
           });
-  
+
           return await Model.insertMany(finalSOArray);
         } else {
           return await Model.insertMany(sapRawData);
         }
       }
 
-    } catch(err) {
+    } catch (err) {
       error(err);
       return {
         success: false,
@@ -1857,6 +1881,545 @@ return {
       };;
     }
   }
+
+
+  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityOld = async(salesOrderId,soItem,invData)=>{
+    try {
+      info(`Updating SO Info ! ${salesOrderId}`);
+      let isUpdated;
+// suppliedQuantity 
+console.log(JSON.stringify(invData))
+let tomorrow  = moment().add(1,'days').format('YYYY-MM-DD');
+  // moment(new Date()).format('YYYY-MM-DD')
+  
+let soFullfilmentStatus = 2;
+soItem.forEach(async (sItem,i)=>{
+invData['data'][0]['item'].forEach(async (item,i)=>{
+  let itemFullfilmentStatus=1
+  // item.qty=1
+  if(sItem.item_no==item.item_no && item.qty<=(parseInt(sItem.qty)-parseInt(sItem.suppliedQty?sItem.suppliedQty:0))){
+  if(item.qty==(parseInt(sItem.qty)-parseInt(sItem.suppliedQty?sItem.suppliedQty:0))){
+    itemFullfilmentStatus=2
+  }else{
+    soFullfilmentStatus = 1
+
+  }
+  // console.log(item)
+ 
+  
+  soItem[i].fulfillmentStatus = itemFullfilmentStatus;
+   isUpdated = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId),'item.item_no':item.item_no
+
+}, {
+  $set:{
+  
+    'item.$.fulfillmentStatus':itemFullfilmentStatus,
+
+},
+$inc:{
+  
+  'item.$.suppliedQty':parseInt(item.qty?item.qty:0),
+}
+});
+  // console.log(isUpdated)
+}
+}
+)
+
+if((soItem[i].fulfillmentStatus?soItem[i].fulfillmentStatus:0)<=1){
+  soFullfilmentStatus = 1
+
+}
+
+})
+
+_.remove(soItem, { 'fulfillmentStatus': 2 })
+// console.log('soFullfilmentStatus',soItem.length,soItem)
+//fulfilled alternative
+if(soItem.length==0){
+  soFullfilmentStatus = 2
+}else{
+  soFullfilmentStatus = 1
+}
+// console.log('soFullfilmentStatus',soFullfilmentStatus)
+let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({'_id':mongoose.Types.ObjectId(salesOrderId)
+}, {
+  $set:{
+    'fulfillmentStatus':soFullfilmentStatus,
+    
+}
+
+});
+console.log(isUpdated,isUpdatedfulfillmentStatus)
+if(isUpdatedfulfillmentStatus){
+  info('SalesOrder Status updated! !');
+          return {
+            success: true,
+            data: isUpdatedfulfillmentStatus
+          };
+        } else {
+          error('Failed to update SALESORDER! ');
+          return {
+            success: false,
+          };
+        }
+   
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
+
+
+  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantity = async (salesOrderId, soItem, pickedItem,delivery_date) => {
+    try {
+      info(`Updating SO Info ! ${salesOrderId}`);
+      console.log('pickedItem',pickedItem)
+      let isUpdated;
+      // suppliedQuantity 
+      // console.log(JSON.stringify(invData))
+      let tomorrow = moment().add(1, 'days').format('YYYY-MM-DD');
+      let deliverDate = delivery_date || tomorrow;
+      // moment(new Date()).format('YYYY-MM-DD')
+
+      let soFullfilmentStatus = 2;
+      soItem.forEach(async (sItem, i) => {
+        pickedItem.forEach(async (item, i) => {
+          let itemFullfilmentStatus = 1
+          // item.qty=1
+          // console.log(parseFloat(item.pickedQuantity),parseFloat(sItem.qty),parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))
+          // console.log(sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0)))
+          if (sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+            if (item.pickedQuantity == (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+              itemFullfilmentStatus = 2
+            } else {
+              soFullfilmentStatus = 1
+
+  }
+  // console.log(item)
+ 
+  
+  soItem[i].fulfillmentStatus = itemFullfilmentStatus;
+ 
+  
+
+            isUpdated = await Model.findOneAndUpdate({
+              '_id': mongoose.Types.ObjectId(salesOrderId), 'item.item_no': item.item_no
+
+            }, {
+              $set: {
+                
+                'item.$.fulfillmentStatus': itemFullfilmentStatus,
+
+              },
+              $inc: {
+
+                'item.$.suppliedQty': parseFloat(item.pickedQuantity ? item.pickedQuantity : 0),
+              }
+            });
+            // console.log(isUpdated)
+          } else if ((sItem.fulfillmentStatus ? sItem.fulfillmentStatus : 0) <= 1) {
+            soFullfilmentStatus = 1 //fixed required in case of fullfiled
+
+          }
+        }
+        )
+
+      })
+      _.remove(soItem, { 'fulfillmentStatus': 2 })
+      // console.log('soFullfilmentStatus',soItem.length,soItem)
+      //fulfilled alternative
+      if(soItem.length==0){
+        soFullfilmentStatus = 2
+      }else{
+        soFullfilmentStatus = 1
+      }
+      let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({
+        '_id': mongoose.Types.ObjectId(salesOrderId)
+      }, {
+        $set: {
+          // 'req_del_date':deliverDate,
+          'fulfillmentStatus': soFullfilmentStatus,
+
+        }
+
+      });
+      console.log(isUpdated, isUpdatedfulfillmentStatus)
+      if (isUpdatedfulfillmentStatus) {
+        info('Sales order Status updated! !');
+        return {
+          success: true,
+          data: {
+            'isUpdatedfulfillmentStatus':isUpdatedfulfillmentStatus,
+            'fulfillmentStatus':soFullfilmentStatus
+          }
+        };
+      } else {
+        error('Failed to update SALESORDER! ');
+        return {
+          success: false,
+        };
+      }
+
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
+// update So status and qty if inv failed but picking succesfull
+  UpdateSalesOrderFullfilmentStatusAndSuppliedQuantityPickingStep = async (salesOrderId, soItem, pickedItem) => {
+    try {
+      info(`Updating SO Info ! ${salesOrderId}`);
+      console.log('pickedItem',pickedItem)
+      let isUpdated;
+      // suppliedQuantity 
+      // console.log(JSON.stringify(invData))
+     
+      // let tomorrow = moment(new Date()).add(1, 'days').format('YYYY-MM-DD');
+      // let deliverDate = delivery_date || tomorrow;
+      
+      // moment(new Date()).format('YYYY-MM-DD')
+
+      let soFullfilmentStatus = 2;
+      soItem.forEach(async (sItem, i) => {
+        pickedItem.forEach(async (item, i) => {
+          let itemFullfilmentStatus = 1
+          // item.qty=1
+          console.log(parseFloat(item.pickedQuantity),parseFloat(sItem.qty),parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))
+          console.log(sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0)))
+          if (sItem.item_no == item.item_no && item.pickedQuantity <= (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+            if (item.pickedQuantity == (parseFloat(sItem.qty) - parseFloat(sItem.suppliedQty ? sItem.suppliedQty : 0))) {
+              itemFullfilmentStatus = 2
+            } else {
+              soFullfilmentStatus = 1
+
+            }
+            // console.log(item)
+
+            soItem[i].fulfillmentStatus = itemFullfilmentStatus;
+
+            isUpdated = await Model.findOneAndUpdate({
+              '_id': mongoose.Types.ObjectId(salesOrderId), 'item.item_no': item.item_no
+
+            }, {
+              $set: {
+                
+                'item.$.fulfillmentStatus': itemFullfilmentStatus,
+
+              },
+              $inc: {
+
+                'item.$.suppliedQty': parseFloat(item.pickedQuantity ? item.pickedQuantity : 0),
+              }
+            });
+       
+            // console.log(isUpdated)
+          }
+        }
+        
+        )
+       if ((soItem[i].fulfillmentStatus ? soItem[i].fulfillmentStatus : 0) <= 1) {
+          soFullfilmentStatus = 1
+
+        }
+
+      })
+
+
+
+
+
+      // console.log('soFullfilmentStatus',soFullfilmentStatus)
+      let isUpdatedfulfillmentStatus = await Model.findOneAndUpdate({
+        '_id': mongoose.Types.ObjectId(salesOrderId)
+      }, {
+        $set: {
+          // 'req_del_date':deliverDate,
+          'fulfillmentStatus': soFullfilmentStatus,
+
+        }
+
+      });
+      console.log(isUpdated, isUpdatedfulfillmentStatus)
+      if (isUpdatedfulfillmentStatus) {
+        info('Sales order Status updated! !');
+        return {
+          success: true,
+          data: {
+            'isUpdatedfulfillmentStatus':isUpdatedfulfillmentStatus,
+            'fulfillmentStatus':soFullfilmentStatus
+          }
+        };
+      } else {
+        error('Failed to update SALESORDER! ');
+        return {
+          success: false,
+        };
+      }
+
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return {
+        success: false,
+        error: err
+      }
+    }
+  }
+
+
+
+// fetch detail if so in valid picking date
+  salesOrderDetailByIdAndPickingDate = async (saleOrderId) => {
+    try {
+      info('Get saleOrderId  details !');
+
+      let startOfTheDay = moment(new Date()).format('YYYY-MM-DD');
+      let yasterdayDate = moment(new Date()).subtract(3, 'days').format('YYYY-MM-DD')
+
+      // get details 
+      return await Model.findOne({
+        '_id': mongoose.Types.ObjectId(saleOrderId),
+        'req_del_date':{$gte:yasterdayDate,$lte:startOfTheDay}
+        // status: 1,
+        // isDeleted: 0
+      }).lean().then((res) => {
+        if (res && !_.isEmpty(res)) {
+          return {
+            success: true,
+            data: res
+          }
+        } else {
+          error('Error Searching Data in saleOrder DB!');
+          return {
+            success: false
+          }
+        }
+      }).catch(err => {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+
+  getSalesOrderReport = async (req, res, next) => {
+
+    try {
+
+      info('Getting the todays Order !!!');
+
+      let page = req.query.page || 1,
+        pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
+        searchKey = req.query.searchKey || '',
+
+        sortBy = req.query.sortBy || 'createdAt',
+        skip = parseInt(page - 1) * pageSize,
+        locationId = 0, // locationId req.user.locationId || 
+        cityId = 'N/A', // cityId req.user.cityId ||
+       
+     
+        startDate = req.query.startDate?moment(req.query.startDate, "DD-MM-YYYY").format('YYYY-MM-DD') : moment(new Date()).format('YYYY-MM-DD'),
+        endDate =  req.query.endDate?moment(req.query.endDate, "DD-MM-YYYY").format('YYYY-MM-DD') :moment(new Date()).format('YYYY-MM-DD'),
+     
+        // plant = req.body.plant,
+        sortingArray = {};
+      sortingArray[sortBy] = -1,
+
+      
+      info('Get Sales Orders !');
+
+      console.log(startDate,endDate)
+      let searchObject = [{
+        $match: {
+          'order_date': { $gte: startDate, $lte: endDate },
+     
+
+        },
+      
+      },
+      { $lookup:{
+        from:'warehouses',
+        localField:'plant',
+        foreignField:'plant',
+        as:'plant'
+        
+      }},
+       {$project:{
+        _id	:1,
+        'sales_document_type':1,
+        'sales_order_no':1,
+        'order_date':1,
+        'req_del_date':1,
+        'sold_to_party':1,
+        'overall_status':1,
+        'isDeleted':1,
+        'status':1,
+        'created_at':1,
+        'updated_at':1,
+        'Plant Name':{
+          "$first" : "$plant.nameToDisplay"
+        },
+        'fulfillmentStatus':1
+       }},
+      {
+        $sort: {
+          '_id': -1
+        }
+      }
+        // status: 1,
+        // isDeleted: 0
+      ]
+
+
+
+       // creating a match object
+      if (searchKey !== '')
+        searchObject = [{
+          $match: {
+            $and:[{
+              'order_date': { $gte: startDate, $lte: endDate }},
+              {$or: [{
+                'sales_order_no': {
+                  $regex: searchKey,
+                  $options: 'is'
+                }
+              }, {
+                'ship_to_party': {
+                  $regex: searchKey,
+                  $options: 'is'
+                }
+              }]}
+            ]
+       
+  
+  
+  
+  
+          }},
+          { $lookup:{
+            from:'warehouses',
+            localField:'plant',
+            foreignField:'plant',
+            as:'plant'
+            
+          }},
+          {$project:{
+            _id	:1,
+            'sales_document_type':1,
+            'sales_order_no':1,
+            'order_date':1,
+            'req_del_date':1,
+            'sold_to_party':1,
+            'overall_status':1,
+            'isDeleted':1,
+            'status':1,
+            'created_at':1,
+            'updated_at':1,
+            'Plant Name':{
+              "$first" : "$plant.nameToDisplay"
+            },
+            'fulfillmentStatus':1
+           }},
+        {
+          $sort: {
+            '_id': -1
+          }
+        }];
+
+      // get details 
+      return await Model.aggregate(searchObject).allowDiskUse(true).then((result) => {
+  
+        if (result && !_.isEmpty(result)) {
+      
+          // return {
+          //   success: true,
+          //   data: res
+          // }
+
+          const json2csv = new Parser()
+
+          try {
+            // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+            const csv = json2csv.parse(result)
+            res.attachment(`report-${moment(startDate).format('DD:MM:YY')}-${moment(endDate).format('DD:MM:YY')}.csv`)
+            res.status(200).send(csv)
+          } catch (error) {
+            console.log('error:', error.message)
+            res.status(500).send(error.message)
+          }
+
+
+          // return this.success(req, res, this.status.HTTP_OK,result , this.messageTypes.invoiceDetailsSent);
+        } else {
+          error('Error Searching Data in SO DB!');
+          // return {
+          //   success: false
+          // }
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            "Sales Order Not Found"
+          );
+        }
+      }).catch(err => {
+        error(err);
+        // return {
+        //   success: false,
+        //   error: err
+        // }
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          "Sales Order Not Found"
+        );
+      });
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+      // this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+  
+
+
+
+
+
+
 }
 
 // exporting the modules 

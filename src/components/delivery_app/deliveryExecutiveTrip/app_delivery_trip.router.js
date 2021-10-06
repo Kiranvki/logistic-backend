@@ -8,7 +8,10 @@ const { updateDeliveryStatusVal,
   updateOrderStatusVal,
   getOrderDetailVal,
   getTripByIdVal, 
-  generateGpnVal} = require('./app_delivery_trip.validators')
+  generateGpnVal,
+  joiTripId,
+  joiSoId
+} = require('./app_delivery_trip.validators')
 
 const {
   isDeliveryExecutiveCheckedIn, // is user checked in
@@ -16,11 +19,13 @@ const {
   isDeliveryAlreadyCheckedIn, // check whether the user already check In
   getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
   deliveryGenerateMonthDaysAndOtherMetaData, // generate month days and other meta data
+  isActiveDelivery
 } = require("../../../hooks/app");
 
 // auth
 const { verifyDeliveryAppToken } = require("../../../hooks/app/Auth");
 const { getAllCheckInVehicleDetails } = require('../../../hooks');
+const joiValidation = require('../../../responses/types/joiValidation');
 
 
 
@@ -31,6 +36,7 @@ function tripsRoutes() {
     closed.route('/get-trip').get(
       verifyDeliveryAppToken,
         isValidDeliveryId,
+        isActiveDelivery,
       // verifyAppToken, // verify app token
         ctrl.getTripByDeliveryExecutiveId 
       );
@@ -157,6 +163,28 @@ closed.route('/trip/order/:type/:orderId/:phoneNumber').get(
         // verifyAppToken, // verify app token
           ctrl.getPendingTrip 
         );
+
+        //get sale order by trip id
+
+      closed.route('/:tripId/salesorders').get(
+        [joiTripId],
+        verifyDeliveryAppToken,
+          ctrl.getSalesOrdersbyTripID
+      )
+
+      //get ivoice numbers by sales oders
+
+          closed.route('/:salesorderId/invoiceList').get(
+            [joiSoId],
+            verifyDeliveryAppToken,
+              ctrl.getInvoiceNumberbySo
+          )
+
+          closed.route('/trip/history/:salesorderId/invoiceList').get(
+            [joiSoId],
+            verifyDeliveryAppToken,
+              ctrl.getHistoryInvoiceListbySo
+          )
   
       
       

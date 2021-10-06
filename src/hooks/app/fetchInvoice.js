@@ -17,33 +17,35 @@ const {
 module.exports = async (req,res,next) => {
     let obj;
   try {
-    info(`Getting Invoice from SAP!`);
-    console.log(req.body.invoice_detail['data']['invoice_no'])
+    info(`Fetching Invoice from SAP!`);
+    // console.log(req.body.invoice_detail['data']['invoice_no'])
 
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
-    let sapBaseUrl = 'http://52.172.31.130:50100/RESTAdapter/';
-
+    let sapBaseUrl = process.env.sapBaseUrl;
     
-console.log('delivery info',req.body.delivery_detail['delivery_no'])
-    let url = sapBaseUrl + 'waycool/invoice_sto_get';
 
-    console.log('Hitting SAP server for Generating the Invoice *> ', url);
+    // let url = sapBaseUrl + 'waycool_qua/Picking_Allocation_Creation';
+    let url = process.env.sapInvoiceFetch;
+
+    console.log('Hitting SAP server for Fetching the Invoice *> ', url);
      obj = {
         "request": {
           
-          "invoice_no":req.body.invoice_detail['data']['invoice_no'],
+          "invoice_no":  req.body.invoice_detail['data']['invoice_no']
+          // '0900000067'
+         
           
         }
      }
 
 
 
-      
+    //  "0900000037" 
 
     // get the data from SAP
     
-    // req.body.invoice_detail = {
+    // req.body.invoice_detail['data'] = [{
     //     "invoice_no": "0083000742",
     //     "billing_type": "X001",
     //     "sales_Org": 2000,
@@ -77,20 +79,20 @@ console.log('delivery info',req.body.delivery_detail['delivery_no'])
     //             "ugst_pr": "0.00 ",
     //             "total_amount": "0.00 "
     //         }]
-    //     }
+    //     }]
 
     req.body.invoice_detail = await request.post(url)
       .send(obj)
       .timeout({
-        response: 5000, // Wait 10 seconds for the server to start sending,
-        deadline: 5000, // but allow 1 minute for the file to finish loading.
+        response: 65000, // Wait 10 seconds for the server to start sending,
+        deadline: 65000, // but allow 1 minute for the file to finish loading.
       })
       .retry(1)
       .then((res,body) => {
         
         // checking whether the user is authentic
         if (res.status === 200) {
-          info('Invoice Generated Successfully !');
+          info('Invoice Fetched Successfully !');
           console.log('invoice data',res.body.response)
           return {
               
@@ -153,6 +155,12 @@ console.log('sap invoice',obj)
   }else{
     //  Message pending
     //req.body.delivery_detail['error']
-    return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, MessageTypes.salesOrder.pickerBoySalesOrderFetchingInvoiceFailed);
+    if(req.body.invoice_detail==undefined){
+      return Response.errors(req, res, StatusCodes.HTTP_FOUND, JSON.stringify({status:true,invoiceId:req.body.invoice_detail['data']['invoice_no'],invoiceStatus:'fetchfailed',"isInvoiceFetch":true}));
+    }
+      
+      // return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, JSON.stringify({status:true,invoiceId:req.body.invoice_detail['data']['invoice_no'],invoiceStatus:'fetchfailed',"isInvoiceFetch":true}));
+    // }
+    return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.salesOrder.pickerBoySalesOrderFetchingInvoiceFailed);
   }
 };

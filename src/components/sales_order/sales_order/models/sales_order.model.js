@@ -17,6 +17,11 @@ const salesOrder = new Schema({
    * state 2 : Fully fulfilled
    */
   },
+  'quantitySupplied':{
+    type:Number,
+    default:0
+
+  },
   'orderPK': {
     type: 'Number'
   },
@@ -43,8 +48,15 @@ const salesOrder = new Schema({
   'status': {
     type: 'String'
   },
+  'req_del_date':{
+    type:String
+  },
   'orderRemarks': {
     type: 'String'
+  },
+  
+  'customer_type':{
+    type:String
   },
   'Channel': {
     type: 'String'
@@ -233,6 +245,27 @@ const salesOrder = new Schema({
       required: true
     },
   },
+  'item':[{
+    'fulfillmentStatus': {
+      type: 'Number',
+      default: 0,
+      enum: [0, 1, 2]
+      /**
+     * state 0 : Not started
+     * state 1 : Partially fulfilled 
+     * state 2 : Fully fulfilled
+     */
+    },
+    'suppliedQty':{
+      type:Number
+    },
+ 'requireQuantity':{
+  type:Number
+ },
+  'totalQuantity':{
+    type:Number
+  }
+  }],
   'orderItems': [
     {
       'rowNo': {
@@ -256,7 +289,7 @@ const salesOrder = new Schema({
       'quantity': {
         type: 'Number'
       },
-      'suppliedQty': {
+      'suppliedQty': {   //quantity -inv_quantity
         type: 'String'
       },
       'itemAmount': {

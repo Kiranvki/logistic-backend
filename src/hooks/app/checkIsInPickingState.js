@@ -1,6 +1,7 @@
 // controller function
 const UserAttendanceCtrl = require('../../components/picker_app/onBoard/app_picker_user_attendance/app_picker_user_attendance.controller'); // app user attendance
 const pickerBoySalesOrderMappingCtrl = require('../../components/picker_app/pickerboy_salesorder_mapping/pickerboy_salesorder_mapping.controller'); // pickerboy SO mapping collection  
+const stoDetailsCtrl = require('../../components/picker_app/external_purchase_order/stock_transfer_picking_details/stock_transfer_picking_details.controller'); // pickerboy StO mapping collection  
 
 // Responses & others utils 
 const Response = require('../../responses/response');
@@ -31,16 +32,35 @@ const {
 module.exports = async (req, res, next) => {
   try {
     info('Get the item detail !');
+    let requestFromUrl = req.url,
+    pickStatus,
+    responseObj;
   
-    let pickStatus = await pickerBoySalesOrderMappingCtrl.getOrderDetailByPickerBoyId(req.user._id)
+    if(requestFromUrl.includes('/picking/getstocktransfer')){
+      pickStatus = await stoDetailsCtrl.getPickingStatus(req.user._id)
+     
+   
+    }else{
+    pickStatus = await pickerBoySalesOrderMappingCtrl.getOrderDetailByPickerBoyId(req.user._id)
   
+    }
     if(pickStatus.success){
-        let responseObj = {
-            'isPicking':true,
-            'pickBoySalesOrderMappingId':pickStatus.data._id,
-            'salesOrderId':pickStatus.data.salesOrderId
+      if(requestFromUrl.includes('/picking/getstocktransfer')){
+      responseObj = {
+        'isPicking':true,
+        'stoDetailsId':pickStatus.data._id,
+        'stoId':pickStatus.data.stoDbId
 
-        }
+    }
+  }
+       else{
+      responseObj = {
+        'isPicking':true,
+        'pickBoySalesOrderMappingId':pickStatus.data._id,
+        'salesOrderId':pickStatus.data.salesOrderId
+  
+    }
+  }
         error('IN PICKING STATE !');
         return Response.errors(req, res, StatusCodes.HTTP_FOUND,JSON.stringify({'message':MessageTypes.salesOrder.pickerBoyAlreadyInPickingState,'data':responseObj}));
 

@@ -22,9 +22,12 @@ const pickerBoySalesOrderItemsMapping = new Schema({
   },
 
 
-  'itemDetail':[{
-    'item_no':{
-      type:String
+  'itemDetail': [{
+    'partialItemRemark': [{
+      type: String
+    }],
+    'item_no': {
+      type: String
     },
     'material_no': {   //material  //SAP Field
       required: true,
@@ -33,20 +36,20 @@ const pickerBoySalesOrderItemsMapping = new Schema({
     'itemName': {
       type: String,
     },
-    'uom':{   //SAP Field
-      type:String
+    'uom': {   //SAP Field
+      type: String
     },
 
-  
+
     'salePrice': { //old field
-    
+
       type: Number,
     },
-    'pickedQuantity': { //delivery_quantity //SAP Field
+    'pickedQuantity': { //delivery_quantity //not SAP Field
       required: true,
       type: Number,
     },
-    'suppliedQty': {    //total_quantity-supplied_quantity 
+    'suppliedQty': {   
       required: true,
       type: Number,
     },
@@ -58,14 +61,14 @@ const pickerBoySalesOrderItemsMapping = new Schema({
       required: true,
       type: Number,
     },
-    'storage_location':{ //SAP Field
-      type:String
+    'storage_location': { //SAP Field
+      type: String
     },
-    'plant':{   //SAP Field
-      type:String
+    'plant': {   //SAP Field
+      type: String
     },
-   
-    
+
+
     'mrp_amount': { //sap
       required: true,
       type: String,
@@ -75,20 +78,20 @@ const pickerBoySalesOrderItemsMapping = new Schema({
       type: String,
     },
     'taxPercentage': { //old field
-      
+
       type: Number,
     },
-    'cgst-pr':{   //SAP Field
-      type:String
+    'cgst-pr': {   //SAP Field
+      type: String
     },
-    'sgst_pr':{   //SAP Field
-      type:String
+    'sgst_pr': {   //SAP Field
+      type: String
     },
-    'igst_pr':{   //SAP Field
-      type:String
+    'igst_pr': {   //SAP Field
+      type: String
     },
-    'ugst_pr':{   //SAP Field
-      type:String
+    'ugst_pr': {   //SAP Field
+      type: String
     },
     'discountPercentage': {
       required: true,
@@ -101,16 +104,16 @@ const pickerBoySalesOrderItemsMapping = new Schema({
     'isItemPicked': {
       required: true,
       type: Boolean,
-      default:true
+      default: true
     },
-    'total_amount':{
+    'total_amount': {
       required: true,
       type: String,
     }
-  
+
 
   }],
-   'isDeleted': {
+  'isDeleted': {
     type: Number,
     default: 0
   },
@@ -121,20 +124,20 @@ const pickerBoySalesOrderItemsMapping = new Schema({
   'createdBy': {
     type: String,
   },
-  'invoiceDetail':{
-    'isInvoice':{
-      type:Boolean,
-      default:false
+  'invoiceDetail': {
+    'isInvoice': {
+      type: Boolean,
+      default: false
 
     },
-    'invoiceId':{
-      'invoiceDbId':{
-        type:mongoose.Types.ObjectId,
+    'invoiceId': {
+      'invoiceDbId': {
+        type: mongoose.Types.ObjectId,
 
       },
-      'invoiceId':{
-        type:String,
-        default:null
+      'invoiceId': {
+        type: String,
+        default: null
       }
     }
   }
@@ -150,24 +153,24 @@ pickerBoySalesOrderItemsMapping.index({
 
 class PickerBoySalesOrderItemsMappingClass{
   static async addItem(orderObjItem){
-    let isExist = await this.count({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId });
+    let isExist = await this.count({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId,'isDeleted': 0 });
     if(isExist){
 
-      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId },{$push:{'itemDetail':orderObjItem.itemDetail}})
+      return await this.update({ 'pickerBoySalesOrderMappingId':orderObjItem.pickerBoySalesOrderMappingId,'isDeleted': 0},{$push:{'itemDetail':orderObjItem.itemDetail}})
       
     }
     // let obj = await new this(orderObjItem).save()
-     return await this(orderObjItem).save();
+    return await this(orderObjItem).save();
 
 
   }
 
-  static async getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId){
-    let isExist = await this.count({ 'pickerBoySalesOrderMappingId':mongoose.Types.ObjectId(pickerBoySalesOrderMappingId) });
-    if(isExist){
+  static async getItemAddedByPickerBoyId(pickerBoySalesOrderMappingId) {
+    let isExist = await this.count({ 'pickerBoySalesOrderMappingId': mongoose.Types.ObjectId(pickerBoySalesOrderMappingId),'isDeleted': 0});
+    if (isExist) {
 
-      return await this.find({ 'pickerBoySalesOrderMappingId':pickerBoySalesOrderMappingId }).lean()
-      
+      return await this.find({ 'pickerBoySalesOrderMappingId': pickerBoySalesOrderMappingId, 'isDeleted': 0 }).lean()
+
     }
     // let obj = await new this(orderObjItem).save()
     return false

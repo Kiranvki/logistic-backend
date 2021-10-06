@@ -15,6 +15,7 @@ const {
   joiOngoingDelivery, // joi ongoing sales order details
   joiPendingDelivery, //  joi pending SO
   joiHistoryOfSO, // joi history of SO
+
 } = require('./pickerboy_salesorder_mapping.validators');
 
 // hooks 
@@ -22,7 +23,8 @@ const {
   isValidSalesOrder,  // check is valid sales order id 
   isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
   checkWhetherItsAValidPickerUpdate, //check whether its a valid picker profile update
-
+  checkIsValidPicking,
+  isValidPickingDate,
   checkIsInPickingState
 } = require('../../../hooks/app');
 
@@ -55,7 +57,7 @@ function userRoutes() {
     );
 
     // get customer details 
-    closed.route('/customer/details/:customerId/city/:cityId').get(
+    closed.route('/customer/details/:customerId').get(
       [joiCustomerGetDetails], // joi validation
       verifyAppToken, // verify app user token 
       ctrl.getCustomerDetails // controller function 
@@ -75,14 +77,30 @@ function userRoutes() {
       ctrl.getTodaysOrder // get controller 
     );
 
+    // closed.route('/purchaseorder').get(
+    //   // verifyAppToken,   // verify app token
+    //   // checkIsInPickingState,
+    //   ctrl.getTodaysPurchaseOrder // get controller 
+    // );
 
-    
+
+
+
+
     // get the single sale order details
     closed.route('/:type/detail/:orderId').get(
       [joiSalesOrderDetails],
       // verifyAppToken,   // verify app token
       // isValidSalesOrder,
       ctrl.getOrderDetails // get controller 
+    );
+
+    // get the single sale order details
+    closed.route('/:type/update/deliverydate/:orderno').patch(
+      // [joiSalesOrderDetails],
+      verifyAppToken,   // verify app token
+      // isValidSalesOrder,
+      ctrl.updateDeliveryDate // get controller 
     );
 
     closed.route('/:type/getdetail/:orderId').get(
@@ -92,14 +110,16 @@ function userRoutes() {
       ctrl.getSalesOrder // get controller 
     );
 
-    
+
 
 
     // add the salesorder in the packing stage
     closed.route('/:type/start-pick/:saleOrderId').patch(
       [joiStartPickSalesOrder], // joi validation
       verifyAppToken,  // verify app token
+      checkIsValidPicking,
       isValidSalesOrder, //check whether the valid salesOrder Id
+      isValidPickingDate, //is valid picking date
       isAlreadyAddedInPickingState, // check whether the salesOrderId is already added into the picker state
       ctrl.pickingState // get controller 
     );
@@ -133,23 +153,68 @@ function userRoutes() {
       verifyAppToken,   // verify app token
       ctrl.getPendingSalesOrder // ongoing SO/invoice status
     );
-    
-// get the invoice detail by invoice mongo id
+
+    // get the invoice detail by invoice mongo id
     closed.route('/invoice/:type/:invId').get(
       // [joiGetInvValidate]
-       // joi history SO
+      // joi history SO
       verifyAppToken,   // verify app token
       ctrl.getInvoiceDocumentDetail // history SO/invoice status
     );
 
 
     // get the history invoice status
-    closed.route('/history/:type').get(
+    closed.route('/history').get(
       [joiHistoryOfSO], // joi history SO
       verifyAppToken,   // verify app token
       ctrl.getOrderHistoryByPickerBoyID
       // getHistoryOfSalesOrder // history SO/invoice status
     );
+    closed.route('/history/:type/invoices/:orderid').get(
+      [joiHistoryOfSO], // joi history SO
+      // verifyAppToken,   // verify app token
+      ctrl.getOrderHistoryAndInvoices
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
+
+    closed.route('/pending/:type/detail/:orderid').get(
+      // [joiHistoryOfSO], // joi history SO
+      // verifyAppToken,   // verify app token
+      ctrl.getPendingOrderAndInvoices
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
+
+
+    open.route('/report/pickingallocation').get(
+
+      // verifyAppToken,   // verify app token
+      ctrl.getPickingAllocationReport
+
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
+
+
+    open.route('/report/comprehensive').get(
+
+      // verifyAppToken,   // verify app token
+      ctrl.getComprehensiveSalesOrderReports
+
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
+
+
+
+
+
+    open.route('/list/invoice-open').get(
+
+      // verifyAppToken,   // verify app token
+      ctrl.getInvoices
+
+      // getHistoryOfSalesOrder // history SO/invoice status
+    );
+
+
   };
 }
 
