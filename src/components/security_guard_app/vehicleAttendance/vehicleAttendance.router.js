@@ -52,30 +52,6 @@ function vehicleRoutes() {
       ctrl.checkOutVehicle // controller function
     );
 
-    //get vehicle list on trip
-    closed.route("/trip/vehicle-list").get(
-      joiVehicleList,
-      verifySecurityAppToken, // verify app user token
-      ctrl.getTripByVehicleNumber // controller function
-    );
-    
-    //get trip details for a tripId
-    closed.route("/trip/trip-details/:tripId").get(
-      verifySecurityAppToken, // verify app user token
-      ctrl.getTripDetailsByTripId // controller function
-    );
-
-    // get details by gpn
-    closed.route("/trip/scan-gpn/:gpn").get(
-      verifySecurityAppToken, // verify app user token
-      ctrl.getGpnDetails // controller function
-    );
-    
-    // verify the gpn
-    closed.route("/trip/verify-gpn/:gpn").post(
-      verifySecurityAppToken, //verify app user token
-      ctrl.verifyGpn // controller function
-    )
   };
 }
 
