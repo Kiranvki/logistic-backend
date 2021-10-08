@@ -325,7 +325,7 @@ class invoiceMasterController extends BaseController {
             totalAmount=totalAmount+Number(invoiceDetails['itemSupplied'][j].total_amount)
             totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
           })
-          let qrCode = await QRCode.toDataURL(invoiceDetails['invoiceDetails']['signed_qrcode'],{type:'terminal'});
+          // let qrCode = await QRCode.toDataURL(invoiceDetails['invoiceDetails']['signed_qrcode'],{type:'terminal'});
 
             let InvoiceDetailsResponse={
               invoiceId:invoiceDetails._id,
@@ -333,7 +333,7 @@ class invoiceMasterController extends BaseController {
               invoiceNo:invoiceDetails.invoiceDetails.invoiceNo,
               invoiceDate:invoiceDetails.createdAt,
               paymentMode:salesOrderDetails.paymentMode,
-              signed_qrcode:qrCode,
+              // signed_qrcode:qrCode,
               // totalWeight:'NA',
               invoiceStatus:'Order Packed',
               soInvoiceNumber:salesOrderDetails.invoiceNo,
