@@ -5,7 +5,7 @@ const invoicePickerBoySalesOrderMappingctrl = require('../invoice_pickerboysales
 const salesOrderctrl = require('../../sales_order/sales_order/sales_order.controller');
 const pickerboySalesorderItemsMappingctrl = require('../pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
 const invoiceMastermodel = require('./models/invoice_master.model');
-
+const QRCode = require('qrcode');//QR code
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 const Model = require('./models/invoice_master.model');
@@ -325,6 +325,7 @@ class invoiceMasterController extends BaseController {
             totalAmount=totalAmount+Number(invoiceDetails['itemSupplied'][j].total_amount)
             totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
           })
+          // let qrCode = await QRCode.toDataURL(invoiceDetails['invoiceDetails']['signed_qrcode'],{type:'terminal'});
 
             let InvoiceDetailsResponse={
               invoiceId:invoiceDetails._id,
@@ -332,6 +333,7 @@ class invoiceMasterController extends BaseController {
               invoiceNo:invoiceDetails.invoiceDetails.invoiceNo,
               invoiceDate:invoiceDetails.createdAt,
               paymentMode:salesOrderDetails.paymentMode,
+              // signed_qrcode:qrCode,
               // totalWeight:'NA',
               invoiceStatus:'Order Packed',
               soInvoiceNumber:salesOrderDetails.invoiceNo,
