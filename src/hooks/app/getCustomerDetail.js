@@ -24,8 +24,11 @@ const {
 module.exports = async (req, res, next) => {
   try {
     info('Get the customer details !');
+    let invoiceDetail = req.body.invoice_detail['data'][0] || undefined,
+    
+    
 
-    let customerDataFromMicroService = await getCustomerDetails("0001029642");
+     customerDataFromMicroService = await getCustomerDetails(invoiceDetail['sold_to_party']);
     if(customerDataFromMicroService){
         req.body.customerDetail =  {success:true,data:customerDataFromMicroService}
         next()

@@ -18,7 +18,8 @@ const {
 // exporting the hooks 
 module.exports = async (req, res, next) => {
   
-  if(req.body.customerDetail.success&&(req.body.customerDetail['data']['data'].gstNumber!= ' '||req.body.customerDetail['data']['data'].gstNumber!= ''))
+  
+  if(req.body.customerDetail.success&&(req.body.customerDetail&&req.body.customerDetail['data']&&(req.body.customerDetail['data']['data'].gstNumber!= ' '||req.body.customerDetail['data']['data'].gstNumber!= '')))
     {
   try {
     console.log('customer',req.body.customerDetail)
