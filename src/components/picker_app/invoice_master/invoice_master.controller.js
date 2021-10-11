@@ -313,7 +313,8 @@ class invoiceMasterController extends BaseController {
           var warehouseDetails =  (salesOrderDetails.warehouse && salesOrderDetails.warehouse[0] )||{}
           var invoiceDetails = invoiceMappingDetails.data[0].invoice[0] || {};
           let totalAmount=0;
-          let totalTaxValue=0
+          let totalTaxValue=0,
+          totalDiscount = 0
           invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
             salesOrderDetails['item'].forEach((item,i)=>{
               if(item.material_no==invItem.itemId){
@@ -323,6 +324,7 @@ class invoiceMasterController extends BaseController {
             invoiceDetails['itemSupplied'][j].unitPrice=Number(invoiceDetails['itemSupplied'][j].total_amount)/invoiceDetails['itemSupplied'][j].quantity;
             invoiceDetails['itemSupplied'][j].totalAmount=Number(invoiceDetails['itemSupplied'][j].total_amount);
             console.log(Number(invoiceDetails['itemSupplied'][j].discountAmount.substring(2)))
+            totalDiscount=totalDiscount+Number(invoiceDetails['itemSupplied'][j].discountAmount.substring(2)) //remove once leading 1 resolved from SAP
             totalAmount=totalAmount+(Number(invoiceDetails['itemSupplied'][j].total_amount)-Number(invoiceDetails['itemSupplied'][j].discountAmount.substring(2))) // remove once fixed concatenated 1
             totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
           })
@@ -356,7 +358,7 @@ class invoiceMasterController extends BaseController {
               invoiceDetail:invoiceDetails,
               basketTotal: totalAmount-totalTaxValue,
               finalTotal:totalAmount-Number((invoiceDetails.totalDiscount).substring(2)),
-              totalDiscount:Number(invoiceDetails.totalDiscount),
+              totalDiscount:totalDiscount,    //Number(invoiceDetails.totalDiscount),
               cgst:Math.round((totalTaxValue/2)*100)/100,
               sgst:Math.round((totalTaxValue/2)*100)/100,
               gstNo:'NA',
