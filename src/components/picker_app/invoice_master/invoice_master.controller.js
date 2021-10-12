@@ -323,8 +323,8 @@ class invoiceMasterController extends BaseController {
             })
             invoiceDetails['itemSupplied'][j].unitPrice=Number(invoiceDetails['itemSupplied'][j].total_amount)/invoiceDetails['itemSupplied'][j].quantity;
             invoiceDetails['itemSupplied'][j].totalAmount=Number(invoiceDetails['itemSupplied'][j].total_amount);
-            console.log(Number(invoiceDetails['itemSupplied'][j].discountAmount.substring(2)))
-            totalDiscount=totalDiscount+Number(invoiceDetails['itemSupplied'][j].discountAmount.substring(2)) //remove once leading 1 resolved from SAP
+            // console.log(Number(invoiceDetails['itemSupplied'][j].discountAmount.substring(2)))
+            totalDiscount=totalDiscount+Number(invoiceDetails['itemSupplied'][j].discountAmount) //remove once leading 1 resolved from SAP
             totalAmount=totalAmount+(Number(invoiceDetails['itemSupplied'][j].total_amount)) // remove once fixed concatenated 1
             totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
           })
@@ -357,7 +357,7 @@ class invoiceMasterController extends BaseController {
               // itemsOrdered:invoiceDetails.itemSupplied,
               invoiceDetail:invoiceDetails,
               basketTotal: totalAmount-totalTaxValue,
-              finalTotal:totalAmount-totalDiscount,
+              finalTotal:(Math.round(totalAmount-totalDiscount)).toString()+'.00',
               totalDiscount:totalDiscount,    //Number(invoiceDetails.totalDiscount),
               cgst:Math.round((totalTaxValue/2)*100)/100,
               sgst:Math.round((totalTaxValue/2)*100)/100,
