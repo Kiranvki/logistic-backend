@@ -675,11 +675,11 @@ class vehicleInfoController extends BaseController {
               driverName: "$attendanceDetails.attendanceLog.driverName",
               checkInTimeInMins:
                 "$attendanceDetails.attendanceLog.checkInTimeInMins",
-              // vehicleType: 1,
-              // rateCategoryName:
-              //   "$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName",
-              // vehicleModel: 1,
-              // tonnage: 1,
+              vehicleType: 1,
+              rateCategoryName:
+                "$transporterRateCategoryDetails.rateCategory.rateCategoryDetails.rateCategoryName",
+              vehicleModel: 1,
+              tonnage: 1,
               status: 1,
               // rateCategoryDetails: "$transporterRateCategoryDetails.rateCategory",
               // attendanceDetails: 1,

@@ -72,13 +72,13 @@ class vehicleInfoController extends BaseController {
         $unwind: "$transporterDetails",
       },
       // {
-      //   "$lookup": {
-      //     from : "salesOrder",
-      //     let: {'id': "$salesOrderId"},
-      //     $match : {
-      //       '$expr' : {'$eq' : ['$_id','$$salesOrderId']}
+      //   $lookup: {
+      //     from: "salesOrder",
+      //     let: { id: "$salesOrderId" },
+      //     $match: {
+      //       $expr: { $eq: ["$_id", "$$salesOrderId"] },
       //     },
-      //     "as": "salesOrder",
+      //     as: "salesOrder",
       //   },
       // },
 
@@ -89,7 +89,7 @@ class vehicleInfoController extends BaseController {
           //   vehicleId:0,
           //   checkedInId:0,
           //   rateCategoryId:0,
-          totalCrates: "$salesOrder",
+          totalCrate: { $sum: ["$salesOrder.crateIn"] },
           vehicleNumber: "$transporterDetails.vehicle",
           totalSpotSales: {
             $cond: {
@@ -253,23 +253,23 @@ class vehicleInfoController extends BaseController {
         },
         {
           $group: {
-            _id: "$tripId",
+            _id: "$_id",
             vehicleRegNumber: { $first: "$vehicleRegNumber" },
             deliveryExecutiveEmpCode: { $first: "$deliveryExecutiveEmpCode" },
             deliveryExecutiveName: { $first: "$deliveryExecutiveName" },
             tripId: { $first: "$tripId" },
-            salesOrder: { $first: "$salesOrder" },
-
-            //  numberOfItems: { $cond: { if: { $isArray: "$salesorder.invoices.itemSupplied" }, then: { $size: "$salesorder.invoices.itemSupplied" }, else: "NA"} },
-            customerName: { $first: "$salesorder.sold_to_party_description" },
-            address: { $first: "$salesorder.invoices.shippingDetails.address" },
-            city: { $first: "$salesorder.invoices.shippingDetails.cityId" },
+            // salesOrder: { $first: "$salesOrder" },
             noOfCrates: { $first: "$salesorder.crateIn" },
+            noOfDeliveries: { $sum: "[$salesorder.invoices.itemSupplied]" },
             invoices: {
               $push: {
                 invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
-                gpnNo: "$salesorder.invoices.gpnNumber.gpn",
-                gpnStatus: "$salesorder.invoices.gpnNumber.isVerify",
+                gpnNo: {$first: "$salesorder.invoices.gpnNumber.gpn"},
+                gpnStatus: {$first: "$salesorder.invoices.gpnNumber.isVerify"},
+                customerName: "$salesorder.sold_to_party_description",
+                address: "$salesorder.invoices.shippingDetails.address",
+                city: "$salesorder.invoices.shippingDetails.cityId",
+                numberOfItems: " "
               },
             },
           },
@@ -383,7 +383,7 @@ class vehicleInfoController extends BaseController {
       // creating data to insert
       let dataToUpdate = {
         $set: {
-          isVerify: 1,
+          status: 1,
         },
       };
 
@@ -416,6 +416,128 @@ class vehicleInfoController extends BaseController {
           this.status.HTTP_CONFLICT,
           this.messageTypes.gpnNotVerified
         );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+  getTripHistoryList = async (req, res, next) => {
+    let type = req.params.type,
+      pageNumber = req.query.page || 1,
+      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
+        if (res.success) return res.data;
+        else return 60;
+      }),
+      sortBy = req.query.sortBy || "createdAt",
+      sortingArray = {};
+
+    sortingArray[sortBy] = -1;
+    let searchObject = {
+      isActive: parseInt(type),
+    };
+
+    let trip = await tripModel
+      .aggregate([
+        { $match: { ...searchObject } },
+        {
+          $project: {
+            truckName: { $first: "$transporterDetails.vehicle" },
+            deliveryExecutive: {
+              $first: "$transporterDetails.deliveryExecutiveName",
+            },
+            tripId: "$tripId",
+          },
+        },
+        {
+          $skip: pageSize * (pageNumber - 1),
+        },
+        {
+          $limit: pageSize,
+        },
+      ])
+      .allowDiskUse(true);
+
+    let totalCount = await tripModel.count({
+      ...searchObject,
+    });
+    let data = {
+      results: trip,
+      pageMeta: {
+        skip: pageSize * (pageNumber - 1),
+        pageSize: pageSize,
+        total: totalCount,
+      },
+    };
+
+    try {
+      info("getting vehicle trip list!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        data || [],
+        this.messageTypes.tripHistoryListFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.tripHistoryListNotFetched
+      );
+    }
+  };
+
+  getTripHistoryDetails = async (req, res, next) => {
+    info("getting in trip data!");
+    let tripId = req.params.tripId;
+    let pipeline = [
+      {
+        $match: {
+          $and: [
+            {
+              _id: mongoose.Types.ObjectId(tripId),
+            },
+            {
+              isActive: 1,
+            },
+          ],
+        },
+      },
+      
+    ];
+
+    let activeTripData = await tripModel.aggregate(pipeline);
+
+    console.log(activeTripData);
+
+    // console.log('totalCrateCount',data)
+
+    try {
+      info("Getting trip Detail!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        activeTripData || [],
+        this.messageTypes.tripHistoryListFetched
+      );
 
       // catch any runtime error
     } catch (err) {

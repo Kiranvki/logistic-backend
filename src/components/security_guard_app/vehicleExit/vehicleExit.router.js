@@ -31,6 +31,17 @@ function vehicleRoutes() {
       verifySecurityAppToken, //verify app user token
       ctrl.verifyGpn // controller function
     );
+    
+    closed.route("/trip/hisory/:type").get(
+      verifySecurityAppToken, //verify app user token
+      ctrl.getTripHistoryList // controller function
+    );
+
+    closed.route("/trip/hisoryDetails/:tripId").get(
+      verifySecurityAppToken, // verify app user token
+      ctrl.getTripHistoryDetails // controller function
+    );
+    
   };
 }
 

@@ -15,6 +15,9 @@ module.exports = {
   gpnDetailsFetched: "GPN Details Fetched Successfully !",
   gpnDetailsNotFetched: "GPN Details not Fetched !",
   gpnVerified: "GPN verified Successfully",
-  gpnNotVerified: "GPN Not Verified"
+  gpnNotVerified: "GPN Not Verified",
+  tripHistoryListFetched: "Trip History List Fetched Successfully.",
+  tripHistoryListNotFetched: "Trip History List Not Fetched."
+
 
 };
