@@ -1,8 +1,11 @@
 const BaseController = require("../../baseController");
 const BasicCtrl = require("../../basic_config/basic_config.controller");
+const masterModel = require("../../vehicle/vehicle_master/models/vehicle_master.model");
+const attendanceModel = require("../../vehicle/vehicle_attendance/models/vehicle_attendance.model");
 const tripModel = require("../../MyTrip/assign_trip/model/trip.model");
 const gpnModel = require("../../delivery_app/deliveryExecutiveTrip/model/gpn_model");
 
+const camelCase = require("camelcase");
 const mongoose = require("mongoose");
 const { error, info } = require("../../../utils").logging;
 const _ = require("lodash");
@@ -15,8 +18,8 @@ class vehicleInfoController extends BaseController {
     this.messageTypes = this.messageTypes.securityGuardApp;
   }
 
-  // get trip details by vehicle number
-  getTripByVehicleNumber = async (req, res, next) => {
+  // get entry vehicle list after delivery
+  entryVehicleList = async (req, res, next) => {
     let pageNumber = req.query.page || 1,
       pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
         if (res.success) return res.data;
@@ -52,6 +55,7 @@ class vehicleInfoController extends BaseController {
           },
         },
       ],
+      $or: [{ isCompleteDeleiveryDone: 1 }, { isPartialDeliveryDone: 1 }],
     };
 
     let pipeline = [
@@ -63,6 +67,7 @@ class vehicleInfoController extends BaseController {
             },
             { createdAt: { $gte: dateToday } },
           ],
+          // $or:[{isCompleteDeleiveryDone: 1},{isPartialDeliveryDone:1}]
         },
       },
       {
@@ -172,8 +177,8 @@ class vehicleInfoController extends BaseController {
     }
   };
 
-  // get trip details by trip Id
-  getTripDetailsByTripId = async (req, res, next) => {
+  // get entry vehicle details by trip Id
+  entryVehicleDetails = async (req, res, next) => {
     let ID = parseInt(req.params.tripId);
     info("getting trip data!");
 
@@ -259,7 +264,6 @@ class vehicleInfoController extends BaseController {
                 address: "$salesorder.invoices.shippingDetails.address",
                 city: "$salesorder.invoices.shippingDetails.cityId",
                 numberOfItems: " ",
-                categoryType: "salesOrder",
               },
             },
           },
@@ -296,295 +300,6 @@ class vehicleInfoController extends BaseController {
     }
   };
 
-  // scan and get GPN details by GPN number
-  getGpnDetails = async (req, res, next) => {
-    let gpnId = req.params.gpn;
-    info("getting gpn details!");
-
-    let gpnDetails = await gpnModel
-      .aggregate([
-        { $match: { gpn: gpnId, isDeleted: 0 } },
-        {
-          $lookup: {
-            from: "invoicemasters",
-            let: { id: "$invoiceNumber" },
-            pipeline: [
-              {
-                $match: {
-                  $expr: { $eq: [["$invoiceDetails.invoiceNo"], "$$id"] },
-                },
-              },
-              // {$project: {
-              //     "gpn": 1,
-
-              // }}
-            ],
-            as: "invoice",
-          },
-        },
-        { $unwind: "$invoice" },
-        {
-          $project: {
-            _id: 1,
-            invoiceNumber: "$invoice.invoiceDetails.invoiceNo",
-            // "itemSupplied": "$invoice.itemSupplied",
-            itemName: "$invoice.itemSupplied.itemName",
-          },
-        },
-      ])
-      .allowDiskUse(true);
-
-    let data = {
-      results: gpnDetails,
-    };
-
-    try {
-      info("getting gpn data!");
-
-      // success response
-      this.success(
-        req,
-        res,
-        this.status.HTTP_OK,
-        data || [],
-        this.messageTypes.gpnDetailsFetched
-      );
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err),
-        this.messageTypes.gpnDetailsNotFetched
-      );
-    }
-  };
-
-  //verify gpn
-  verifyGpn = async (req, res) => {
-    try {
-      info("GPN STATUS CHANGE !");
-
-      let gpnId = req.params.gpn;
-
-      // creating data to insert
-      let dataToUpdate = {
-        $set: {
-          status: 1,
-        },
-      };
-
-      // inserting data into the db
-      let isUpdated = await gpnModel.findOneAndUpdate(
-        {
-          gpn: gpnId,
-        },
-        dataToUpdate,
-        {
-          new: true,
-          upsert: false,
-          lean: true,
-        }
-      );
-
-      // check if inserted
-      if (isUpdated && !_.isEmpty(isUpdated))
-        return this.success(
-          req,
-          res,
-          this.status.HTTP_OK,
-          isUpdated,
-          this.messageTypes.gpnVerified
-        );
-      else
-        return this.errors(
-          req,
-          res,
-          this.status.HTTP_CONFLICT,
-          this.messageTypes.gpnNotVerified
-        );
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
-    }
-  };
-
-  getTripHistoryList = async (req, res, next) => {
-    let type = req.params.type,
-      pageNumber = req.query.page || 1,
-      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
-        if (res.success) return res.data;
-        else return 60;
-      }),
-      sortBy = req.query.sortBy || "createdAt",
-      sortingArray = {};
-
-    let startDate =
-        req.query.startDate ||
-        moment()
-          .set({
-            h: 0,
-            m: 0,
-            s: 0,
-            millisecond: 0,
-          })
-          .toDate(),
-      endDate =
-        req.query.endDate ||
-        moment()
-          .set({
-            h: 24,
-            m: 24,
-            s: 0,
-            millisecond: 0,
-          })
-          .toDate();
-
-    if (startDate && !_.isEmpty(startDate)) {
-      startDate = moment(startDate, "DD-MM-YYYY")
-        .set({
-          h: 0,
-          m: 0,
-          s: 0,
-          millisecond: 0,
-        })
-        .toDate();
-    }
-
-    if (endDate && !_.isEmpty(endDate)) {
-      endDate = moment(endDate, "DD-MM-YYYY")
-        .set({
-          h: 24,
-          m: 24,
-          s: 0,
-          millisecond: 0,
-        })
-        .toDate();
-    }
-
-    sortingArray[sortBy] = -1;
-    let searchObject = {
-      isActive: parseInt(type),
-      createdAt: { $gte: startDate, $lte: endDate },
-    };
-
-    let trip = await tripModel
-      .aggregate([
-        {
-          $match: { ...searchObject },
-        },
-        {
-          $project: {
-            truckName: { $first: "$transporterDetails.vehicle" },
-            deliveryExecutive: {
-              $first: "$transporterDetails.deliveryExecutiveName",
-            },
-            tripId: "$tripId",
-          },
-        },
-        {
-          $skip: pageSize * (pageNumber - 1),
-        },
-        {
-          $limit: pageSize,
-        },
-      ])
-      .allowDiskUse(true);
-
-    let totalCount = await tripModel.count({
-      ...searchObject,
-    });
-    let data = {
-      results: trip,
-      pageMeta: {
-        skip: pageSize * (pageNumber - 1),
-        pageSize: pageSize,
-        total: totalCount,
-      },
-    };
-
-    try {
-      info("getting vehicle trip list!");
-
-      // success response
-      this.success(
-        req,
-        res,
-        this.status.HTTP_OK,
-        data || [],
-        this.messageTypes.tripHistoryListFetched
-      );
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err),
-        this.messageTypes.tripHistoryListNotFetched
-      );
-    }
-  };
-
-  getTripHistoryDetails = async (req, res, next) => {
-    info("getting in trip data!");
-    let tripId = req.params.tripId;
-    let pipeline = [
-      {
-        $match: {
-          $and: [
-            {
-              _id: mongoose.Types.ObjectId(tripId),
-            },
-            {
-              isActive: 1,
-            },
-          ],
-        },
-      },
-    ];
-
-    let activeTripData = await tripModel.aggregate(pipeline);
-
-    console.log(activeTripData);
-
-    // console.log('totalCrateCount',data)
-
-    try {
-      info("Getting trip Detail!");
-
-      // success response
-      this.success(
-        req,
-        res,
-        this.status.HTTP_OK,
-        activeTripData || [],
-        this.messageTypes.tripHistoryListFetched
-      );
-
-      // catch any runtime error
-    } catch (err) {
-      error(err);
-      this.errors(
-        req,
-        res,
-        this.status.HTTP_INTERNAL_SERVER_ERROR,
-        this.exceptions.internalServerErr(req, err)
-      );
-    }
-  };
 }
 
 module.exports = new vehicleInfoController();
