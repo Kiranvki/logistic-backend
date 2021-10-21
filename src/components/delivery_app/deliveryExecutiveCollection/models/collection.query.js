@@ -20,7 +20,7 @@ class CollectionQuery {
 
   async calculatePendingAmount(invoiceNo){
     let result=await deCollectionModel.aggregate([ { '$match': { 'invoicesMapped.invoiceNo': invoiceNo } }, { '$group': { _id: '', totalCollection: { '$sum': '$collectionAmount' },"pendingAmount":{"$first":"$invoicesMapped.pendingAmount"}}}])
-    return result.length?result[0].pendingAmount:[]
+    return result.length?result[0].pendingAmount[0]:0
   }
 
 

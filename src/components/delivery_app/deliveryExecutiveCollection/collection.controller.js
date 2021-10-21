@@ -182,10 +182,10 @@ class NewCollection extends BaseController {
           let commitedInvoices=await collectionQuery.getCommittedInvoice(Number(soldToParty))
           let totalNetValue = invoiceList[i].totalNetValue
           let totalPendingAmount = await collectionQuery.calculatePendingAmount(invoiceList[i].invoiceDetails.invoiceNo)
-          let pendingAmount = totalPendingAmount.length ? totalPendingAmount[0] : totalNetValue
+          let pendingAmount = totalPendingAmount ? totalPendingAmount : totalNetValue
           let count=0
           for (let j in commitedInvoices){
-            if (commitedInvoices[j].invoice.invoiceDetails&&invoiceList[i].invoiceDetails.invoiceNo==commitedInvoices[j].invoice.invoiceDetails.invoiceNo){
+            if (commitedInvoices[j].invoice && commitedInvoices[j].invoice.length && commitedInvoices[j].invoice[0].invoiceDetails && invoiceList[i].invoiceDetails.invoiceNo==commitedInvoices[j].invoice[0].invoiceDetails.invoiceNo){
               data["commitedInvoices"].push({_id:mongoose.Types.ObjectId(invoiceList[i]._id),
                 ...invoiceList[i].invoiceDetails,
                 'pendingAmount': pendingAmount,
