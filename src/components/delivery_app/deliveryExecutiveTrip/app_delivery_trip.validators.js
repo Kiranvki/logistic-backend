@@ -210,7 +210,7 @@ module.exports = {
     let option = options.basic;
 
     // validating the schema 
-    schema.validate({'type':req.params.type,'orderid':req.params.itemid,...req.body}, option).then(() => {
+    schema.validate({'type':req.params.type,'orderid':req.params.itemId,...req.body}, option).then(() => {
         next();
         // if error occured
     }).catch((err) => {

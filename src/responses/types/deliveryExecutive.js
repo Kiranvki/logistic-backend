@@ -14,7 +14,9 @@ module.exports = {
     SalesOrderListByTripIdFetchedSuccessfully: "Sales order list fetched successfully !",
     SalesOrderListByTripIdNotFetchedSuccessfully: "No data found !",
     InoiceNumberBySoIdFetchedSuccessfully: "Invoice Number fetched successfully !",
-    InoiceNumberBySoIdNotFetchedSuccessfully: "No data found !"
+    InoiceNumberBySoIdNotFetchedSuccessfully: "No data found !",
+    disputeDetailsFetchedSuccessfully: 'Dispute Details Fetched Successfully.',
+
 
 
     
