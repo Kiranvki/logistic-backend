@@ -1,6 +1,7 @@
 const masterInvoicesModel = require("../../../picker_app/invoice_master/models/invoice_master.model");
-const deCollectionHistoryModel = require("./deCollectionHistory.model");
-const deCollectionModel = require("./deliveryExecutiveCollection.model");
+const deCollectionHistoryModel = require("./commitments.model");
+const deCollectionModel = require("./deliveryExecutiveCollection.model"),
+      commitmentModel=require("./commitments.model")
 
 class CollectionQuery {
   async createNewCollection(object) {
@@ -171,6 +172,87 @@ class CollectionQuery {
     return await masterInvoicesModel.find({
       "invoiceDetails.sold_to_party": soldToParty,
     }).sort(sortOn);
+  }
+
+  async getCommittedInvoice(soldToParty){
+    return await commitmentModel.aggregate(
+      [
+          {
+              $match:{
+                  goFrugalId:Number("0001039285"),
+                  isDeleted:0,
+                  status:1
+                  
+              }
+              
+          },
+          {$project:{
+              _id:1,
+              salesmanId:1,
+              customerId:1,
+              commitmentDate : 1,
+              commitmentDateTime : 1,
+              totalCommitmentAmount : 1,
+          }},
+          {$lookup: {
+              
+                 from: "commitmentinvoicemappings",
+                 let: { id:"$_id"},
+                 pipeline: [
+                     { $match:
+                        { $expr:
+                        {$eq:["$commitmentId","$$id"]}                     }
+                     },
+                     {
+                         $lookup: {
+                                from: "invoicemasters",
+                                localField: "invoiceId",
+                                foreignField: "_id",
+                                as: "invoices"
+                              }
+                     }
+                     ],
+                as: "result"
+          }},
+          {$project:{"invoice":{$first:"$result.invoices"},
+            "salesmanId":"$salesmanId",
+              "customerId":"$customerId",
+              "commitmentDate" : "$commitmentDate",
+              "commitmentDateTime" : "$commitmentDateTime",
+              "totalCommitmentAmount" : "$totalCommitmentAmount"
+              
+          }},
+            //   {
+            //   $group:{
+                  
+            //     "_id": "$committedInvoices._id",
+            //     "invoiceNo":{$first:"$invoice.invoiceNo"},
+            //     "invoiceDate":{$first:"$invoice.invoiceDate"},
+            //     "sapID":{$first:"$invoice.sapID"},
+            //     "billing_type":{$first:"$invoice.billing_type"},
+            //     "sales_Org":{$first:"$invoice.sales_Org"},
+            //     "distribution_channel":{$first:"$invoice.distribution_channel"},
+            //     "division":{$first:"$invoice.division"},
+            //     "customer_price_group":{$first:"$invoice.customer_price_group"},
+            //     "customer_group":{$first:"$invoice.customer_group"},
+            //     "inco_terms":{$first:"$invoice.inco_terms"},
+            //     "company_code":{$first:"$invoice.company_code"},
+            //     "account_assignment_group":{$first:"$invoice.account_assignment_group"},
+            //     "sold_to_party":{$first:"$invoice.sold_to_party"},
+            //     "bill_to_party":{$first:"$invoice.bill_to_party"},
+            //     "pendingAmount":{$first:"$invoice.pendingAmount"},
+            //     "totalAmount":{$first:"$invoice.totalAmount"},
+            //     "createdAt":{$first:"$invoice.createdAt"},
+            //     "updatedAt":{$first:"$invoice.updatedAt"},
+            //      "salesmanId":{$first:"$salesmanId"},
+            //   "customerId":{$first:"$customerId"},
+            //   "commitmentDate" : {$first:"$commitmentDate"},
+            //   "commitmentDateTime" : {$first:"$commitmentDateTime"},
+            //   "totalCommitmentAmount" : {$sum:"$totalCommitmentAmount"},
+
+            //   }
+        //   }
+          ])
   }
 }
 
