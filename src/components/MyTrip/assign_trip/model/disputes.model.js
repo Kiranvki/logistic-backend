@@ -33,6 +33,11 @@ let disputeSchema = Schema({
       itemId: {
         type: Number
     },
+
+    acceptedQty:{
+      type: Number
+    },
+
     status: {
         type: Number,
         default: 0,

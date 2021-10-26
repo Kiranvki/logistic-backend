@@ -703,8 +703,8 @@ class DeliveryExecutivetrip extends BaseController {
       let responseObj = {
 
         'invoiceNumber': invoiceNumber,
-        'invoiceId': invoiceId,
-        'qr': qr,
+        //'invoiceId': invoiceId,
+        //'qr': qr,
         'gpn': gpnData.gpn
 
       }
@@ -2110,7 +2110,7 @@ class DeliveryExecutivetrip extends BaseController {
        foreignField:"_id",
        as:"invoices" ,
    }},
-   {$project:{disputeId:1, status:1,"disputeDate":"$createdAt","invoicesNo":{$first:"$invoices.invoiceDetails.invoiceNo"}}},
+   {$project:{disputeId:1, acceptedQty:1, status:1,"disputeDate":"$createdAt","invoicesNo":{$first:"$invoices.invoiceDetails.invoiceNo"}}},
 
     {
       $skip: (pageSize * (pageNumber - 1))
