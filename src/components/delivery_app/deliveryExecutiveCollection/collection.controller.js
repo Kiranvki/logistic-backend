@@ -21,71 +21,16 @@ class NewCollection extends BaseController {
 
       req.body.customer = {
         sold_to_party: req.body.soldToParty,
-        sold_to_party_description: req.body.customerName,
+        sold_to_party_description: req.body.sold_to_party_description,
       };
-
-
-      let collectionsDoneAgainstOneInvoice;
-
-      for (let i in req.body.invoicesMapped) {
-        projection = {
-          "invoiceDetails.invoiceNo":
-            req.body.invoicesMapped[i].invoiceDetails.invoiceNo,
-          soId: req.body.soId,
-        };
-        let sort = req.body.sort
-        let getInvoice = await collectionQuery.getInvoiceList(projection, sort)
-        getInvoice = getInvoice[0];
-        if (req.body.invoicesMapped[i]["partialMapping"] == false) {
-          req.body.invoicesMapped[i].invoiceState = "fulfilled";
-        }
-
-        if (req.body.invoicesMapped[i]["partialMapping"] == true) {
-          req.body.invoicesMapped[i].invoiceState = "partial";
-        }
-        if (getInvoice) {
-          req.body.invoicesMapped[i].sold_to_party =
-            getInvoice.invoiceDetails.sold_to_party;
-          req.body.invoicesMapped[i].invoiceId = mongoose.Types.ObjectId(getInvoice._id);
-          req.body.invoicesMapped[i].invoiceNo =
-            getInvoice.invoiceDetails.invoiceNo;
-
-          req.body.invoicesMapped[i].totalNetValue = getInvoice.totalNetValue;
-          req.body.invoicesMapped[i].location = getInvoice.location;
-          req.body.invoicesMapped[i].invoiceDate = getInvoice.invoiceDate;
-
-          collectionsDoneAgainstOneInvoice =
-            await collectionQuery.totalcollectionsAgainstOneInvoice(
-              getInvoice.invoiceDetails.invoiceNo
-            );
-          let totalCollection
-          if (collectionsDoneAgainstOneInvoice.length && collectionsDoneAgainstOneInvoice[0].totalCollection != 0) {
-            totalCollection = collectionsDoneAgainstOneInvoice[0].totalCollection + req.body.collectionAmount
-          } else { totalCollection = req.body.collectionAmount }
-
-          req.body.invoicesMapped[i].pendingAmount =
-            getInvoice.totalNetValue - totalCollection
-
-          if (req.body.collectionAmount == req.body.invoicesMapped[i].totalNetValue) {
-            req.body.invoicesMapped[i].invoiceState = "fulfilled"
-          }
-
-          if (req.body.collectionAmount < req.body.invoicesMapped[i].totalNetValue) {
-            req.body.invoicesMapped[i].invoiceState = "partial"
-          }
-
-
-          await collectionQuery.updatePendingAmountInCollections(req.body.soId, req.body.invoicesMapped[i].invoiceNo, req.body.invoicesMapped[i].pendingAmount)
-
-        }
-      }
+       let collectionId=req.body.collectionId
 
       // req.body.DEEmployeeId = req.userDetails.employeeId;
-      req.body.collectionDate = req.body.date;
+      
       req.body.sold_to_party = req.body.soldToParty;
       req.body.collectionDoneBy = "waycool";
       // req.body.DEName = req.userDetails.name;
-      req.body.isInvoiceMapped = true;
+      req.body.isInvoiceMapped = false;
       req.body.isCollectionMade = true;
       req.body.collectionDone = true;
 
@@ -111,6 +56,10 @@ class NewCollection extends BaseController {
       if (req.body.type === "cheque") {
         for (let v of req.body.cheque) {
           v.status = "approved";
+          v.stage=[{
+            "state" : "handed over to DE",
+            "date" : new Date()
+          }]
         }
         req.body.cheque.DEDetails = DEDetails;
       }
@@ -120,6 +69,10 @@ class NewCollection extends BaseController {
 
         for (let v of req.body.demandDraft) {
           v.status = "approved";
+          v.stage=[{
+            "state" : "handed over to DE",
+            "date" : new Date()
+          }]
         }
       }
 
@@ -135,13 +88,14 @@ class NewCollection extends BaseController {
       }
 
 
-      await collectionQuery.createNewCollection(req.body);
-
+      let result=await collectionQuery.createNewCollection(req.body);
+    console.log("result>>>>>>>>>",result)
+    
       return this.success(
         req,
         res,
         this.status.HTTP_OK,
-        [],
+        {collectionId:result._id||""},
         "Collection Created"
       );
     } catch (err) {
@@ -156,6 +110,94 @@ class NewCollection extends BaseController {
 
     // success(req, res, status, data = null, message = 'success')
   };
+
+  mapInvoicesToCollection=async(req,res)=>{
+    try{
+
+    let collectionsDoneAgainstOneInvoice;
+
+    for (let i in req.body.invoicesMapped) {
+      let projection = {
+        "invoiceDetails.invoiceNo":
+          req.body.invoicesMapped[i].invoiceDetails.invoiceNo,
+        soId: req.body.soId,
+      };
+      let sort = req.body.sort
+      let getInvoice = await collectionQuery.getInvoiceList(projection, sort)
+      getInvoice = getInvoice[0];
+      if (req.body.invoicesMapped[i]["partialMapping"] == false) {
+        req.body.invoicesMapped[i].invoiceState = "fulfilled";
+      }
+
+      if (req.body.invoicesMapped[i]["partialMapping"] == true) {
+        req.body.invoicesMapped[i].invoiceState = "partial";
+      }
+      if (getInvoice) {
+        req.body.invoicesMapped[i].sold_to_party =
+          getInvoice.invoiceDetails.sold_to_party;
+        req.body.invoicesMapped[i].invoiceId = mongoose.Types.ObjectId(getInvoice._id);
+        req.body.invoicesMapped[i].invoiceNo =
+          getInvoice.invoiceDetails.invoiceNo;
+
+        req.body.invoicesMapped[i].totalNetValue = getInvoice.totalNetValue;
+        req.body.invoicesMapped[i].location = getInvoice.location;
+        req.body.invoicesMapped[i].invoiceDate = getInvoice.invoiceDate;
+
+        collectionsDoneAgainstOneInvoice =
+          await collectionQuery.totalcollectionsAgainstOneInvoice(
+            getInvoice.invoiceDetails.invoiceNo
+          );
+        let totalCollection
+        if (collectionsDoneAgainstOneInvoice.length && collectionsDoneAgainstOneInvoice[0].totalCollection != 0) {
+          totalCollection = collectionsDoneAgainstOneInvoice[0].totalCollection + req.body.collectionAmount
+        } else { totalCollection = req.body.collectionAmount }
+
+        req.body.invoicesMapped[i].pendingAmount =
+          getInvoice.totalNetValue - totalCollection
+
+        if(req.body.invoicesMapped[i].pendingAmount>=0){  
+
+        if (req.body.collectionAmount == req.body.invoicesMapped[i].totalNetValue) {
+          req.body.invoicesMapped[i].invoiceState = "fulfilled"
+        }
+
+        if (req.body.collectionAmount < req.body.invoicesMapped[i].totalNetValue) {
+          req.body.invoicesMapped[i].invoiceState = "partial"
+        }
+
+        if (req.body.collectionStatus && req.body.collectionStatus=="complete"){
+          req.body.overallCollectionStatus = "complete";
+
+            await collectionQuery.updatePendingAmountInCollections(req.body.soId, req.body.invoicesMapped[i].invoiceNo, req.body.invoicesMapped[i].pendingAmount,"complete")
+          }else{
+            req.body.overallCollectionStatus = "partial";
+
+            await collectionQuery.updatePendingAmountInCollections(req.body.soId, req.body.invoicesMapped[i].invoiceNo, req.body.invoicesMapped[i].pendingAmount,"partial")
+          }
+      }
+    }
+  }
+
+  let result=await collectionQuery.mapInvoicesToCollection(req.body.collectionId,req.body);
+
+  return this.success(
+    req,
+    res,
+    this.status.HTTP_OK,
+    {},
+    "invoices mapped to collection"
+  );
+} catch (err) {
+  error(err);
+  this.errors(
+    req,
+    res,
+    this.status.HTTP_INTERNAL_SERVER_ERROR,
+    "Internal Server Error",
+  );
+}
+
+  }
 
   //function to fetch all the invoices against a customer
   getInvoiceListByCustomer = async (req, res) => {

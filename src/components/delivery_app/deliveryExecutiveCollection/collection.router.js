@@ -45,6 +45,14 @@ function collectionRoutes() {
       // verifyAppToken, // verify app token
       ctrl.getInvoiceListByCustomer
     );
+
+    closed.route("/mapInvoicesToCollection").put(
+      // verifyDeliveryAppToken,
+      // isValidDeliveryId,
+      // isActiveDelivery,
+      // verifyAppToken, // verify app token
+      ctrl.mapInvoicesToCollection
+    );
     
   };
 }

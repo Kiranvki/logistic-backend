@@ -1,7 +1,9 @@
 const masterInvoicesModel = require("../../../picker_app/invoice_master/models/invoice_master.model");
 const deCollectionHistoryModel = require("./commitments.model");
 const deCollectionModel = require("./deliveryExecutiveCollection.model"),
-      commitmentModel=require("./commitments.model")
+      commitmentModel=require("./commitments.model"),
+      mongoose = require("mongoose")
+
 
 class CollectionQuery {
   async createNewCollection(object) {
@@ -9,13 +11,20 @@ class CollectionQuery {
     return await deCollectionModel.create(object);
   }
 
+  async mapInvoicesToCollection(collectionId,object){
+    return await deCollectionModel.updateOne({_id:mongoose.Types.ObjectId(collectionId)},{$set:object})
+  }
+
   async getInvoices(projection, sortBy) {
     return await masterInvoicesModel.find(projection).sort(sortBy);
   }
 
-  async updatePendingAmountInCollections(soId,invoiceNo,pendingAmount){
-    console.log("here>>>>>>>>>>>>");
-    return await deCollectionModel.updateMany({soId:soId,invoicesMapped:{ $elemMatch: {'invoiceNo':invoiceNo}}},{$set:{"invoicesMapped.$.pendingAmount":pendingAmount}},{upsert:true})
+  async updatePendingAmountInCollections(soId,invoiceNo,pendingAmount,overallCollectionStatus){
+    if (overallCollectionStatus){
+      return await deCollectionModel.updateMany({soId:soId,invoicesMapped:{ $elemMatch: {'invoiceNo':invoiceNo}}},{$set:{"invoicesMapped.$.pendingAmount":pendingAmount,"overallCollectionStatus":overallCollectionStatus}},{upsert:true})
+    }else{
+      return await deCollectionModel.updateMany({soId:soId,invoicesMapped:{ $elemMatch: {'invoiceNo':invoiceNo}}},{$set:{"invoicesMapped.$.pendingAmount":pendingAmount}},{upsert:true})
+    }
   }
 
   async calculatePendingAmount(invoiceNo){

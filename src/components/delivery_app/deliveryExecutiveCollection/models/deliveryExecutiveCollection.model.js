@@ -82,6 +82,10 @@ let collectionSchema = mongoose.Schema(
       enum: ["pending","partial","complete"],
       default:"pending"
     },
+    overallCollectionStatus: {
+      type: "String",
+      enum: ["pending","partial","complete"],
+    },
     isFailed: {
       type: Boolean,
       default: false,
