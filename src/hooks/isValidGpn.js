@@ -36,11 +36,11 @@ module.exports = async (req, res, next) => {
        
       } else {
         error('INVALID GPN!');
-        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.salesmanIdInvalidEitherDeletedOrDeactivated);
+        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.securityGuardApp.gpnIsValid);
       }
     } else {
       error('The salesman ID is Invalid !');
-      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.employee.invalidSalesmanId);
+      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.securityGuardApp.gpnIsInvalid);
     }
 
     // catch any runtime error 

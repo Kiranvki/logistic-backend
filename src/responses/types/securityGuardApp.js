@@ -24,5 +24,7 @@ module.exports = {
   itemsIdsFetched: "Item Ids List Fetched Successfully",
   itemsIdsNotFetched: "Item Ids List Not Fetched",
   vehicleAllowed: "Vehicle Allowed Successfully",
-  vehicleNotAllowed: "Vehicel not Allowed"
+  vehicleNotAllowed: "Vehicel not Allowed",
+  gpnIsValid:"GPN is Valid",
+  gpnIsInvalid:"GPN is Invalid"
 };
