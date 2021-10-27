@@ -17,7 +17,7 @@ function connectDb() {
   });
 
   mongoose.connection.on('connected', function () {
-    // mongoose.set('debug', true);
+    mongoose.set('debug', true);
     info(chalk.blue(' [ ✓ ] ') + 'Application - Connected to MongoDb');
   });
 

@@ -280,13 +280,13 @@ class areaSalesManagerController extends BaseController {
         // 'isPacked': 0,
         'fulfillmentStatus': 1,
         'plant':  plant.toString() ,
-        'isDeleted':0,
-        'status':1,
+        // 'isDeleted':0,
+        // 'status':1,
         // 'locationId': parseInt(locationId),
         // 'cityId': cityId,
 
         'req_del_date': {
-          '$gte': yasterdayDate,
+          '$gt': yasterdayDate,
           '$lte': startOfTheDay
         }
       };
@@ -2227,6 +2227,7 @@ salesOrderDetailByIdAndPickingDate = async (saleOrderId) => {
     //   this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
   }
 }
+
 
 
 

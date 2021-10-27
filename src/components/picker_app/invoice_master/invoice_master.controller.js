@@ -5,7 +5,7 @@ const invoicePickerBoySalesOrderMappingctrl = require('../invoice_pickerboysales
 const salesOrderctrl = require('../../sales_order/sales_order/sales_order.controller');
 const pickerboySalesorderItemsMappingctrl = require('../pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
 const invoiceMastermodel = require('./models/invoice_master.model');
-
+const QRCode = require('qrcode');//QR code
 const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 const Model = require('./models/invoice_master.model');
@@ -313,7 +313,8 @@ class invoiceMasterController extends BaseController {
           var warehouseDetails =  (salesOrderDetails.warehouse && salesOrderDetails.warehouse[0] )||{}
           var invoiceDetails = invoiceMappingDetails.data[0].invoice[0] || {};
           let totalAmount=0;
-          let totalTaxValue=0
+          let totalTaxValue=0,
+          totalDiscount = 0
           invoiceDetails['itemSupplied'].forEach((invItem,j)=>{
             salesOrderDetails['item'].forEach((item,i)=>{
               if(item.material_no==invItem.itemId){
@@ -322,9 +323,12 @@ class invoiceMasterController extends BaseController {
             })
             invoiceDetails['itemSupplied'][j].unitPrice=Number(invoiceDetails['itemSupplied'][j].total_amount)/invoiceDetails['itemSupplied'][j].quantity;
             invoiceDetails['itemSupplied'][j].totalAmount=Number(invoiceDetails['itemSupplied'][j].total_amount);
-            totalAmount=totalAmount+Number(invoiceDetails['itemSupplied'][j].total_amount)
+            // console.log(Number(invoiceDetails['itemSupplied'][j].discountAmount.substring(2)))
+            totalDiscount=totalDiscount+Number(invoiceDetails['itemSupplied'][j].discountAmount) //remove once leading 1 resolved from SAP
+            totalAmount=totalAmount+(Number(invoiceDetails['itemSupplied'][j].total_amount)) // remove once fixed concatenated 1
             totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
           })
+          // let qrCode = await QRCode.toDataURL(invoiceDetails['invoiceDetails']['signed_qrcode'],{type:'terminal'});
 
             let InvoiceDetailsResponse={
               invoiceId:invoiceDetails._id,
@@ -332,6 +336,7 @@ class invoiceMasterController extends BaseController {
               invoiceNo:invoiceDetails.invoiceDetails.invoiceNo,
               invoiceDate:invoiceDetails.createdAt,
               paymentMode:salesOrderDetails.paymentMode,
+              // signed_qrcode:qrCode,
               // totalWeight:'NA',
               invoiceStatus:'Order Packed',
               soInvoiceNumber:salesOrderDetails.invoiceNo,
@@ -352,8 +357,8 @@ class invoiceMasterController extends BaseController {
               // itemsOrdered:invoiceDetails.itemSupplied,
               invoiceDetail:invoiceDetails,
               basketTotal: totalAmount-totalTaxValue,
-              finalTotal:totalAmount,
-              totalDiscount:Number(invoiceDetails.totalDiscount),
+              finalTotal:(Math.round(totalAmount+totalDiscount)).toString()+'.00',
+              totalDiscount:totalDiscount,    //Number(invoiceDetails.totalDiscount),
               cgst:Math.round((totalTaxValue/2)*100)/100,
               sgst:Math.round((totalTaxValue/2)*100)/100,
               gstNo:'NA',

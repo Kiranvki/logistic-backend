@@ -1,3 +1,5 @@
+const isActiveDelivery = require('./isActiveDelivery');
+
 module.exports = {
   // On boarding hooks 
   checkWhetherAValidPickerCrediantial: require('./checkWhetherAValidPickerCrediantial'),
@@ -84,7 +86,11 @@ module.exports = {
   getAvailableStock:require('./getAvailableStock'),
   checkStockAvailability:require('./checkStockAvailability'),
   isClearBucket:require('./isClearBucket'),
+  isActiveDelivery:require('./isActiveDelivery'),
   getInvoiceNumber:require('./getInvoiceNumber'),
-  isInvoiceAlreadyFetched:require('./isInvoiceAlreadyFetched')
+  isInvoiceAlreadyFetched:require('./isInvoiceAlreadyFetched'),
+  invoiceFetchCounter:require('./invoiceFetchCounter'),
+  generateEInvoice:require('./generateEInvoice'),
+  getCustomerDetail:require('./getCustomerDetail')
 
 }
