@@ -3,15 +3,15 @@ const BasicCtrl = require("../../basic_config/basic_config.controller");
 const masterModel = require("../../vehicle/vehicle_master/models/vehicle_master.model");
 const attendanceModel = require("../../vehicle/vehicle_attendance/models/vehicle_attendance.model");
 const tripModel = require("../../MyTrip/assign_trip/model/trip.model");
-const gpnModel = require("../../delivery_app/deliveryExecutiveTrip/model/gpn_model");
-
+const invoiceModel = require("../../picker_app/invoice_master/models/invoice_master.model");
+const salesOrderModel = require("../../sales_order/sales_order/models/sales_order.model");
 const camelCase = require("camelcase");
 const mongoose = require("mongoose");
 const { error, info } = require("../../../utils").logging;
 const _ = require("lodash");
 const moment = require("moment");
 
-class vehicleInfoController extends BaseController {
+class vehicleEntryController extends BaseController {
   // constructor
   constructor() {
     super();
@@ -41,33 +41,17 @@ class vehicleInfoController extends BaseController {
       .toDate();
 
     let searchObject = {
-      $or: [
-        {
-          "transporterDetails.vehicle": {
-            $regex: searchKey,
-            $options: "is",
-          },
-        },
-        {
-          vehicleModel: {
-            $regex: searchKey,
-            $options: "is",
-          },
-        },
-      ],
+      "transporterDetails.vehicle": {
+        $regex: searchKey,
+        $options: "is",
+      },
       $or: [{ isCompleteDeleiveryDone: 1 }, { isPartialDeliveryDone: 1 }],
     };
 
     let pipeline = [
       {
         $match: {
-          $or: [
-            {
-              ...searchObject,
-            },
-            { createdAt: { $gte: dateToday } },
-          ],
-          // $or:[{isCompleteDeleiveryDone: 1},{isPartialDeliveryDone:1}]
+          ...searchObject
         },
       },
       {
@@ -300,6 +284,105 @@ class vehicleInfoController extends BaseController {
     }
   };
 
+  //update the returned crates after delivery
+  updateCratesQuantity = async (req, res, next) => {
+    let id = req.params.id;
+    let cratesRemaining = req.params.crates;
+    let updatedOrderDetail;
+
+    // update crate numbers
+
+    try {
+      let updateObj = {
+        "orderItems.$.cratesReturned": cratesRemaining || "",
+      };
+
+      updatedOrderDetail = await salesOrderModel.update(
+        {
+          _id: mongoose.Types.ObjectId(id),
+          "orderItems._id": mongoose.Types.ObjectId(item.id),
+        },
+        { $set: { ...updateObj } }
+      );
+
+      info("Crates Numbers Updating!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        updatedOrderDetail || [],
+        this.messageTypes.cratesUpdated
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+  //verify invoice after trip
+  verifyDeliveredInvoice = async (req, res) => {
+    try {
+      info("Update Invoice Status !");
+
+      let id = req.params.invoiceid;
+
+      // creating data to insert
+      let dataToUpdate = {
+        $set: {
+          isDelivered: 1,
+        },
+      };
+
+      // inserting data into the db
+      let isUpdated = await invoiceModel.findOneAndUpdate(
+        {
+          _id: id,
+        },
+        dataToUpdate,
+        {
+          new: true,
+          upsert: false,
+          lean: true,
+        }
+      );
+
+      // check if inserted
+      if (isUpdated && !_.isEmpty(isUpdated))
+        return this.success(
+          req,
+          res,
+          this.status.HTTP_OK,
+          isUpdated,
+          this.messageTypes.invoiceVerified
+        );
+      else
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.invoiceNotVerified
+        );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
 }
 
-module.exports = new vehicleInfoController();
+module.exports = new vehicleEntryController();

@@ -16,7 +16,7 @@ function vehicleRoutes() {
 
     //get trip details for a tripId
     closed.route("/trip/trip-details/:tripId").get(
-      verifySecurityAppToken, // verify app user token
+      // verifySecurityAppToken, // verify app user token
       ctrl.getTripDetailsByTripId // controller function
     );
 
@@ -40,6 +40,11 @@ function vehicleRoutes() {
     closed.route("/trip/hisoryDetails/:tripId").get(
       verifySecurityAppToken, // verify app user token
       ctrl.getTripHistoryDetails // controller function
+    );
+
+    closed.route("/trip/allow-vehicle/:tripId").post(
+      verifySecurityAppToken, // verify app user token
+      ctrl.allowVehicle // controller function
     );
     
   };

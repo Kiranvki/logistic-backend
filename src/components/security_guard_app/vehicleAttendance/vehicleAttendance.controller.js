@@ -11,7 +11,7 @@ const { error, info } = require("../../../utils").logging;
 const _ = require("lodash");
 const moment = require("moment");
 
-class vehicleInfoController extends BaseController {
+class vehicleAttendanceController extends BaseController {
   // constructor
   constructor() {
     super();
@@ -910,4 +910,4 @@ class vehicleInfoController extends BaseController {
 
 }
 
-module.exports = new vehicleInfoController();
+module.exports = new vehicleAttendanceController();
