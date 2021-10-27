@@ -41,7 +41,7 @@ class NewCollection extends BaseController {
       };
 
       if (req.body.type === "cash") {
-        req.body.cash = req.body.cash[0];
+        // req.body.cash = req.body.cash;
         if (
           !req.body.cash.denominations ||
           !req.body.cash.denominations.length
