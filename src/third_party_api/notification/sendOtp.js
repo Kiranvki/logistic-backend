@@ -13,7 +13,7 @@ module.exports = async (mobileNumber, otpTemplate, otp, expiryTime) => {
     info(`Sending OTP WITH EXPIRY TIME OF ${expiryTime} MINS`);
 
     // getting the otp 
-    let baseUrl = process.env.otpUrl,
+    let baseUrl = process.env.smsUrl,
       authkey = process.env.authkey,
       otpType = process.env.otpType,
       otpBalUrl = process.env.otpBalUrl;
@@ -56,8 +56,8 @@ module.exports = async (mobileNumber, otpTemplate, otp, expiryTime) => {
       }
 
       // generating the otp url
-      baseUrl = `${baseUrl}?authkey=${authkey}&template_id=${otpTemplate}&mobile=+91${parseInt(mobileNumber)}&invisible=1&extra_param=${JSON.stringify(extraParams)}`;
-
+      // baseUrl = `${baseUrl}?authkey=${authkey}&template_id=${otpTemplate}&mobile=+91${parseInt(mobileNumber)}&invisible=1&extra_param=${JSON.stringify(extraParams)}`;
+      baseUrl = `${baseUrl}?authkey=${authkey}&mobiles=${parseInt(mobileNumber)}&country=91&invisible=1&extra_param=${JSON.stringify(extraParams)}&&message=Your OTP Verification Code is ${otp}. Do not share it with anyone. Thanks and Regards WayCool Customer Support&sender=WAYCOL&route=4&DLT_TE_ID=1707162434740917007`;///${otpTemplate}`;//1707162434740917007`
       // sending OTP to the given mobile number 
       return request.get(baseUrl)
         .timeout({
@@ -68,7 +68,7 @@ module.exports = async (mobileNumber, otpTemplate, otp, expiryTime) => {
         .then((res) => {
           return {
             success: true,
-            data: JSON.parse(res.text)
+            data:{'request_id':res.text} //JSON.parse(res.text)
           }
           // catch any runtime error
         }, (err) => {

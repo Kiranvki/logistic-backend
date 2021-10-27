@@ -9,6 +9,7 @@ const pickerBoySalesOrderModel = require('../pickerboy_salesorder_mapping/models
 const BaseController = require('../../baseController');
 const Model = require('./models/pickerboy_salesorder_items_mapping.model');
 const mongoose = require('mongoose');
+var QRCode = require('qrcode');//QR code
 const _ = require('lodash');
 const moment = require('moment');
 
@@ -428,6 +429,10 @@ class pickerSalesOrderMappingController extends BaseController {
       // requireQuantity: 1,
       // suppliedQty: 0,
       // }
+
+      //let qr
+      console.log('req.body.invDetail',req.body.invDetail)
+      // req.body.invDetail['invoiceDetails']['signed_qrcode'] = await QRCode.toDataURL(req.body.invDetail['invoiceDetails']['signed_qrcode'],{type:'terminal'});
         req.body.invDetail['itemSupplied'].forEach((data,i)=>{
         OrderData['itemDetail'].forEach((item,j) => {
           // console.log('item_no',data.item_no,item.item_no)
@@ -601,18 +606,18 @@ class pickerSalesOrderMappingController extends BaseController {
         $match: {
           
           'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
-          'state': 1,
+          'state': 2, //state 2 for delivery
           $or: [
             
             {
               'isSapError':
 
                 { $exists: true, $ne: 'DNE' }
-            }
-            // {
-            //   'isSapError': { $exists: false }
+            },
+            {
+              'isSapError': { $exists: false }
 
-            // }
+            }
           ],
           'fullfilment': fullfilment,
           'delivery_no': {
@@ -686,13 +691,28 @@ class pickerSalesOrderMappingController extends BaseController {
 
       let totalPendingInvoice = await pickerBoySalesOrderModel.aggregate([{
         $match: {
-          'invoiceDetail.isInvoice': false,
+          
           'pickerBoyId': mongoose.Types.ObjectId(pickerBoyId),
-          'isSapError': 'INVE',
+          'state': 2, //state 2 for delivery
+          $or: [
+            
+            {
+              'isSapError':
+
+                { $exists: true, $ne: 'DNE' }
+            },
+            {
+              'isSapError': { $exists: false }
+
+            }
+          ],
           'fullfilment': fullfilment,
           'delivery_no': {
             $ne: 'N/A'
           }
+
+
+
 
 
         }

@@ -204,7 +204,17 @@ module.exports = async (req, res, next) => {
                 'distribution_channel':invoiceDetail['distribution_channel'], //sap field
             
                 'division':invoiceDetail['division'],  //sap field
-          
+                
+                // 'irn_no':invoiceDetail['irn_no'] ,
+                // 'signed_qrcode': invoiceDetail['signed_qrcode'],
+                // 'acknowledgement_number':invoiceDetail['acknowledgement_number'],
+                // // 'Acknowledgement_Date':invoiceDetail['Acknowledgement_Number'],
+                // 'irn_status': invoiceDetail['irn_status'],
+                // 'error_details': invoiceDetail['error_details'],
+                // 'signed_invoice_no':invoiceDetail['signed_invoice_no'],
+
+
+             
                
                 'customer_price_group': invoiceDetail['customer_price_group'], //sap field
         
@@ -213,6 +223,7 @@ module.exports = async (req, res, next) => {
                 'inco_terms': invoiceDetail['inco_terms'], //sap field
            
                 'payment_terms': invoiceDetail['payment_terms'],  //sap field
+                'payment_terms_description': invoiceDetail['payment_terms_description'],
             
                 'company_code': invoiceDetail['company_code'],  //sap field
              

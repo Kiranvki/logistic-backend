@@ -1462,7 +1462,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       let page = req.query.page || 1,
         pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => { if (res.success) return res.data; else return 60; }),
         searchKey = req.query.searchKey || '',
-        sortBy = req.query.sortBy || 'req_del_date',
+        sortBy = req.query.sortBy || '_id',//'req_del_date',
         sortingArray = {};
       sortingArray[sortBy] = -1;
       let skip = parseInt(page - 1) * pageSize;
@@ -1745,7 +1745,7 @@ class pickerboySalesOrderMappingController extends BaseController {
 
               }
             },
-           
+           //DOCUMENT TYPE FILTER IS ADDED BY MAYANK.THEREFORE REMOVE FROM NODE SIDE
             // {'sales_document_type':{$ne:'ZBRD'}},
             // {'sales_document_type':{$ne:'ZRET'}},
             // {'sales_document_type':{$ne:'ZREB'}},
@@ -1768,6 +1768,13 @@ class pickerboySalesOrderMappingController extends BaseController {
               $or: [{ 'overall_status': { $exists: true, $ne: 'Completely processed' } }, {
 
                 'overall_status': { $exists: false }
+              }]
+            },
+            {
+              $or: [{ 'orderCancelStatus': { $exists: true, $eq: 0 } },
+               {
+
+                'orderCancelStatus': { $exists: false }
               }]
             }
 
@@ -1819,6 +1826,13 @@ class pickerboySalesOrderMappingController extends BaseController {
                 $or: [{ 'overall_status': { $exists: true, $ne: 'Completely processed' } }, {
   
                   'overall_status': { $exists: false }
+                }]
+              },
+              {
+                $or: [{ 'orderCancelStatus': { $exists: true, $eq: 0 } },
+                 {
+  
+                  'orderCancelStatus': { $exists: false }
                 }]
               }],
 
@@ -1972,6 +1986,13 @@ class pickerboySalesOrderMappingController extends BaseController {
           $or: [{ 'fulfillmentStatus': { $exists: true, $ne: 2 } }, {
 
             'fulfillmentStatus': { $exists: false }
+          }]
+        },
+        {
+          $or: [{ 'orderCancelStatus': { $exists: true, $eq: 0 } },
+           {
+
+            'orderCancelStatus': { $exists: false }
           }]
         },
 

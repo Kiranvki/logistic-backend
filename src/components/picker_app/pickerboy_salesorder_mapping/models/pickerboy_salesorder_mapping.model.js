@@ -126,11 +126,38 @@ const pickerBoyOrderMappingSchema = new Schema({
   }, 'isSapError': {
     type: String
   },
+
+  'irn_no':{
+    type:String
+  },
+  'error_details': {
+    type:String
+  },
+  "signed_invoice_no":{
+    type:String
+  },
+  "signed_qr_code":{
+    type:String
+  },
+  "Acknowledgement_Number": {
+    type:String
+  },
+  "Acknowledgement_Date": {
+    type:String
+  },
   'invoiceDetail': {
     'isInvoiceRequest': {
       type: Boolean,
       default: false  //true->restrict picker boy
 
+    },
+    'isManualFetch':{
+      type: Boolean,
+      default: false
+    },
+    'fetchCount':{
+      type: Number,
+      default: 0
     },
     'isInvoice': {
       type: Boolean,
@@ -249,6 +276,15 @@ class PickerBoyOrderMappingClass {
 
 
     let orderPickerBoyMappingData = await this.findOneAndUpdate({ '_id': pickerBoyOrderMappingId }, { $set: { 'invoiceDetail.isInvoice': invObject.isInvoice, 'invoiceDetail.invoice.invoiceId': invObject.invoice_no, 'invoiceDetail.invoice.invoiceDbId': invObject.invoiceId, 'isItemPicked': false, 'isStartedPicking': false, 'customerName': invObject.customerName, 'state': 3 } });
+    return orderPickerBoyMappingData;
+
+  }
+
+
+  static async updateInvoiceStatus(pickerBoyOrderMappingId) {
+   
+  
+    let orderPickerBoyMappingData = await this.findOneAndUpdate({ '_id': mongoose.Types.ObjectId(pickerBoyOrderMappingId) }, { $set: { 'invoiceDetail.isManualFetch': true},  $inc:{'invoiceDetail.fetchCount':1}} );
     return orderPickerBoyMappingData;
 
   }
