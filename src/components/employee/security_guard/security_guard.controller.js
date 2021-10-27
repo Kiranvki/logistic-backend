@@ -7,10 +7,10 @@ const deliveryCtrl = require("../delivery_executive/delivery_executive.controlle
 const pickerBoyCtrl = require("../picker_boy/picker_boy.controller");
 const _ = require("lodash");
 const { error, info } = require("../../../utils").logging;
-
 const {
   getAgencyNameFromIdForDeliveryAndPickerBoy, // geting the agency name from ID
 } = require('../../../inter_service_api/dms_dashboard_v1/v1');
+const gpnModel = require("../../delivery_app/deliveryExecutiveTrip/model/gpn_model");
 
 //getting the model
 class securityController extends BaseController {
@@ -143,6 +143,38 @@ class securityController extends BaseController {
       error(err);
     }
   };
+
+  getGpnNumber=async(gpn)=>{
+    try{
+      info("Getting GPN Number!")
+
+      return await gpnModel.find({gpn:gpn})
+      .allowDiskUse(true)
+      .then((res) => {
+        if (res) {
+          return {
+            success: true,
+            data: res,
+          };
+        } else {
+          error("Error Searching this GPN in DB!");
+          return {
+            success: false,
+          };
+        }
+      })
+      .catch((err) => {
+        error(err);
+        return {
+          success: false,
+          error: err,
+        };
+      });
+
+    } catch (err) {
+      error(err);
+    }
+  }
 
   // get employee details
   getEmployeeDetails = async (employeeId, employeeType) => {

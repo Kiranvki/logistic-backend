@@ -17,13 +17,11 @@ class NewCollection extends BaseController {
   //to create a new record of a new collection
   createNewCollection = async (req, res) => {
     try {
-      let projection = {};
 
       req.body.customer = {
         sold_to_party: req.body.soldToParty,
         sold_to_party_description: req.body.sold_to_party_description,
       };
-       let collectionId=req.body.collectionId
 
       // req.body.DEEmployeeId = req.userDetails.employeeId;
       
@@ -178,7 +176,6 @@ class NewCollection extends BaseController {
     }
   }
 
-  let result=await collectionQuery.mapInvoicesToCollection(req.body.collectionId,req.body);
 
   return this.success(
     req,
