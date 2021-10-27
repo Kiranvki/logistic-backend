@@ -21,7 +21,7 @@ module.exports = async (req, res, next) => {
     let gpn = req.body.gpn || req.params.gpn || req.query.gpn // get the gpn number
 
     // check if the format is string or not
-    if(gpn.isString()) {
+    if(typeof(gpn)=="string") {
 
       // check whether the gpn exists or not 
       let isValidGpn = await securityGuardCtrl.getGpnNumber(gpn)
@@ -36,11 +36,11 @@ module.exports = async (req, res, next) => {
        
       } else {
         error('INVALID GPN!');
-        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.securityGuardApp.gpnIsValid);
+        return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.securityGuardApp.gpnIsInvalid);
       }
     } else {
-      error('The salesman ID is Invalid !');
-      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.securityGuardApp.gpnIsInvalid);
+      error('The GPN data type is Invalid !');
+      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.securityGuardApp.gpnDataTypeIsInvalid);
     }
 
     // catch any runtime error 

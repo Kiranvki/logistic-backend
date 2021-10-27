@@ -26,5 +26,7 @@ module.exports = {
   vehicleAllowed: "Vehicle Allowed Successfully",
   vehicleNotAllowed: "Vehicel not Allowed",
   gpnIsValid:"GPN is Valid",
-  gpnIsInvalid:"GPN is Invalid"
+  gpnIsInvalid:"GPN format is Invalid",
+  gpnDataTypeIsInvalid:"GPN data type is Invalid"
+
 };
