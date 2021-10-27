@@ -45,41 +45,57 @@ module.exports = async (req,res,next) => {
 
     // get the data from SAP
     
-    // req.body.invoice_detail['data'] = [{
-    //     "invoice_no": "0083000742",
-    //     "billing_type": "X001",
-    //     "sales_Org": 2000,
-    //     "distribution_channel": 20,
-    //     "division": 21,
-    //     "billing_date": 20210201,
-    //     "customer_price_group": "01",
-    //     "customer_group": "01",
-    //     "inco_terms": "FOB",
-    //     "payment_terms": "WC08",
-    //     "company_code": 2000,
-    //     "account_assignment_group": "C1",
-    //     "sold_to_party": "0002000002",
-    //     "bill_to_party": "0002000002",
-    //     "payer": "0002000002",
-    //     "item": [
-    //         {
-    //             "item_no": "000010",
-    //             "material": "CFB000000000000021",
-    //             "item_category": "XTAN",
-    //             "plant": 2000,
-    //             "qty": "0.000 ",
-    //             "uom": "PAK",
-    //             "mrp_amount": "0.00 ",
-    //             "discount_amount": "0.00 ",
-    //             "net_price": "0.00 ",
-    //             "taxable_value": "0.00 ",
-    //             "cgst_pr": "0.00 ",
-    //             "sgst_pr": "0.00 ",
-    //             "igst_pr": "0.00 ",
-    //             "ugst_pr": "0.00 ",
-    //             "total_amount": "0.00 "
-    //         }]
-    //     }]
+  //   req.body.invoice_detail['data'] = [ {
+  //     "invoice_no": "0900000640",
+  //     "delivery_doc_no": "0800001278",
+  //     "sales_order_no": "0300001475",
+  //     "billing_type": "ZDOM",
+  //     "document_currency": " ",
+  //     "sales_Org": 5000,
+  //     "distribution_channel": 50,
+  //     "division": 50,
+  //     "billing_date": "2021-06-16",
+  //     "customer_price_group": "B4",
+  //     "customer_group": "BD",
+  //     "inco_terms": "FOB",
+  //     "payment_terms": "WCAD",
+  //     "payment_terms_description": "ADVANCE PAYMENT",
+  //     "company_code": 1000,
+  //     "account_assignment_group": "W1",
+  //     "sold_to_party": "0001000826",
+  //     "bill_to_party": "0001000826",
+  //     "payer": "0001000826",
+  //     "plant": 1000,
+  //     "irn_no": "b20facd9ca2710cb8e02f6666c1f341eb3e6cef0b7dc62b5e527f6118a90dc9a",
+  //     "signed_qrcode": "eyJhbGciOiJSUzI1NiIsImtpZCI6IkVEQzU3REUxMzU4QjMwMEJBOUY3OTM0MEE2Njk2ODMxRjNDODUwNDciLCJ0eXAiOiJKV1QiLCJ4NXQiOiI3Y1Y5NFRXTE1BdXA5NU5BcG1sb01mUElVRWMifQ.eyJkYXRhIjoie1wiU2VsbGVyR3N0aW5cIjpcIjI5QUFGQ0Q1ODYyUjAwMFwiLFwiQnV5ZXJHc3RpblwiOlwiMzNCSURQUDQ4MDNOMVo0XCIsXCJEb2NOb1wiOlwiOTAwMDAwNjQwXCIsXCJEb2NUeXBcIjpcIklOVlwiLFwiRG9jRHRcIjpcIjE2LzA2LzIwMjFcIixcIlRvdEludlZhbFwiOjIxMDAwLjAwLFwiSXRlbUNudFwiOjEsXCJNYWluSHNuQ29kZVwiOlwiMjEwNjkwOTlcIixcIklyblwiOlwiYjIwZmFjZDljYTI3MTBjYjhlMDJmNjY2NmMxZjM0MWViM2U2Y2VmMGI3ZGM2MmI1ZTUyN2Y2MTE4YTkwZGM5YVwiLFwiSXJuRHRcIjpcIjIwMjEtMDctMDUgMTg6MTU6MDBcIn0iLCJpc3MiOiJOSUMifQ.Bn9KQ4m1Nu-rQ6HEddPg7xbcUqb4Dm5lIIXQl0bgyc59FLVoK0XpAddBY-bJ0LvIMJq6T1zPq7VpR9Doqw_kA5tXD_QyrvSUwCAuLs5DNVvGYRNJWD0yeJhWL19Uhs50XqGdYGtxAcfP2TqNqPz0fFlJPtKN1w07dk3v0CN3dlJXEL8VNt3ivzk6EM3-gNTSVcofzaqZP_0mBStJeTk0ThX4aEp62O1mvD3UJ80h6IBmks6Y3KoYhYBWqmUBj8GSXj224WOWs6bEcnG2lO1Oj9zPCqZ21h1HnkSN5izl7cHZrCWUv8fVmqVN0GEUCyb90tjg_Mk48C3iifKehA8Iog",
+  //     "acknowledgement_number": 112110087062113,
+  //     "irn_status": "ACT",
+  //     "item": [
+  //         {
+  //             "item_no": "000010",
+  //             "material": "WC0000000000000010",
+  //             "batch": "TEST2",
+  //             "item_category": "ZTAN",
+  //             "plant": 1000,
+  //             "qty": "20.000",
+  //             "uom": "KG",
+  //             "unit_price": "1000.00",
+  //             "mrp_amount": "40000.00",
+  //             "discount_amount": "0.00",
+  //             "net_price": "20000.00",
+  //             "taxable_value": "1000.00",
+  //             "cgst_pr": "0.00",
+  //             "cgst_value": "0.00",
+  //             "sgst_pr": "0.00",
+  //             "sgst_value": "0.00",
+  //             "igst_pr": "5.00",
+  //             "igst_value": "1000.00",
+  //             "ugst_pr": "0.00",
+  //             "ugst_value": "0.00",
+  //             "total_amount": "21000.00"
+  //         }
+  //     ]
+  // }]
 
     req.body.invoice_detail = await request.post(url)
       .send(obj)

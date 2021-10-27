@@ -21,7 +21,6 @@ const vehicleAttendance = new Schema({
   attendanceLog: [{
     checkInDate: {
       type: Date,
-      unique: true,
       required: true
     },
     checkInTimeInMins: {

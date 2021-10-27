@@ -17,6 +17,8 @@ const {
   error,
   info
 } = require('../../utils').logging;
+const invoice = require('../../responses/types/invoice');
+const { pickingAllocation } = require('../../components/picker_app/pickerboy_salesorder_items_mapping/pickerboy_salesorder_items_mapping.controller');
 
 // exporting the hooks 
 module.exports = async (req, res, next) => {
@@ -271,6 +273,8 @@ if(requestFromUrl.includes('/generate/invoice/')){
     // };
   }
 }
+
+
 
 
   // error response
