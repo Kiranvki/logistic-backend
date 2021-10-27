@@ -1,7 +1,7 @@
 const BaseController = require("../../baseController");
 const BasicCtrl = require("../../basic_config/basic_config.controller");
 const tripModel = require("../../MyTrip/assign_trip/model/trip.model");
-const disputeModel = require("./models/disputes_model");
+const disputeModel = require("../../MyTrip/assign_trip/model/disputes.model");
 const gpnModel = require("../../delivery_app/deliveryExecutiveTrip/model/gpn_model");
 
 const mongoose = require("mongoose");
