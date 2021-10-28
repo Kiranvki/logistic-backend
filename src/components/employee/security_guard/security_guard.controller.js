@@ -11,6 +11,7 @@ const {
   getAgencyNameFromIdForDeliveryAndPickerBoy, // geting the agency name from ID
 } = require("../../../inter_service_api/dms_dashboard_v1/v1");
 const gpnModel = require("../../delivery_app/deliveryExecutiveTrip/model/gpn_model");
+const invoiceMasterModel = require("../../picker_app/invoice_master/models/invoice_master.model")
 
 //getting the model
 class securityController extends BaseController {
@@ -975,6 +976,37 @@ class securityController extends BaseController {
         this.status.HTTP_INTERNAL_SERVER_ERROR,
         this.exceptions.internalServerErr(req, err)
       );
+    }
+  };
+
+  getInvoiceDetails = async (invoiceNo) => {
+    try {
+      info("Getting invoice details!");
+      
+      return await invoiceMasterModel
+        .find({ "invoiceDetails.invoiceNo": invoiceNo })
+        .then((res) => {
+          if (res && res.length) {
+            return {
+              success: true,
+              data: res,
+            };
+          } else {
+            error("Error Searching invoices in DB");
+            return {
+              success: false,
+            };
+          }
+        })
+        .catch((err) => {
+          error(err);
+          return {
+            success: false,
+            error: err,
+          };
+        });
+    } catch (err) {
+      error(err);
     }
   };
 }

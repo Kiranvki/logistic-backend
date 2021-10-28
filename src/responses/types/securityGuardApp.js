@@ -27,6 +27,9 @@ module.exports = {
   vehicleNotAllowed: "Vehicel not Allowed",
   gpnIsValid:"GPN is Valid",
   gpnIsInvalid:"GPN format is Invalid",
-  gpnDataTypeIsInvalid:"GPN data type is Invalid"
+  gpnDataTypeIsInvalid:"GPN data type is Invalid",
+  invoiceExists:"Invoice exists",
+  invoiceDoesNotExists: "Couldn't find invoice'",
+  invoiceNoDataTypeIsInvalid:"invoice no data type is Invalid",
 
 };
