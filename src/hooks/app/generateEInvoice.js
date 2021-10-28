@@ -164,8 +164,9 @@ module.exports = async (req, res, next) => {
       // return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,JSON.stringify(req.body.einvoicing_detail['error_details'][0]['error_message']) +','+`inr_code is: ${req.body.einvoicing_detail['irn_no']}`);
     } else {
     
-      info('some error generate delivery NO.')
-      return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, req.body.einvoicing_detail['error']);
+      info('some error generating E-invoicing.')
+      // return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, req.body.einvoicing_detail['error']);
+      return next()
     }
   }
 }else{

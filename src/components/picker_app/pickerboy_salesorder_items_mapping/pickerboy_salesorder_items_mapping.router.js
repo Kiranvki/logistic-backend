@@ -91,8 +91,8 @@ function userRoutes() {
                  // generateDelivery,
                 // updateSapDeliveryDetail,
       generateInvoice, //generate invoice for the delivery number
-      // getCustomerDetail,
-      // generateEInvoice,
+      getCustomerDetail,
+      generateEInvoice,
       fetchInvoice, //fetch generated invoice from sap
       updateInvoiceSAPDataToDB, //save the invoice detail to application db
       ctrl.generateInvV2
