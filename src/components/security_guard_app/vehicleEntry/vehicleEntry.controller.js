@@ -51,7 +51,7 @@ class vehicleEntryController extends BaseController {
     let pipeline = [
       {
         $match: {
-          ...searchObject
+          ...searchObject,
         },
       },
       {
@@ -234,20 +234,18 @@ class vehicleEntryController extends BaseController {
             deliveryExecutiveEmpCode: { $first: "$deliveryExecutiveEmpCode" },
             deliveryExecutiveName: { $first: "$deliveryExecutiveName" },
             tripId: { $first: "$tripId" },
-            // salesOrder: { $first: "$salesOrder" },
             noOfCrates: { $first: "$salesorder.crateIn" },
-            noOfDeliveries: { $sum: "$salesorder.invoices.itemSupplied" },
+
             invoices: {
               $push: {
                 invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
                 gpnNo: { $first: "$salesorder.invoices.gpnNumber.gpn" },
-                gpnStatus: {
-                  $first: "$salesorder.invoices.gpnNumber.isVerify",
-                },
+                deliveryFlag: "$salesorder.invoices.isDelivered",
                 customerName: "$salesorder.sold_to_party_description",
                 address: "$salesorder.invoices.shippingDetails.address",
                 city: "$salesorder.invoices.shippingDetails.cityId",
-                numberOfItems: " ",
+                deliveryStatus: "Delivered",
+                categoryType: "Sales Order",
               },
             },
           },
@@ -333,7 +331,7 @@ class vehicleEntryController extends BaseController {
     try {
       info("Update Invoice Status !");
 
-      let id = req.params.invoiceid;
+      let invoice = req.params.invoiceNo;
 
       // creating data to insert
       let dataToUpdate = {
@@ -345,7 +343,7 @@ class vehicleEntryController extends BaseController {
       // inserting data into the db
       let isUpdated = await invoiceModel.findOneAndUpdate(
         {
-          _id: id,
+          "invoiceDetails.invoiceNo": invoice,
         },
         dataToUpdate,
         {

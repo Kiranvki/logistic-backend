@@ -178,100 +178,106 @@ class vehicleInfoController extends BaseController {
     info("getting trip data!");
 
     let trip = await tripModel
-    .aggregate([
-      {
-        $match: { tripId: ID },
-      },
-      {
-        $project: {
-          vehicleRegNumber: 1,
-          deliveryExecutiveEmpCode: 1,
-          deliveryExecutiveName: 1,
-          tripId: 1,
-          salesOrder: 1,
+      .aggregate([
+        {
+          $match: { tripId: ID },
         },
-      },
-      {
-        $lookup: {
-          from: "salesorders",
-          let: { id: "$salesOrder" },
-          pipeline: [
-            {
-              $match: { $expr: { $eq: ["$_id", "$$id"] } },
-            },
-            {
-              $lookup: {
-                from: "invoicemasters",
-                let: { id: "$_id" },
-                pipeline: [
-                  {
-                    $match: {
-                      $expr: { $eq: ["$so_db_id", "$$id"] },
+        {
+          $project: {
+            vehicleRegNumber: 1,
+            deliveryExecutiveEmpCode: 1,
+            deliveryExecutiveName: 1,
+            tripId: 1,
+            salesOrder: 1,
+          },
+        },
+        {
+          $lookup: {
+            from: "salesorders",
+            let: { id: "$salesOrder" },
+            pipeline: [
+              {
+                $match: { $expr: { $eq: ["$_id", "$$id"] } },
+              },
+              {
+                $lookup: {
+                  from: "invoicemasters",
+                  let: { id: "$_id" },
+                  pipeline: [
+                    {
+                      $match: {
+                        $expr: { $eq: ["$so_db_id", "$$id"] },
+                      },
                     },
-                  },
-                  {
-                    $lookup: {
-                      from: "gatepassnumbers",
-                      let: { id: "$invoiceDetails.invoiceNo" },
-                      pipeline: [
-                        {
-                          $match: {
-                            $expr: { $in: ["$$id", "$invoiceNumber"] },
+                    {
+                      $lookup: {
+                        from: "gatepassnumbers",
+                        let: { id: "$invoiceDetails.invoiceNo" },
+                        pipeline: [
+                          {
+                            $match: {
+                              $expr: { $in: ["$$id", "$invoiceNumber"] },
+                            },
                           },
-                        },
-                      ],
-                      as: "gpnNumber",
+                        ],
+                        as: "gpnNumber",
+                      },
                     },
-                  },
-                ],
-                as: "invoices",
+                  ],
+                  as: "invoices",
+                },
               },
-            },
-          ],
-          as: "salesorder",
+            ],
+            as: "salesorder",
+          },
         },
-      },
-      { $unwind: { path: "$salesorder", preserveNullAndEmptyArrays: false } },
-      {
-        $unwind: {
-          path: "$salesorder.invoices",
-          preserveNullAndEmptyArrays: false,
+        { $unwind: { path: "$salesorder", preserveNullAndEmptyArrays: false } },
+        {
+          $unwind: {
+            path: "$salesorder.invoices",
+            preserveNullAndEmptyArrays: false,
+          },
         },
-      },
-          
 
-     
-      {
-        $group: {
-          _id: "$_id",
-          vehicleRegNumber: { $first: "$vehicleRegNumber" },
-          deliveryExecutiveEmpCode: { $first: "$deliveryExecutiveEmpCode" },
-          deliveryExecutiveName: { $first: "$deliveryExecutiveName" },
-          tripId: { $first: "$tripId" },
-          // salesOrder: { $first: "$salesOrder" },
-          noOfCrates: { $first: "$salesorder.crateIn" },
-          // noOfDeliveries: 4,
+        {
+          $group: {
+            _id: "$_id",
+            vehicleRegNumber: { $first: "$vehicleRegNumber" },
+            deliveryExecutiveEmpCode: { $first: "$deliveryExecutiveEmpCode" },
+            deliveryExecutiveName: { $first: "$deliveryExecutiveName" },
+            tripId: { $first: "$tripId" },
+            // salesOrder: { $first: "$salesOrder" },
+            noOfCrates: { $first: "$salesorder.crateIn" },
+            // noOfDeliveries: 4,
 
-          invoices: {
-            $push: {
-              invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
-              gpnNo: { $first: "$salesorder.invoices.gpnNumber.gpn" },
-              gpnStatus: {
-                $first: "$salesorder.invoices.gpnNumber.status",
+            invoices: {
+              $push: {
+                invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
+                gpnNo: { $first: "$salesorder.invoices.gpnNumber.gpn" },
+                gpnStatus: {
+                  $first: "$salesorder.invoices.gpnNumber.status",
+                },
+                customerName: "$salesorder.sold_to_party_description",
+                address: "$salesorder.invoices.shippingDetails.address",
+                city: "$salesorder.invoices.shippingDetails.cityId",
+                numberOfItems: 1,
+                categoryType: "Sales Order",
               },
-              customerName: "$salesorder.sold_to_party_description",
-              address: "$salesorder.invoices.shippingDetails.address",
-              city: "$salesorder.invoices.shippingDetails.cityId",
-              numberOfItems: 1,
-              categoryType: "salesOrder",
             },
           },
         },
-      },
-       {
-          $addFields:{noOfDeliveries:{ $cond: { if: { $isArray: "$invoices" }, then: { $size: "$invoices" }, else: "NA"} }
-          }},
-    ])
+        {
+          $addFields: {
+            noOfDeliveries: {
+              $cond: {
+                if: { $isArray: "$invoices" },
+                then: { $size: "$invoices" },
+                else: "NA",
+              },
+            },
+          },
+        },
+      ])
       .allowDiskUse(true);
 
     let data = {
@@ -599,7 +605,7 @@ class vehicleInfoController extends BaseController {
       info("Allow Vehicle for Trip !");
       let trip = req.params.tripId;
       console.log(trip);
-      
+
       // creating data to insert
       let dataToUpdate = {
         $set: {
