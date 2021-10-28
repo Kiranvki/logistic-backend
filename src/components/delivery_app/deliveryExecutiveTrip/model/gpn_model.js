@@ -69,7 +69,7 @@ gatePassNumberSchema.plugin(autopopulate);
 class GpnClass{
 
     static async generateGpn(gpnData) {
-        console.log(gpnData)
+        
         // let userExist = await this.count({ email });
         // if(userExist) throw new Error('Email is already exist.');
         // let phoneExist = await this.count({cell_phone})
