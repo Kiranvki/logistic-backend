@@ -27,13 +27,13 @@ function vehicleRoutes() {
     );
 
     closed.route("/vehicle/updateCrates/:id").patch(
-      // verifySecurityAppToken, //verify app user token
+      verifySecurityAppToken, //verify app user token
       ctrl.updateCratesQuantity //controller function
     );
 
-    // verify the gpn
-    closed.route("/trip/verify-invoice/:gpn").post(
-      // verifySecurityAppToken, //verify app user token
+    // verify the invoice
+    closed.route("/vehicle/verify-invoice/:invoiceNo").post(
+      verifySecurityAppToken, //verify app user token
       ctrl.verifyDeliveredInvoice // controller function
     );
   };
