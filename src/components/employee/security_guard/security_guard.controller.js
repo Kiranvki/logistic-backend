@@ -1009,6 +1009,37 @@ class securityController extends BaseController {
       error(err);
     }
   };
+
+  getInvoiceAlreadyVerifiedDetails = async (invoiceNo) => {
+    try {
+      info("Getting invoice details!");
+      
+      return await invoiceMasterModel
+        .find({ "invoiceDetails.invoiceNo": invoiceNo,isDelivered:0 })
+        .then((res) => {
+          if (res && res.length) {
+            return {
+              success: true,
+              data: res,
+            };
+          } else {
+            error("Error Searching invoices in DB");
+            return {
+              success: false,
+            };
+          }
+        })
+        .catch((err) => {
+          error(err);
+          return {
+            success: false,
+            error: err,
+          };
+        });
+    } catch (err) {
+      error(err);
+    }
+  };
 }
 // exporting the modules
 module.exports = new securityController();
