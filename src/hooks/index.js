@@ -28,4 +28,5 @@ module.exports = {
   checkWhetherTheFileIdIsValid: require('./checkWhetherTheFileIdIsValid'), // check whether the file id is valid or not 
   encryptTheFileInorderToStoreItInDb: require('./encryptTheFileInorderToStoreItInDb'), // encrypt the file inorder to store the file in the db
   isValidGpn: require('./isValidGpn'), // check if the gpn is valid or not
+  isValidInvoice: require('./isValidInvoice'),
 }

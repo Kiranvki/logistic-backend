@@ -117,7 +117,7 @@ class NewCollection extends BaseController {
     for (let i in req.body.invoicesMapped) {
       let projection = {
         "invoiceDetails.invoiceNo":
-          req.body.invoicesMapped[i].invoiceDetails.invoiceNo,
+          req.body.invoicesMapped[i].invoiceNo,
         soId: req.body.soId,
       };
       let sort = req.body.sort
@@ -166,9 +166,11 @@ class NewCollection extends BaseController {
         if (req.body.collectionStatus && req.body.collectionStatus=="complete"){
           req.body.overallCollectionStatus = "complete";
 
+            await collectionQuery.mapInvoicesToCollection(req.body.collectionId,req.body)
             await collectionQuery.updatePendingAmountInCollections(req.body.soId, req.body.invoicesMapped[i].invoiceNo, req.body.invoicesMapped[i].pendingAmount,"complete")
           }else{
             req.body.overallCollectionStatus = "partial";
+            await collectionQuery.mapInvoicesToCollection(req.body.collectionId,req.body)
 
             await collectionQuery.updatePendingAmountInCollections(req.body.soId, req.body.invoicesMapped[i].invoiceNo, req.body.invoicesMapped[i].pendingAmount,"partial")
           }
