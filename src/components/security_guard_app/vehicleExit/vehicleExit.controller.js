@@ -559,15 +559,37 @@ class vehicleInfoController extends BaseController {
         $match: {
           $and: [
             {
-              _id: mongoose.Types.ObjectId(tripId),
+              _id:mongoose.Types.ObjectId(tripId),
             },
             {
               isActive: 1,
             },
           ],
         },
+      },{
+        $lookup: {
+          from:"vehiclemasters",
+          localField:"vehicleId",
+          foreignField:"_id",
+          as: "vehicleDetails"
+        }
+      },{
+          $lookup:{
+              from:"deliveryexecutives",
+              localField:"deliveryExecutiveId",
+              foreignField:"_id",
+              as:"deDetails"
+          }
       },
-    ];
+      {
+          $lookup:{
+              from:"salesorders",
+              localField:"salesOrder",
+              foreignField:"_id",
+              as:"soDetails"
+          }
+      }
+    ]
 
     let activeTripData = await tripModel.aggregate(pipeline);
 

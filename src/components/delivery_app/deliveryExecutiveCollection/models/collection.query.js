@@ -177,10 +177,8 @@ class CollectionQuery {
 
 
 
-  async getInvoiceListByCustomer(soldToParty,sortOn) {
-    return await masterInvoicesModel.find({
-      "invoiceDetails.sold_to_party": soldToParty,
-    }).sort(sortOn);
+  async getInvoiceListByCustomer(searchQuery,sortOn) {
+    return await masterInvoicesModel.find({...searchQuery}).sort(sortOn);
   }
 
   async getCommittedInvoice(soldToParty){
@@ -188,7 +186,7 @@ class CollectionQuery {
       [
           {
               $match:{
-                  goFrugalId:Number("0001039285"),
+                  goFrugalId:Number(soldToParty),
                   isDeleted:0,
                   status:1
                   

@@ -452,6 +452,9 @@ let collectionSchema = mongoose.Schema(
     glAccount: {
       type: String,
     },
+    unUtilizedAmount: {
+      type: Number,
+    },
   },
   {
     timestamps: true,

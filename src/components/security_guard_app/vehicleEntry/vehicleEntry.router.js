@@ -35,7 +35,7 @@ function vehicleRoutes() {
 
     // verify the invoice
     closed.route("/vehicle/verify-invoice/:invoiceNo").post(
-      verifySecurityAppToken, //verify app user token
+      // verifySecurityAppToken, //verify app user token
       isValidInvoice, //verify if invoice exists or not
       isInvoiceAlreadyVerified,//verify if invoice is verified 
       ctrl.verifyDeliveredInvoice // controller function
