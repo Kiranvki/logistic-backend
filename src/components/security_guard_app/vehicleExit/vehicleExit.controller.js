@@ -580,14 +580,24 @@ class vehicleInfoController extends BaseController {
               foreignField:"_id",
               as:"deDetails"
           }
+        },
+      {
+        $lookup: {
+          from: "salesorders",
+          localField: "salesOrder",
+          foreignField: "_id",
+          as: "soDetails"
+        }
       },
       {
-          $lookup:{
-              from:"salesorders",
-              localField:"salesOrder",
-              foreignField:"_id",
-              as:"soDetails"
-          }
+        $project: {
+          tripId: 1,
+          truckNumber: { $first: "$vehicleDetails.regNumber" },
+          deName: { $first: "$deDetails.fullName" },
+          employeeNumber: { $first: "$deDetails.zohoId" },
+          noOfCrates: { $first: "$soDetails.crateIn" }
+
+        }
       }
     ]
 
