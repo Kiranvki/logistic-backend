@@ -328,9 +328,10 @@ class invoiceMasterController extends BaseController {
             totalAmount=totalAmount+(Number(invoiceDetails['itemSupplied'][j].total_amount)) // remove once fixed concatenated 1
             totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
           })
+          let qrCode = ''
           // let qrCode = await QRCode.toDataURL(invoiceDetails['invoiceDetails']['signed_qrcode'],{type:'terminal'});
           if(req.body.invDetail['invoiceDetails']['signed_qrcode']){
-            req.body.invDetail['invoiceDetails']['signed_qrcode'] = await QRCode.toDataURL(req.body.invDetail['invoiceDetails']['signed_qrcode'],{type:'terminal'});
+             qrCode = await QRCode.toDataURL(req.body.invDetail['invoiceDetails']['signed_qrcode'],{type:'terminal'});
           }
 
             let InvoiceDetailsResponse={
