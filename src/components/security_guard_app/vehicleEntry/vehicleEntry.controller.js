@@ -227,6 +227,24 @@ class vehicleEntryController extends BaseController {
             preserveNullAndEmptyArrays: false,
           },
         },
+        { $unwind: { path: "$salesorder.orderItems" } },
+        {
+          $addFields: {
+            isSalesReturn: {
+              $cond: {
+                if: {
+                  $eq: [
+                    "$salesorder.orderItems.orderDetails.itemDeliveryStatus",
+                    2,
+                  ],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
+        },
+
         {
           $group: {
             _id: "$_id",
@@ -236,7 +254,9 @@ class vehicleEntryController extends BaseController {
             tripId: { $first: "$tripId" },
             noOfCrates: { $first: "$salesorder.crateIn" },
             noOfCratesOut: { $first: "$salesorder.crateOut" },
+            isSalesReturn: { $first: "$isSalesReturn" },
             returnedCrates: { $first: "$salesorder.crateOutWithItem" },
+
             invoices: {
               $push: {
                 invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",

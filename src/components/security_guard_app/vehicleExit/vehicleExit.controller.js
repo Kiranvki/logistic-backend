@@ -623,7 +623,6 @@ class vehicleInfoController extends BaseController {
     try {
       info("Allow Vehicle for Trip !");
       let trip = req.params.tripId;
-      console.log(trip);
 
       // creating data to insert
       let dataToUpdate = {

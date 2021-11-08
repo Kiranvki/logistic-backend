@@ -214,7 +214,7 @@ class disputesController extends BaseController {
             $cond: {
               if: { $isArray: "$orderItems" },
               then: { $size: "$orderItems" },
-              else: "NA",
+              else: "0",
             },
           },
         },
