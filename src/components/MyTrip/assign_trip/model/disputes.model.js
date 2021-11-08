@@ -1,53 +1,68 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-let disputeSchema = Schema({
+let disputeSchema = Schema(
+  {
     tripId: {
-        type: Number,
-        unique: true,
-        required: true
+      type: Number,
+      unique: true,
+      required: true,
     },
-    disputeId:{
-        type: Number,
-        unique: true,
-        required: true
+    disputeId: {
+      type: Number,
+      unique: true,
+      required: true,
     },
-      dispute_amount: {
-        type: Number,
-      },
-      salesOrderId: [{
+    dispute_amount: {
+      type: Number,
+    },
+    salesOrderId: [
+      {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'salesOrder'
-    }],
-    invoiceId:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'invoiceMaster'
-    }],
-      // 'invoiceNo': { //invoice_no
-      //   type: 'String',
-      // },
-      material_description: {
-        type: String,
+        ref: "salesOrder",
       },
-
-      itemId: {
-        type: Number
+    ],
+    invoiceId: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "invoiceMaster",
+      },
+    ],
+    // 'invoiceNo': { //invoice_no
+    //   type: 'String',
+    // },
+    material_description: {
+      type: String,
     },
 
-    acceptedQty:{
-      type: Number
+    itemId: {
+      type: Number,
     },
+
+    acceptedQty: {
+      type: Number,
+    },
+
+    checkedQty: {
+      type: Number,
+      default: 0,
+    },
+    reason: {
+      type: String,
+    },
+
+    // notifiedId: {
+    //   type: String,
+    // },
 
     status: {
-        type: Number,
-        default: 0,
-        enum: [0, 1,2,]
-      },
+      type: Number,
+      default: 0,
+      enum: [0, 1, 2, 3],
+    },
+  },
+  { timestamps: true }
+);
 
-
-
-},
-{timestamps:true})
-
-let disputeModel = mongoose.model('disputes', disputeSchema, 'disputes');
+let disputeModel = mongoose.model("disputes", disputeSchema, "disputes");
 module.exports = disputeModel;

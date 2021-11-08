@@ -22,16 +22,21 @@ function vehicleRoutes() {
     closed.route("/disputes/scan-gpn/:gpn").get(
       verifySecurityAppToken, //verify app user token
       ctrl.scanReturnGpn // controller function
-    )
+    );
 
     closed.route("/disputes/getMinifiedList/:invoice").get(
       verifySecurityAppToken, //verify app user token
       ctrl.getDisputeItemsMinifiedList // controller function
-    )
+    );
 
-    closed.route("/disputes/disputeDetails").post(
+    closed.route("/disputes/notifyDispute").post(
       verifySecurityAppToken, // verify app user token
       ctrl.notifyDispute // controller function
+    );
+
+    closed.route("/disputes/updateDisputeDetails/:id").patch(
+      verifySecurityAppToken, //verify app user token
+      ctrl.updateDisputeDetails //controller function
     );
   };
 }

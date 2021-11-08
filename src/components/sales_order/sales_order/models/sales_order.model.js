@@ -350,6 +350,11 @@ const salesOrder = new Schema({
         type: 'Number',
         default:0
       },
+      'cratesReturned':
+      {
+        type: 'Number',
+        default:0
+      },
 
 }, {
   timestamps: true

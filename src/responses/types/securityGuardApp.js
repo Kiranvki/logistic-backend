@@ -30,7 +30,10 @@ module.exports = {
   gpnDataTypeIsInvalid:"GPN data type is Invalid",
   invoiceExists:"Invoice exists",
   invoiceDoesNotExists: "Couldn't find invoice'",
-  invoiceNoDataTypeIsInvalid:"invoice no data type is Invalid",
-  invoiceAlreadyVerified:"this invoice is already verified"
+  invoiceNoDataTypeIsInvalid:"Invoice number data type is Invalid",
+  invoiceAlreadyVerified:"This invoice is already verified",
+  disputeDetailsUpdated: "Dispute Details Updated Successfully",
+  disputeDetailsNotUpdated: "Unable to update Dispute Details",
+
 
 };

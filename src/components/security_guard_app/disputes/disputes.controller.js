@@ -17,7 +17,6 @@ class disputesController extends BaseController {
   }
 
   getDisputes = async (req, res, next) => {
-    console.log(req.query.page);
     let pageSize = 100;
     // let user = disputeId
     let pageNumber = req.query.page;
@@ -117,9 +116,8 @@ class disputesController extends BaseController {
   };
 
   getDisputeDetails = async (req, res, next) => {
-    console.log(req.query.page);
     let pageSize = 100;
-    let disputeId = req.params.disputeId;
+    let disputeId = req.params.disputeId || req.query.disputeId;
     let pageNumber = req.query.page;
 
     let dateToday = moment(Date.now())
@@ -132,72 +130,95 @@ class disputesController extends BaseController {
       .toDate();
 
     let trip = await disputeModel.aggregate([
-      { $match: { disputeId: parseInt(disputeId) } },
+      {
+        $match: { disputeId: parseInt(disputeId) },
+      },
+      { $project: { _id: 0, createdAt: 0 } },
       {
         $lookup: {
           from: "trips",
-          localField: "tripId",
-          foreignField: "tripId",
+          let: { id: "$tripId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$tripId", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                vehicleRegNumber: 1,
+                deliveryExecutiveName: 1,
+                deliveryExecutiveEmpCode: 1,
+              },
+            },
+          ],
           as: "trips",
         },
       },
-      {
-        $lookup: {
-          from: "salesorders",
-          localField: "salesOrderId",
-          foreignField: "_id",
-          as: "salesorder",
-        },
-      },
-      { $unwind: { path: "$salesorder" } },
+      { $unwind: { path: "$trips" } },
+
       {
         $lookup: {
           from: "invoicemasters",
-          localField: "invoiceId",
-          foreignField: "_id",
+          let: { id: "$invoiceId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                so_db_id: 1,
+                invoiceNo: "$invoiceDetails.invoiceNo",
+              },
+            },
+            {
+              $lookup: {
+                from: "salesorders",
+                localField: "so_db_id",
+                foreignField: "_id",
+                as: "salesorders",
+              },
+            },
+            { $unwind: { path: "$salesorders" } },
+          ],
           as: "invoices",
         },
       },
-      { $unwind: { path: "$salesorder.orderItems" } },
+      { $unwind: { path: "$invoices" } },
       {
         $project: {
           tripId: 1,
-          status: 1,
           disputeId: 1,
           dispute_amount: 1,
-          itemName: "$salesorder.orderItems.material_description",
-          itemId: "$salesorder.orderItems.material_no",
-          "ordered qty": "$salesorder.orderItems.quantity",
-          "packed qty": "$salesorder.orderItems.suppliedQty",
-          "rejected qty": "$salesorder.orderItems.rejectedQuantity",
-          deliveryExecutiveName: { $first: "$trips.deliveryExecutiveName" },
-          customerName: "$salesorder.sold_to_party_description",
-          customerId: "$salesorder.sold_to_party",
-          disputeDate: "$createdAt",
-          truck_Number: { $first: "$trips.vehicleRegNumber" },
-          invoicesNo: { $first: "$invoices.invoiceDetails.invoiceNo" },
-        },
-      },
-      {
-        $skip: pageSize * (pageNumber - 1),
-      },
-      {
-        $limit: 100,
-      },
-      {
-        $group: {
-          _id: "$disputeId",
-          total: { $sum: 1 },
-          tripData: {
-            $push: "$$ROOT",
+          status: 1,
+          acceptedQty: 1,
+          vehicleRegNumber: "$trips.vehicleRegNumber",
+          deliveryExecutiveName: "$trips.deliveryExecutiveName",
+          deliveryExecutiveEmpCode: "$trips.deliveryExecutiveEmpCode",
+          invoiceNo: "$invoices.invoiceNo",
+          orderItems: {
+            $filter: {
+              input: "$invoices.salesorders.orderItems",
+              as: "items",
+              cond: { $eq: ["$$items.orderDetails.itemDeliveryStatus", 2] },
+            },
           },
         },
       },
-      // {
-      //   $sort: {
-      //     _id: -1
-      //   }
-      // },
+      {
+        $addFields: {
+          noOfItems: {
+            $cond: {
+              if: { $isArray: "$orderItems" },
+              then: { $size: "$orderItems" },
+              else: "NA",
+            },
+          },
+        },
+      },
     ]);
 
     let totalCount = await disputeModel.count({
@@ -391,6 +412,53 @@ class disputesController extends BaseController {
         this.status.HTTP_INTERNAL_SERVER_ERROR,
         this.exceptions.internalServerErr(req, err),
         this.messageTypes.itemsIdsNotFetched
+      );
+    }
+  };
+
+  updateDisputeDetails = async (req, res, next) => {
+    let id = req.params.id;
+    let checkedQuantity =
+      req.params.quantity || req.query.quantity || req.body.quantity;
+    let reasons = req.params.reason || req.query.reason || req.body.reason;
+
+    let updatedDisputeDetail;
+
+    // update checked quantity and reason
+
+    try {
+      let updateObj = {
+        checkedQty: parseInt(checkedQuantity) || "",
+        reason: reasons,
+      };
+
+      updatedDisputeDetail = await disputeModel.update(
+        {
+          disputeId: parseInt(id),
+        },
+        { $set: { ...updateObj } }
+      );
+
+      info("Dispute Details Updating!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        updatedDisputeDetail || [],
+        this.messageTypes.disputeDetailsUpdated
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.disputeDetailsNotUpdated
       );
     }
   };

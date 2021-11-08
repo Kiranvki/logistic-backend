@@ -571,9 +571,6 @@ class vehicleInfoController extends BaseController {
 
     let activeTripData = await tripModel.aggregate(pipeline);
 
-    console.log(activeTripData);
-
-    // console.log('totalCrateCount',data)
 
     try {
       info("Getting trip Detail!");
