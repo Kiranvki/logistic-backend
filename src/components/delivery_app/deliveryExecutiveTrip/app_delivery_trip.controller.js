@@ -2058,7 +2058,7 @@ class DeliveryExecutivetrip extends BaseController {
                 "mobileNo": "$shippingDetails.mobileNo", "isDelivered": "$isDelivered"
               }
             },
-            noOfSalesOrder: { $sum: 1 }
+            // noOfSalesOrder: { $sum: 1 }
 
           }
         }
@@ -2273,6 +2273,72 @@ class DeliveryExecutivetrip extends BaseController {
     // success(req, res, status, data = null, message = 'success')
 
   }
+
+  caputreDocumnet = async (req, res, next) => {
+    let user = req.user, // user 
+      deliveryExecutiveId = user._id
+    let invoiceId = req.query.invoiceid;
+    let invoiceNo = req.query.invoiceno || 0;
+
+
+
+
+    let pipeline = [
+      {
+        $match: {
+          $or: [
+            { 'invoiceDetails.invoiceNo': invoiceNo }
+          ]
+        }
+      },
+      {
+        $lookup: {
+          from: "invoicemasters",
+          let: { id: "$salesOrder" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$so_db_id", "$$id"] }
+              }
+            }],
+          as: "invoice",
+        }
+      },
+      {
+          $project:{soId:1,isDelivered:1,"noOfCrates":{$first:"$salesorder.crateIn"},"orderPlacedAt":"$createdAt" 
+        }
+      }
+
+      // {
+      //   $lookup:{
+      //     from:'spotSales',
+      //     localField:'spotSalesId',
+      //     foreignField:'_id',
+      //     as:'spotSales'
+      //   }
+      // },
+    ]
+    let invoiceDetail = await invoiceMasterModel.aggregate(pipeline)
+
+
+    try {
+      info('Getting invoice Detail!');
+
+
+      // success response 
+      this.success(req, res, this.status.HTTP_OK,
+        invoiceDetail || []
+        , this.messageTypes.deliveryExecutiveInvoiceFetchedSuccessfully);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+
+  }
+
+  
 
 
 
