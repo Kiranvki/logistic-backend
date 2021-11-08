@@ -18,7 +18,7 @@ function vehicleRoutes() {
 
     //get trip details for a tripId
     closed.route("/trip/trip-details/:tripId").get(
-      // verifySecurityAppToken, // verify app user token
+      verifySecurityAppToken, // verify app user token
       ctrl.getTripDetailsByTripId // controller function
     );
 

@@ -51,7 +51,6 @@ function vehicleRoutes() {
       isVehicleCheckedIn,
       ctrl.checkOutVehicle // controller function
     );
-
   };
 }
 

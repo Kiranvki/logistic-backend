@@ -285,20 +285,20 @@ class vehicleEntryController extends BaseController {
   //update the returned crates after delivery
   updateCratesQuantity = async (req, res, next) => {
     let id = req.params.id;
-    let cratesRemaining = req.params.crates;
+    let cratesRemaining =
+      req.params.crates || req.query.crates || req.body.crates;
     let updatedOrderDetail;
 
     // update crate numbers
 
     try {
       let updateObj = {
-        "orderItems.$.cratesReturned": cratesRemaining || "",
+        cratesReturned: parseInt(cratesRemaining) || "",
       };
 
       updatedOrderDetail = await salesOrderModel.update(
         {
           _id: mongoose.Types.ObjectId(id),
-          "orderItems._id": mongoose.Types.ObjectId(item.id),
         },
         { $set: { ...updateObj } }
       );
