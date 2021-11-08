@@ -235,10 +235,12 @@ class vehicleEntryController extends BaseController {
             deliveryExecutiveName: { $first: "$deliveryExecutiveName" },
             tripId: { $first: "$tripId" },
             noOfCrates: { $first: "$salesorder.crateIn" },
-
+            noOfCratesOut: { $first: "$salesorder.crateOut" },
+            returnedCrates: { $first: "$salesorder.crateOutWithItem" },
             invoices: {
               $push: {
                 invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
+                invoiceId: "$salesorder.invoices._id",
                 gpnNo: { $first: "$salesorder.invoices.gpnNumber.gpn" },
                 deliveryFlag: "$salesorder.invoices.isDelivered",
                 customerName: "$salesorder.sold_to_party_description",
@@ -247,6 +249,23 @@ class vehicleEntryController extends BaseController {
                 deliveryStatus: "Delivered",
                 categoryType: "Sales Order",
               },
+            },
+          },
+        },
+        {
+          $addFields: {
+            noOfDeliveries: {
+              $cond: {
+                if: { $isArray: "$invoices" },
+                then: { $size: "$invoices" },
+                else: "0",
+              },
+            },
+            cratesRemaining: {
+              $subtract: [
+                "$noOfCrates",
+                { $add: ["$noOfCratesOut", "$returnedCrates"] },
+              ],
             },
           },
         },

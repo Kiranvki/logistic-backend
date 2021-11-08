@@ -272,7 +272,7 @@ class vehicleInfoController extends BaseController {
               $cond: {
                 if: { $isArray: "$invoices" },
                 then: { $size: "$invoices" },
-                else: "NA",
+                else: "0",
               },
             },
           },
