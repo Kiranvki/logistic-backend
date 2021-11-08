@@ -19,11 +19,49 @@ const schemas = {
       .allow(""),
   }),
 
+  joiInvoiceNo: Joi.object().keys({
+    invoiceNo: Joi.number().integer().required()
+  }),
+
   joiVehicleId: Joi.object().keys({
     vehicleId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
       .label("Vehicle Id")
+      .required()
+      .options({
+        language: {
+          string: {
+            regex: {
+              base: "should be a valid mongoose Id.",
+            },
+          },
+        },
+      }),
+  }),
+
+  joiTripId: Joi.object().keys({
+    tripId: Joi.string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .label("Trip Id")
+      .required()
+      .options({
+        language: {
+          string: {
+            regex: {
+              base: "should be a valid mongoose Id.",
+            },
+          },
+        },
+      }),
+  }),
+
+  joiId: Joi.object().keys({
+    tripId: Joi.string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .label("id")
       .required()
       .options({
         language: {
@@ -82,9 +120,79 @@ module.exports = {
       });
   },
 
+  joiInvoiceNo: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.joiInvoiceNo;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate(req.params, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
   joiVehicleId: (req, res, next) => {
     // getting the schemas
     let schema = schemas.joiVehicleId;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate(req.params, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
+
+  joiTripId: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.joiTripId;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate(req.params, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
+  joiId: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.joiId;
     let option = options.basic;
 
     // validating the schema

@@ -31,6 +31,7 @@ class NewCollection extends BaseController {
       req.body.isInvoiceMapped = false;
       req.body.isCollectionMade = true;
       req.body.collectionDone = true;
+      req.body.unUtilizedAmount=req.body.collectionAmount
 
       let DEDetails = {
         // id: mongoose.Types.ObjectId(req.user._id),
@@ -113,7 +114,6 @@ class NewCollection extends BaseController {
     try {
 
       let collectionsDoneAgainstOneInvoice;
-      req.body["unUtilizedAmount"]=0
       let totalMappedAmount=0
 
       for (let i in req.body.invoicesMapped) {
@@ -152,7 +152,7 @@ class NewCollection extends BaseController {
           let totalCollection
           if (collectionsDoneAgainstOneInvoice.length && collectionsDoneAgainstOneInvoice[0].totalCollection != 0) {
             totalCollection = collectionsDoneAgainstOneInvoice[0].totalCollection + req.body.invoicesMapped[i].mappedAmount
-            req.body.unUtilizedAmount = req.body.collectionAmount - req.body.invoicesMapped[i].mappedAmount
+            req.body.unUtilizedAmount = req.body.collectionAmount - totalMappedAmount
           } else { totalCollection = req.body.collectionAmount }
 
           req.body.invoicesMapped[i].pendingAmount =
