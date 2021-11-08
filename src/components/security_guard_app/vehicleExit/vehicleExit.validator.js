@@ -18,6 +18,27 @@ const schemas = {
       .optional()
       .allow(""),
   }),
+
+  joiTripId: Joi.object().keys({
+    tripId: Joi.string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .label("Trip Id")
+      .required()
+      .options({
+        language: {
+          string: {
+            regex: {
+              base: "should be a valid mongoose Id.",
+            },
+          },
+        },
+      }),
+  }),
+
+  joiType:Joi.object().keys({
+    type:Joi.string().valid("0","1").required(),
+  })
 };
 
 // joi options
@@ -64,4 +85,51 @@ module.exports = {
         Response.joierrors(req, res, err);
       });
   },
+
+  joiTripId: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.joiTripId;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate(req.params, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
+  joiType: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.joiType;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate(req.params, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
 };

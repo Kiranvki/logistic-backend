@@ -1,7 +1,7 @@
 // auth
 const ctrl = require("./disputes.controller");
 const { verifySecurityAppToken } = require("../../../hooks/app/Auth");
-const { joiDisputesList } = require("./disputes.validator");
+const { joiDisputesList, joiDisputeId, joiInvoiceNo, joiId } = require("./disputes.validator");
 
 // exporting the vehicle routes
 function vehicleRoutes() {
@@ -15,6 +15,7 @@ function vehicleRoutes() {
     );
 
     closed.route("/disputes/disputeDetails/:disputeId").get(
+      joiDisputeId,
       verifySecurityAppToken, // verify app user token
       ctrl.getDisputeDetails // controller function
     );
@@ -25,6 +26,7 @@ function vehicleRoutes() {
     );
 
     closed.route("/disputes/getMinifiedList/:invoice").get(
+      joiInvoiceNo,
       verifySecurityAppToken, //verify app user token
       ctrl.getDisputeItemsMinifiedList // controller function
     );
@@ -35,6 +37,7 @@ function vehicleRoutes() {
     );
 
     closed.route("/disputes/updateDisputeDetails/:id").patch(
+      joiId,
       verifySecurityAppToken, //verify app user token
       ctrl.updateDisputeDetails //controller function
     );
