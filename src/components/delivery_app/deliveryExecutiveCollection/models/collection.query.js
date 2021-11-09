@@ -178,7 +178,7 @@ class CollectionQuery {
 
 
   async getInvoiceListByCustomer(searchQuery,sortOn) {
-    return await masterInvoicesModel.find({...searchQuery}).sort(sortOn);
+    return await masterInvoicesModel.aggregate([{$match:{...searchQuery}},{$sort:sortOn}]);
   }
 
   async getCommittedInvoice(soldToParty){

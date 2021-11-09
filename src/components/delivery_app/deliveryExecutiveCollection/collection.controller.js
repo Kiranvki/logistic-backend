@@ -206,23 +206,28 @@ class NewCollection extends BaseController {
   getInvoiceListByCustomer = async (req, res) => {
     try {
       let soldToParty = req.query.soldToParty;
+      
       let sortBy = req.query.sortBy
+      if (sortBy == "amount") {
+        sortBy = "totalNetValue";
+      }
+
       let sortingOrder = req.query.sortingOrder
       let searchText=req.query.searchText
       let searchQuery={"invoiceDetails.sold_to_party":soldToParty}
+      
       if (searchText){
         searchQuery["invoiceDetails.invoiceNo"]={$regex:searchText,$options:"i"}
       }
+      
       let sortOn = {}
-      sortOn[sortBy] = sortingOrder
+      sortOn[sortBy] = parseInt(sortingOrder)
+      
       let data = {
         commitedInvoices:[],
         availableInvoices:[]
       }
       let invoiceList = await collectionQuery.getInvoiceListByCustomer(searchQuery, sortOn);
-      if (sortBy == "amount") {
-        sortBy = totalNetValue;
-      }
       
       // let customerDataFromMicroService = await getCustomerDetails(soldToParty);
       // let gofrugalId=customerDataFromMicroService.data.gofrugalId
