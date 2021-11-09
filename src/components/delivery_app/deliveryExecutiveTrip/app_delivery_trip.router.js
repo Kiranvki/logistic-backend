@@ -1,4 +1,6 @@
 const ctrl = require('./app_delivery_trip.controller');
+const multer = require('multer');
+const multipartMiddleware = multer();
 
 const { updateDeliveryStatusVal,
   getHistoryVal,
@@ -10,7 +12,8 @@ const { updateDeliveryStatusVal,
   getTripByIdVal,
   generateGpnVal,
   joiTripId,
-  joiSoId
+  joiSoId,
+
 } = require('./app_delivery_trip.validators')
 
 const {
@@ -19,7 +22,9 @@ const {
   isDeliveryAlreadyCheckedIn, // check whether the user already check In
   getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
   deliveryGenerateMonthDaysAndOtherMetaData, // generate month days and other meta data
-  isActiveDelivery
+  isActiveDelivery,
+  isvalidImageIsUploading
+  
 } = require("../../../hooks/app");
 
 // auth
@@ -210,13 +215,24 @@ function tripsRoutes() {
       ctrl.getPendingInvoiceListSo
     )
 
-    closed.route('intrip/salesorders/invoiceList/viewinvoice/:invoiceno/caputreDocumnet').post(
-      getInvoiceVal,
+    closed.route('/get-trip/pending/viewInvoice').get(
       verifyDeliveryAppToken,
       isValidDeliveryId,
       // verifyAppToken, // verify app token
-      ctrl.caputreDocumnet
+      ctrl.getPendingViewInvoice
     )
+    
+
+    // closed.route('intrip/salesorders/:salesorderId/caputreDocumnet').post(
+    //   getInvoiceVal,
+    //   verifyDeliveryAppToken,
+    //   multipartMiddleware.array('file',10), // multer middleware
+    //   isvalidImageIsUploading,
+    //   // verifyAppToken, // verify app token
+    //   ctrl.caputreDocumnet
+    // )
+
+    
 
 
 

@@ -8,6 +8,7 @@ const multipartMiddleware = multer();
 // hooks 
 const {
     checkWhetherItsAValidDeliveryUpdate, //check whether its a valid picker profile update
+    isValidProfilePicUpload
   } = require('../../../hooks/app');
   
 // auth
@@ -27,6 +28,8 @@ function deliveryUserRoutes() {
     closed.route("/user/update").patch(
       verifyDeliveryAppToken, // verify app user token
       checkWhetherItsAValidDeliveryUpdate, //check whether its a valid picker profile update
+      multipartMiddleware.single('profilePhoto'),
+      isValidProfilePicUpload,
       ctrl.updateDeliveryUserDetails // update user details
     );
   };

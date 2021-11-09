@@ -1842,7 +1842,8 @@ class DeliveryExecutivetrip extends BaseController {
 
       }
     },
-    { $project: { salesOrder: 1, vehicleRegNumber: 1 } },
+  
+    { $project: { tripId:1, salesOrder: 1, vehicleRegNumber: 1 } },
     { $unwind: { path: "$salesOrder" } },
     {
       $lookup: {
@@ -1874,7 +1875,7 @@ class DeliveryExecutivetrip extends BaseController {
     { $unwind: { path: "$invoice", preserveNullAndEmptyArrays: true } },
     {
       $project: {
-        salesOrder: 1, vehicleRegNumber: 1, "getDirection": "$salesorders.location", "NoOfCrates": "$salesorders.crateIn",
+        tripId:1,salesOrder: 1, vehicleRegNumber: 1, "getDirection": "$salesorders.location", "NoOfCrates": "$salesorders.crateIn",
         sold_to_party_description: "$salesorders.sold_to_party_description",
         sold_to_party: "$salesorders.sold_to_party",
         "address1": "$invoice.shippingDetails.address1",
@@ -2274,7 +2275,7 @@ class DeliveryExecutivetrip extends BaseController {
 
   }
 
-  caputreDocumnet = async (req, res, next) => {
+  getPendingViewInvoice = async (req, res, next) => {
     let user = req.user, // user 
       deliveryExecutiveId = user._id
     let invoiceId = req.query.invoiceid;
@@ -2293,30 +2294,32 @@ class DeliveryExecutivetrip extends BaseController {
       },
       {
         $lookup: {
-          from: "invoicemasters",
-          let: { id: "$salesOrder" },
+          from: "salesorders",
+          let: { id: "$so_db_id" },
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ["$so_db_id", "$$id"] }
+                $expr: { $eq: ["$_id", "$$id"] }
               }
             }],
-          as: "invoice",
+          as: "salesorder",
         }
       },
       {
-          $project:{soId:1,isDelivered:1,"noOfCrates":{$first:"$salesorder.crateIn"},"orderPlacedAt":"$createdAt" 
+        $project: {
+          so_db_id: 1,isDelivered:1, "orderPlacedAt": "$createdAt", "invoiceNo": "$invoiceDetails.invoiceNo", "itemSupplied.itemId": 1, "itemSupplied._id": 1,
+          "itemSupplied.itemName": 1,"noOfCrates":{$first:"$salesorder.crateIn"}
         }
-      }
+      },
 
-      // {
-      //   $lookup:{
-      //     from:'spotSales',
-      //     localField:'spotSalesId',
-      //     foreignField:'_id',
-      //     as:'spotSales'
-      //   }
-      // },
+      {
+        $lookup:{
+          from:'spotSales',
+          localField:'spotSalesId',
+          foreignField:'_id',
+          as:'spotSales'
+        }
+      },
     ]
     let invoiceDetail = await invoiceMasterModel.aggregate(pipeline)
 
@@ -2338,7 +2341,105 @@ class DeliveryExecutivetrip extends BaseController {
 
   }
 
-  
+  // caputreDocumnet = async (req, res) => {
+  //   try {
+  //     info('upload photos of invoices and other documents with customer signature');
+
+  //     // STEP 1 - Create a entry in db
+  //     // STEP 2 - Upload the image as per customer name directive 
+
+  //     // get the firstname
+  //     // req.body.name = req.body.name.replace(
+  //     //   /\w\S*/g,
+  //     //   function (txt) {
+  //     //     return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  //     //   });
+
+  //     // get the onboarding date
+  //     // let onboardingDate = moment().set({
+  //     //   h: 0,
+  //     //   m: 0,
+  //     //   s: 0,
+  //     //   millisecond: 0
+  //     // }).utcOffset("+05:30").toDate(); // today date 
+  //     // get the insert object 
+  //     let insertObject = {
+  //       // goFrugalId: 0,
+  //       // incoTermLocation: req.user.incoTermLocation,
+  //       // salesDocumentType: req.user.salesDocumentType || 'ZDOM',
+  //       // salesOrganization: req.user.salesOrg || '5000',
+  //       // distributionChannel: req.user.distributionChannel || '50',
+  //       // division: req.user.division || '51',
+  //       // plant: req.user.plant || '1000',
+  //       // storageLocation: req.user.storageLocation || '101',
+  //       // priceLevelId: req.user.customerGroup || 'BB', //it will be cust group by default some value we are passing
+  //       //  customerGroup: req.user.distributionChannel || '50', // it will be distribution channel
+  //       /**
+  //        * From backend we will have to assigned both the dist channel and customer_group
+  //        */
+  //       // priceLevelId: req.body.priceLevelId,  //here we will be getting the customer group (now it wont be taken from the user, it will be directly assigned to the user from the saleman-warehouse mapping)
+  //       // customerGroup: req.body.group, //here it should be the distribution center(now we do not need to take it from front end, it will be taken from salesman)
+  //       //cityId: req.user.cityId,
+
+  //       //salesmanId: req.user._id,
+
+  //       //contactPerson: req.body.contactPersonName,
+  //       // mobileNumber: req.body.phoneNumber,
+  //       // email: req.body.email,
+  //       // address1: req.body.address1 || null,
+  //       // address2: req.body.address2 || null,
+  //       // latitude: req.body.latitude || null,
+  //       // longitude: req.body.longitude || null,
+  //       // location: {
+  //       //   type: 'Point',
+  //       //   coordinates: [!isNaN(req.body.longitude) ? req.body.longitude : null, !isNaN(req.body.latitude) ? req.body.latitude : null]
+  //       // },
+  //       // city: req.body.city || null,
+  //       // pincode: req.body.pincode || null,
+  //       // state: req.body.state || null,
+  //       // dateOfOnBoarding: onboardingDate,
+  //       // name: req.body.name,
+  //       // step1: true,
+  //       status: 1,
+  //       // isDeleted: 0,
+  //       // isCustomerPosted: 0,
+  //     };
+
+  //     // creating a new customer in local db
+  //     let isInserted = await Model.create(insertObject).then((result) => {
+  //       if (!_.isEmpty(req.body.fileInfo))
+  //         return AppImageCtrl.uploadInternal({ id: result._id, name: result.name }, req.body.fileInfo, 'image').then((data) => {
+  //           return {
+  //             success: true,
+  //             data: result
+  //           };
+  //         });
+  //       else return {
+  //         success: false,
+  //         data: result
+  //       }
+  //     });
+
+  //     // if inserted 
+  //     if (isInserted.success) {
+  //       await Model.findByIdAndUpdate(isInserted.data.id, {
+  //         originalImageId: isInserted.data.originalFileName,
+  //         //thumbnailImageId: isInserted.data.thumbNailFileName,
+  //       });
+  //     }
+  //     console.log(' image uploaded Successfully : ', isInserted.data)
+  //     // success 
+  //     return this.success(req, res, this.status.HTTP_OK, {
+  //      // onBoardingId: isInserted.success ? isInserted.data.id : isInserted.data._id
+  //     }, this.messageTypes.imageUploadedSuccessfully);
+
+  //     // catch any runtime error 
+  //   } catch (err) {
+  //     error(err);
+  //     this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+  //   }
+  // }
+
 
 
 
