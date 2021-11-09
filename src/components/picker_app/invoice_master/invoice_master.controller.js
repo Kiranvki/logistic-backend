@@ -330,8 +330,8 @@ class invoiceMasterController extends BaseController {
           })
           let qrCode = ''
           // let qrCode = await QRCode.toDataURL(invoiceDetails['invoiceDetails']['signed_qrcode'],{type:'terminal'});
-          if(req.body.invDetail['invoiceDetails']['signed_qrcode']){
-             qrCode = await QRCode.toDataURL(req.body.invDetail['invoiceDetails']['signed_qrcode'],{type:'terminal'});
+          if(invoiceDetails['invoiceDetails']['signed_qrcode']){
+             qrCode = await QRCode.toDataURL(invoiceDetails['invoiceDetails']['signed_qrcode'],{type:'terminal'});
           }
 
             let InvoiceDetailsResponse={
