@@ -3,7 +3,11 @@ const ctrl = require("./vehicleExit.controller");
 const { verifySecurityAppToken } = require("../../../hooks/app/Auth");
 const { isValidGpn } = require("../../../hooks");
 
-const { joiVehicleList, joiTripId, joiType } = require("./vehicleExit.validator");
+const {
+  joiVehicleList,
+  joiTripId,
+  joiType,
+} = require("./vehicleExit.validator");
 
 // exporting the vehicle routes
 function vehicleRoutes() {
@@ -45,8 +49,14 @@ function vehicleRoutes() {
 
     closed.route("/trip/historyDetails/:tripId").get(
       joiTripId,
-      // verifySecurityAppToken, // verify app user token
+      verifySecurityAppToken, // verify app user token
       ctrl.getTripHistoryDetails // controller function
+    );
+
+    closed.route("/trip/historyTimeline/:tripId").get(
+      joiTripId,
+      verifySecurityAppToken, // verify app user token
+      ctrl.getTripTimeline // controller function
     );
 
     closed.route("/trip/allow-vehicle/:tripId").post(

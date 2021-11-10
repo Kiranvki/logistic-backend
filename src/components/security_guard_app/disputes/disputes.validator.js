@@ -19,44 +19,16 @@ const schemas = {
       .allow(""),
   }),
 
-
   joiId: Joi.object().keys({
-    tripId: Joi.string()
-      .trim()
-      .regex(/^[a-fA-F0-9]{24}$/)
-      .label("id")
-      .required()
-      .options({
-        language: {
-          string: {
-            regex: {
-              base: "should be a valid mongoose Id.",
-            },
-          },
-        },
-      }),
+    id: Joi.number().integer().min(2).label("Id").required(),
   }),
 
-
   joiDisputeId: Joi.object().keys({
-    disputeId: Joi.string()
-      .trim()
-      .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Dispute Id")
-      .required()
-      .options({
-        language: {
-          string: {
-            regex: {
-              base: "should be a valid mongoose Id.",
-            },
-          },
-        },
-      }),
+    disputeId: Joi.number().integer().min(2).label("dispute Id").required(),
   }),
 
   joiInvoiceNo: Joi.object().keys({
-    invoice: Joi.number().integer().required()
+    invoice: Joi.number().integer().required(),
   }),
 };
 
@@ -104,7 +76,6 @@ module.exports = {
         Response.joierrors(req, res, err);
       });
   },
-
 
   joiId: (req, res, next) => {
     // getting the schemas

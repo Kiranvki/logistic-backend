@@ -48,7 +48,9 @@ class disputesController extends BaseController {
         $project: {
           disputeId: 1,
           status: 1,
-          disputeDate: "$createdAt",
+          disputeDate: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+          },
           invoicesNo: { $first: "$invoices.invoiceDetails.invoiceNo" },
           tripId: "$tripId",
           deliveryExecutiveName: "",

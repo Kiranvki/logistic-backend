@@ -634,7 +634,7 @@ class vehicleInfoController extends BaseController {
     let pipeline = [
       {
         $match: {
-          tripId: parseInt(ID),
+          _id: mongoose.Types.ObjectId(ID),
         },
       },
       {
@@ -653,8 +653,26 @@ class vehicleInfoController extends BaseController {
           orderPackedDate: { $first: "$order.delivery_date" },
           orderPackedTime: { $first: "$order.picking_time" },
           assignedTo: { $first: "$transporterDetails.deliveryExecutiveName" },
-          assignedDateTime: "$createdAt",
-          startedDelivery: "$updatedAt",
+          assignedDate: {
+            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+          },
+          assignedTime: {
+            $dateToString: {
+              format: "%H:%M",
+              date: "$createdAt",
+              timezone: "+05:30",
+            },
+          },
+          startedDeliveryDate: {
+            $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" },
+          },
+          startedDeliveryTime: {
+            $dateToString: {
+              format: "%H:%M",
+              date: "$updatedAt",
+              timezone: "+05:30",
+            },
+          },
         },
       },
     ];

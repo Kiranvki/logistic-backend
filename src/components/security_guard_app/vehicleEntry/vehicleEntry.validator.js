@@ -20,7 +20,7 @@ const schemas = {
   }),
 
   joiInvoiceNo: Joi.object().keys({
-    invoiceNo: Joi.number().integer().required()
+    invoiceNo: Joi.number().integer().required(),
   }),
 
   joiVehicleId: Joi.object().keys({
@@ -41,24 +41,11 @@ const schemas = {
   }),
 
   joiTripId: Joi.object().keys({
-    tripId: Joi.string()
-      .trim()
-      .regex(/^[a-fA-F0-9]{24}$/)
-      .label("Trip Id")
-      .required()
-      .options({
-        language: {
-          string: {
-            regex: {
-              base: "should be a valid mongoose Id.",
-            },
-          },
-        },
-      }),
+    tripId: Joi.number().integer().min(2).label("tripId").required(),
   }),
 
   joiId: Joi.object().keys({
-    tripId: Joi.string()
+    id: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
       .label("id")
@@ -165,7 +152,6 @@ module.exports = {
         Response.joierrors(req, res, err);
       });
   },
-
 
   joiTripId: (req, res, next) => {
     // getting the schemas
