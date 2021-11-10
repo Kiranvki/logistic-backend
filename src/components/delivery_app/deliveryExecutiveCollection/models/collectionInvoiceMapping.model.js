@@ -32,8 +32,7 @@ let deCollectionInvoiceMappingSchema = mongoose.Schema({
         default: false
     },
     amountRemaining: {
-        type: Number,
-        default: 0        
+        type: Number,       
     },
     invoiceState: {
         type: String,

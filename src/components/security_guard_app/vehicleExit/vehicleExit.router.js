@@ -45,7 +45,7 @@ function vehicleRoutes() {
 
     closed.route("/trip/historyDetails/:tripId").get(
       joiTripId,
-      verifySecurityAppToken, // verify app user token
+      // verifySecurityAppToken, // verify app user token
       ctrl.getTripHistoryDetails // controller function
     );
 
