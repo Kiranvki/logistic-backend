@@ -19,14 +19,14 @@ const {
 module.exports = async (req, res, next) => {
   
   
-  if(req.body.customerDetail.success&&(req.body.customerDetail&&req.body.customerDetail['data']&&(req.body.customerDetail['data']['data'].gstNumber!= ' '||req.body.customerDetail['data']['data'].gstNumber!= '')))
+  if(req.body.customerDetail.success&&(req.body.customerDetail&&req.body.customerDetail['data']&&(req.body.customerDetail['data'].gstNumber!= ' '||req.body.customerDetail['data'].gstNumber!= '')))
     {
   try {
     console.log('customer',req.body.customerDetail)
    
     info(`Hitting the SAP for Picking Allocation !`);
-    let data = req.body.data;
-    let OrderData = req.body.orderDetail
+    // let data = req.body.data;
+    // let OrderData = req.body.orderDetail
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
     let sapBaseUrl = process.env.sapBaseUrl;

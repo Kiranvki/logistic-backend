@@ -24,13 +24,17 @@ const {
 module.exports = async (req, res, next) => {
   try {
     info('Get the customer details !');
-    let invoiceDetail = req.body.invoice_detail['data'][0] || undefined,
+    // console.log(req.body.invoice_detail['data'][0])
+    // let invoiceDetail = req.body.invoice_detail['data'][0] || undefined,
+    let customerCode = req.body.orderDetail['pickerBoySalesOrderMappingId']['salesOrderId']['ship_to_party'],
+
     
     
 
-     customerDataFromMicroService = await getCustomerDetails(invoiceDetail['sold_to_party']);
-    if(customerDataFromMicroService){
-        req.body.customerDetail =  {success:true,data:customerDataFromMicroService}
+      customerDataFromMicroService = await getCustomerDetails(customerCode);
+    
+     if(customerDataFromMicroService){
+        req.body.customerDetail =  {success:true,data:(customerDataFromMicroService&&customerDataFromMicroService.data)}
         next()
     }else{
         req.body.customerDetail =  {success:false,data:[]}
