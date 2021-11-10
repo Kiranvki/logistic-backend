@@ -361,7 +361,7 @@ class invoiceMasterController extends BaseController {
               // itemsOrdered:invoiceDetails.itemSupplied,
               invoiceDetail:invoiceDetails,
               basketTotal: totalAmount-totalTaxValue,
-              finalTotal:(Math.round(totalAmount+totalDiscount)).toString()+'.00',
+              finalTotal:parseFloat((Math.round(totalAmount+totalDiscount)).toString()+'.00'),
               totalDiscount:totalDiscount,    //Number(invoiceDetails.totalDiscount),
               cgst:Math.round((totalTaxValue/2)*100)/100,
               sgst:Math.round((totalTaxValue/2)*100)/100,
