@@ -553,41 +553,43 @@ class vehicleInfoController extends BaseController {
 
   getTripHistoryDetails = async (req, res, next) => {
     info("getting in trip data!");
-    let tripId = req.params.tripId;
+    let tripId = req.params.tripId || req.query.tripId;
     let pipeline = [
       {
         $match: {
           $and: [
             {
-              _id:mongoose.Types.ObjectId(tripId),
+              _id: mongoose.Types.ObjectId(tripId),
             },
             {
               isActive: 1,
             },
           ],
         },
-      },{
+      },
+      {
         $lookup: {
-          from:"vehiclemasters",
-          localField:"vehicleId",
-          foreignField:"_id",
-          as: "vehicleDetails"
-        }
-      },{
-          $lookup:{
-              from:"deliveryexecutives",
-              localField:"deliveryExecutiveId",
-              foreignField:"_id",
-              as:"deDetails"
-          }
+          from: "vehiclemasters",
+          localField: "vehicleId",
+          foreignField: "_id",
+          as: "vehicleDetails",
         },
+      },
+      {
+        $lookup: {
+          from: "deliveryexecutives",
+          localField: "deliveryExecutiveId",
+          foreignField: "_id",
+          as: "deDetails",
+        },
+      },
       {
         $lookup: {
           from: "salesorders",
           localField: "salesOrder",
           foreignField: "_id",
-          as: "soDetails"
-        }
+          as: "soDetails",
+        },
       },
       {
         $project: {
@@ -595,14 +597,12 @@ class vehicleInfoController extends BaseController {
           truckNumber: { $first: "$vehicleDetails.regNumber" },
           deName: { $first: "$deDetails.fullName" },
           employeeNumber: { $first: "$deDetails.zohoId" },
-          noOfCrates: { $first: "$soDetails.crateIn" }
-
-        }
-      }
-    ]
+          noOfCrates: { $first: "$soDetails.crateIn" },
+        },
+      },
+    ];
 
     let activeTripData = await tripModel.aggregate(pipeline);
-
 
     try {
       info("Getting trip Detail!");
@@ -624,6 +624,63 @@ class vehicleInfoController extends BaseController {
         res,
         this.status.HTTP_INTERNAL_SERVER_ERROR,
         this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+  getTripTimeline = async (req, res, next) => {
+    let ID = req.params.tripId || req.query.tripId;
+    info("getting trip timeline!");
+    let pipeline = [
+      {
+        $match: {
+          tripId: parseInt(ID),
+        },
+      },
+      {
+        $unwind: "$salesOrderId",
+      },
+      {
+        $lookup: {
+          from: "pickerboyordermappings",
+          localField: "salesOrderId",
+          foreignField: "salesOrderId",
+          as: "order",
+        },
+      },
+      {
+        $project: {
+          orderPackedDate: { $first: "$order.delivery_date" },
+          orderPackedTime: { $first: "$order.picking_time" },
+          assignedTo: { $first: "$transporterDetails.deliveryExecutiveName" },
+          assignedDateTime: "$createdAt",
+          startedDelivery: "$updatedAt",
+        },
+      },
+    ];
+
+    let tripTimeline = await tripModel.aggregate(pipeline);
+    try {
+      info("Getting trip Timeline!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        tripTimeline || [],
+        this.messageTypes.tripTimelineFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.tripTimelineNotFetched
       );
     }
   };
