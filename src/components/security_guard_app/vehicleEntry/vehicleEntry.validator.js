@@ -45,7 +45,7 @@ const schemas = {
   }),
 
   joiId: Joi.object().keys({
-    id: Joi.string()
+    salesorderId: Joi.string()
       .trim()
       .regex(/^[a-fA-F0-9]{24}$/)
       .label("id")

@@ -174,9 +174,11 @@ class vehicleEntryController extends BaseController {
         {
           $project: {
             vehicleRegNumber: 1,
+            vehicleId: 1,
             deliveryExecutiveEmpCode: 1,
             deliveryExecutiveName: 1,
             tripId: 1,
+            so_db_id: 1,
             salesOrder: 1,
           },
         },
@@ -249,20 +251,22 @@ class vehicleEntryController extends BaseController {
           $group: {
             _id: "$_id",
             vehicleRegNumber: { $first: "$vehicleRegNumber" },
+            vehicleId: {$first: "$vehicleId"},
             deliveryExecutiveEmpCode: { $first: "$deliveryExecutiveEmpCode" },
             deliveryExecutiveName: { $first: "$deliveryExecutiveName" },
             tripId: { $first: "$tripId" },
+            salesOrderId: {$first: "$salesOrder"},
             noOfCrates: { $first: "$salesorder.crateIn" },
             noOfCratesOut: { $first: "$salesorder.crateOut" },
-            isSalesReturn: { $first: "$isSalesReturn" },
             returnedCrates: { $first: "$salesorder.crateOutWithItem" },
-
+            
             invoices: {
               $push: {
                 invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
                 invoiceId: "$salesorder.invoices._id",
                 gpnNo: { $first: "$salesorder.invoices.gpnNumber.gpn" },
                 deliveryFlag: "$salesorder.invoices.isDelivered",
+                isSalesReturn: "$isSalesReturn" ,
                 customerName: "$salesorder.sold_to_party_description",
                 address: "$salesorder.invoices.shippingDetails.address",
                 city: "$salesorder.invoices.shippingDetails.cityId",
@@ -287,6 +291,7 @@ class vehicleEntryController extends BaseController {
                 { $add: ["$noOfCratesOut", "$returnedCrates"] },
               ],
             },
+            vehicleId: "$vehicleId",
           },
         },
       ])
@@ -323,7 +328,7 @@ class vehicleEntryController extends BaseController {
 
   //update the returned crates after delivery
   updateCratesQuantity = async (req, res, next) => {
-    let id = req.params.id;
+    let id = req.params.salesorderId;
     let cratesRemaining =
       req.params.crates || req.query.crates || req.body.crates;
     let updatedOrderDetail;
@@ -335,7 +340,7 @@ class vehicleEntryController extends BaseController {
         cratesReturned: parseInt(cratesRemaining) || "",
       };
 
-      updatedOrderDetail = await salesOrderModel.update(
+      updatedOrderDetail = await salesOrderModel.findOneAndUpdate(
         {
           _id: mongoose.Types.ObjectId(id),
         },
