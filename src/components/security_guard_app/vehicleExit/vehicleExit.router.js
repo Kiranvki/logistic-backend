@@ -7,6 +7,7 @@ const {
   joiVehicleList,
   joiTripId,
   joiType,
+  joiTripNo
 } = require("./vehicleExit.validator");
 
 // exporting the vehicle routes
@@ -22,7 +23,7 @@ function vehicleRoutes() {
 
     //get trip details for a tripId
     closed.route("/trip/trip-details/:tripId").get(
-      joiTripId, // verify the format of input
+      joiTripNo, // verify the format of input
       verifySecurityAppToken, // verify app user token
       ctrl.getTripDetailsByTripId // controller function
     );
@@ -60,7 +61,7 @@ function vehicleRoutes() {
     );
 
     closed.route("/trip/allow-vehicle/:tripId").post(
-      joiTripId,
+      joiTripNo,
       verifySecurityAppToken, // verify app user token
       ctrl.allowVehicle // controller function
     );

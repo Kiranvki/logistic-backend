@@ -591,13 +591,21 @@ class vehicleInfoController extends BaseController {
           as: "soDetails",
         },
       },
+
       {
         $project: {
           tripId: 1,
           truckNumber: { $first: "$vehicleDetails.regNumber" },
-          deName: { $first: "$deDetails.fullName" },
-          employeeNumber: { $first: "$deDetails.zohoId" },
+          deliveryExecutiveName: { $first: "$deDetails.fullName" },
+          employeeNumber: { $first: "$deDetails.employeeId" },
           noOfCrates: { $first: "$soDetails.crateIn" },
+          salesOrdersDelivery: {
+            $cond: {
+              if: { $isArray: "$soDetails" },
+              then: { $size: "$soDetails" },
+              else: "NA",
+            },
+          },
         },
       },
     ];
