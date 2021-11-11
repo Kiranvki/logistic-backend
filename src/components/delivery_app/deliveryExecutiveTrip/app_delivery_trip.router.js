@@ -23,8 +23,10 @@ const {
   getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
   deliveryGenerateMonthDaysAndOtherMetaData, // generate month days and other meta data
   isActiveDelivery,
-  isvalidImageIsUploading
-  
+  isValidMultiImageIsUploading,
+  isValidCustomerNotAvailUpload,
+  isvalidSignatureIsUploading
+
 } = require("../../../hooks/app");
 
 // auth
@@ -159,8 +161,6 @@ function tripsRoutes() {
       updateDeliveryStatusVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
-
-
       ctrl.updateItemStatusAndCaretOut
     );
 
@@ -179,6 +179,15 @@ function tripsRoutes() {
       ctrl.getSalesOrdersbyTripID
     )
 
+    closed.route('/trip/intrip/caputreDocument/:salesOrdersId').post(
+      // getInvoiceVal,
+      verifyDeliveryAppToken,
+      multipartMiddleware.array('files'), // multer middleware
+      isValidMultiImageIsUploading,
+      ctrl.uploadDocuments
+      // ctrl.justChecking
+    )
+
     //get ivoice numbers by sales oders
 
     closed.route('/:salesorderId/invoiceList').get(
@@ -194,19 +203,19 @@ function tripsRoutes() {
     )
     closed.route('/get-dispute').get(
       verifyDeliveryAppToken,
-        isValidDeliveryId,
-        isActiveDelivery,
+      isValidDeliveryId,
+      isActiveDelivery,
       // verifyAppToken, // verify app token
-        ctrl.getdispute 
-      );
+      ctrl.getdispute
+    );
 
-      closed.route('/get-dispute/:disputeId/viewDisputeDetails').get(
-        verifyDeliveryAppToken,
-          isValidDeliveryId,
-          isActiveDelivery,
-        // verifyAppToken, // verify app token
-          ctrl.viewDisputeDetails
-        );
+    closed.route('/get-dispute/:disputeId/viewDisputeDetails').get(
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      isActiveDelivery,
+      // verifyAppToken, // verify app token
+      ctrl.viewDisputeDetails
+    );
 
     closed.route('/get-trip/pending/:salesorderId/invoiceList').get(
       verifyDeliveryAppToken,
@@ -221,18 +230,24 @@ function tripsRoutes() {
       // verifyAppToken, // verify app token
       ctrl.getPendingViewInvoice
     )
-    
 
-    // closed.route('intrip/salesorders/:salesorderId/caputreDocumnet').post(
-    //   getInvoiceVal,
-    //   verifyDeliveryAppToken,
-    //   multipartMiddleware.array('file',10), // multer middleware
-    //   isvalidImageIsUploading,
-    //   // verifyAppToken, // verify app token
-    //   ctrl.caputreDocumnet
-    // )
+    closed.route('/trip/intrip/:salesorderId/signature').post(
+      //getInvoiceVal,
+      verifyDeliveryAppToken,
+      multipartMiddleware.single('file'), // multer middleware
+      isvalidSignatureIsUploading,
+      ctrl.customerSignature
+    )
 
-    
+    closed.route('/trip/intrip/:salesorderId/customerNotAvailable').post(
+      //getInvoiceVal,
+      verifyDeliveryAppToken,
+      multipartMiddleware.array('file'), // multer middleware
+      isValidCustomerNotAvailUpload, // is valid balance confirmation file upload 
+      ctrl.uploadImageCustomerNotAvailable, // controller function
+    )
+
+
 
 
 

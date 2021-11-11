@@ -78,9 +78,8 @@ const schemas = {
       
     }),
     getInvoice:Joi.object().keys({
-      invoiceno: Joi.string().allow(''),
-      invoiceid: Joi.when('invoiceno', { is: '', then: Joi.string(), otherwise: Joi.string().allow('') })
-    }).or('invoiceno', 'invoiceid'),
+      salesorderId:Joi.string().trim().label('soid').min(20)
+    }),
     
     
     
