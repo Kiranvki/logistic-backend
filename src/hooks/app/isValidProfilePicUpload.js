@@ -34,6 +34,7 @@ module.exports = async (req, res, next) => {
 
     // initializing
     let fileInfo = {};
+    console.log("image", req.file)
 
     // checking if the file is there
     if (req.file) {

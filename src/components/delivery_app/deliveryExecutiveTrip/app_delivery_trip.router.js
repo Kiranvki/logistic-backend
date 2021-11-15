@@ -182,7 +182,7 @@ function tripsRoutes() {
     closed.route('/trip/intrip/caputreDocument/:salesOrdersId').post(
       // getInvoiceVal,
       verifyDeliveryAppToken,
-      multipartMiddleware.array('files'), // multer middleware
+      multipartMiddleware.array('files',5), // multer middleware
       isValidMultiImageIsUploading,
       ctrl.uploadDocuments
       // ctrl.justChecking
@@ -231,7 +231,7 @@ function tripsRoutes() {
       ctrl.getPendingViewInvoice
     )
 
-    closed.route('/trip/intrip/:salesorderId/signature').post(
+    closed.route('/trip/intrip/:salesOrdersId/signature').post(
       //getInvoiceVal,
       verifyDeliveryAppToken,
       multipartMiddleware.single('file'), // multer middleware
@@ -239,10 +239,10 @@ function tripsRoutes() {
       ctrl.customerSignature
     )
 
-    closed.route('/trip/intrip/:salesorderId/customerNotAvailable').post(
+    closed.route('/trip/intrip/:salesOrdersId/customerNotAvailable').post(
       //getInvoiceVal,
       verifyDeliveryAppToken,
-      multipartMiddleware.array('file'), // multer middleware
+      multipartMiddleware.array('files',5), // multer middleware
       isValidCustomerNotAvailUpload, // is valid balance confirmation file upload 
       ctrl.uploadImageCustomerNotAvailable, // controller function
     )

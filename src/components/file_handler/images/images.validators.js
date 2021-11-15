@@ -83,4 +83,25 @@ module.exports = {
       Response.joierrors(req, res, err);
     });
   },
+
+  // joi validation for customer file upload 
+  joiValidationForFileUploadCustomer: (req, res, next) => {
+    // getting the schemas 
+    let schema = schemas.joiValidationForFileUploadCustomer;
+    let option = options.basic;
+
+    // validating the schema 
+    schema.validate(req.params, option).then(() => {
+      return next();
+      // if error occured
+    }).catch((err) => {
+      let error = [];
+      err.details.forEach(element => {
+        error.push(element.message);
+      });
+
+      // returning the response 
+      Response.joierrors(req, res, err);
+    });
+  },
 }

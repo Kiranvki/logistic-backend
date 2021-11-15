@@ -33,22 +33,20 @@ module.exports = async (req, res, next) => {
     const maxFileSizeInMbFromConfig = await BasicCtrl.GET_MAX_STOP_IMAGE_FILE_SIZE_IN_MB().then((res) => { if (res.success) return res.data; else return 1; });
 
     // initializing
-    let fileInfo = [],
-    files = {};
+    let fileInfo = {};
+    // file = {};
 
-    console.log("image file===>", req.files)
+    console.log("image file===>", req.file)
     // checking if the file is there
-    if (req.files) {
+    if (req.file) {
 
-    for (let i = 0 ; i<req.files.length;i++){
-      
     
 
       info('FILE FOUND !');
 
      // creating a new file info
       const resizedImage = await
-        sharp(req.files[i].buffer)
+        sharp(req.file.buffer)
           .resize({
             width: 400,
             height: 400,
@@ -58,15 +56,15 @@ module.exports = async (req, res, next) => {
           .toBuffer();
 
       // creating file info
-      files = {
-        "originalName": req.files[i].originalname,
-        "size": req.files[i].size,
-        "b64": getStream(req.files[i].buffer),
-        "b64Length": req.files[i].buffer.length,
+      fileInfo = {
+        "originalName": req.file.originalname,
+        "size": req.file.size,
+        "b64": getStream(req.file.buffer),
+        "b64Length": req.file.buffer.length,
       };
 
       // get the size of the file 
-      let sizeInMb = bytesToMb(req.files[i].size);
+      let sizeInMb = bytesToMb(req.file.size);
 
       // if the file is more than expected size
       if (sizeInMb > maxFileSizeInMbFromConfig) {
@@ -75,24 +73,24 @@ module.exports = async (req, res, next) => {
       }
 
       // check the max image size 
-      let ext = mime.extension(req.files[i].mimetype);
+      let ext = mime.extension(req.file.mimetype);
 
       //if the extension is not valid 
       if (validExt.indexOf(ext) >= 0) {
 
         // get the encrypted file 
-        fileInfo.push(files);
+        req.body.fileInfo = fileInfo;
 
         // else return response 
-      }}
+      
 
       
-      if(fileInfo.length=== req.files.length) {
-        req.body.fileInfo = fileInfo;
+     // (fileInfo.length=== req.file.length)
+     
+       
       }else return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.fileHandler.fileExtensionIsNotValid(validExt));
 
-    } else 
-    req.body.fileInfo = fileInfo;
+    } else req.body.fileInfo = fileInfo;
    
 
     // move on

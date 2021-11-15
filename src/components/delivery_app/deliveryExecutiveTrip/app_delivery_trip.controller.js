@@ -2658,19 +2658,19 @@ class DeliveryExecutivetrip extends BaseController {
       );
       //  console.log("data",data)
       dataToUpdate = {
-        $set: {
-          invoiceUploads: [(azureUrl + data.name)]
+        $addToSet: {
+          invoiceUploads: (azureUrl + data.name)
         },
       };
      // console.log(azureUrl,'this is azureUrl')
-     console.log('datetoupdate',dataToUpdate)
+    // console.log('datetoupdate',dataToUpdate)
      // console.log('salesOrdersId',salesOrdersId)
 
 
     
     // console.log("dataToUpdate",updatedData)
       // inserting data into the db
-      isUpdated = await salesOrderModel.updateOne(
+      isUpdated = await salesOrderModel.findOneAndUpdate(
         {
           _id: mongoose.Types.ObjectId(salesOrdersId),
         },
@@ -2709,17 +2709,22 @@ class DeliveryExecutivetrip extends BaseController {
   customerSignature = async (req, res, next) => {
     try {
       info('Uploading signature to the DB !');
-      let salesorder = req.params.salesorder ||req.query.salesorder || req.body.salesorder; // get the onboarding id
+      let salesOrdersId = 
+      req.params.salesOrdersId ||req.query.salesOrdersId || req.body.salesOrdersId; // get the onboarding id
       // let customerName = req.body.onBoarding.name || req.params.deliveryExId;  // this has to eb changes
       // let type = req.body.type;
 
       // get the file name 
-      let fileName = `customers/$-${salesorder}/`;
+      let fileName = `customers/$-${salesOrdersId}/`;
       let fileStream = req.body.fileInfo.b64;
       let streamLength = req.body.fileInfo.b64Length;
 
       // data
-      let data = await blobService.createBlockBlobFromStream(containerName, fileName + `original-${req.body.fileInfo.originalName.trim()}`, fileStream, streamLength, err => {
+      let data = await blobService.createBlockBlobFromStream(
+        containerName, fileName + `original-${req.body.fileInfo.originalName}`,
+         fileStream,
+         streamLength,
+         err => {
         if (err) {
           error('Original Upload Fail', err);
           return {
@@ -2734,26 +2739,26 @@ class DeliveryExecutivetrip extends BaseController {
 
       let dataToUpdate = {
         $set: {
-          photo: (azureUrl+data.name).trim(""),
+          customerSignature: (azureUrl+data.name)
         },
       };
 
       // inserting data into the db
       let isUpdated = await salesOrderModel.findOneAndUpdate(
         {
-          _id: mongoose.Types.ObjectId(salesorder),
+          _id: mongoose.Types.ObjectId(salesOrdersId),
         },
         dataToUpdate,
         {
           new: true,
-          upsert: true,
+          upsert: false,
           lean: true,
         }
       );
 
       // success 
       return this.success(req, res, this.status.HTTP_OK, {
-        //id: salesOrdersId,
+        id: salesOrdersId,
         msg: isUpdated,
       }, this.messageTypes.fileSuccessfullyUploaded);
 
@@ -2764,86 +2769,91 @@ class DeliveryExecutivetrip extends BaseController {
     }
   }
 
+
   uploadImageCustomerNotAvailable = async (req, res, next) => {
     try {
       info("upload photos if customer is not available");
-          let dataToUpdate,isUpdated;
-          let salesOrders =
-            req.params.salesorder || req.query.salesorder || req.body.salesorder; // get the onboarding id
-          // let customerName = req.body.onBoarding.name || req.params.salesOrder;  // this has to eb changes
-          // let type = req.body.type;
+      let dataToUpdate,isUpdated;
+      let salesOrdersId=
+        req.params.salesOrdersId || req.query.salesOrdersId || req.body.salesOrdersId; // get the onboarding id
+      // let customerName = req.body.onBoarding.name || req.params.salesOrder;  // this has to eb changes
+      // let type = req.body.type;
+      //console.log('images ===>', req.body.fileInfo)
+      for (let i = 0 ; i<req.body.fileInfo.length;i++){
+      // get the file name
+      let fileName = `customers/-${salesOrdersId}/`;
+      let fileStream = req.body.fileInfo[i].b64;
+      let streamLength = req.body.fileInfo[i].b64Length;
 
-          for (let i = 0 ; i<req.body.fileInfo.length;i++){
-          // get the file name
-          let fileName = `customers/-${salesOrders}/`;
-          let fileStream = req.body.fileInfo[i].b64;
-          let streamLength = req.body.fileInfo[i].b64Length;
-    
-          // data
-          let data = await blobService.createBlockBlobFromStream(
-            containerName,
-            fileName + `original-${req.body.fileInfo[i].originalName}`,
-            fileStream,
-            streamLength,
-            (err) => {
-              if (err) {
-                error("Original Upload Fail", err);
-                return {
-                  success: false,
-                };
-              }
-              console.log("IMAGE UPLOAD IS COMPLETED !");
-              return {
-                success: true,
-              };
-            }
-          );
-            console.log("data",data)
-          dataToUpdate = {
-            $set: {
-              invoiceUploads: (azureUrl + data.name).trim(""),
-            },
+      // data
+      let data = await blobService.createBlockBlobFromStream(
+        containerName,
+        fileName + `original-${req.body.fileInfo[i].originalName}`,
+        fileStream,
+        streamLength,
+        (err) => {
+          if (err) {
+            error("Original Upload Fail", err);
+            return {
+              success: false,
+            };
+          }
+          console.log("IMAGE UPLOAD IS COMPLETED !");
+          return {
+            success: true,
           };
-          // console.log(azureUrl,'this is azureUrl')
-    
-        
-        // console.log("dataToUpdate",updatedData)
-          // inserting data into the db
-          isUpdated = await salesOrderModel.findOneAndUpdate(
-            {
-              _id: mongoose.Types.ObjectId(salesOrders),
-            },
-            dataToUpdate,
-            {
-              new: true,
-              upsert: true,
-              lean: true,
-            }
-          )}
-    
-          // success
-          return this.success(
-            req,
-            res,
-            this.status.HTTP_OK,
-            {
-              //id: salesOrder,
-              msg: isUpdated,
-            },
-            this.messageTypes.fileSuccessfullyUploaded
-          );
-    
-          // catch any runtime error
-        } catch (err) {
-          error(err);
-          return this.errors(
-            req,
-            res,
-            this.status.HTTP_INTERNAL_SERVER_ERROR,
-            this.exceptions.internalServerErr(req, err)
-          );
         }
+      );
+      //  console.log("data",data)
+      dataToUpdate = {
+        $addToSet: {
+          customerNotAvailable: (azureUrl + data.name)
+        },
       };
+     // console.log(azureUrl,'this is azureUrl')
+    // console.log('datetoupdate',dataToUpdate)
+     // console.log('salesOrdersId',salesOrdersId)
+
+
+    
+    // console.log("dataToUpdate",updatedData)
+      // inserting data into the db
+      isUpdated = await salesOrderModel.findOneAndUpdate(
+        {
+          _id: mongoose.Types.ObjectId(salesOrdersId),
+        },
+        dataToUpdate,
+        {
+          new: true,
+         upsert: false,
+         lean: true,
+        }
+      )}
+      console.log('isUpdated',isUpdated)
+      // success
+      return this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        {
+          id: salesOrdersId,
+          msg: isUpdated,
+        },
+        this.messageTypes.fileSuccessfullyUploaded
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+  
 }
 
 module.exports = new DeliveryExecutivetrip();

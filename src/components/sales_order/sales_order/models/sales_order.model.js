@@ -332,12 +332,25 @@ const salesOrder = new Schema({
       'comments': {
         type: String
       },
-      'invoiceUploads': {
-        type: [String]
-      }
+      
 
     }
   ],
+
+  'invoiceUploads': {
+    type: [String]
+  },
+
+  'customerSignature':{
+    type: String,
+  },
+
+  'customerNotAvailable': {
+    type: [String]
+  },
+
+
+
   'crateIn':
   {
     type: Number,
