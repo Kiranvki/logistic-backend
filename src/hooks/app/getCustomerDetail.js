@@ -31,7 +31,8 @@ module.exports = async (req, res, next) => {
     
     
 
-      customerDataFromMicroService = await getCustomerDetails(customerCode);
+      customerDataFromMicroService = await getCustomerDetails(parseInt(customerCode.replace(/^0+/, '')));
+    
     
      if(customerDataFromMicroService){
         req.body.customerDetail =  {success:true,data:(customerDataFromMicroService&&customerDataFromMicroService.data)}
