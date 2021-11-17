@@ -36,4 +36,8 @@ module.exports = {
   disputeDetailsNotUpdated: "Unable to update Dispute Details",
   tripTimelineFetched: "Trip Timeline Fectched Successfully",
   tripTimelineNotFetched: "Unable to FectchTrip Timeline",
+  disputeNotified: "Disputes Notified Successfully",
+  disputeNotNotified: "Unable to notify Dispute",
+  disputeItemDetailsFetched: "Dispute item details fetched Successfully!",
+  disputeItemDetailsNotFetched: "Dispute item details Not fetched.",
 };

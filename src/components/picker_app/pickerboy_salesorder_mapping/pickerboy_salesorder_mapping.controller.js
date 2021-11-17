@@ -1631,7 +1631,7 @@ class pickerboySalesOrderMappingController extends BaseController {
           'pickerBoyId': 1,
           'pickingDate': {
             '$dateToString': {
-              format: "%Y-%m-%d",
+              format: "%d-%m-%Y",
               date: "$pickingDate",
               timezone: "+05:30"
             }
@@ -2553,7 +2553,7 @@ class pickerboySalesOrderMappingController extends BaseController {
       
        
        
-          'picking Date': {$dateToString: { format: "%Y-%m-%d", date:'$pickingDate'  } },
+          'picking Date': {$dateToString: { format: "%d-%m-%Y", date:'$pickingDate'  } },
           'picking Time':{$dateToString: { format: "%H:%M", date: '$pickingDate'  } },
           'createdAt': 1,
           // 'updatedAt': 1,
@@ -2568,7 +2568,7 @@ class pickerboySalesOrderMappingController extends BaseController {
           // 'payerDetails': { $first: '$invoice.payerDetails' },
           // 'shippingDetails': { $first: '$invoice.shippingDetails' },
           // 'invoiceDetails': { $first: '$invoice.invoiceDetails' },
-          'invoice Date':{$dateToString: { format: "%Y-%m-%d", date: { $first: '$invoice.invoiceDate' } } },
+          'invoice Date':{$dateToString: { format: "%d-%m-%Y", date: { $first: '$invoice.invoiceDate' } } },
           'invoice Time':{$dateToString: { format: "%H:%M", date: { $first: '$invoice.invoiceDate' } } },
           'totalQuantitySupplied': { $first: '$invoice.totalQuantitySupplied' },
           'totalQuantityDemanded': { $first: '$invoice.totalQuantityDemanded' },
@@ -2837,9 +2837,9 @@ class pickerboySalesOrderMappingController extends BaseController {
           'invoice Number':{ $first: '$invoice.invoiceDetails.invoiceNo'},
           
           'delivery_date': 1,
-          'picking Date': {$dateToString: { format: "%Y-%m-%d", date:'$pickingDate'  } },
+          'picking Date': {$dateToString: { format: "%d-%m-%Y", date:'$pickingDate'  } },
           'picking Time':{$dateToString: { format: "%H:%M", date: '$pickingDate'  } },
-          'Invoice Date': {$dateToString: { format: "%Y-%m-%d", date: { $first: '$invoice.invoiceDetails.invoiceDate' }} },
+          'Invoice Date': {$dateToString: { format: "%d-%m-%Y", date: { $first: '$invoice.invoiceDetails.invoiceDate' }} },
           'Invoice Time':{$dateToString: { format: "%H:%M", date: { $first:  '$invoice.invoiceDetails.invoiceDate' } }},
           'sales_order_no': 1,
           'salesOrderId': 1,

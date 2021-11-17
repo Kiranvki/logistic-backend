@@ -28,7 +28,15 @@ const schemas = {
   }),
 
   joiInvoiceNo: Joi.object().keys({
-    invoice: Joi.number().integer().required(),
+    invoiceId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Salesman Id').required().options({
+      language: {
+        string: {
+          regex: {
+            base: 'should be a valid mongoose Id.'
+          }
+        }
+      }
+    }),
   }),
 };
 

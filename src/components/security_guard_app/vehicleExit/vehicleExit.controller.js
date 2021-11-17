@@ -82,28 +82,28 @@ class vehicleInfoController extends BaseController {
             $cond: {
               if: { $isArray: "$spotSalesId" },
               then: { $size: "$spotSalesId" },
-              else: "NA",
+              else: "0",
             },
           },
           totalAssetTransfer: {
             $cond: {
               if: { $isArray: "$assetTransfer" },
               then: { $size: "$assetTransfer" },
-              else: "NA",
+              else: "0",
             },
           },
           totalStockTransfer: {
             $cond: {
               if: { $isArray: "$stockTransferIds" },
               then: { $size: "$stockTransferIds" },
-              else: "NA",
+              else: "0",
             },
           },
           totalSalesOrder: {
             $cond: {
               if: { $isArray: "$salesOrderId" },
               then: { $size: "$salesOrderId" },
-              else: "NA",
+              else: "0",
             },
           },
           tripId: 1,
@@ -338,10 +338,8 @@ class vehicleInfoController extends BaseController {
         { $unwind: "$invoice" },
         {
           $project: {
-            _id: 1,
+            _id: "$invoice._id" ,
             invoiceNumber: "$invoice.invoiceDetails.invoiceNo",
-            // itemsSupplied: "$invoice.itemSupplied",
-            // itemName: "$invoice.itemSupplied.itemName",
           },
         },
       ])
@@ -603,7 +601,7 @@ class vehicleInfoController extends BaseController {
             $cond: {
               if: { $isArray: "$soDetails" },
               then: { $size: "$soDetails" },
-              else: "NA",
+              else: "0",
             },
           },
         },
@@ -662,7 +660,7 @@ class vehicleInfoController extends BaseController {
           orderPackedTime: { $first: "$order.picking_time" },
           assignedTo: { $first: "$transporterDetails.deliveryExecutiveName" },
           assignedDate: {
-            $dateToString: { format: "%Y-%m-%d", date: "$createdAt" },
+            $dateToString: { format: "%d-%m-%Y", date: "$createdAt" },
           },
           assignedTime: {
             $dateToString: {
@@ -672,7 +670,7 @@ class vehicleInfoController extends BaseController {
             },
           },
           startedDeliveryDate: {
-            $dateToString: { format: "%Y-%m-%d", date: "$updatedAt" },
+            $dateToString: { format: "%d-%m-%Y", date: "$updatedAt" },
           },
           startedDeliveryTime: {
             $dateToString: {

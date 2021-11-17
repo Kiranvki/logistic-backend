@@ -47,13 +47,14 @@ let disputeSchema = Schema(
       type: Number,
       default: 0,
     },
-    reason: {
-      type: String,
-    },
+    reason: [
+      { _id: mongoose.Schema.Types.ObjectId, itemId: String, reason: String },
+    ],
 
-    // notifiedId: {
-    //   type: String,
-    // },
+    notifiedId: {
+      type: String,
+      unique: true,
+    },
 
     status: {
       type: Number,
