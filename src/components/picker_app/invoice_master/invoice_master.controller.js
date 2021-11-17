@@ -328,7 +328,11 @@ class invoiceMasterController extends BaseController {
             totalAmount=totalAmount+(Number(invoiceDetails['itemSupplied'][j].total_amount)) // remove once fixed concatenated 1
             totalTaxValue=totalTaxValue+Number(invoiceDetails['itemSupplied'][j].taxable_value)
           })
+          let qrCode = ''
           // let qrCode = await QRCode.toDataURL(invoiceDetails['invoiceDetails']['signed_qrcode'],{type:'terminal'});
+          if(invoiceDetails['invoiceDetails']['signed_qrcode']){
+             qrCode = await QRCode.toDataURL(invoiceDetails['invoiceDetails']['signed_qrcode'],{type:'terminal'});
+          }
 
             let InvoiceDetailsResponse={
               invoiceId:invoiceDetails._id,
@@ -336,7 +340,7 @@ class invoiceMasterController extends BaseController {
               invoiceNo:invoiceDetails.invoiceDetails.invoiceNo,
               invoiceDate:invoiceDetails.createdAt,
               paymentMode:salesOrderDetails.paymentMode,
-              // signed_qrcode:qrCode,
+              signed_qrcode:qrCode,
               // totalWeight:'NA',
               invoiceStatus:'Order Packed',
               soInvoiceNumber:salesOrderDetails.invoiceNo,
@@ -357,7 +361,7 @@ class invoiceMasterController extends BaseController {
               // itemsOrdered:invoiceDetails.itemSupplied,
               invoiceDetail:invoiceDetails,
               basketTotal: totalAmount-totalTaxValue,
-              finalTotal:(Math.round(totalAmount+totalDiscount)).toString()+'.00',
+              finalTotal:parseFloat((Math.round(totalAmount+totalDiscount)).toString()+'.00'),
               totalDiscount:totalDiscount,    //Number(invoiceDetails.totalDiscount),
               cgst:Math.round((totalTaxValue/2)*100)/100,
               sgst:Math.round((totalTaxValue/2)*100)/100,

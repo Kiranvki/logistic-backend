@@ -115,6 +115,12 @@ const pickerBoyOrderMappingSchema = new Schema({
   'invoice_request': [{
     type: String
   }],
+  'Einvoice_response': [{
+    type: String
+  }],
+  'Einvoice_request': [{
+    type: String
+  }],
   'remarks': [{
     type: String,
     default: 'N/A'

@@ -19,14 +19,14 @@ const {
 module.exports = async (req, res, next) => {
   
   
-  if(req.body.customerDetail.success&&(req.body.customerDetail&&req.body.customerDetail['data']&&(req.body.customerDetail['data']['data'].gstNumber!= ' '||req.body.customerDetail['data']['data'].gstNumber!= '')))
+  if(req.body.customerDetail.success&&(req.body.customerDetail&&req.body.customerDetail['data']&&req.body.customerDetail['data'].gstNumber&&(req.body.customerDetail['data'].gstNumber!= ' '||req.body.customerDetail['data'].gstNumber!= '')))
     {
   try {
-    console.log('customer',req.body.customerDetail)
-   
+
+
     info(`Hitting the SAP for Picking Allocation !`);
-    let data = req.body.data;
-    let OrderData = req.body.orderDetail
+    // let data = req.body.data;
+    // let OrderData = req.body.orderDetail
     // console.log('generate delivery',  req.body.orderDetail)
     // getting the data from the env
     let sapBaseUrl = process.env.sapBaseUrl;
@@ -119,14 +119,16 @@ module.exports = async (req, res, next) => {
 //         ]
 //     }
 // }
- console.log(req.body.einvoicing_detail)
+ 
  
   if (req.body.einvoicing_detail['success'] && !req.body.einvoicing_detail['data']['error_details'].length) {
     info('E-invoicing generating sucessfully !')
+    console.log(req.body.einvoicing_detail['data'])
     let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
           '_id': req.params.pickerBoyOrderMappingId
         }, {
           $set: {
+          
             
             'irn_no': req.body.einvoicing_detail['data']['irn_no'],
             'error_details': JSON.stringify(req.body.einvoicing_detail['data']['error_details']),
@@ -134,6 +136,9 @@ module.exports = async (req, res, next) => {
         "signed_qr_code":req.body.einvoicing_detail['data']['signed_qr_code'] ,
         "Acknowledgement_Number": req.body.einvoicing_detail['data']['Acknowledgement_Number'],
         "Acknowledgement_Date": req.body.einvoicing_detail['data']['Acknowledgement_Date'],
+          },$push:{
+            'Einvoice_response':JSON.stringify(req.body.einvoicing_detail),
+            'Einvoice_request':JSON.stringify(obj)
           }
         }
           )
@@ -141,7 +146,7 @@ module.exports = async (req, res, next) => {
 
   } else {
     
-    console.log(req.body.einvoicing_detail['data']['error_message'])
+    console.log(req.body.einvoicing_detail['data'])
     if (req.body.einvoicing_detail['success'] && req.body.einvoicing_detail['data']['irn_no'] && req.body.einvoicing_detail['data']['error_details'][0]['error_message'] === "IRN already exist") {
       info('E-invoice Already Exist!')
       let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
@@ -154,6 +159,9 @@ module.exports = async (req, res, next) => {
       "signed_qr_code":req.body.einvoicing_detail['data']['signed_qr_code'] ,
       "Acknowledgement_Number": req.body.einvoicing_detail['data']['Acknowledgement_Number'],
       "Acknowledgement_Date": req.body.einvoicing_detail['data']['Acknowledgement_Date'],
+      },$push:{
+        'Einvoice_response':JSON.stringify(req.body.einvoicing_detail),
+        'Einvoice_request':JSON.stringify(obj)
       }
       })
       return next()
@@ -164,8 +172,18 @@ module.exports = async (req, res, next) => {
       // return Response.errors(req, res, StatusCodes.HTTP_CONFLICT,JSON.stringify(req.body.einvoicing_detail['error_details'][0]['error_message']) +','+`inr_code is: ${req.body.einvoicing_detail['irn_no']}`);
     } else {
     
-      info('some error generate delivery NO.')
-      return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, req.body.einvoicing_detail['error']);
+
+      let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
+        '_id': req.params.pickerBoyOrderMappingId
+      }, {
+       $push:{
+        'Einvoice_response':JSON.stringify(req.body.einvoicing_detail),
+        'Einvoice_request':JSON.stringify(obj)
+      }
+      })
+      info('some error generating E-invoicing.')
+      // return Response.errors(req, res, StatusCodes.HTTP_INTERNAL_SERVER_ERROR, req.body.einvoicing_detail['error']);
+      return next()
     }
   }
 }else{
