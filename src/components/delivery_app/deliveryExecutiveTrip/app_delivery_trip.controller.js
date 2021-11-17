@@ -2618,70 +2618,69 @@ class DeliveryExecutivetrip extends BaseController {
       );
     }
   };
-  // justChecking=async(req,res,next)=>{
-  //   console.log("hello just checking")
-  // }
+
 
   uploadDocuments = async (req, res, next) => {
     try {
       info("Uploading scanned documents!");
-      let dataToUpdate,isUpdated;
-      let salesOrdersId=
+      let dataToUpdate, isUpdated;
+      let salesOrdersId =
         req.params.salesOrdersId || req.query.salesOrdersId || req.body.salesOrdersId; // get the onboarding id
       // let customerName = req.body.onBoarding.name || req.params.salesOrder;  // this has to eb changes
       // let type = req.body.type;
       //console.log('images ===>', req.body.fileInfo)
-      for (let i = 0 ; i<req.body.fileInfo.length;i++){
-      // get the file name
-      let fileName = `customers/-${salesOrdersId}/`;
-      let fileStream = req.body.fileInfo[i].b64;
-      let streamLength = req.body.fileInfo[i].b64Length;
+      for (let i = 0; i < req.body.fileInfo.length; i++) {
+        // get the file name
+        let fileName = `customers/-${salesOrdersId}/`;
+        let fileStream = req.body.fileInfo[i].b64;
+        let streamLength = req.body.fileInfo[i].b64Length;
 
-      // data
-      let data = await blobService.createBlockBlobFromStream(
-        containerName,
-        fileName + `original-${req.body.fileInfo[i].originalName}`,
-        fileStream,
-        streamLength,
-        (err) => {
-          if (err) {
-            error("Original Upload Fail", err);
+        // data
+        let data = await blobService.createBlockBlobFromStream(
+          containerName,
+          fileName + `original-${req.body.fileInfo[i].originalName}`,
+          fileStream,
+          streamLength,
+          (err) => {
+            if (err) {
+              error("Original Upload Fail", err);
+              return {
+                success: false,
+              };
+            }
+            console.log("IMAGE UPLOAD IS COMPLETED !");
             return {
-              success: false,
+              success: true,
             };
           }
-          console.log("IMAGE UPLOAD IS COMPLETED !");
-          return {
-            success: true,
-          };
-        }
-      );
-      //  console.log("data",data)
-      dataToUpdate = {
-        $addToSet: {
-          invoiceUploads: (azureUrl + data.name)
-        },
-      };
-     // console.log(azureUrl,'this is azureUrl')
-    // console.log('datetoupdate',dataToUpdate)
-     // console.log('salesOrdersId',salesOrdersId)
+        );
+        //  console.log("data",data)
+        dataToUpdate = {
+          $addToSet: {
+            invoiceUploads: (azureUrl + data.name)
+          },
+        };
+        // console.log(azureUrl,'this is azureUrl')
+        // console.log('datetoupdate',dataToUpdate)
+        // console.log('salesOrdersId',salesOrdersId)
 
 
-    
-    // console.log("dataToUpdate",updatedData)
-      // inserting data into the db
-      isUpdated = await salesOrderModel.findOneAndUpdate(
-        {
-          _id: mongoose.Types.ObjectId(salesOrdersId),
-        },
-        dataToUpdate,
-        {
-          new: true,
-         upsert: false,
-         lean: true,
-        }
-      )}
-      console.log('isUpdated',isUpdated)
+
+        // console.log("dataToUpdate",updatedData)
+        // inserting data into the db
+        isUpdated = await salesOrderModel.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId(salesOrdersId),
+          },
+          dataToUpdate,
+          {
+            new: true,
+            upsert: false,
+            lean: true,
+          }
+        )
+      }
+      console.log('isUpdated', isUpdated)
       // success
       return this.success(
         req,
@@ -2709,8 +2708,8 @@ class DeliveryExecutivetrip extends BaseController {
   customerSignature = async (req, res, next) => {
     try {
       info('Uploading signature to the DB !');
-      let salesOrdersId = 
-      req.params.salesOrdersId ||req.query.salesOrdersId || req.body.salesOrdersId; // get the onboarding id
+      let salesOrdersId =
+        req.params.salesOrdersId || req.query.salesOrdersId || req.body.salesOrdersId; // get the onboarding id
       // let customerName = req.body.onBoarding.name || req.params.deliveryExId;  // this has to eb changes
       // let type = req.body.type;
 
@@ -2722,24 +2721,24 @@ class DeliveryExecutivetrip extends BaseController {
       // data
       let data = await blobService.createBlockBlobFromStream(
         containerName, fileName + `original-${req.body.fileInfo.originalName}`,
-         fileStream,
-         streamLength,
-         err => {
-        if (err) {
-          error('Original Upload Fail', err);
+        fileStream,
+        streamLength,
+        err => {
+          if (err) {
+            error('Original Upload Fail', err);
+            return {
+              success: false
+            };
+          }
+          console.log('IMAGE UPLOAD IS COMPLETED !');
           return {
-            success: false
-          };
-        }
-        console.log('IMAGE UPLOAD IS COMPLETED !');
-        return {
-          success: true
-        }
-      });
+            success: true
+          }
+        });
 
       let dataToUpdate = {
         $set: {
-          customerSignature: (azureUrl+data.name)
+          customerSignature: (azureUrl + data.name)
         },
       };
 
@@ -2773,63 +2772,64 @@ class DeliveryExecutivetrip extends BaseController {
   uploadImageCustomerNotAvailable = async (req, res, next) => {
     try {
       info("upload photos if customer is not available");
-      let dataToUpdate,isUpdated;
-      let salesOrdersId=
+      let dataToUpdate, isUpdated;
+      let salesOrdersId =
         req.params.salesOrdersId || req.query.salesOrdersId || req.body.salesOrdersId; // get the onboarding id
       // let customerName = req.body.onBoarding.name || req.params.salesOrder;  // this has to eb changes
       // let type = req.body.type;
       //console.log('images ===>', req.body.fileInfo)
-      for (let i = 0 ; i<req.body.fileInfo.length;i++){
-      // get the file name
-      let fileName = `customers/-${salesOrdersId}/`;
-      let fileStream = req.body.fileInfo[i].b64;
-      let streamLength = req.body.fileInfo[i].b64Length;
+      for (let i = 0; i < req.body.fileInfo.length; i++) {
+        // get the file name
+        let fileName = `customers/-${salesOrdersId}/`;
+        let fileStream = req.body.fileInfo[i].b64;
+        let streamLength = req.body.fileInfo[i].b64Length;
 
-      // data
-      let data = await blobService.createBlockBlobFromStream(
-        containerName,
-        fileName + `original-${req.body.fileInfo[i].originalName}`,
-        fileStream,
-        streamLength,
-        (err) => {
-          if (err) {
-            error("Original Upload Fail", err);
+        // data
+        let data = await blobService.createBlockBlobFromStream(
+          containerName,
+          fileName + `original-${req.body.fileInfo[i].originalName}`,
+          fileStream,
+          streamLength,
+          (err) => {
+            if (err) {
+              error("Original Upload Fail", err);
+              return {
+                success: false,
+              };
+            }
+            console.log("IMAGE UPLOAD IS COMPLETED !");
             return {
-              success: false,
+              success: true,
             };
           }
-          console.log("IMAGE UPLOAD IS COMPLETED !");
-          return {
-            success: true,
-          };
-        }
-      );
-      //  console.log("data",data)
-      dataToUpdate = {
-        $addToSet: {
-          customerNotAvailable: (azureUrl + data.name)
-        },
-      };
-     // console.log(azureUrl,'this is azureUrl')
-    // console.log('datetoupdate',dataToUpdate)
-     // console.log('salesOrdersId',salesOrdersId)
+        );
+        //  console.log("data",data)
+        dataToUpdate = {
+          $addToSet: {
+            customerNotAvailable: (azureUrl + data.name)
+          },
+        };
+        // console.log(azureUrl,'this is azureUrl')
+        // console.log('datetoupdate',dataToUpdate)
+        // console.log('salesOrdersId',salesOrdersId)
 
 
-    
-    // console.log("dataToUpdate",updatedData)
-      // inserting data into the db
-      isUpdated = await salesOrderModel.findOneAndUpdate(
-        {
-          _id: mongoose.Types.ObjectId(salesOrdersId),
-        },
-        dataToUpdate,
-        {
-          new: true,
-         upsert: false,
-         lean: true,
-        }
-      )}
-      console.log('isUpdated',isUpdated)
+
+        // console.log("dataToUpdate",updatedData)
+        // inserting data into the db
+        isUpdated = await salesOrderModel.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId(salesOrdersId),
+          },
+          dataToUpdate,
+          {
+            new: true,
+            upsert: false,
+            lean: true,
+          }
+        )
+      }
+      console.log('isUpdated', isUpdated)
       // success
       return this.success(
         req,
@@ -2853,7 +2853,121 @@ class DeliveryExecutivetrip extends BaseController {
       );
     }
   };
-  
+
+  getInvoiceVewAfterPayment = async (req, res, next) => {
+    let user = req.user, // user
+      deliveryExecutiveId = user._id;
+    let invoiceId = req.query.invoiceid;
+    let invoiceNo = req.query.invoiceno || 0;
+
+    let pipeline = [
+       { $match: { soId: soId } },
+  {
+    $lookup: {
+      from: "salesorders",
+      localField: "so_db_id",
+      foreignField: "_id",
+      as: "saleorder",
+    },
+  },
+  {
+    $lookup: {
+      from: "decollections",
+      localField: "soId",
+      foreignField: "soId",
+      as: "decollection",
+    }
+  },
+  {
+      "$project":{
+         "so_db_id":1,
+         "isDelivered":1,
+         "orderPlacedAt":"$createdAt",
+         "pendingCrates": { $first:"$saleorder.crateOutWithItem"},
+         "noOfCratesOut" : { $first:"$saleorder.crateOut"},
+         "invoiceNo":"$invoiceDetails.invoiceNo",
+         "itemSupplied.itemId":1,
+         "itemSupplied._id":1,
+         "itemSupplied.suppliedQty":1,
+         "itemSupplied.quantity":1,
+         "credit":{ $first:"$decollection.collectionAmount"},
+         "photos":{ $first:"$saleorder.invoiceUploads"},
+         "itemSupplied.itemName":1,
+         "soId":1,
+      }
+  }
+];
+    let invoiceDetail = await invoiceMasterModel.aggregate(pipeline);
+
+    try {
+      info("Getting invoice Detail!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        invoiceDetail || [],
+        this.messageTypes.deliveryExecutiveInvoiceFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+
+  disputeAcceptOrReject = async (req, res, next) => {
+    let id = req.params.disputeId || req.query.disputeId || req.body.disputeId;
+    let condition = req.params.condition == "accept" ? 1 : 0;
+
+    let updatedDisputeDetail;
+
+    // update checked quantity and reason
+
+    try {
+      let updateObj = {
+        isAccepted: condition
+      };
+
+      updatedDisputeDetail = await disputeModel.findOneAndUpdate(
+        {
+          disputeId: parseInt(id),
+        },
+        { $set: { ...updateObj } }
+      );
+      info("Dispute is being Accepted or Recjected");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        updatedDisputeDetail || [],
+        this.messageTypes.disputeDetailsUpdated
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.disputeDetailsNotUpdated
+      );
+    }
+  };
+
+
 }
 
 module.exports = new DeliveryExecutivetrip();

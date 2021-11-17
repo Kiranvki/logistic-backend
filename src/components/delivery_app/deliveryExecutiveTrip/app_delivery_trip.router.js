@@ -117,7 +117,7 @@ function tripsRoutes() {
       verifyDeliveryAppToken,
       isValidDeliveryId,
 
-      // verifyAppToken, // verify app token
+     // verifyAppToken, // verify app token
       ctrl.getInTrip
     );
 
@@ -244,8 +244,21 @@ function tripsRoutes() {
       verifyDeliveryAppToken,
       multipartMiddleware.array('files',5), // multer middleware
       isValidCustomerNotAvailUpload, // is valid balance confirmation file upload 
-      ctrl.uploadImageCustomerNotAvailable, // controller function
+      ctrl.uploadImageCustomerNotAvailable // controller function
     )
+
+    closed.route('/trip/intrip/salesorders/invoiceList/viewInvoiceAfterpPayment').get(
+      getInvoiceVal,
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      // verifyAppToken, // verify app token
+      ctrl.getInvoiceVewAfterPayment
+    );
+
+    closed.route('/get-dispute/:disputeId/:condition/updateDisputeDetails').patch(
+      verifyDeliveryAppToken,
+      ctrl.disputeAcceptOrReject
+    );
 
 
 

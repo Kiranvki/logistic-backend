@@ -55,6 +55,12 @@ let disputeSchema = Schema(
     //   type: String,
     // },
 
+  isAccepted: {
+    type: Number,
+    default: 0, // o for rejected and 1 for accepted
+    enum: [0, 1]
+  },
+
     status: {
       type: Number,
       default: 0,
