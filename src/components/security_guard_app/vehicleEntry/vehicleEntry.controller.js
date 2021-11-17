@@ -47,7 +47,7 @@ class vehicleEntryController extends BaseController {
         $regex: searchKey,
         $options: "is",
       },
-      $or: [{ isCompleteDeleiveryDone: 1 }, { isPartialDeliveryDone: 1 }],
+      $or: [{ isActive: 1 }, { isTripStarted: 1 }],
     };
 
     let pipeline = [

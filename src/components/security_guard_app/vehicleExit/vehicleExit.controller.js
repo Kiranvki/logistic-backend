@@ -63,6 +63,9 @@ class vehicleInfoController extends BaseController {
             },
             { createdAt: { $gte: dateToday } },
           ],
+          isActive: {$ne: 1},
+          isTripStarted: {$ne: 1}
+
         },
       },
       {
@@ -496,7 +499,7 @@ class vehicleInfoController extends BaseController {
         },
         {
           $project: {
-            truckName: { $first: "$transporterDetails.vehicle" },
+            vehicleNo: { $first: "$transporterDetails.vehicle" },
             deliveryExecutive: {
               $first: "$transporterDetails.deliveryExecutiveName",
             },
@@ -719,6 +722,7 @@ class vehicleInfoController extends BaseController {
       let dataToUpdate = {
         $set: {
           isActive: 1,
+          isTripStarted: 1
         },
       };
 
