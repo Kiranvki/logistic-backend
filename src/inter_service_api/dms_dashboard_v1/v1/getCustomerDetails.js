@@ -17,7 +17,7 @@ module.exports = async (customerId) => {
     let dmsGetCustomerDetails = process.env.dmsV1GetCustomerDetailsOne + customerId + process.env.dmsV1GetCustomerDetailsTwo+'chennai';
 
     let url = dmsV1BaseUrl + dmsGetCustomerDetails; // DMS url
-
+info('Hitting URL->'+url)
     // check whether the document type already exist or not 
     return request.get(url)
       .timeout({
@@ -29,6 +29,7 @@ module.exports = async (customerId) => {
         // checking whether the user is authentic
         if (res.status === 200) {
           info('Data Fetched Successfully !');
+          
           return {
             success: true,
             data: res.body.data,

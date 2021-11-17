@@ -1,7 +1,12 @@
 // auth
 const ctrl = require("./disputes.controller");
 const { verifySecurityAppToken } = require("../../../hooks/app/Auth");
-const { joiDisputesList, joiDisputeId, joiInvoiceNo, joiId } = require("./disputes.validator");
+const {
+  joiDisputesList,
+  joiDisputeId,
+  joiInvoiceNo,
+  joiId,
+} = require("./disputes.validator");
 
 // exporting the vehicle routes
 function vehicleRoutes() {
@@ -25,21 +30,27 @@ function vehicleRoutes() {
       ctrl.scanReturnGpn // controller function
     );
 
-    closed.route("/disputes/getMinifiedList/:invoice").get(
+    closed.route("/disputes/getMinifiedList/:invoiceId").get(
       joiInvoiceNo,
       verifySecurityAppToken, //verify app user token
       ctrl.getDisputeItemsMinifiedList // controller function
     );
 
-    closed.route("/disputes/notifyDispute").post(
+    closed.route("/disputes/notifyDispute/:invoiceId").patch(
+      joiDisputeId,
       verifySecurityAppToken, // verify app user token
       ctrl.notifyDispute // controller function
     );
 
-    closed.route("/disputes/updateDisputeDetails/:id").patch(
-      joiId,
+    closed.route("/disputes/updateDisputeDetails/:disputeId").patch(
+      joiDisputeId,
       verifySecurityAppToken, //verify app user token
       ctrl.updateDisputeDetails //controller function
+    );
+
+    closed.route("/disputes/itemDetails/:invoiceId/:itemId").get(
+      verifySecurityAppToken, //verify app user token
+      ctrl.getReturnedItemDetails // controller function
     );
   };
 }

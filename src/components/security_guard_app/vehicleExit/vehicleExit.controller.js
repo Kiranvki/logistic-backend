@@ -63,6 +63,9 @@ class vehicleInfoController extends BaseController {
             },
             { createdAt: { $gte: dateToday } },
           ],
+          isActive: {$ne: 1},
+          isTripStarted: {$ne: 1}
+
         },
       },
       {
@@ -82,28 +85,28 @@ class vehicleInfoController extends BaseController {
             $cond: {
               if: { $isArray: "$spotSalesId" },
               then: { $size: "$spotSalesId" },
-              else: "NA",
+              else: "0",
             },
           },
           totalAssetTransfer: {
             $cond: {
               if: { $isArray: "$assetTransfer" },
               then: { $size: "$assetTransfer" },
-              else: "NA",
+              else: "0",
             },
           },
           totalStockTransfer: {
             $cond: {
               if: { $isArray: "$stockTransferIds" },
               then: { $size: "$stockTransferIds" },
-              else: "NA",
+              else: "0",
             },
           },
           totalSalesOrder: {
             $cond: {
               if: { $isArray: "$salesOrderId" },
               then: { $size: "$salesOrderId" },
-              else: "NA",
+              else: "0",
             },
           },
           tripId: 1,
@@ -272,7 +275,7 @@ class vehicleInfoController extends BaseController {
               $cond: {
                 if: { $isArray: "$invoices" },
                 then: { $size: "$invoices" },
-                else: "NA",
+                else: "0",
               },
             },
           },
@@ -338,10 +341,8 @@ class vehicleInfoController extends BaseController {
         { $unwind: "$invoice" },
         {
           $project: {
-            _id: 1,
+            _id: "$invoice._id" ,
             invoiceNumber: "$invoice.invoiceDetails.invoiceNo",
-            // itemsSupplied: "$invoice.itemSupplied",
-            // itemName: "$invoice.itemSupplied.itemName",
           },
         },
       ])
@@ -498,7 +499,7 @@ class vehicleInfoController extends BaseController {
         },
         {
           $project: {
-            truckName: { $first: "$transporterDetails.vehicle" },
+            vehicleNo: { $first: "$transporterDetails.vehicle" },
             deliveryExecutive: {
               $first: "$transporterDetails.deliveryExecutiveName",
             },
@@ -553,56 +554,64 @@ class vehicleInfoController extends BaseController {
 
   getTripHistoryDetails = async (req, res, next) => {
     info("getting in trip data!");
-    let tripId = req.params.tripId;
+    let tripId = req.params.tripId || req.query.tripId;
     let pipeline = [
       {
         $match: {
           $and: [
             {
-              _id:mongoose.Types.ObjectId(tripId),
+              _id: mongoose.Types.ObjectId(tripId),
             },
             {
               isActive: 1,
             },
           ],
         },
-      },{
+      },
+      {
         $lookup: {
-          from:"vehiclemasters",
-          localField:"vehicleId",
-          foreignField:"_id",
-          as: "vehicleDetails"
-        }
-      },{
-          $lookup:{
-              from:"deliveryexecutives",
-              localField:"deliveryExecutiveId",
-              foreignField:"_id",
-              as:"deDetails"
-          }
+          from: "vehiclemasters",
+          localField: "vehicleId",
+          foreignField: "_id",
+          as: "vehicleDetails",
         },
+      },
+      {
+        $lookup: {
+          from: "deliveryexecutives",
+          localField: "deliveryExecutiveId",
+          foreignField: "_id",
+          as: "deDetails",
+        },
+      },
       {
         $lookup: {
           from: "salesorders",
           localField: "salesOrder",
           foreignField: "_id",
-          as: "soDetails"
-        }
+          as: "soDetails",
+        },
       },
+
       {
         $project: {
           tripId: 1,
           truckNumber: { $first: "$vehicleDetails.regNumber" },
-          deName: { $first: "$deDetails.fullName" },
-          employeeNumber: { $first: "$deDetails.zohoId" },
-          noOfCrates: { $first: "$soDetails.crateIn" }
-
-        }
-      }
-    ]
+          deliveryExecutiveName: { $first: "$deDetails.fullName" },
+          employeeNumber: { $first: "$deDetails.employeeId" },
+          noOfCrates: { $first: "$soDetails.crateIn" },
+          salesOrdersDelivery: {
+            $cond: {
+              if: { $isArray: "$soDetails" },
+              then: { $size: "$soDetails" },
+              else: "0",
+            },
+          },
+        },
+      },
+    ];
 
     let activeTripData = await tripModel.aggregate(pipeline);
-
 
     try {
       info("Getting trip Detail!");
@@ -628,17 +637,92 @@ class vehicleInfoController extends BaseController {
     }
   };
 
+  getTripTimeline = async (req, res, next) => {
+    let ID = req.params.tripId || req.query.tripId;
+    info("getting trip timeline!");
+    let pipeline = [
+      {
+        $match: {
+          _id: mongoose.Types.ObjectId(ID),
+        },
+      },
+      {
+        $unwind: "$salesOrderId",
+      },
+      {
+        $lookup: {
+          from: "pickerboyordermappings",
+          localField: "salesOrderId",
+          foreignField: "salesOrderId",
+          as: "order",
+        },
+      },
+      {
+        $project: {
+          orderPackedDate: { $first: "$order.delivery_date" },
+          orderPackedTime: { $first: "$order.picking_time" },
+          assignedTo: { $first: "$transporterDetails.deliveryExecutiveName" },
+          assignedDate: {
+            $dateToString: { format: "%d-%m-%Y", date: "$createdAt" },
+          },
+          assignedTime: {
+            $dateToString: {
+              format: "%H:%M",
+              date: "$createdAt",
+              timezone: "+05:30",
+            },
+          },
+          startedDeliveryDate: {
+            $dateToString: { format: "%d-%m-%Y", date: "$updatedAt" },
+          },
+          startedDeliveryTime: {
+            $dateToString: {
+              format: "%H:%M",
+              date: "$updatedAt",
+              timezone: "+05:30",
+            },
+          },
+        },
+      },
+    ];
+
+    let tripTimeline = await tripModel.aggregate(pipeline);
+    try {
+      info("Getting trip Timeline!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        tripTimeline || [],
+        this.messageTypes.tripTimelineFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.tripTimelineNotFetched
+      );
+    }
+  };
+
   //allow vehicle
   allowVehicle = async (req, res) => {
     try {
       info("Allow Vehicle for Trip !");
       let trip = req.params.tripId;
-      console.log(trip);
 
       // creating data to insert
       let dataToUpdate = {
         $set: {
           isActive: 1,
+          isTripStarted: 1
         },
       };
 

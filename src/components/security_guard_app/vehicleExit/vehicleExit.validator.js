@@ -36,6 +36,10 @@ const schemas = {
       }),
   }),
 
+  joiTripNo: Joi.object().keys({
+    tripId: Joi.number().integer().min(2).label("tripId").required(),
+  }),
+
   joiType:Joi.object().keys({
     type:Joi.string().valid("0","1").required(),
   })
@@ -89,6 +93,29 @@ module.exports = {
   joiTripId: (req, res, next) => {
     // getting the schemas
     let schema = schemas.joiTripId;
+    let option = options.basic;
+
+    // validating the schema
+    schema
+      .validate(req.params, option)
+      .then(() => {
+        next();
+        // if error occured
+      })
+      .catch((err) => {
+        let error = [];
+        err.details.forEach((element) => {
+          error.push(element.message);
+        });
+
+        // returning the response
+        Response.joierrors(req, res, err);
+      });
+  },
+
+  joiTripNo: (req, res, next) => {
+    // getting the schemas
+    let schema = schemas.joiTripNo;
     let option = options.basic;
 
     // validating the schema

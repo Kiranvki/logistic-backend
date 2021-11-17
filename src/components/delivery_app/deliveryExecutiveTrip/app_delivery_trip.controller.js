@@ -2055,7 +2055,6 @@ class DeliveryExecutivetrip extends BaseController {
       { $unwind: { path: "$invoice", preserveNullAndEmptyArrays: true } },
       {
         $project: {
-          tripId: 1,
           salesOrder: 1,
           vehicleRegNumber: 1,
           getDirection: "$salesorders.location",

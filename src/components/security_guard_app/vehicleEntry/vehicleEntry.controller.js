@@ -5,6 +5,7 @@ const attendanceModel = require("../../vehicle/vehicle_attendance/models/vehicle
 const tripModel = require("../../MyTrip/assign_trip/model/trip.model");
 const invoiceModel = require("../../picker_app/invoice_master/models/invoice_master.model");
 const salesOrderModel = require("../../sales_order/sales_order/models/sales_order.model");
+const sgCtrl = require("../../employee/security_guard/security_guard.controller");
 const camelCase = require("camelcase");
 const mongoose = require("mongoose");
 const { error, info } = require("../../../utils").logging;
@@ -27,7 +28,8 @@ class vehicleEntryController extends BaseController {
       }),
       searchKey = req.query.search || "",
       sortBy = req.query.sortBy || "createdAt",
-      sortingArray = {};
+      sortingArray = {},
+      sgDetails = await sgCtrl.getsecurityFullDetails(req.user._id);
 
     sortingArray[sortBy] = -1;
 
@@ -45,7 +47,7 @@ class vehicleEntryController extends BaseController {
         $regex: searchKey,
         $options: "is",
       },
-      $or: [{ isCompleteDeleiveryDone: 1 }, { isPartialDeliveryDone: 1 }],
+      $or: [{ isActive: 1 }, { isTripStarted: 1 }],
     };
 
     let pipeline = [
@@ -57,7 +59,14 @@ class vehicleEntryController extends BaseController {
       {
         $unwind: "$transporterDetails",
       },
-
+      {
+        $lookup: {
+          from: "vehiclemasters",
+          localField: "transporterDetails.vehicle",
+          foreignField: "regNumber",
+          as: "vehicleDetails",
+        },
+      },
       {
         $project: {
           //  _id:0,
@@ -67,35 +76,43 @@ class vehicleEntryController extends BaseController {
           //   rateCategoryId:0,
           totalCrate: { $sum: ["$salesOrder.crateIn"] },
           vehicleNumber: "$transporterDetails.vehicle",
+          warehouseId: { $first: "$vehicleDetails.warehouseId" },
           totalSpotSales: {
             $cond: {
               if: { $isArray: "$spotSalesId" },
               then: { $size: "$spotSalesId" },
-              else: "NA",
+              else: "0",
             },
           },
           totalAssetTransfer: {
             $cond: {
               if: { $isArray: "$assetTransfer" },
               then: { $size: "$assetTransfer" },
-              else: "NA",
+              else: "0",
             },
           },
           totalStockTransfer: {
             $cond: {
               if: { $isArray: "$stockTransferIds" },
               then: { $size: "$stockTransferIds" },
-              else: "NA",
+              else: "0",
             },
           },
           totalSalesOrder: {
             $cond: {
               if: { $isArray: "$salesOrderId" },
               then: { $size: "$salesOrderId" },
-              else: "NA",
+              else: "0",
             },
           },
           tripId: 1,
+          isVehicleExternal: {
+            $cond: {
+              if: { $eq: [sgDetails.data.warehouseId, "$warehouseId"] },
+              then: 1,
+              else: 0,
+            },
+          },
         },
       },
 
@@ -174,9 +191,11 @@ class vehicleEntryController extends BaseController {
         {
           $project: {
             vehicleRegNumber: 1,
+            vehicleId: 1,
             deliveryExecutiveEmpCode: 1,
             deliveryExecutiveName: 1,
             tripId: 1,
+            so_db_id: 1,
             salesOrder: 1,
           },
         },
@@ -227,20 +246,44 @@ class vehicleEntryController extends BaseController {
             preserveNullAndEmptyArrays: false,
           },
         },
+        { $unwind: { path: "$salesorder.orderItems" } },
+        {
+          $addFields: {
+            isSalesReturn: {
+              $cond: {
+                if: {
+                  $eq: [
+                    "$salesorder.orderItems.orderDetails.itemDeliveryStatus",
+                    2,
+                  ],
+                },
+                then: 1,
+                else: 0,
+              },
+            },
+          },
+        },
+
         {
           $group: {
             _id: "$_id",
             vehicleRegNumber: { $first: "$vehicleRegNumber" },
+            vehicleId: { $first: "$vehicleId" },
             deliveryExecutiveEmpCode: { $first: "$deliveryExecutiveEmpCode" },
             deliveryExecutiveName: { $first: "$deliveryExecutiveName" },
             tripId: { $first: "$tripId" },
+            salesOrderId: { $first: "$salesOrder" },
             noOfCrates: { $first: "$salesorder.crateIn" },
+            noOfCratesOut: { $first: "$salesorder.crateOut" },
+            returnedCrates: { $first: "$salesorder.crateOutWithItem" },
 
             invoices: {
               $push: {
                 invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
+                invoiceId: "$salesorder.invoices._id",
                 gpnNo: { $first: "$salesorder.invoices.gpnNumber.gpn" },
                 deliveryFlag: "$salesorder.invoices.isDelivered",
+                isSalesReturn: "$isSalesReturn",
                 customerName: "$salesorder.sold_to_party_description",
                 address: "$salesorder.invoices.shippingDetails.address",
                 city: "$salesorder.invoices.shippingDetails.cityId",
@@ -248,6 +291,24 @@ class vehicleEntryController extends BaseController {
                 categoryType: "Sales Order",
               },
             },
+          },
+        },
+        {
+          $addFields: {
+            noOfDeliveries: {
+              $cond: {
+                if: { $isArray: "$invoices" },
+                then: { $size: "$invoices" },
+                else: "0",
+              },
+            },
+            cratesRemaining: {
+              $subtract: [
+                "$noOfCrates",
+                { $add: ["$noOfCratesOut", "$returnedCrates"] },
+              ],
+            },
+            vehicleId: "$vehicleId",
           },
         },
       ])
@@ -284,7 +345,7 @@ class vehicleEntryController extends BaseController {
 
   //update the returned crates after delivery
   updateCratesQuantity = async (req, res, next) => {
-    let id = req.params.id;
+    let id = req.params.salesorderId;
     let cratesRemaining =
       req.params.crates || req.query.crates || req.body.crates;
     let updatedOrderDetail;
@@ -296,7 +357,7 @@ class vehicleEntryController extends BaseController {
         cratesReturned: parseInt(cratesRemaining) || "",
       };
 
-      updatedOrderDetail = await salesOrderModel.update(
+      updatedOrderDetail = await salesOrderModel.findOneAndUpdate(
         {
           _id: mongoose.Types.ObjectId(id),
         },
