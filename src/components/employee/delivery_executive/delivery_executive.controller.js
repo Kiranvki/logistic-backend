@@ -81,6 +81,7 @@ class deliveryExecutiveCtrl extends BaseController {
         .allowDiskUse(true)
         .then((res) => {
           if (res && res.length) {
+            console.log("response===>",res)
             return {
               success: true,
               data: res[res.length - 1],

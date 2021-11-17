@@ -30,4 +30,5 @@ module.exports = {
   isValidGpn: require('./isValidGpn'), // check if the gpn is valid or not
   isValidInvoice: require('./isValidInvoice'),// check if the invoice exists or not
   isInvoiceAlreadyVerified:require('./isInvoiceAlreadyVerified'),// checks if the invoice is delivered or not for verification
+  
 }

@@ -1,4 +1,6 @@
 const ctrl = require('./app_delivery_trip.controller');
+const multer = require('multer');
+const multipartMiddleware = multer();
 
 const { updateDeliveryStatusVal,
   getHistoryVal,
@@ -10,7 +12,8 @@ const { updateDeliveryStatusVal,
   getTripByIdVal,
   generateGpnVal,
   joiTripId,
-  joiSoId
+  joiSoId,
+
 } = require('./app_delivery_trip.validators')
 
 const {
@@ -19,7 +22,11 @@ const {
   isDeliveryAlreadyCheckedIn, // check whether the user already check In
   getAllAppUserWhoAreNotCheckedOut, // get all app users who are not checked out
   deliveryGenerateMonthDaysAndOtherMetaData, // generate month days and other meta data
-  isActiveDelivery
+  isActiveDelivery,
+  isValidMultiImageIsUploading,
+  isValidCustomerNotAvailUpload,
+  isvalidSignatureIsUploading
+
 } = require("../../../hooks/app");
 
 // auth
@@ -110,8 +117,8 @@ function tripsRoutes() {
       verifyDeliveryAppToken,
       isValidDeliveryId,
 
-      // verifyAppToken, // verify app token
-      ctrl.getInTrip
+     // verifyAppToken, // verify app token
+     ctrl.getInTrip
     );
 
     closed.route('/trip/intrip/:type/invoiceList').get(
@@ -154,8 +161,6 @@ function tripsRoutes() {
       updateDeliveryStatusVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
-
-
       ctrl.updateItemStatusAndCaretOut
     );
 
@@ -174,6 +179,15 @@ function tripsRoutes() {
       ctrl.getSalesOrdersbyTripID
     )
 
+    closed.route('/trip/intrip/caputreDocument/:salesOrdersId').post(
+      // getInvoiceVal,
+      verifyDeliveryAppToken,
+      multipartMiddleware.array('files',5), // multer middleware
+      isValidMultiImageIsUploading,
+      ctrl.uploadDocuments
+      // ctrl.justChecking
+    )
+
     //get ivoice numbers by sales oders
 
     closed.route('/:salesorderId/invoiceList').get(
@@ -189,19 +203,19 @@ function tripsRoutes() {
     )
     closed.route('/get-dispute').get(
       verifyDeliveryAppToken,
-        isValidDeliveryId,
-        isActiveDelivery,
+      isValidDeliveryId,
+      isActiveDelivery,
       // verifyAppToken, // verify app token
-        ctrl.getdispute 
-      );
+      ctrl.getdispute
+    );
 
-      closed.route('/get-dispute/:disputeId/viewDisputeDetails').get(
-        verifyDeliveryAppToken,
-          isValidDeliveryId,
-          isActiveDelivery,
-        // verifyAppToken, // verify app token
-          ctrl.viewDisputeDetails
-        );
+    closed.route('/get-dispute/:disputeId/viewDisputeDetails').get(
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      isActiveDelivery,
+      // verifyAppToken, // verify app token
+      ctrl.viewDisputeDetails
+    );
 
     closed.route('/get-trip/pending/:salesorderId/invoiceList').get(
       verifyDeliveryAppToken,
@@ -210,13 +224,43 @@ function tripsRoutes() {
       ctrl.getPendingInvoiceListSo
     )
 
-    closed.route('intrip/salesorders/invoiceList/viewinvoice/:invoiceno/caputreDocumnet').post(
+    closed.route('/get-trip/pending/viewInvoice').get(
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      // verifyAppToken, // verify app token
+      ctrl.getPendingViewInvoice
+    )
+
+    closed.route('/trip/intrip/:salesOrdersId/signature').post(
+      //getInvoiceVal,
+      verifyDeliveryAppToken,
+      multipartMiddleware.single('file'), // multer middleware
+      isvalidSignatureIsUploading,
+      ctrl.customerSignature
+    )
+
+    closed.route('/trip/intrip/:salesOrdersId/customerNotAvailable').post(
+      //getInvoiceVal,
+      verifyDeliveryAppToken,
+      multipartMiddleware.array('files',5), // multer middleware
+      isValidCustomerNotAvailUpload, // is valid balance confirmation file upload 
+      ctrl.uploadImageCustomerNotAvailable // controller function
+    )
+
+    closed.route('/trip/intrip/salesorders/invoiceList/viewInvoiceAfterpPayment').get(
       getInvoiceVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
       // verifyAppToken, // verify app token
-      ctrl.caputreDocumnet
-    )
+      ctrl.getInvoiceVewAfterPayment
+    );
+
+    closed.route('/get-dispute/:disputeId/:condition/updateDisputeDetails').patch(
+      verifyDeliveryAppToken,
+      ctrl.disputeAcceptOrReject
+    );
+
+
 
 
 

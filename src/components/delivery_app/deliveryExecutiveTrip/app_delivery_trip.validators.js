@@ -78,9 +78,8 @@ const schemas = {
       
     }),
     getInvoice:Joi.object().keys({
-      invoiceno: Joi.string().allow(''),
-      invoiceid: Joi.when('invoiceno', { is: '', then: Joi.string(), otherwise: Joi.string().allow('') })
-    }).or('invoiceno', 'invoiceid'),
+      salesorderId:Joi.string().trim().label('soid').min(20)
+    }),
     
     
     
@@ -126,7 +125,7 @@ const schemas = {
                id:Joi.string().trim().label('id').required().min(18),
                itemdeliverystatus:Joi.number().label('Delivery Status').integer().required(),
                rejectedquantity:Joi.number().label('Rejected item quantity').integer().required(),
-               comments:Joi.string().trim().label('Comments').required().min(30)
+               comments:Joi.string().trim().label('Comments').required().min(1)
             })
 
           ).required(),
