@@ -210,6 +210,15 @@ function tripsRoutes() {
       ctrl.getPendingInvoiceListSo
     )
 
+    closed.route('intrip/salesorders/invoiceList/viewinvoice/:invoiceno/caputreDocumnet').post(
+      getInvoiceVal,
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      // verifyAppToken, // verify app token
+      ctrl.caputreDocumnet
+    )
+
+
 
 
 

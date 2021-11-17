@@ -17,13 +17,11 @@ class NewCollection extends BaseController {
   //to create a new record of a new collection
   createNewCollection = async (req, res) => {
     try {
-      let projection = {};
 
       req.body.customer = {
         sold_to_party: req.body.soldToParty,
         sold_to_party_description: req.body.sold_to_party_description,
       };
-       let collectionId=req.body.collectionId
 
       // req.body.DEEmployeeId = req.userDetails.employeeId;
       
@@ -33,6 +31,7 @@ class NewCollection extends BaseController {
       req.body.isInvoiceMapped = false;
       req.body.isCollectionMade = true;
       req.body.collectionDone = true;
+      req.body.unUtilizedAmount=req.body.collectionAmount
 
       let DEDetails = {
         // id: mongoose.Types.ObjectId(req.user._id),
@@ -111,91 +110,95 @@ class NewCollection extends BaseController {
     // success(req, res, status, data = null, message = 'success')
   };
 
-  mapInvoicesToCollection=async(req,res)=>{
-    try{
+  mapInvoicesToCollection = async (req, res) => {
+    try {
 
-    let collectionsDoneAgainstOneInvoice;
+      let collectionsDoneAgainstOneInvoice;
+      let totalMappedAmount=0
 
-    for (let i in req.body.invoicesMapped) {
-      let projection = {
-        "invoiceDetails.invoiceNo":
-          req.body.invoicesMapped[i].invoiceDetails.invoiceNo,
-        soId: req.body.soId,
-      };
-      let sort = req.body.sort
-      let getInvoice = await collectionQuery.getInvoiceList(projection, sort)
-      getInvoice = getInvoice[0];
-      if (req.body.invoicesMapped[i]["partialMapping"] == false) {
-        req.body.invoicesMapped[i].invoiceState = "fulfilled";
-      }
-
-      if (req.body.invoicesMapped[i]["partialMapping"] == true) {
-        req.body.invoicesMapped[i].invoiceState = "partial";
-      }
-      if (getInvoice) {
-        req.body.invoicesMapped[i].sold_to_party =
-          getInvoice.invoiceDetails.sold_to_party;
-        req.body.invoicesMapped[i].invoiceId = mongoose.Types.ObjectId(getInvoice._id);
-        req.body.invoicesMapped[i].invoiceNo =
-          getInvoice.invoiceDetails.invoiceNo;
-
-        req.body.invoicesMapped[i].totalNetValue = getInvoice.totalNetValue;
-        req.body.invoicesMapped[i].location = getInvoice.location;
-        req.body.invoicesMapped[i].invoiceDate = getInvoice.invoiceDate;
-
-        collectionsDoneAgainstOneInvoice =
-          await collectionQuery.totalcollectionsAgainstOneInvoice(
-            getInvoice.invoiceDetails.invoiceNo
-          );
-        let totalCollection
-        if (collectionsDoneAgainstOneInvoice.length && collectionsDoneAgainstOneInvoice[0].totalCollection != 0) {
-          totalCollection = collectionsDoneAgainstOneInvoice[0].totalCollection + req.body.collectionAmount
-        } else { totalCollection = req.body.collectionAmount }
-
-        req.body.invoicesMapped[i].pendingAmount =
-          getInvoice.totalNetValue - totalCollection
-
-        if(req.body.invoicesMapped[i].pendingAmount>=0){  
-
-        if (req.body.collectionAmount == req.body.invoicesMapped[i].totalNetValue) {
-          req.body.invoicesMapped[i].invoiceState = "fulfilled"
+      for (let i in req.body.invoicesMapped) {
+        let projection = {
+          "invoiceDetails.invoiceNo":
+            req.body.invoicesMapped[i].invoiceNo,
+          soId: req.body.soId,
+        };
+        let sort = req.body.sort
+        let getInvoice = await collectionQuery.getInvoiceList(projection, sort)
+        getInvoice = getInvoice[0];
+        if (req.body.invoicesMapped[i]["partialMapping"] == false) {
+          req.body.invoicesMapped[i].invoiceState = "fulfilled";
         }
 
-        if (req.body.collectionAmount < req.body.invoicesMapped[i].totalNetValue) {
-          req.body.invoicesMapped[i].invoiceState = "partial"
+        if (req.body.invoicesMapped[i]["partialMapping"] == true) {
+          req.body.invoicesMapped[i].invoiceState = "partial";
         }
+        if (getInvoice) {
+          req.body.invoicesMapped[i].sold_to_party =
+            getInvoice.invoiceDetails.sold_to_party;
+          req.body.invoicesMapped[i].invoiceId = mongoose.Types.ObjectId(getInvoice._id);
+          req.body.invoicesMapped[i].invoiceNo =
+            getInvoice.invoiceDetails.invoiceNo;
 
-        if (req.body.collectionStatus && req.body.collectionStatus=="complete"){
-          req.body.overallCollectionStatus = "complete";
+          req.body.invoicesMapped[i].totalNetValue = getInvoice.totalNetValue;
+          req.body.invoicesMapped[i].location = getInvoice.location;
+          req.body.invoicesMapped[i].invoiceDate = getInvoice.invoiceDate;
 
-            await collectionQuery.updatePendingAmountInCollections(req.body.soId, req.body.invoicesMapped[i].invoiceNo, req.body.invoicesMapped[i].pendingAmount,"complete")
-          }else{
-            req.body.overallCollectionStatus = "partial";
+          totalMappedAmount=totalMappedAmount+req.body.invoicesMapped[i].mappedAmount
 
-            await collectionQuery.updatePendingAmountInCollections(req.body.soId, req.body.invoicesMapped[i].invoiceNo, req.body.invoicesMapped[i].pendingAmount,"partial")
+          collectionsDoneAgainstOneInvoice =
+            await collectionQuery.totalcollectionsAgainstOneInvoice(
+              getInvoice.invoiceDetails.invoiceNo
+            );
+          let totalCollection
+          if (collectionsDoneAgainstOneInvoice.length && collectionsDoneAgainstOneInvoice[0].totalCollection != 0) {
+            totalCollection = collectionsDoneAgainstOneInvoice[0].totalCollection + req.body.invoicesMapped[i].mappedAmount
+            req.body.unUtilizedAmount = req.body.collectionAmount - totalMappedAmount
+          } else { totalCollection = req.body.collectionAmount }
+
+          req.body.invoicesMapped[i].pendingAmount =
+            getInvoice.totalNetValue - totalCollection
+
+          if (req.body.invoicesMapped[i].pendingAmount >= 0) {
+
+            if (req.body.collectionAmount == req.body.invoicesMapped[i].totalNetValue) {
+              req.body.invoicesMapped[i].invoiceState = "fulfilled"
+            }
+
+            if (req.body.collectionAmount < req.body.invoicesMapped[i].totalNetValue) {
+              req.body.invoicesMapped[i].invoiceState = "partial"
+            }
+
+            if (req.body.collectionStatus && req.body.collectionStatus == "complete") {
+              req.body.overallCollectionStatus = "complete";
+
+              await collectionQuery.mapInvoicesToCollection(req.body.collectionId, req.body)
+              await collectionQuery.updatePendingAmountInCollections(req.body.soId, req.body.invoicesMapped[i].invoiceNo, req.body.invoicesMapped[i].pendingAmount, "complete")
+            } else {
+              req.body.overallCollectionStatus = "partial";
+              await collectionQuery.mapInvoicesToCollection(req.body.collectionId, req.body)
+
+              await collectionQuery.updatePendingAmountInCollections(req.body.soId, req.body.invoicesMapped[i].invoiceNo, req.body.invoicesMapped[i].pendingAmount, "partial")
+            }
           }
+        }
       }
+
+      return this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        {totalMappedAmount},
+        "invoices mapped to collection"
+      );
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        "Internal Server Error",
+      );
     }
-  }
-
-  let result=await collectionQuery.mapInvoicesToCollection(req.body.collectionId,req.body);
-
-  return this.success(
-    req,
-    res,
-    this.status.HTTP_OK,
-    {},
-    "invoices mapped to collection"
-  );
-} catch (err) {
-  error(err);
-  this.errors(
-    req,
-    res,
-    this.status.HTTP_INTERNAL_SERVER_ERROR,
-    "Internal Server Error",
-  );
-}
 
   }
 
@@ -203,18 +206,28 @@ class NewCollection extends BaseController {
   getInvoiceListByCustomer = async (req, res) => {
     try {
       let soldToParty = req.query.soldToParty;
+      
       let sortBy = req.query.sortBy
+      if (sortBy == "amount") {
+        sortBy = "totalNetValue";
+      }
+
       let sortingOrder = req.query.sortingOrder
+      let searchText=req.query.searchText
+      let searchQuery={"invoiceDetails.sold_to_party":soldToParty}
+      
+      if (searchText){
+        searchQuery["invoiceDetails.invoiceNo"]={$regex:searchText,$options:"i"}
+      }
+      
       let sortOn = {}
-      sortOn[sortBy] = sortingOrder
+      sortOn[sortBy] = parseInt(sortingOrder)
+      
       let data = {
         commitedInvoices:[],
         availableInvoices:[]
       }
-      let invoiceList = await collectionQuery.getInvoiceListByCustomer(soldToParty, sortOn);
-      if (sortBy == "amount") {
-        sortBy = totalNetValue;
-      }
+      let invoiceList = await collectionQuery.getInvoiceListByCustomer(searchQuery, sortOn);
       
       // let customerDataFromMicroService = await getCustomerDetails(soldToParty);
       // let gofrugalId=customerDataFromMicroService.data.gofrugalId
@@ -274,120 +287,3 @@ class NewCollection extends BaseController {
 }
 
 module.exports = new NewCollection();
-
-// {
-//   success: true,
-//   data: {
-//     _id: '6034d1f804e1837a23ae2389',
-//     cityId: '',
-//     goFrugalId: 1039285,
-//     __v: 0,
-//     aadharNumber: ' ',
-//     address1: '314, 28th Main Rd, Sector 2, 1st Sector, HSR Layout',
-//     address2: '#',
-//     address3: '#',
-//     allowBilling: 1,
-//     area: '0',
-//     birthdate: '',
-//     city: 'Bengaluru',
-//     country: 'IN',
-//     createdAt: '2021-02-23T09:59:20.780Z',
-//     creditDays: 0,
-//     creditDaysLeft: 7,
-//     creditLimit: '50.56',
-//     customerAlias: 0,
-//     customerId: '',
-//     customerTypeCode: null,
-//     dbStatus: 1,
-//     email: ' ',
-//     gstNumber: ' ',
-//     gstRegType: 0,
-//     isCreditAllowed: 1,
-//     isDeleted: 0,
-//     isFree: 0,
-//     isGstExempted: false,
-//     isOffer: 0,
-//     isQty: 1,
-//     latitude: '12.9180572',
-//     location: { type: 'Point', coordinates: [Array] },
-//     loginId: '',
-//     longitude: '77.6523404',
-//     marriageDate: null,
-//     mobile: '9731913185',
-//     name: 'BANGALORE HORTICULTURE HSR',
-//     outstanding: '0',
-//     panNumber: ' ',
-//     phone1: '9731913185',
-//     phone2: '',
-//     phone3: '',
-//     pincode: '560102',
-//     priceLevelId: 'FG',
-//     salesMan: ' ',
-//     salesManCode: 0,
-//     salesManMobile: '',
-//     state: '29',
-//     stateCode: '29',
-//     status: '1',
-//     syncTS: 0,
-//     type: 'ZWDO',
-//     updatedAt: '2021-04-03T07:01:19.163Z',
-//     isMigrated: 1,
-//     account_assignment_group: null,
-//     bp_role: '2',
-//     building_code: 43,
-//     check_rule: '02',
-//     company_code: [ [Object] ],
-//     currency: 'INR',
-//     customer_group: null,
-//     customer_pricing_procedure: null,
-//     delivery_plant: null,
-//     delivery_priority: null,
-//     distribution_channel: '50',
-//     grouping: 'ZWDO',
-//     inco_terms: null,
-//     inco_terms_location: null,
-//     language: 'E',
-//     legacy: 3666,
-//     order_combination: null,
-//     output_tax_jocg: null,
-//     output_tax_joig: null,
-//     output_tax_josg: null,
-//     output_tax_joug: null,
-//     output_tax_yces: null,
-//     payment_terms: null,
-//     price_group: null,
-//     price_list: null,
-//     reconciliation_account: null,
-//     route: '',
-//     sales_area: [
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object], [Object], [Object], [Object],
-//       [Object], [Object]
-//     ],
-//     sales_district: null,
-//     sales_group: null,
-//     sales_office: null,
-//     sales_organization: '5000',
-//     search_term: 'BLR22703',
-//     shipping_conditions: null,
-//     tax_category: ' ',
-//     title: '0003',
-//     updated_at: '2021-10-15T19:00:48.256Z',
-//     url: '',
-//     valid_to: '2021-10-31',
-//     sap_customer_no: '0001039285',
-//     erp_updated_at: '2021-10-15 10:00:24',
-//     beatPlans: [ [Object], [Object], [Object], [Object], [Object] ]
-//   }
-// }

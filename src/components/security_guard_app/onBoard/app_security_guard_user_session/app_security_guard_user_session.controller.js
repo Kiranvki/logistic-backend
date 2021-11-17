@@ -121,7 +121,7 @@ class pickerUserSessionController extends BaseController {
 
         // is logged in 
         return this.success(req, res, this.status.HTTP_OK, {
-          pickerBoyId: req.body.securityGuardDetails._id,
+          securityGuardId: req.body.securityGuardDetails._id,
           securityGuardDetails: {
             name: req.body.securityGuardDetails.fullName,
             cityId: req.body.securityGuardDetails.cityId,

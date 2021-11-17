@@ -529,6 +529,7 @@ class userController extends BaseController {
       return Model.find({
         'status': 1,
         'isDeleted': 0,
+        'attendanceLog.isCheckedOut': 0,
         'dateOfAttendance': {
           '$gte': startOfTheDay,
           '$lte': endOfTheDay
