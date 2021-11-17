@@ -2858,7 +2858,7 @@ class DeliveryExecutivetrip extends BaseController {
     let user = req.user, // user
       deliveryExecutiveId = user._id;
     let invoiceId = req.query.invoiceid;
-    let invoiceNo = req.query.invoiceno || 0;
+    let soId = req.query.soId || 0;
 
     let pipeline = [
        { $match: { soId: soId } },

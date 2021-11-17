@@ -118,7 +118,7 @@ function tripsRoutes() {
       isValidDeliveryId,
 
      // verifyAppToken, // verify app token
-      ctrl.getInTrip
+     ctrl.getInTrip
     );
 
     closed.route('/trip/intrip/:type/invoiceList').get(
