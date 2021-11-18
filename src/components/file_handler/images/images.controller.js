@@ -2,12 +2,17 @@ const BasicCtrl = require('../../basic_config/basic_config.controller');
 const BaseController = require('../../baseController');
 // getting the model 
 const Model = require('./models/images.model');
+const CamelCase = require('camelcase');
 const {
   error,
   info
 } = require('../../../utils').logging;
 const _ = require('lodash');
 const stream = require('stream');
+const azureStorage = require('azure-storage');
+const blobService = azureStorage.createBlobService();
+const containerName = process.env.azureBlobContainerName;
+const azureUrl = process.env.azureUploadUrl + containerName + '/';
 
 // image controller 
 class fileImagesController extends BaseController {
@@ -85,6 +90,66 @@ class fileImagesController extends BaseController {
       return this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
     }
   }
+    // upload file internal 
+    uploadInternal = async (customerData, fileInfo, type) => {
+      try {
+        info('Uploading the Image to the DB !');
+  
+        let fileName = `customers/-${customerData.id}/${type}/`;
+        let fileStream = fileInfo.b64;
+        let streamLength = fileInfo.b64Length;
+  
+        // data
+        let data = await blobService.createBlockBlobFromStream(containerName, fileName + `original-${fileInfo.originalName}`, fileStream, streamLength, err => {
+          if (err) {
+            error('Original Upload Fail', err);
+            return {
+              success: false
+            };
+          }
+          console.log('IMAGE UPLOAD IS COMPLETED !');
+          return {
+            success: true
+          }
+        });
+  
+        fileName = `customers/-${customerData.id}/${type}/`;
+        fileStream = fileInfo.thumbnailb64;
+        streamLength = fileInfo.thumbnailb64Length;
+  
+        // thumbnail
+        let thumbNailData = await blobService.createBlockBlobFromStream(containerName, fileName + `thumbNail-${fileInfo.originalName}`, fileStream, streamLength, err => {
+          if (err) {
+            error('Thumbnail Upload Fail', err);
+            return {
+              success: false
+            };
+          }
+          info('IMAGE UPLOAD IS COMPLETED !');
+          return {
+            success: true
+          }
+        });
+  
+        // returning the file names 
+        return {
+          success: true,
+          data: {
+            id: customerData.id,
+            originalFileName: data.name,
+            thumbNailFileName: thumbNailData.name
+          }
+        };
+  
+        // catch any runtime error 
+      } catch (err) {
+        error(err);
+        return {
+          success: false,
+          error: err
+        }
+      }
+    }
 
 }
 

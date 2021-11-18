@@ -91,6 +91,10 @@ module.exports = {
   isInvoiceAlreadyFetched:require('./isInvoiceAlreadyFetched'),
   invoiceFetchCounter:require('./invoiceFetchCounter'),
   generateEInvoice:require('./generateEInvoice'),
-  getCustomerDetail:require('./getCustomerDetail')
+  getCustomerDetail:require('./getCustomerDetail'),
+  isValidMultiImageIsUploading:require('./isValidMultiImageIsUploading'),
+  isValidProfilePicUpload: require('./isValidProfilePicUpload'),
+  isValidCustomerNotAvailUpload:require('./isValidCustomerNotAvailUpload'),// check whether the profile pic is valid or not 
+  isvalidSignatureIsUploading:require('./isvalidSignatureIsUploading'),
 
 }

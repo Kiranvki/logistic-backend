@@ -21,19 +21,21 @@ module.exports = async (req, res, next) => {
 
     // creating a valid mongoose type object 
     let objectId = mongoose.Types.ObjectId;
-
     // get the picker id   
-    let deliveryId = req.params.deliveryId || req.user._id, // picker id 
-      fullName = req.body.fullName,
-      dateOfBirth = req.body.dateOfBirth || '',
-      isNotChanged = [],
-      toChangeObject = [],// change object 
-      DateOfBirthFromDb = moment();
-
-
+    let deliveryId = req.user._id, // picker id 
+    fullName = req.body.fullName,
+    dateOfBirth = req.body.dateOfBirth || '',
+    isNotChanged = [],
+    toChangeObject = [],// change object 
+    DateOfBirthFromDb = moment();
+    
+    
+    console.log(deliveryId,"delivery ID===>")
     if (objectId.isValid(deliveryId)) {
       // check whether the document type already exist or not 
       let getDeliveryDetails = await DeliveryCtrl.getDetails(deliveryId);
+
+      console.log("getDeliveryDetails==>",getDeliveryDetails)
 
       // if picker details fetched successfully
       if (getDeliveryDetails.success) {

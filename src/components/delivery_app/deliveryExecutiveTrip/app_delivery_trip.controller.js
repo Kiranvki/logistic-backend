@@ -1,7 +1,7 @@
-const BasicCtrl = require("../../basic_config/basic_config.controller");
 const BaseController = require("../../baseController");
 const { error, info } = require("../../../utils").logging;
-
+const BasicCtrl = require("../../basic_config/basic_config.controller");
+const AppImageCtrl = require("./../../file_handler/images/images.controller");
 const moment = require("moment");
 // const SalesOrderModel = require('../../sales_order/sales_order/models/sales_order.model')
 const invoiceMasterModel = require("../../picker_app/invoice_master/models/invoice_master.model");
@@ -20,6 +20,11 @@ import { type } from "ramda";
 import { v4 as uuidv4 } from "uuid";
 import securityGenerateMonthDaysAndOtherMetaData from "../../../hooks/app/securityGenerateMonthDaysAndOtherMetaData";
 const gpnModel = require("./model/gpn_model");
+const Promise = require("bluebird");
+const azureStorage = require("azure-storage");
+const blobService = azureStorage.createBlobService();
+const containerName = process.env.azureBlobContainerName;
+const azureUrl = process.env.azureUploadUrl + containerName + "/";
 
 // const transporterModel = require('../../transporter/transporter/models/transporter.model');
 // const transVehicleModel = require('../../rate_category/ratecategory_transporter_vehicle_mapping/models/ratecategory_transporter_vehicle_mapping.model')
@@ -2015,7 +2020,8 @@ class DeliveryExecutivetrip extends BaseController {
           ],
         },
       },
-      { $project: { salesOrder: 1, vehicleRegNumber: 1 } },
+
+      { $project: { tripId: 1, salesOrder: 1, vehicleRegNumber: 1 } },
       { $unwind: { path: "$salesOrder" } },
       {
         $lookup: {
@@ -2068,6 +2074,26 @@ class DeliveryExecutivetrip extends BaseController {
           },
         },
       },
+      {
+        $group: {
+          _id: "$tripId",
+          vehicleRegNumber: { $first: "$vehicleRegNumber" },
+          result: {
+            $push: {
+              salesOrder: "$salesOrder",
+              getDirection: "$getDirection",
+              NoOfCrates: "$NoOfCrates",
+              sold_to_party_description: "$sold_to_party_description",
+              sold_to_party: "$sold_to_party",
+              address1: "$address1",
+              mobileNo: "$mobileNo",
+              cityId: "$cityId",
+              isDelivered: "$isDelivered",
+              salesorders: "$salesorders",
+            },
+          },
+        },
+      },
     ];
     let trip = await tripModel.aggregate(pipeline);
 
@@ -2094,11 +2120,11 @@ class DeliveryExecutivetrip extends BaseController {
       ],
     });
     let data = {
-      results: trip,
+      trip,
       pageMeta: {
         skip: pageSize * (pageNumber - 1),
         pageSize: pageSize,
-        total: totalCount,
+        total: trip[0].result.length,
       },
     };
 
@@ -2251,6 +2277,7 @@ class DeliveryExecutivetrip extends BaseController {
             invoices: {
               $push: {
                 invoice: "$invoiceDetails.invoiceNo",
+                soId: "$soId",
                 orderPlacedAt: "$createdAt",
                 address1: "$shippingDetails.address1",
                 city: "$shippingDetails.cityId",
@@ -2326,7 +2353,7 @@ class DeliveryExecutivetrip extends BaseController {
           disputeId: 1,
           acceptedQty: 1,
           status: 1,
-          disputeDate: { $dateToString: { format: "%d-%m-%Y", date: "$createdAt" } },
+          disputeDate: "$createdAt",
           invoicesNo: { $first: "$invoices.invoiceDetails.invoiceNo" },
         },
       },
@@ -2449,7 +2476,7 @@ class DeliveryExecutivetrip extends BaseController {
           deliveryExecutiveName: { $first: "$trips.deliveryExecutiveName" },
           customerName: "$salesorder.sold_to_party_description",
           customerId: "$salesorder.sold_to_party",
-          disputeDate: { $dateToString: { format: "%d-%m-%Y", date: "$createdAt" } },
+          disputeDate: "$createdAt",
           truck_Number: { $first: "$trips.vehicleRegNumber" },
           invoicesNo: { $first: "$invoices.invoiceDetails.invoiceNo" },
         },
@@ -2514,7 +2541,7 @@ class DeliveryExecutivetrip extends BaseController {
     // success(req, res, status, data = null, message = 'success')
   };
 
-  caputreDocumnet = async (req, res, next) => {
+  getPendingViewInvoice = async (req, res, next) => {
     let user = req.user, // user
       deliveryExecutiveId = user._id;
     let invoiceId = req.query.invoiceid;
@@ -2528,36 +2555,347 @@ class DeliveryExecutivetrip extends BaseController {
       },
       {
         $lookup: {
-          from: "invoicemasters",
-          let: { id: "$salesOrder" },
+          from: "salesorders",
+          let: { id: "$so_db_id" },
           pipeline: [
             {
               $match: {
-                $expr: { $eq: ["$so_db_id", "$$id"] },
+                $expr: { $eq: ["$_id", "$$id"] },
               },
             },
           ],
-          as: "invoice",
+          as: "salesorder",
         },
       },
       {
         $project: {
+          so_db_id: 1,
           soId: 1,
           isDelivered: 1,
-          noOfCrates: { $first: "$salesorder.crateIn" },
           orderPlacedAt: "$createdAt",
+          invoiceNo: "$invoiceDetails.invoiceNo",
+          "itemSupplied.itemId": 1,
+          "itemSupplied._id": 1,
+          "itemSupplied.itemName": 1,
+          noOfCrates: { $first: "$salesorder.crateIn" },
         },
       },
 
-      // {
-      //   $lookup:{
-      //     from:'spotSales',
-      //     localField:'spotSalesId',
-      //     foreignField:'_id',
-      //     as:'spotSales'
-      //   }
-      // },
+      {
+        $lookup: {
+          from: "spotSales",
+          localField: "spotSalesId",
+          foreignField: "_id",
+          as: "spotSales",
+        },
+      },
     ];
+    let invoiceDetail = await invoiceMasterModel.aggregate(pipeline);
+
+    console.log("");
+
+    try {
+      info("Getting invoice Detail!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        invoiceDetail || [],
+        this.messageTypes.deliveryExecutiveInvoiceFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+
+  uploadDocuments = async (req, res, next) => {
+    try {
+      info("Uploading scanned documents!");
+      let dataToUpdate, isUpdated;
+      let salesOrdersId =
+        req.params.salesOrdersId || req.query.salesOrdersId || req.body.salesOrdersId; // get the onboarding id
+      // let customerName = req.body.onBoarding.name || req.params.salesOrder;  // this has to eb changes
+      // let type = req.body.type;
+      //console.log('images ===>', req.body.fileInfo)
+      for (let i = 0; i < req.body.fileInfo.length; i++) {
+        // get the file name
+        let fileName = `customers/-${salesOrdersId}/`;
+        let fileStream = req.body.fileInfo[i].b64;
+        let streamLength = req.body.fileInfo[i].b64Length;
+
+        // data
+        let data = await blobService.createBlockBlobFromStream(
+          containerName,
+          fileName + `original-${req.body.fileInfo[i].originalName}`,
+          fileStream,
+          streamLength,
+          (err) => {
+            if (err) {
+              error("Original Upload Fail", err);
+              return {
+                success: false,
+              };
+            }
+            console.log("IMAGE UPLOAD IS COMPLETED !");
+            return {
+              success: true,
+            };
+          }
+        );
+        //  console.log("data",data)
+        dataToUpdate = {
+          $addToSet: {
+            invoiceUploads: (azureUrl + data.name)
+          },
+        };
+        // console.log(azureUrl,'this is azureUrl')
+        // console.log('datetoupdate',dataToUpdate)
+        // console.log('salesOrdersId',salesOrdersId)
+
+
+
+        // console.log("dataToUpdate",updatedData)
+        // inserting data into the db
+        isUpdated = await salesOrderModel.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId(salesOrdersId),
+          },
+          dataToUpdate,
+          {
+            new: true,
+            upsert: false,
+            lean: true,
+          }
+        )
+      }
+      console.log('isUpdated', isUpdated)
+      // success
+      return this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        {
+          id: salesOrdersId,
+          msg: isUpdated,
+        },
+        this.messageTypes.fileSuccessfullyUploaded
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+  customerSignature = async (req, res, next) => {
+    try {
+      info('Uploading signature to the DB !');
+      let salesOrdersId =
+        req.params.salesOrdersId || req.query.salesOrdersId || req.body.salesOrdersId; // get the onboarding id
+      // let customerName = req.body.onBoarding.name || req.params.deliveryExId;  // this has to eb changes
+      // let type = req.body.type;
+
+      // get the file name 
+      let fileName = `customers/$-${salesOrdersId}/`;
+      let fileStream = req.body.fileInfo.b64;
+      let streamLength = req.body.fileInfo.b64Length;
+
+      // data
+      let data = await blobService.createBlockBlobFromStream(
+        containerName, fileName + `original-${req.body.fileInfo.originalName}`,
+        fileStream,
+        streamLength,
+        err => {
+          if (err) {
+            error('Original Upload Fail', err);
+            return {
+              success: false
+            };
+          }
+          console.log('IMAGE UPLOAD IS COMPLETED !');
+          return {
+            success: true
+          }
+        });
+
+      let dataToUpdate = {
+        $set: {
+          customerSignature: (azureUrl + data.name)
+        },
+      };
+
+      // inserting data into the db
+      let isUpdated = await salesOrderModel.findOneAndUpdate(
+        {
+          _id: mongoose.Types.ObjectId(salesOrdersId),
+        },
+        dataToUpdate,
+        {
+          new: true,
+          upsert: false,
+          lean: true,
+        }
+      );
+
+      // success 
+      return this.success(req, res, this.status.HTTP_OK, {
+        id: salesOrdersId,
+        msg: isUpdated,
+      }, this.messageTypes.fileSuccessfullyUploaded);
+
+      // catch any runtime error 
+    } catch (err) {
+      error(err);
+      return this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+    }
+  }
+
+
+  uploadImageCustomerNotAvailable = async (req, res, next) => {
+    try {
+      info("upload photos if customer is not available");
+      let dataToUpdate, isUpdated;
+      let salesOrdersId =
+        req.params.salesOrdersId || req.query.salesOrdersId || req.body.salesOrdersId; // get the onboarding id
+      // let customerName = req.body.onBoarding.name || req.params.salesOrder;  // this has to eb changes
+      // let type = req.body.type;
+      //console.log('images ===>', req.body.fileInfo)
+      for (let i = 0; i < req.body.fileInfo.length; i++) {
+        // get the file name
+        let fileName = `customers/-${salesOrdersId}/`;
+        let fileStream = req.body.fileInfo[i].b64;
+        let streamLength = req.body.fileInfo[i].b64Length;
+
+        // data
+        let data = await blobService.createBlockBlobFromStream(
+          containerName,
+          fileName + `original-${req.body.fileInfo[i].originalName}`,
+          fileStream,
+          streamLength,
+          (err) => {
+            if (err) {
+              error("Original Upload Fail", err);
+              return {
+                success: false,
+              };
+            }
+            console.log("IMAGE UPLOAD IS COMPLETED !");
+            return {
+              success: true,
+            };
+          }
+        );
+        //  console.log("data",data)
+        dataToUpdate = {
+          $addToSet: {
+            customerNotAvailable: (azureUrl + data.name)
+          },
+        };
+        // console.log(azureUrl,'this is azureUrl')
+        // console.log('datetoupdate',dataToUpdate)
+        // console.log('salesOrdersId',salesOrdersId)
+
+
+
+        // console.log("dataToUpdate",updatedData)
+        // inserting data into the db
+        isUpdated = await salesOrderModel.findOneAndUpdate(
+          {
+            _id: mongoose.Types.ObjectId(salesOrdersId),
+          },
+          dataToUpdate,
+          {
+            new: true,
+            upsert: false,
+            lean: true,
+          }
+        )
+      }
+      console.log('isUpdated', isUpdated)
+      // success
+      return this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        {
+          id: salesOrdersId,
+          msg: isUpdated,
+        },
+        this.messageTypes.fileSuccessfullyUploaded
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      return this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+  getInvoiceVewAfterPayment = async (req, res, next) => {
+    let user = req.user, // user
+      deliveryExecutiveId = user._id;
+    let invoiceId = req.query.invoiceid;
+    let soId = req.query.soId || 0;
+
+    let pipeline = [
+       { $match: { soId: soId } },
+  {
+    $lookup: {
+      from: "salesorders",
+      localField: "so_db_id",
+      foreignField: "_id",
+      as: "saleorder",
+    },
+  },
+  {
+    $lookup: {
+      from: "decollections",
+      localField: "soId",
+      foreignField: "soId",
+      as: "decollection",
+    }
+  },
+  {
+      "$project":{
+         "so_db_id":1,
+         "isDelivered":1,
+         "orderPlacedAt":"$createdAt",
+         "pendingCrates": { $first:"$saleorder.crateOutWithItem"},
+         "noOfCratesOut" : { $first:"$saleorder.crateOut"},
+         "invoiceNo":"$invoiceDetails.invoiceNo",
+         "itemSupplied.itemId":1,
+         "itemSupplied._id":1,
+         "itemSupplied.suppliedQty":1,
+         "itemSupplied.quantity":1,
+         "credit":{ $first:"$decollection.collectionAmount"},
+         "photos":{ $first:"$saleorder.invoiceUploads"},
+         "itemSupplied.itemName":1,
+         "soId":1,
+      }
+  }
+];
     let invoiceDetail = await invoiceMasterModel.aggregate(pipeline);
 
     try {
@@ -2583,6 +2921,52 @@ class DeliveryExecutivetrip extends BaseController {
       );
     }
   };
+
+
+  disputeAcceptOrReject = async (req, res, next) => {
+    let id = req.params.disputeId || req.query.disputeId || req.body.disputeId;
+    let condition = req.params.condition == "accept" ? 1 : 0;
+
+    let updatedDisputeDetail;
+
+    // update checked quantity and reason
+
+    try {
+      let updateObj = {
+        isAccepted: condition
+      };
+
+      updatedDisputeDetail = await disputeModel.findOneAndUpdate(
+        {
+          disputeId: parseInt(id),
+        },
+        { $set: { ...updateObj } }
+      );
+      info("Dispute is being Accepted or Recjected");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        updatedDisputeDetail || [],
+        this.messageTypes.disputeDetailsUpdated
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.disputeDetailsNotUpdated
+      );
+    }
+  };
+
+
 }
 
 module.exports = new DeliveryExecutivetrip();
