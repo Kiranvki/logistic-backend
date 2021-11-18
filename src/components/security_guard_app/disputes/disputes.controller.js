@@ -275,14 +275,18 @@ class disputesController extends BaseController {
       let updateObj = {
         notifiedId: notifiedId || "",
         status: 2,
-        reason: reason,
+        reason: {
+          _id: reason._id,
+          itemId: reason.itemId,
+          reason: reason.reason,
+        },
       };
 
       let data = await disputeModel.findOneAndUpdate(
         {
           invoiceId: mongoose.Types.ObjectId(id),
         },
-        { $set: { ...updateObj } }
+        { $push: { ...updateObj } }
       );
 
       let updatedData = await disputeModel.find(
