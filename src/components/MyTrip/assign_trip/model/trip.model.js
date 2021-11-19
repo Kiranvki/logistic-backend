@@ -120,6 +120,7 @@ let tripSchema = Schema ({
         default: 0
     },
 
+
     tripFinished: {
         type: Number,
         default: 0

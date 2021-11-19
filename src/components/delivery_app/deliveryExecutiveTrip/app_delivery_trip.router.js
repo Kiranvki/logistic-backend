@@ -247,12 +247,12 @@ function tripsRoutes() {
       ctrl.uploadImageCustomerNotAvailable // controller function
     )
 
-    closed.route('/trip/intrip/salesorders/invoiceList/viewInvoiceAfterpPayment').get(
+    closed.route('/trip/intrip/salesorders/viewInvoiceSummary').get(
       getInvoiceVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
       // verifyAppToken, // verify app token
-      ctrl.getInvoiceVewAfterPayment
+      ctrl.getInvoiceSummary
     );
 
     closed.route('/get-dispute/:disputeId/:condition/updateDisputeDetails').patch(

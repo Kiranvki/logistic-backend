@@ -1056,6 +1056,7 @@ class DeliveryExecutivetrip extends BaseController {
           {
             $project: {
               tripId: 1,
+              tripInProcess:"$salesorders.tripInProcess",
               salesOrder: 1,
               vehicleRegNumber: 1,
               getDirection: "$salesorders.location",
@@ -1170,7 +1171,7 @@ class DeliveryExecutivetrip extends BaseController {
 
     let activeTripData = await tripModel.aggregate(pipeline);
 
-    // console.log('totalCrateCount',data)
+     console.log('tripInProcess',activeTripData[0].orderData)
 
     try {
       info("Getting trip Detail!");
@@ -2853,14 +2854,15 @@ class DeliveryExecutivetrip extends BaseController {
     }
   };
 
-  getInvoiceVewAfterPayment = async (req, res, next) => {
+  getInvoiceSummary = async (req, res, next) => {
     let user = req.user, // user
       deliveryExecutiveId = user._id;
-    let invoiceId = req.query.invoiceid;
+    //let invoiceId = req.query.invoiceid;
     let soId = req.query.soId || 0;
 
     let pipeline = [
-       { $match: { soId: soId } },
+       { $match: { soId: parseInt(soId) } },
+  
   {
     $lookup: {
       from: "salesorders",

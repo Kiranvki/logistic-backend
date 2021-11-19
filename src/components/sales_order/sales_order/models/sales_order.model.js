@@ -48,6 +48,11 @@ const salesOrder = new Schema({
   'status': {
     type: String
   },
+  'tripInProcess':{
+    type: Number,
+    default: 0,
+    enum: [0, 1]
+},
   'req_del_date': {
     type: String
   },
