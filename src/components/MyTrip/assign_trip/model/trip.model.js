@@ -125,10 +125,23 @@ let tripSchema = Schema ({
         type: Number,
         default: 0
     },
+
+    statusVerify:{
+        type: Number,
+        default: 0,
+        enum: [0, 1] 
+    },
+
     initialOdometerReading: {
         type: Number,
         default: 0
     },
+
+    endOdometerReading: {
+        type: Number,
+        default: 0
+    },
+
 
     isCompleteDeleiveryDone: {
         type: Number,

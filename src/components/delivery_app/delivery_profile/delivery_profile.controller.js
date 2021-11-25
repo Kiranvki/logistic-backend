@@ -111,89 +111,14 @@ class deliveryProfileController extends BaseController {
     try {
       info('Delivery Executive Profile PATCH REQUEST !');
       let id = req.user._id || '';
+      let toChangeObject = req.body;
 
       // inserting data into the db 
-      let isUpdated = await deliveryCtrl.updateDetails(req.body.toChangeObject, id);
-
-
-      let insertObject = {
-        // goFrugalId: 0,
-        // incoTermLocation: req.user.incoTermLocation,
-        // salesDocumentType: req.user.salesDocumentType || 'ZDOM',
-        // salesOrganization: req.user.salesOrg || '5000',
-        // distributionChannel: req.user.distributionChannel || '50',
-        // division: req.user.division || '51',
-        // plant: req.user.plant || '1000',
-        // storageLocation: req.user.storageLocation || '101',
-        //priceLevelId: req.user.customerGroup || 'BB', //it will be cust group by default some value we are passing
-        //  customerGroup: req.user.distributionChannel || '50', // it will be distribution channel
-        /**
-         * From backend we will have to assigned both the dist channel and customer_group
-         */
-        // priceLevelId: req.body.priceLevelId,  //here we will be getting the customer group (now it wont be taken from the user, it will be directly assigned to the user from the saleman-warehouse mapping)
-        // customerGroup: req.body.group, //here it should be the distribution center(now we do not need to take it from front end, it will be taken from salesman)
-        //cityId: req.user.cityId,
-
-        // salesmanId: req.user._id,
-
-        // contactPerson: req.body.contactPersonName,
-        // mobileNumber: req.body.phoneNumber,
-        // email: req.body.email,
-        // address1: req.body.address1 || null,
-        // address2: req.body.address2 || null,
-        // latitude: req.body.latitude || null,
-        // longitude: req.body.longitude || null,
-        // location: {
-        //   type: 'Point',
-        //   coordinates: [!isNaN(req.body.longitude) ? req.body.longitude : null, !isNaN(req.body.latitude) ? req.body.latitude : null]
-        // },
-        // city: req.body.city || null,
-        // pincode: req.body.pincode || null,
-        // state: req.body.state || null,
-        // dateOfOnBoarding: onboardingDate,
-        // name: req.body.name,
-        // step1: true,
-        // status: 1,
-        // isDeleted: 0,
-        // isCustomerPosted: 0,
-        photo: req.body.profilePhoto
-
-      };
-
-      // creating a new customer in local db
-      let isInserted = await Model.create(insertObject).then((result) => {
-        console.log(result, "result")
-        if (!_.isEmpty(req.body.fileInfo))
-          return AppImageCtrl.uploadInternal({ id: result._id }, req.body.fileInfo, 'image').then((data) => {
-            return {
-              success: true,
-              data: data
-            };
-          });
-        else return {
-          success: false,
-          data: data
-        }
-      });
-      // console.log("inserteddata===>",isInserted,id)
-
-      if (isInserted.success) {
-        await Model.findByIdAndUpdate(isInserted.data.data.id, {
-          originalImageId: isInserted.data.data.originalFileName,
-          thumbnailImageId: isInserted.data.data.thumbNailFileName,
-        });
-      }
-      console.log("dataUpdated", isInserted)
-
-      // let result = {
-      //   isUpdated: isUpdated,
-      //   originalImageId : isInserted.data.originalImageId,
-      //   thumbnailImageId : thumbnailImageId,
-      // }
-      console.log('profile pic uploaded Successfully ', isInserted.data)
-
+      let isUpdated = await deliveryCtrl.updateDetails(toChangeObject,id);
+     
+    
       // check if updated 
-      if (isUpdated.success) return this.success(req, res, this.status.HTTP_OK, result, this.messageTypes.deliveryExecutiveUpdatedSuccessfully);
+      if (isUpdated.success) return this.success(req, res, this.status.HTTP_OK, isUpdated, this.messageTypes.deliveryExecutiveUpdatedSuccessfully);
       else return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdated);
 
       // catch any runtime error 

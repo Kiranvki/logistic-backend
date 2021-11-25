@@ -45,13 +45,15 @@ const salesOrder = new Schema({
     type: 'Date',
     default: Date.now
   },
+  
   'status': {
     type: String
   },
+
   'tripInProcess':{
     type: Number,
     default: 0,
-    enum: [0, 1]
+    enum: [0, 1] 
 },
   'req_del_date': {
     type: String
@@ -250,6 +252,11 @@ const salesOrder = new Schema({
       required: true
     },
   },
+  'salesorderStatus':{
+    type:Number,
+    default:0, 
+    enum:[0,1,2,3] //1 customerNotAvailable , 2 salereturn, 3 delivered
+  },
   'item': [{
     'fulfillmentStatus': {
       type: Number,
@@ -327,7 +334,8 @@ const salesOrder = new Schema({
 
       'itemDeliveryStatus': {
         type: Number,
-        default: 0 //0 not deliver 1 processing 2 deliver
+        default: 0, 
+        enum:[0,1] // 0 for delivered and 1 salesreturn 
       },
       'rejectedQuantity': {
         type: Number,
@@ -377,7 +385,10 @@ const salesOrder = new Schema({
     default: 0
   },
 
+
 },
+
+
   {
     timestamps: true
   });
