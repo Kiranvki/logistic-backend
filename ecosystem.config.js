@@ -8,9 +8,6 @@ module.exports = {
       'PORT': 3003,
       'securePort': 5003,
       'NODE_ENV': 'development',
-      'AZURE_STORAGE_CONNECTION_STRING': 'DefaultEndpointsProtocol=https;AccountName=waycoolstorage;AccountKey=tjzgdLH4ZxpP0oDcZXZDyyvBWaVw+uBwLphrgilQ0xBm1vD62KN7qMuZNPwtq6jugDmhNiY6tCE3HMGXOmcmIw==;EndpointSuffix=core.windows.net',
-      'azureBlobContainerName': 'receivable',
-      'azureUploadUrl': 'https://waycoolstorage.blob.core.windows.net/',
       // 'DB':'mongodb://localhost:27017/dms-picker',
       // 'DB':'mongodb://AdminSammy:wxFQ%5EmqlE4Wz@40.65.152.232:27017/dms-picker?authSource=admin'
       'DB': 'mongodb://pickeruser:wxFQ^mqlE4Wz@40.65.152.232:27017/dms-picker?authSource=dms-picker',
