@@ -22,8 +22,8 @@ class vehicleEntryController extends BaseController {
   // get entry vehicle list after delivery
   entryVehicleList = async (req, res, next) => {
     let pageNumber = req.query.page || 1,
-      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
-        if (res.success) return res.data;
+      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((resp) => {
+        if (resp.success) return resp.data;
         else return 60;
       }),
       searchKey = req.query.search || "",
@@ -33,14 +33,6 @@ class vehicleEntryController extends BaseController {
 
     sortingArray[sortBy] = -1;
 
-    let dateToday = moment(Date.now())
-      .set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0,
-      })
-      .toDate();
 
     let searchObject = {
       "transporterDetails.vehicle": {
@@ -125,21 +117,6 @@ class vehicleEntryController extends BaseController {
     ];
 
     let trip = await tripModel.aggregate(pipeline);
-    let crates = await tripModel.aggregate([
-      {
-        $lookup: {
-          from: "salesorders",
-          localField: "salesOrderId",
-          foreignField: "_id",
-          as: "salesOrder",
-        },
-      },
-      {
-        $project: {
-          totalCrate: { $sum: ["$salesOrder.crateIn"] },
-        },
-      },
-    ]);
 
     let totalCount = await tripModel.count({
       ...searchObject,
