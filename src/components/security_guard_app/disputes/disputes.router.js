@@ -69,6 +69,13 @@ function vehicleRoutes() {
       isSecurityGuardUserCheckedIn, // is security guard checked in
       ctrl.getUpdatedDisputeDetails // controller function
     );
+
+    closed.route("/disputes/salesReturnDetails/invoice/:invoiceId/item/:itemId").get(
+      joiInvoiceId,
+      verifySecurityAppToken, // verify app user token
+      isSecurityGuardUserCheckedIn, // is security guard checked in
+      ctrl.getsaleReturnDetails // controller function
+    );
   };
 }
 

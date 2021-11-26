@@ -373,11 +373,11 @@ class disputesController extends BaseController {
     });
     let data = {
       results: trip,
-      pageMeta: {
-        skip: pageSize * (pageNumber - 1),
-        pageSize: pageSize,
-        total: totalCount,
-      },
+      // pageMeta: {
+      //   skip: pageSize * (pageNumber - 1),
+      //   pageSize: pageSize,
+      //   total: totalCount,
+      // },
     };
 
     try {
@@ -406,9 +406,71 @@ class disputesController extends BaseController {
     // success(req, res, status, data = null, message = 'success')
   };
 
+  getsaleReturnDetails = async (req, res, next) => {
+    let invoiceId = req.params.invoiceId || req.query.invoiceId,
+      itemID = req.params.itemId || req.query.itemId;
+
+    let trip = await disputeModel.aggregate([
+      {
+        $match: { invoiceId: mongoose.Types.ObjectId(invoiceId) },
+      },
+      {
+        $lookup: {
+          from: "salesorders",
+          localField: "so_db_id",
+          foreignField: "_id",
+          as: "salesReturn",
+        },
+      },
+      { $unwind: { path: "$salesReturn" } },
+      { $unwind: { path: "$salesReturn.orderItems" } },
+      { $project: { returnDetails: 1, salesReturn: 1 } },
+      {
+        $match: { "salesReturn.orderItems.material_no": itemID },
+      },
+      { $unwind: { path: "$returnDetails" } },
+      {
+        $addFields: {
+          "returnDetails.ordered_qty": "$salesReturn.orderItems.ordered_qty",
+          "returnDetails.packed_qty": "$salesReturn.orderItems.packed_qty",
+          "returnDetails.accepted_qty": "$salesReturn.orderItems.accepted_qty",
+          "returnDetails.itemName":
+            "$salesReturn.orderItems.material_description",
+        },
+      },
+      { $match: { "returnDetails.itemId": itemID } },
+      { $project: {_id: 0, returnDetails: 1 } },
+    ]);
+
+    try {
+      info("getting desputes data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        trip || [],
+        this.messageTypes.disputeDetailsFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+
+    // success(req, res, status, data = null, message = 'success')
+  };
+
   notifyDispute = async (req, res, next) => {
     let id = req.params.invoiceId || req.query.invoiceId || req.body.invoiceId,
-      { _id, itemId, reason,checkedQty } = req.body,
+      { _id, itemId, reason, checkedQty } = req.body,
       notId = await disputeModel.find().sort({ createdAt: -1 }),
       newId = parseInt(notId[0].notifiedId),
       notifiedId = newId + 1;
@@ -426,7 +488,7 @@ class disputesController extends BaseController {
         //   reason: reason,
         //   checkedQty:checkedQty
         // };
-       Arr = req.body;
+        Arr = req.body;
 
       let data = await disputeModel.findOneAndUpdate(
         {
@@ -440,7 +502,7 @@ class disputesController extends BaseController {
           invoiceId: mongoose.Types.ObjectId(id),
         },
 
-        { $addToSet: { returnDetails: {$each: Arr }} ,}
+        { $addToSet: { returnDetails: { $each: Arr } } }
       );
 
       let updatedData = await disputeModel.find(

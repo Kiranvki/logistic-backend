@@ -33,7 +33,6 @@ class vehicleEntryController extends BaseController {
 
     sortingArray[sortBy] = -1;
 
-
     let searchObject = {
       "transporterDetails.vehicle": {
         $regex: searchKey,
@@ -258,6 +257,27 @@ class vehicleEntryController extends BaseController {
               $push: {
                 invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
                 invoiceId: "$salesorder.invoices._id",
+                invoiceDate: {
+                  $dateToString: {
+                    format: "%d-%m-%Y",
+                    date: "$salesorder.invoices.invoiceDetails.invoiceDate",
+                  },
+                },
+                invoiceTime: {
+                  $dateToString: {
+                    format: "%H:%M",
+                    date: "$salesorder.invoices.invoiceDetails.invoiceDate",
+                    timezone: "+05:30",
+                  },
+                },
+                noOfItems: {
+                  $cond: {
+                    if: { $isArray: "$salesorder.invoices.itemSupplied" },
+                    then: { $size: "$salesorder.invoices.itemSupplied" },
+                    else: "NA",
+                  },
+                },
+                invoiceUploads: "$salesorder.invoiceUploads",
                 gpnNo: { $first: "$salesorder.invoices.gpnNumber.gpn" },
                 deliveryFlag: "$salesorder.invoices.isDelivered",
                 isSalesReturn: "$isSalesReturn",
