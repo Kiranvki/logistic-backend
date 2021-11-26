@@ -123,12 +123,12 @@ const schemas = {
           itemdata:Joi.array().items(
             Joi.object({
                id:Joi.string().trim().label('id').required().min(18),
-               itemdeliverystatus:Joi.number().label('Delivery Status').integer().required(),
+               itemdeliverystatus:Joi.number().label('Delivery Status').required().valid(0,1),
                rejectedquantity:Joi.number().label('Rejected item quantity').integer().required(),
-               comments:Joi.string().trim().label('Comments').required().min(1)
+               comments: Joi.any().when('itemdeliverystatus', { is: 1, then: Joi.required(), otherwise: Joi.optional() })
             })
 
-          ).required(),
+          )
          
     }),
 

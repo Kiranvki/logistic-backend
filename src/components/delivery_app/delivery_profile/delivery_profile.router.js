@@ -24,14 +24,12 @@ function deliveryUserRoutes() {
       ctrl.getDeliveryUserDetails // controller function
     );
 
-    // update Delivery Executive details
-    // closed.route("/user/update").patch(
-    //   verifyDeliveryAppToken, // verify app user token
-    //   checkWhetherItsAValidDeliveryUpdate, //check whether its a valid picker profile update
-    //   multipartMiddleware.single('profilePhoto'),
-    //   isValidProfilePicUpload,
-    //   ctrl.updateDeliveryUserDetails // update user details
-    // );
+   // update Delivery Executive details
+   closed.route("/user/update").patch(
+    verifyDeliveryAppToken, // verify app user token
+    checkWhetherItsAValidDeliveryUpdate, //check whether its a valid picker profile update
+    ctrl.updateDeliveryUserDetails // update user details
+  );
 
     // upload file to server 
     closed.route('/user/:deliveryExId/file/upload').post(
