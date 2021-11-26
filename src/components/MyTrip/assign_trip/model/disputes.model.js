@@ -47,8 +47,13 @@ let disputeSchema = Schema(
       type: Number,
       default: 0,
     },
-    reason: [
-      { _id: mongoose.Schema.Types.ObjectId, itemId: String, reason: String },
+    returnDetails: [
+      {
+        _id: mongoose.Schema.Types.ObjectId,
+        itemId: String,
+        checkedQty: Number,
+        reason: String,
+      },
     ],
 
     notifiedId: {
@@ -60,11 +65,11 @@ let disputeSchema = Schema(
     //   type: String,
     // },
 
-  isAccepted: {
-    type: Number,
-    default: 0, // o for rejected and 1 for accepted
-    enum: [0, 1]
-  },
+    isAccepted: {
+      type: Number,
+      default: 0, // o for rejected and 1 for accepted
+      enum: [0, 1],
+    },
 
     status: {
       type: Number,

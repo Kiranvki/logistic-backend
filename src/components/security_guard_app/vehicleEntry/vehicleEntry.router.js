@@ -2,6 +2,9 @@
 const ctrl = require("./vehicleEntry.controller");
 const { verifySecurityAppToken } = require("../../../hooks/app/Auth");
 const {
+  isSecurityGuardUserCheckedIn, // is security guard checked in
+} = require("../../../hooks/app");
+const {
   joiVehicleList,
   joiTripId,
   joiId,
@@ -23,6 +26,7 @@ function vehicleRoutes() {
     closed.route("/vehicle/entry-vehicle-list").get(
       joiVehicleList,
       verifySecurityAppToken, // verify app user token
+      isSecurityGuardUserCheckedIn, // is security guard checked in
       ctrl.entryVehicleList // controller function
     );
 
@@ -31,12 +35,14 @@ function vehicleRoutes() {
       joiTripId, //verify the input format
       verifySecurityAppToken, // verify app user token
       getAllCheckInVehicleDetails,
+      isSecurityGuardUserCheckedIn, // is security guard checked in
       ctrl.entryVehicleDetails // controller function
     );
 
     closed.route("/vehicle/updateCrates/:salesorderId").patch(
       joiId, //verify the input format
       verifySecurityAppToken, //verify app user token
+      isSecurityGuardUserCheckedIn, // is security guard checked in
       ctrl.updateCratesQuantity //controller function
     );
 
@@ -45,7 +51,8 @@ function vehicleRoutes() {
       verifySecurityAppToken, //verify app user token
       joiInvoiceNo,
       isValidInvoice, //verify if invoice exists or not
-      isInvoiceAlreadyVerified,//verify if invoice is verified 
+      isInvoiceAlreadyVerified, //verify if invoice is verified
+      isSecurityGuardUserCheckedIn, // is security guard checked in
       ctrl.verifyDeliveredInvoice // controller function
     );
   };

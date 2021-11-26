@@ -18,8 +18,8 @@ class vehicleInfoController extends BaseController {
   // get trip details by vehicle number
   getTripByVehicleNumber = async (req, res, next) => {
     let pageNumber = req.query.page || 1,
-      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
-        if (res.success) return res.data;
+      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((resp) => {
+        if (resp.success) return resp.data;
         else return 60;
       }),
       searchKey = req.query.search || "",
@@ -38,19 +38,14 @@ class vehicleInfoController extends BaseController {
       .toDate();
 
     let searchObject = {
-      $or: [
+      $and: [
         {
           "transporterDetails.vehicle": {
             $regex: searchKey,
             $options: "is",
           },
         },
-        {
-          vehicleModel: {
-            $regex: searchKey,
-            $options: "is",
-          },
-        },
+        { isActive: { $ne: 1 }, isTripStarted: { $ne: 1 } },
       ],
     };
 
@@ -63,9 +58,8 @@ class vehicleInfoController extends BaseController {
             },
             { createdAt: { $gte: dateToday } },
           ],
-          isActive: {$ne: 1},
-          isTripStarted: {$ne: 1}
-
+          isActive: { $ne: 1 },
+          isTripStarted: { $ne: 1 },
         },
       },
       {
@@ -73,11 +67,60 @@ class vehicleInfoController extends BaseController {
       },
 
       {
+        $lookup: {
+          from: "salesorders",
+          let: { id: "$salesOrder" },
+          pipeline: [
+            {
+              $match: { $expr: { $eq: ["$_id", "$$id"] } },
+            },
+            {
+              $lookup: {
+                from: "invoicemasters",
+                let: { id: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $eq: ["$so_db_id", "$$id"] },
+                    },
+                  },
+                  {
+                    $lookup: {
+                      from: "gatepassnumbers",
+                      let: { id: "$invoiceDetails.invoiceNo" },
+                      pipeline: [
+                        {
+                          $match: {
+                            $expr: { $in: ["$$id", "$invoiceNumber"] },
+                          },
+                        },
+                      ],
+                      as: "gpnNumber",
+                    },
+                  },
+                ],
+                as: "invoices",
+              },
+            },
+          ],
+          as: "salesorder",
+        },
+      },
+      { $unwind: { path: "$salesorder", preserveNullAndEmptyArrays: false } },
+      // {
+      //   $unwind: {
+      //     path: "$salesorder.invoices",
+      //     preserveNullAndEmptyArrays: false,
+      //   },
+      // },
+
+      {
         $project: {
           //  _id:0,
           //   deliveryDetails:0,
           //   vehicleId:0,
           //   checkedInId:0,
+          tripId: 1,
           //   rateCategoryId:0,
           totalCrate: { $sum: ["$salesOrder.crateIn"] },
           vehicleNumber: "$transporterDetails.vehicle",
@@ -85,31 +128,30 @@ class vehicleInfoController extends BaseController {
             $cond: {
               if: { $isArray: "$spotSalesId" },
               then: { $size: "$spotSalesId" },
-              else: "0",
+              else: 0,
             },
           },
           totalAssetTransfer: {
             $cond: {
               if: { $isArray: "$assetTransfer" },
               then: { $size: "$assetTransfer" },
-              else: "0",
+              else: 0,
             },
           },
           totalStockTransfer: {
             $cond: {
               if: { $isArray: "$stockTransferIds" },
               then: { $size: "$stockTransferIds" },
-              else: "0",
+              else: 0,
             },
           },
           totalSalesOrder: {
             $cond: {
-              if: { $isArray: "$salesOrderId" },
-              then: { $size: "$salesOrderId" },
-              else: "0",
+              if: { $isArray: "$salesorder.invoices" },
+              then: { $size: "$salesorder.invoices" },
+              else: 0,
             },
           },
-          tripId: 1,
         },
       },
 
@@ -122,31 +164,13 @@ class vehicleInfoController extends BaseController {
     ];
 
     let trip = await tripModel.aggregate(pipeline);
-    let crates = await tripModel.aggregate([
-      {
-        $lookup: {
-          from: "salesorders",
-          localField: "salesOrderId",
-          foreignField: "_id",
-          as: "salesOrder",
-        },
-      },
-      {
-        $project: {
-          totalCrate: { $sum: ["$salesOrder.crateIn"] },
-        },
-      },
-    ]);
 
-    let totalCount = await tripModel.count({
-      ...searchObject,
-    });
     let data = {
       results: trip,
       pageMeta: {
         skip: pageSize * (pageNumber - 1),
         pageSize: pageSize,
-        total: totalCount,
+        total: trip.length || 0,
       },
     };
 
@@ -341,7 +365,7 @@ class vehicleInfoController extends BaseController {
         { $unwind: "$invoice" },
         {
           $project: {
-            _id: "$invoice._id" ,
+            _id: "$invoice._id",
             invoiceNumber: "$invoice.invoiceDetails.invoiceNo",
           },
         },
@@ -722,7 +746,7 @@ class vehicleInfoController extends BaseController {
       let dataToUpdate = {
         $set: {
           isActive: 1,
-          isTripStarted: 1
+          isTripStarted: 1,
         },
       };
 
