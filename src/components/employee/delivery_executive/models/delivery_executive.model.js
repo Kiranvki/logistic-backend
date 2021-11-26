@@ -46,7 +46,6 @@ const deliveryExecutive = new Schema(
 
     fullName: {
       type: String,
-      required: true,
     },
     contactMobile: {
       type: Number,
