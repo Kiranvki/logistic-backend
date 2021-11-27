@@ -94,6 +94,7 @@ class DeliveryExecutivetrip extends BaseController {
         $project: {
           tripId: 1,
           statusVerify: 1,
+          statusPendingVerify: 1,
           vehicleRegNumber: 1,
           salesorders: {
             $cond: {
@@ -248,6 +249,7 @@ class DeliveryExecutivetrip extends BaseController {
     let pageSize = 100;
     let pageNumber = req.query.page;
     let VerifyUpdate = await tripModel.updateOne({ tripId: ID }, { $set: { statusVerify: 0 } })
+    let pendingVerify = await tripModel.updateOne({ tripId: ID }, { $set: { statusPendingVerify: 0 } })
     info("getting trip data!");
     if (type === "salesorders" || type === "salesOrder") {
       pipeline = [
@@ -286,6 +288,7 @@ class DeliveryExecutivetrip extends BaseController {
             totalCrate: { $sum: "salesOrder.crateIn" },
             totalSalesOrder: { $sum: 1 },
             statusVerify: { $first: "$statusVerify" },
+            statusPendingVerify: { $first: "$statusPendingVerify" },
 
 
             orderData: {
@@ -1317,6 +1320,7 @@ class DeliveryExecutivetrip extends BaseController {
               vehicleRegNumber: 1,
               getDirection: "$salesorders.location",
               NoOfCrates: "$salesorders.crateIn",
+              salesorderStatus : "$salesorders.salesorderStatus",
               sold_to_party_description:
                 "$salesorders.sold_to_party_description",
               sold_to_party: "$salesorders.sold_to_party",
@@ -1333,7 +1337,7 @@ class DeliveryExecutivetrip extends BaseController {
               },
             },
           },
-          
+
           {
             $group: {
               _id: "$order.details.customerName",
@@ -1576,7 +1580,7 @@ class DeliveryExecutivetrip extends BaseController {
       pipeline.push(
         ...[
           {
-            $project: { vehicleRegNumber: 1, tripId: 1, salesOrder: 1, _id: 0 },
+            $project: { vehicleRegNumber: 1, tripId: 1, salesOrder: 1, _id: 0, salesorderStatus:1 },
           },
           {
             $lookup: {
@@ -1619,6 +1623,7 @@ class DeliveryExecutivetrip extends BaseController {
               vehicleRegNumber: { $first: "$vehicleRegNumber" },
               isDelivered: { $first: "$salesorder.invoices.isDelivered" },
               so_db_id: { $first: "$salesOrder" },
+              salesorderStatus : { $first: "$salesorder.salesorderStatus"},
               customerName: { $first: "$salesorder.sold_to_party_description" },
               address: {
                 $first: "$salesorder.invoices.shippingDetails.address1",
@@ -2174,15 +2179,23 @@ class DeliveryExecutivetrip extends BaseController {
         { $match: { so_db_id: mongoose.Types.ObjectId(so_id) } },
         { $unwind: { path: "$itemSupplied" } },
         {
+          $lookup: {
+            from: "salesorders",
+            localField: "so_db_id",
+            foreignField: "_id",
+            as: "salesorder",
+          }
+        },
+        { $unwind: "$salesorder" },
+        {
           $project: {
             customerName: 1,
             invoice: "$invoiceDetails.invoiceNo",
-            "itemObjectId": "$itemSupplied._id",
-            "itemNo": "$itemSupplied.itemId",
             salesOrderNo: "$soId",
             "shippingDetails.address1": 1,
             "shippingDetails.cityId": 1,
             orderPlacedAt: "$createdAt",
+            crates: "$salesorder.crateIn",
           }
         },
         {
@@ -2190,15 +2203,15 @@ class DeliveryExecutivetrip extends BaseController {
             _id: "$invoice",
             customerName: { $first: "$customerName" },
             invoice: { $first: "$invoice" },
-            items: { $push: { itemObjectId: "$itemObjectId", itemNo: "$itemNo" } },
             salesOrderNo: { $first: "$salesOrderNo" },
             "address1": { $first: "$shippingDetails.address1" },
             "cityId": { $first: "$shippingDetails.cityId" },
             orderPlacedAt: { $first: "$orderPlacedAt" },
+            noOfCrates: { $first: "$crates" }
           }
-        }
+        },
       ]);
-      console.log("data updated", invoiceNumber)
+      console.log("data updated", invoiceNumber);
 
       let invoiceData = [];
       for (let v of invoiceNumber) {
@@ -2218,8 +2231,9 @@ class DeliveryExecutivetrip extends BaseController {
 
           invoice: v.invoice,
           salesOrderNo: v.salesOrderNo,
-          "address1": v.address1,
-          "cityId": v.cityId,
+          address1: v.address1,
+          cityId: v.cityId,
+          noOfcrates: v.noOfCrates,
           orderPlacedAt: v.orderPlacedAt,
           status: gpnStatus.length ? gpnStatus[0].status : 0,
         });
@@ -2255,6 +2269,7 @@ class DeliveryExecutivetrip extends BaseController {
       );
     }
   };
+
 
   getPendingTrip = async (req, res, next) => {
     info("getting delivery executive pending trip data!");
@@ -2468,6 +2483,7 @@ class DeliveryExecutivetrip extends BaseController {
                 address1: "$shippingDetails.address1",
                 city: "$shippingDetails.cityId",
                 isDelivered: "$isDelivered",
+                soId: "$soId"
               },
             },
             noOfSalesOrder: { $sum: 1 },
@@ -2632,6 +2648,7 @@ class DeliveryExecutivetrip extends BaseController {
           disputeId: 1,
           acceptedQty: 1,
           status: 1,
+          isAccepted:1,
           disputeDate: "$createdAt",
           invoicesNo: { $first: "$invoices.invoiceDetails.invoiceNo" },
         },
@@ -2726,7 +2743,7 @@ class DeliveryExecutivetrip extends BaseController {
       {
         $lookup: {
           from: "salesorders",
-          localField: "salesOrderId",
+          localField: "so_db_id",
           foreignField: "_id",
           as: "salesorder",
         },
@@ -2746,7 +2763,7 @@ class DeliveryExecutivetrip extends BaseController {
           tripId: 1,
           status: 1,
           disputeId: 1,
-          dispute_amount: 1,
+          disputeAmount:"disputeDetails.dispute_amount",
           itemName: "$salesorder.orderItems.material_description",
           itemId: "$salesorder.orderItems.material_no",
           "ordered qty": "$salesorder.orderItems.quantity",
@@ -3107,7 +3124,7 @@ class DeliveryExecutivetrip extends BaseController {
           }
         )
       }
-     // console.log('isUpdated', isUpdated)
+      // console.log('isUpdated', isUpdated)
       // success
       return this.success(
         req,
@@ -3177,7 +3194,7 @@ class DeliveryExecutivetrip extends BaseController {
       }
     ];
     let invoiceDetail = await invoiceMasterModel.aggregate(pipeline);
-
+    //console.log("invoice details ==== >", invoiceDetail)
     try {
       info("Getting invoice Detail!");
 
@@ -3205,7 +3222,7 @@ class DeliveryExecutivetrip extends BaseController {
 
   disputeAcceptOrReject = async (req, res, next) => {
     let id = req.params.disputeId || req.query.disputeId || req.body.disputeId;
-    let condition = req.params.condition == "accept" ? 1 : 0;
+    let condition = req.params.condition == "accept" ? 1 : 2;
 
     let updatedDisputeDetail;
 
@@ -3247,32 +3264,35 @@ class DeliveryExecutivetrip extends BaseController {
   };
 
   customerUnAvailability = async (req, res, next) => {
-    try{
-   // let id = req.params.tripId
-    let soId = req.query.soId
-    let updatedOrder = await salesOrderModel.updateOne(
-      {
-        //tripId:id,
-        _id : mongoose.Types.ObjectId(soId)
-      },
-      {
-        $set:{salesorderStatus:1}
+    try {
+      // let id = req.params.tripId
+      let soId = req.query.soId || req.params.soId
+      let type = req.query.type || req.params.type
 
-      },
-      {
-        upsert:true
-      }
+      let updatedOrder = await salesOrderModel.updateOne(
+        {
+          //tripId:id,
+          _id: mongoose.Types.ObjectId(soId)
+        },
+        {
+          $set: { salesorderStatus: type }
+
+        },
+        {
+          upsert: true
+        }
 
       )
-      if(updatedOrder && !_.isEmpty(updatedOrder)){
-      
-      return this.success(
-        req,
-        res,
-        this.status.HTTP_OK,
-        updatedOrder || [],
-        "updated"
-      )}
+      if (updatedOrder && !_.isEmpty(updatedOrder)) {
+
+        return this.success(
+          req,
+          res,
+          this.status.HTTP_OK,
+          updatedOrder || [],
+          "updated"
+        )
+      }
 
       else {
         return this.errors(
@@ -3282,7 +3302,7 @@ class DeliveryExecutivetrip extends BaseController {
           "notupdated"
         );
 
-      }   
+      }
       // catch any runtime error
     } catch (err) {
       error(err);
@@ -3294,7 +3314,78 @@ class DeliveryExecutivetrip extends BaseController {
       );
     }
   };
-      
+
+  getHistoryInvoiceDetails = async (req, res, next) => {
+    let user = req.user, // user
+      deliveryExecutiveId = user._id;
+   // let invoiceId = req.query.invoiceid;
+    let soId = req.query.soId || 0;
+
+    let pipeline = [
+      { $match: { soId: parseInt(soId) } },
+
+      {
+        $lookup: {
+          from: "salesorders",
+          localField: "so_db_id",
+          foreignField: "_id",
+          as: "saleorder",
+        },
+      },
+      {
+        $lookup: {
+          from: "decollections",
+          localField: "soId",
+          foreignField: "soId",
+          as: "decollection",
+        }
+      },
+      {
+        "$project": {
+          "so_db_id": 1,
+          "isDelivered": 1,
+          "orderPlacedAt": "$createdAt",
+          "pendingCrates": { $first: "$saleorder.crateOutWithItem" },
+          "noOfCratesOut": { $first: "$saleorder.crateOut" },
+          "invoiceNo": "$invoiceDetails.invoiceNo",
+          "itemSupplied.itemId": 1,
+          "itemSupplied._id": 1,
+          "itemSupplied.suppliedQty": 1,
+          "itemSupplied.quantity": 1,
+          "credit": { $first: "$decollection.collectionAmount" },
+          "photos": { $first: "$saleorder.invoiceUploads" },
+          "itemSupplied.itemName": 1,
+          "soId": 1,
+        }
+      }
+    ];
+    let invoiceDetail = await invoiceMasterModel.aggregate(pipeline);
+    console.log("invoice details ==== >", invoiceDetail)
+    try {
+      info("Getting invoice Detail!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        invoiceDetail || [],
+        this.messageTypes.deliveryExecutiveInvoiceFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+
 
 
 

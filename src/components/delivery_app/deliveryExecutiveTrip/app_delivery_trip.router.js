@@ -179,9 +179,20 @@ function tripsRoutes() {
       getHistoryVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
-
-
       ctrl.getHistoryByOrderType
+    );
+
+    closed.route('/trip/history/:salesorderId/invoiceList').get(
+      [joiSoId],
+      verifyDeliveryAppToken,
+      ctrl.getHistoryInvoiceListbySo
+    );
+
+    closed.route('/trip/history/salesorders/viewInvoiceHistory').get(
+      getInvoiceVal,
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      ctrl.getHistoryInvoiceDetails
     );
 
     // salesorderID
@@ -209,11 +220,7 @@ function tripsRoutes() {
       // ctrl.justChecking
     )
 
-    closed.route('/trip/history/:salesorderId/invoiceList').get(
-      [joiSoId],
-      verifyDeliveryAppToken,
-      ctrl.getHistoryInvoiceListbySo
-    )
+
     closed.route('/get-dispute').get(
       verifyDeliveryAppToken,
       isValidDeliveryId,
@@ -273,12 +280,12 @@ function tripsRoutes() {
       ctrl.disputeAcceptOrReject
     );
 
-    closed.route('/trip/intrip/customer_NotAvailable').patch(
-     // [joiTripId],
+    closed.route('/trip/intrip/:soId/:type/customer_NotAvailable').patch(
+      // [joiTripId],
       [joiSoId],
       verifyDeliveryAppToken,
       ctrl.customerUnAvailability
-      
+
     )
 
 
