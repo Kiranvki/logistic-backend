@@ -2,6 +2,9 @@
 const ctrl = require("./vehicleAttendance.controller");
 const { verifySecurityAppToken } = require("../../../hooks/app/Auth");
 const {
+  isSecurityGuardUserCheckedIn, // is security guard checked in
+} = require("../../../hooks/app");
+const {
   joiVehicleList,
   joiVehicleId,
 } = require("./vehicleAttendance.validator");
@@ -19,38 +22,43 @@ function vehicleRoutes() {
     closed.route("/vehicle/vehicle-list").get(
       joiVehicleList,
       verifySecurityAppToken, // verify app user token
+      isSecurityGuardUserCheckedIn, // is security guard checked in
       ctrl.getAllVehicleListToCheckIn // controller function
     );
 
     //get a list of checked in vehicles
     closed.route("/vehicle/vehicle-waiting-list").get(
       joiVehicleList,
-      verifySecurityAppToken, // verify app user token
       getAllCheckInVehicleDetails,
+      verifySecurityAppToken, // verify app user token
+      isSecurityGuardUserCheckedIn, // is security guard checked in
       ctrl.checkedInVehicles // controller function
     );
 
     //get details of a checked in vehicle
     closed.route("/vehicle/vehicleDetails/:vehicleId").get(
       joiVehicleId,
-      verifySecurityAppToken, // verify app user token
       getAllCheckInVehicleDetails,
+      isSecurityGuardUserCheckedIn, // is security guard checked in
+      verifySecurityAppToken, // verify app user token
       ctrl.checkedInVehicleDetais // controller function
     );
 
     //check-in a vehicle
     closed.route("/vehicle/check-in/:vehicleId").post(
       joiVehicleId,
-      verifySecurityAppToken, // verify app user token
       isAlreadyCheckedIn,
+      verifySecurityAppToken, // verify app user token
+      isSecurityGuardUserCheckedIn, // is security guard checked in
       ctrl.checkInVehicle // controller function
     );
 
     //check-out a vehicle
     closed.route("/vehicle/check-out/:vehicleId").post(
       joiVehicleId,
-      verifySecurityAppToken, // verify app user token
       isVehicleCheckedIn,
+      verifySecurityAppToken, // verify app user token
+      isSecurityGuardUserCheckedIn, // is security guard checked in
       ctrl.checkOutVehicle // controller function
     );
   };

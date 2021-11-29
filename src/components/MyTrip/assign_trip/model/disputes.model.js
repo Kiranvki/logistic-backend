@@ -47,8 +47,13 @@ let disputeSchema = Schema(
       type: Number,
       default: 0,
     },
-    reason: [
-      { _id: mongoose.Schema.Types.ObjectId, itemId: String, reason: String },
+    returnDetails: [
+      {
+        _id: mongoose.Schema.Types.ObjectId,
+        itemId: String,
+        checkedQty: Number,
+        reason: String,
+      },
     ],
 
     notifiedId: {

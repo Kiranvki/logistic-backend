@@ -1,39 +1,44 @@
-const ctrl = require('./security_profile.controller');
+const ctrl = require("./security_profile.controller");
 
 // library
-const multer = require('multer');
+const multer = require("multer");
 const multipartMiddleware = multer();
 
 
-// hooks 
+// hooks
 const {
   checkWhetherItsAValidSecurityUpdate, //check whether its a valid picker profile update
-} = require('../../../hooks/app');
+  isValidProfilePicUpload,
+} = require("../../../hooks/app");
 
+// auth
+const { verifySecurityAppToken } = require("../../../hooks/app/Auth");
 
-// auth 
-const {
-    verifySecurityAppToken
-  } = require('../../../hooks/app/Auth');
-  
-// exporting the user routes 
+// exporting the user routes
 function deliveryUserRoutes() {
- //open, closed
- return (open, closed) => {
-   // get security guard details 
-   closed.route('/user/details').get(
-    verifySecurityAppToken, // verify app user token 
-    ctrl.getsecurityUserDetails // controller function 
-  );
+  //open, closed
+  return (open, closed) => {
+    // get security guard details
+    closed.route("/user/details").get(
+      verifySecurityAppToken, // verify app user token
+      ctrl.getsecurityUserDetails // controller function
+    );
 
-  // update Security Guard details
-  closed.route("/user/update").patch(
-    verifySecurityAppToken, // verify app user token
-    checkWhetherItsAValidSecurityUpdate, //check whether its a valid Security profile update
-    ctrl.updateSecurityUserDetails // update user details
-  );
+    // update Security Guard details
+    closed.route("/user/update").patch(
+      verifySecurityAppToken, // verify app user token
+      checkWhetherItsAValidSecurityUpdate, //check whether its a valid Security profile update
+      ctrl.updateSecurityUserDetails // update user details
+    );
 
- }
+    // upload file to server
+    closed.route("/user/:securityGuardId/file/upload").post(
+      verifySecurityAppToken, // verify app token
+      multipartMiddleware.single("file"), // multer middleware
+      isValidProfilePicUpload,
+      ctrl.uploadProfilePic // controller function
+    );
+  };
 }
 
 module.exports = deliveryUserRoutes();
