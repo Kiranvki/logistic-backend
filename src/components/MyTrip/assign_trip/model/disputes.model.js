@@ -28,24 +28,11 @@ let disputeSchema = Schema(
         ref: "invoiceMaster",
       },
     ],
-    // 'invoiceNo': { //invoice_no
-    //   type: 'String',
-    // },
     material_description: {
       type: String,
     },
-
     itemId: {
       type: Number,
-    },
-
-    acceptedQty: {
-      type: Number,
-    },
-
-    checkedQty: {
-      type: Number,
-      default: 0,
     },
     returnDetails: [
       {
@@ -61,20 +48,22 @@ let disputeSchema = Schema(
       unique: true,
     },
 
-    // notifiedId: {
-    //   type: String,
-    // },
-
     isAccepted: {
       type: Number,
-      default: 0, // o for rejected and 1 for accepted
+      default: 0, // 0 for rejected and 1 for accepted
       enum: [0, 1],
+    },
+
+    isPODReturned: {
+      type: Number,
+      default: 1, 
+      enum: [0, 1], // 0 POD not returned,
     },
 
     status: {
       type: Number,
       default: 0,
-      enum: [0, 1, 2, 3],
+      enum: [0, 1, 2],// 0 = dispute Raised, 1 = dispute Notified, 2 = dispute Resolved
     },
   },
   { timestamps: true }

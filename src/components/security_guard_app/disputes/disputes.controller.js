@@ -48,6 +48,7 @@ class disputesController extends BaseController {
         $project: {
           disputeId: 1,
           status: 1,
+          isPODReturned: 1,
           disputeDate: {
             $dateToString: { format: "%d-%m-%Y", date: "$createdAt" },
           },
@@ -118,20 +119,11 @@ class disputesController extends BaseController {
   };
 
   getDisputeDetails = async (req, res, next) => {
-    let pageSize = 100;
-    let disputeId = req.params.disputeId || req.query.disputeId;
-    let pageNumber = req.query.page;
+    let disputeId = req.params.disputeId || req.query.disputeId,
+      PODtype = parseInt(req.params.PODtype) || parseInt(req.query.PODtype);
+    console.log("PODtype", PODtype);
 
-    let dateToday = moment(Date.now())
-      .set({
-        h: 24,
-        m: 59,
-        s: 0,
-        millisecond: 0,
-      })
-      .toDate();
-
-    let trip = await disputeModel.aggregate([
+    let pipeline = [
       {
         $match: { disputeId: parseInt(disputeId) },
       },
@@ -197,10 +189,13 @@ class disputesController extends BaseController {
           dispute_amount: 1,
           status: 1,
           acceptedQty: 1,
+          checkedQty: { $first: "$returnDetails.checkedQty" },
+          reason: { $first: "$returnDetails.reason" },
           vehicleRegNumber: "$trips.vehicleRegNumber",
           deliveryExecutiveName: "$trips.deliveryExecutiveName",
           deliveryExecutiveEmpCode: "$trips.deliveryExecutiveEmpCode",
           invoiceNo: "$invoices.invoiceNo",
+          invoiceId: "$invoices._id",
           orderItems: {
             $filter: {
               input: "$invoices.salesorders.orderItems",
@@ -208,6 +203,12 @@ class disputesController extends BaseController {
               cond: { $eq: ["$$items.orderDetails.itemDeliveryStatus", 2] },
             },
           },
+        },
+      },
+      {
+        $addFields: {
+          "orderItems.checkedQty": "$checkedQty",
+          "orderItems.reason": "$reason",
         },
       },
       {
@@ -221,19 +222,142 @@ class disputesController extends BaseController {
           },
         },
       },
-    ]);
+    ];
 
-    let totalCount = await disputeModel.count({
-      createdAt: { $lt: dateToday },
-    });
-    let data = {
-      results: trip,
-      pageMeta: {
-        skip: pageSize * (pageNumber - 1),
-        pageSize: pageSize,
-        total: totalCount,
+    let trip = await disputeModel.aggregate(pipeline);
+
+    try {
+      info("getting desputes data!");
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        trip || [],
+        this.messageTypes.disputeDetailsFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+
+    // success(req, res, status, data = null, message = 'success')
+  };
+
+  getPODDisputeDetails = async (req, res, next) => {
+    let disputeId = req.params.disputeId || req.query.disputeId,
+      PODtype = parseInt(req.params.PODtype) || parseInt(req.query.PODtype);
+    console.log("PODtype", PODtype);
+
+    let pipeline = [
+      {
+        $match: { disputeId: parseInt(disputeId) },
       },
-    };
+      { $project: { _id: 0, createdAt: 0 } },
+      {
+        $lookup: {
+          from: "trips",
+          let: { id: "$tripId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$tripId", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                vehicleRegNumber: 1,
+                deliveryExecutiveName: 1,
+                deliveryExecutiveEmpCode: 1,
+              },
+            },
+          ],
+          as: "trips",
+        },
+      },
+      { $unwind: { path: "$trips" } },
+
+      {
+        $lookup: {
+          from: "invoicemasters",
+          let: { id: "$invoiceId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                so_db_id: 1,
+                invoiceNo: "$invoiceDetails.invoiceNo",
+              },
+            },
+            {
+              $lookup: {
+                from: "salesorders",
+                localField: "so_db_id",
+                foreignField: "_id",
+                as: "salesorders",
+              },
+            },
+            { $unwind: { path: "$salesorders" } },
+          ],
+          as: "invoices",
+        },
+      },
+      { $unwind: { path: "$invoices" } },
+      {
+        $project: {
+          tripId: 1,
+          disputeId: 1,
+          dispute_amount: 1,
+          status: 1,
+          acceptedQty: 1,
+          checkedQty: { $first: "$returnDetails.checkedQty" },
+          reason: { $first: "$returnDetails.reason" },
+          vehicleRegNumber: "$trips.vehicleRegNumber",
+          deliveryExecutiveName: "$trips.deliveryExecutiveName",
+          deliveryExecutiveEmpCode: "$trips.deliveryExecutiveEmpCode",
+          invoiceNo: "$invoices.invoiceNo",
+          invoiceId: "$invoices._id",
+
+          // orderItems: {
+          //   $filter: {
+          //     input: "$invoices.salesorders.orderItems",
+          //     as: "items",
+          //     cond: { $eq: ["$$items.orderDetails.itemDeliveryStatus", 2] },
+          //   },
+          // },
+        },
+      },
+      // {
+      //   $addFields: {
+      //     "orderItems.checkedQty": "$checkedQty",
+      //     "orderItems.reason": "$reason",
+      //   },
+      // },
+      // {
+      //   $addFields: {
+      //     noOfItems: {
+      //       $cond: {
+      //         if: { $isArray: "$orderItems" },
+      //         then: { $size: "$orderItems" },
+      //         else: "0",
+      //       },
+      //     },
+      //   },
+      // },
+    ];
+    let trip = await disputeModel.aggregate(pipeline);
 
     try {
       info("getting desputes data!");
@@ -243,7 +367,7 @@ class disputesController extends BaseController {
         req,
         res,
         this.status.HTTP_OK,
-        data || [],
+        trip || [],
         this.messageTypes.disputeDetailsFetchedSuccessfully
       );
 
@@ -439,7 +563,7 @@ class disputesController extends BaseController {
         },
       },
       { $match: { "returnDetails.itemId": itemID } },
-      { $project: {_id: 0, returnDetails: 1 } },
+      { $project: { _id: 0, returnDetails: 1 } },
     ]);
 
     try {

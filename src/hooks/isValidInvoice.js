@@ -17,14 +17,13 @@ const {
 module.exports = async (req, res, next) => {
   try {
     info('Check whether the Invoice exists or not !');
-    // let objectId = mongoose.Types.ObjectId; // object id
-    let invoiceNo = req.body.invoiceNo || req.params.invoiceNo || req.query.invoiceNo // get the invoiceNo
+    let invoiceId = req.body.invoiceId || req.params.invoiceId || req.query.invoiceId // get the invoiceNo
 
     // check if the format is string or not
-    if(typeof(invoiceNo)=="string") {
+    // if(typeof(invoiceId)== mongoose.Types.ObjectId) {
 
       // check whether the gpn exists or not 
-      let isValidInvoice = await securityGuardCtrl.getInvoiceDetails(invoiceNo)
+      let isValidInvoice = await securityGuardCtrl.getInvoiceDetails(invoiceId)
 
       // if invoice exists
       if (isValidInvoice.success) {
@@ -38,10 +37,10 @@ module.exports = async (req, res, next) => {
         error('Cannot find invoice!');
         return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.securityGuardApp.invoiceDoesNotExists);
       }
-    } else {
-      error('The invoiceNo data type is Invalid !');
-      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.securityGuardApp.invoiceNoDataTypeIsInvalid);
-    }
+    // } else {
+    //   error('The invoiceNo data type is Invalid !');
+    //   return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.securityGuardApp.invoiceNoDataTypeIsInvalid);
+    // }
 
     // catch any runtime error 
   } catch (e) {
