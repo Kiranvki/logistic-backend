@@ -48,6 +48,11 @@ let disputeSchema = Schema(
       unique: true,
     },
 
+  isAccepted: {
+    type: Number,
+    default: 0, 
+    enum: [0, 1,2] // o for pending and 1 for accepted , 2 for rejected
+  },
     isAccepted: {
       type: Number,
       default: 0, // 0 for rejected and 1 for accepted
