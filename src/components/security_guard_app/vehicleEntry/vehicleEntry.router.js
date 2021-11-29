@@ -8,7 +8,7 @@ const {
   joiVehicleList,
   joiTripId,
   joiId,
-  joiInvoiceNo,
+  joiInvoiceId,
 } = require("./vehicleEntry.validator");
 const {
   isAlreadyCheckedIn,
@@ -47,9 +47,9 @@ function vehicleRoutes() {
     );
 
     // verify the invoice
-    closed.route("/vehicle/verify-invoice/:invoiceNo").post(
+    closed.route("/vehicle/verify-invoice/:invoiceId").post(
       verifySecurityAppToken, //verify app user token
-      joiInvoiceNo,
+      joiInvoiceId,
       isValidInvoice, //verify if invoice exists or not
       isInvoiceAlreadyVerified, //verify if invoice is verified
       isSecurityGuardUserCheckedIn, // is security guard checked in
