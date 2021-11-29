@@ -30,6 +30,13 @@ function vehicleRoutes() {
       ctrl.getDisputeDetails // controller function
     );
 
+    closed.route("/disputes/getPODDisputeDetails/:disputeId").get(
+      joiDisputeId,
+      verifySecurityAppToken, // verify app user token
+      isSecurityGuardUserCheckedIn, // is security guard checked in
+      ctrl.getPODDisputeDetails // controller function
+    );
+
     closed.route("/disputes/scan-gpn/:gpn").get(
       verifySecurityAppToken, //verify app user token
       isSecurityGuardUserCheckedIn, // is security guard checked in
@@ -70,12 +77,14 @@ function vehicleRoutes() {
       ctrl.getUpdatedDisputeDetails // controller function
     );
 
-    closed.route("/disputes/salesReturnDetails/invoice/:invoiceId/item/:itemId").get(
-      joiInvoiceId,
-      verifySecurityAppToken, // verify app user token
-      isSecurityGuardUserCheckedIn, // is security guard checked in
-      ctrl.getsaleReturnDetails // controller function
-    );
+    closed
+      .route("/disputes/salesReturnDetails/invoice/:invoiceId/item/:itemId")
+      .get(
+        joiInvoiceId,
+        verifySecurityAppToken, // verify app user token
+        isSecurityGuardUserCheckedIn, // is security guard checked in
+        ctrl.getsaleReturnDetails // controller function
+      );
   };
 }
 

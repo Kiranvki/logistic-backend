@@ -389,7 +389,7 @@ class vehicleEntryController extends BaseController {
     try {
       info("Update Invoice Status !");
 
-      let invoice = req.params.invoiceNo;
+      let invoice = req.params.invoiceId;
 
       // creating data to insert
       let dataToUpdate = {
@@ -401,7 +401,7 @@ class vehicleEntryController extends BaseController {
       // inserting data into the db
       let isUpdated = await invoiceModel.findOneAndUpdate(
         {
-          "invoiceDetails.invoiceNo": invoice,
+          "_id": mongoose.Types.ObjectId(invoice),
         },
         dataToUpdate,
         {

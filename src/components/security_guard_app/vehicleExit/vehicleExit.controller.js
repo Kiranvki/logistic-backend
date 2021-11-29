@@ -706,6 +706,10 @@ class vehicleInfoController extends BaseController {
               timezone: "+05:30",
             },
           },
+          atWareHouseDate: "ETA",
+          atWareHouseTime: "ETA",
+          DeliveredDate: "ETA",
+          DeliveredTime: "ETA"
         },
       },
     ];

@@ -979,12 +979,12 @@ class securityController extends BaseController {
     }
   };
 
-  getInvoiceDetails = async (invoiceNo) => {
+  getInvoiceDetails = async (invoiceId) => {
     try {
       info("Getting invoice details!");
       
       return await invoiceMasterModel
-        .find({ "invoiceDetails.invoiceNo": invoiceNo })
+        .find({ "_id": mongoose.Types.ObjectId(invoiceId) })
         .then((res) => {
           if (res && res.length) {
             return {
@@ -1010,12 +1010,12 @@ class securityController extends BaseController {
     }
   };
 
-  getInvoiceAlreadyVerifiedDetails = async (invoiceNo) => {
+  getInvoiceAlreadyVerifiedDetails = async (invoiceId) => {
     try {
       info("Getting invoice details!");
       
       return await invoiceMasterModel
-        .find({ "invoiceDetails.invoiceNo": invoiceNo,isDelivered:0 })
+        .find({ "_id": mongoose.Types.ObjectId(invoiceId),isDelivered:0 })
         .then((res) => {
           if (res && res.length) {
             return {
