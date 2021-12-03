@@ -121,7 +121,7 @@ module.exports = async (req, res, next) => {
 // }
  
  
-  if (req.body.einvoicing_detail['success'] && !req.body.einvoicing_detail['data']['error_details'].length) {
+  if (req.body.einvoicing_detail['success'] && !(req.body.einvoicing_detail['data']&&req.body.einvoicing_detail['data']['error_details']&&req.body.einvoicing_detail['data']['error_details'].length)) {
     info('E-invoicing generating sucessfully !')
     console.log(req.body.einvoicing_detail['data'])
     let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
