@@ -64,6 +64,7 @@ module.exports = async (req, res, next) => {
         // checking whether the user is authentic
         if (res.status === 200) {
           info('Document Generated Successfully !');
+          console.log('e-invoice response',res.body.response)
           return {
             success: true,
             data: res.body.response,
