@@ -1,15 +1,22 @@
 const mongoose = require('mongoose');
+const { mapObjIndexed } = require('ramda');
 const Schema = mongoose.Schema;
 
 // schema
 const deliveryProfileSchema = new Schema({
   'deliveryId': {
-    required: true,
+    // required: true,
     type: mongoose.Schema.Types.ObjectId,
     ref: 'deliveryExecutive',
     autopopulate: {
       select: ['fullName', 'employeeId']
     }
+  },
+  'originalImageId': {
+    type: 'String',
+  },
+  'thumbnailImageId': {
+    type: 'String',
   },
   'deliveryDate': {
     type: Date,
@@ -30,6 +37,9 @@ const deliveryProfileSchema = new Schema({
   'isDeleted': {
     type: Number,
     default: 0
+  },
+  'photo': {
+    type: String,
   },
   'status': {
     type: Number,

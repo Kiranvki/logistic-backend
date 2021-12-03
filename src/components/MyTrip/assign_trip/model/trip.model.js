@@ -120,14 +120,36 @@ let tripSchema = Schema ({
         default: 0
     },
 
+
     tripFinished: {
         type: Number,
         default: 0
     },
+
+    statusPendingVerify:{
+        type: Number,
+        default: 0,
+        enum: [0, 1] //0 pending, 1 for intrip
+    },
+
+    pendingVerify:{
+        type: Number,
+        default: 0,
+        enum: [0, 1] 
+    },
+
+
+
     initialOdometerReading: {
         type: Number,
         default: 0
     },
+
+    endOdometerReading: {
+        type: Number,
+        default: 0
+    },
+
 
     isCompleteDeleiveryDone: {
         type: Number,

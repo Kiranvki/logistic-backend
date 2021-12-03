@@ -4,11 +4,11 @@ const Schema = mongoose.Schema;
 // schema
 const salesOrder = new Schema({
   'cityId': {
-    type: 'String',
+    type: String,
     enum: ['coimbatore', 'hyderabad', 'padappai', 'gummidipoondi', 'chennai', 'bangalore']
   },
   'fulfillmentStatus': {
-    type: 'Number',
+    type: Number,
     default: 0,
     enum: [0, 1, 2]
     /**
@@ -17,19 +17,19 @@ const salesOrder = new Schema({
    * state 2 : Fully fulfilled
    */
   },
-  'quantitySupplied':{
-    type:Number,
-    default:0
+  'quantitySupplied': {
+    type: Number,
+    default: 0
 
   },
   'orderPK': {
-    type: 'Number'
+    type: Number
   },
   'onlineReferenceNo': {
-    type: 'Number'
+    type: Number
   },
   'onlineChildReferenceNo': {
-    type: 'String'
+    type: String
   },
   'createdAt': {
     type: 'Date'
@@ -45,195 +45,202 @@ const salesOrder = new Schema({
     type: 'Date',
     default: Date.now
   },
+  
   'status': {
-    type: 'String'
+    type: String
   },
-  'req_del_date':{
-    type:String
+
+  'tripInProcess':{
+    type: Number,
+    default: 0,
+    enum: [0, 1] 
+},
+  'req_del_date': {
+    type: String
   },
   'orderRemarks': {
-    type: 'String'
+    type: String
   },
-  
-  'customer_type':{
-    type:String
+
+  'customer_type': {
+    type: String
   },
   'Channel': {
-    type: 'String'
+    type: String
   },
   'totalQuantity': {
-    type: 'Number'
+    type: Number
   },
   'totalFreeQty': {
-    type: 'Number'
+    type: Number
   },
   'totalAmount': {
-    type: 'Number'
+    type: Number
   },
   'paymentMode': {
-    type: 'String'
+    type: String
   },
   'totalTaxAmount': {
-    type: 'Number'
+    type: Number
   },
   'totalDiscountAmount': {
-    type: 'Number'
+    type: Number
   },
   'courierPartner': {
-    type: 'String'
+    type: String
   },
   'shippingId': {
-    type: 'String'
+    type: String
   },
   'shippingName': {
-    type: 'String'
+    type: String
   },
   'shippingAddress1': {
-    type: 'String'
+    type: String
   },
   'shippingAddress2': {
-    type: 'String'
+    type: String
   },
   'shippingPlace': {
-    type: 'String'
+    type: String
   },
   'shippingState': {
-    type: 'String'
+    type: String
   },
   'shippingCountry': {
-    type: 'String'
+    type: String
   },
   'shippingPincode': {
-    type: 'String'
+    type: String
   },
   'shippingPhone': {
-    type: 'String'
+    type: String
   },
   'shippingMobile': {
-    type: 'String'
+    type: String
   },
   'shippingEmail': {
-    type: 'String'
+    type: String
   },
   'shippingCharge': {
-    type: 'Number'
+    type: Number
   },
   'packingCharge': {
-    type: 'Number'
+    type: Number
   },
   'shippingMethod': {
-    type: 'String'
+    type: String
   },
   'ShipmentPointsUsed': {
-    type: 'Number'
+    type: Number
   },
   'shipmentItems': {
-    type: 'Number'
+    type: Number
   },
   'shipmentABN': {
-    type: 'String'
+    type: String
   },
   'shipmentWeight': {
-    type: 'Number'
+    type: Number
   },
   'latitude': {
-    type: 'String'
+    type: String
   },
   'longitude': {
-    type: 'String'
+    type: String
   },
   'customeLatitude': {
-    type: 'String'
+    type: String
   },
   'customerLongitude': {
-    type: 'String'
+    type: String
   },
   'discountCoupon': {
-    type: 'String'
+    type: String
   },
   'deliveryDate': {
     type: 'Date'
   },
   'locationId': {
-    type: 'Number'
+    type: Number
   },
   'userId': {
-    type: 'String'
+    type: String
   },
   'appUserName': {
-    type: 'String'
+    type: String
   },
   'customerCode': {
-    type: 'Number'
+    type: Number
   },
   'customerId': {
-    type: 'String'
+    type: String
   },
   'customerName': {
-    type: 'String'
+    type: String
   },
   'customerType': {
-    type: 'String'
+    type: String
   },
   'customerAddressLine1': {
-    type: 'String'
+    type: String
   },
   'customerAddressLine2': {
-    type: 'String'
+    type: String
   },
   'customerAddressLine3': {
-    type: 'String'
+    type: String
   },
   'customerArea': {
-    type: 'String'
+    type: String
   },
   'customerCity': {
-    type: 'String'
+    type: String
   },
   'customerState': {
-    type: 'String'
+    type: String
   },
   'customerCountry': {
-    type: 'String'
+    type: String
   },
   'customerPincode': {
-    type: 'String'
+    type: String
   },
   'customerPhone': {
-    type: 'String'
+    type: String
   },
   'customerMobile': {
-    type: 'String'
+    type: String
   },
   'customerEmail': {
-    type: 'String'
+    type: String
   },
   'ordTimestamp': {
-    type: 'Number'
+    type: Number
   },
   'outletId': {
-    type: 'Number'
+    type: Number
   },
   'isOfflineOrder': {
-    type: 'Number'
+    type: Number
   },
   'invoiceNo': {
-    type: 'String'
+    type: String
   },
   'deliveryBoy': {
-    type: 'String'
+    type: String
   },
   'deilveryBoyMobileNo': {
-    type: 'String'
+    type: String
   },
   'otherChargesTaxAmount': {
-    type: 'Number'
+    type: Number
   },
   'otherChargesTaxPercentage': {
-    type: 'Number'
+    type: Number
   },
   'otherChargesTaxInclusive': {
-    type: 'String'
+    type: String
   },
   'location': {
     type: {
@@ -245,9 +252,14 @@ const salesOrder = new Schema({
       required: true
     },
   },
-  'item':[{
+  'salesorderStatus':{
+    type:Number,
+    default:0, 
+    enum:[0,1,2,3] //1 customerNotAvailable , 2 salereturn, 3 delivered
+  },
+  'item': [{
     'fulfillmentStatus': {
-      type: 'Number',
+      type: Number,
       default: 0,
       enum: [0, 1, 2]
       /**
@@ -256,104 +268,130 @@ const salesOrder = new Schema({
      * state 2 : Fully fulfilled
      */
     },
-    'suppliedQty':{
-      type:Number
+    'suppliedQty': {
+      type: Number
     },
- 'requireQuantity':{
-  type:Number
- },
-  'totalQuantity':{
-    type:Number
-  }
+    'requireQuantity': {
+      type: Number
+    },
+    'totalQuantity': {
+      type: Number
+    }
   }],
   'orderItems': [
     {
       'rowNo': {
-        type: 'Number'
+        type: Number
       },
       'id': {
-        type: 'Number'
+        type: Number
       },
       'itemId': {
-        type: 'Number'
+        type: Number
       },
       'itemName': {
-        type: 'String'
+        type: String
       },
       'itemReferenceCode': {
-        type: 'String'
+        type: String
       },
       'salePrice': {
-        type: 'Number'
+        type: Number
       },
       'quantity': {
-        type: 'Number'
+        type: Number
       },
       'suppliedQty': {   //quantity -inv_quantity
-        type: 'String'
+        type: String
       },
       'itemAmount': {
-        type: 'Number'
+        type: Number
       },
       'iBarU': {
-        type: 'Number'
+        type: Number
       },
       'taxPercentage': {
-        type: 'Number'
+        type: Number
       },
       'itemTaxType': {
-        type: 'String'
+        type: String
       },
       'discountPercentage': {
-        type: 'Number'
+        type: Number
       },
       'itemRemarks': {
-        type: 'String'
+        type: String
       },
       'itemMarketPrice': {
-        type: 'Number'
+        type: Number
       },
       'freeQty': {
-        type: 'Number'
+        type: Number
       },
       'orderPK': {
-        type: 'Number'
+        type: Number
       },
-      
-      'itemDeliveryStatus':{
-        type: 'Number',
-        default:0 //0 not deliver 1 processing 2 deliver
+
+      'itemDeliveryStatus': {
+        type: Number,
+        default: 0, 
+        enum:[0,1] // 0 for delivered and 1 salesreturn 
       },
-      'rejectedQuantity':{
-        type: 'Number',
-        default:0
+      'rejectedQuantity': {
+        type: Number,
+        default: 0
 
       },
-     'comments':{
-      type: 'String'
-     }
+      'comments': {
+        type: String
+      },
+      
 
     }
   ],
-  'crateIn':
-      {
-        type: 'Number',
-        default:0
-      },
-   'crateOut':
-      {
-        type: 'Number',
-        default:0
-      },
-    'crateOutWithItem':
-      {
-        type: 'Number',
-        default:0
-      },
 
-}, {
-  timestamps: true
-});
+  'invoiceUploads': {
+    type: [String]
+  },
+
+  'customerSignature':{
+    type: String,
+  },
+
+  'customerNotAvailable': {
+    type: [String]
+  },
+
+
+
+  'crateIn':
+  {
+    type: Number,
+    default: 0
+  },
+  'crateOut':
+  {
+    type: Number,
+    default: 0
+  },
+  'crateOutWithItem':
+  {
+    type: Number,
+    default: 0
+  },
+  'cratesReturned':
+  {
+    type: Number,
+    default: 0
+  },
+
+
+},
+
+
+  {
+    timestamps: true
+  });
 
 salesOrder.index({
   'onlineReferenceNo': 1,

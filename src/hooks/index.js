@@ -27,5 +27,8 @@ module.exports = {
   getDecryptedImageBuffer: require('./getDecryptedImageBuffer'), // get decrypted image buffer
   checkWhetherTheFileIdIsValid: require('./checkWhetherTheFileIdIsValid'), // check whether the file id is valid or not 
   encryptTheFileInorderToStoreItInDb: require('./encryptTheFileInorderToStoreItInDb'), // encrypt the file inorder to store the file in the db
-
+  isValidGpn: require('./isValidGpn'), // check if the gpn is valid or not
+  isValidInvoice: require('./isValidInvoice'),// check if the invoice exists or not
+  isInvoiceAlreadyVerified:require('./isInvoiceAlreadyVerified'),// checks if the invoice is delivered or not for verification
+  
 }

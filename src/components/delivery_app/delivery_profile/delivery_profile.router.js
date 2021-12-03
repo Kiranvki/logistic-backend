@@ -7,9 +7,10 @@ const multipartMiddleware = multer();
 
 // hooks 
 const {
-    checkWhetherItsAValidDeliveryUpdate, //check whether its a valid picker profile update
-  } = require('../../../hooks/app');
-  
+  checkWhetherItsAValidDeliveryUpdate, //check whether its a valid picker profile update
+  isValidProfilePicUpload
+} = require('../../../hooks/app');
+
 // auth
 const { verifyDeliveryAppToken } = require("../../../hooks/app/Auth");
 
@@ -23,11 +24,22 @@ function deliveryUserRoutes() {
       ctrl.getDeliveryUserDetails // controller function
     );
 
-    // update Delivery Executive details
-    closed.route("/user/update").patch(
-      verifyDeliveryAppToken, // verify app user token
-      checkWhetherItsAValidDeliveryUpdate, //check whether its a valid picker profile update
-      ctrl.updateDeliveryUserDetails // update user details
+   // update Delivery Executive details
+   closed.route("/user/update").patch(
+    verifyDeliveryAppToken, // verify app user token
+    checkWhetherItsAValidDeliveryUpdate, //check whether its a valid picker profile update
+    ctrl.updateDeliveryUserDetails // update user details
+  );
+
+    // upload file to server 
+    closed.route('/user/:deliveryExId/file/upload').post(
+      verifyDeliveryAppToken, // verify app token
+      multipartMiddleware.single('file'), // multer middleware
+      // [joiValidationForFileUpload], // joi validation
+      // isValidOnBoardingId,  // check whether the onboarding id is valid or not 
+      // isValidOnBoardingUpload,
+      isValidProfilePicUpload,
+      ctrl.uploadImage, // controller function
     );
   };
 }

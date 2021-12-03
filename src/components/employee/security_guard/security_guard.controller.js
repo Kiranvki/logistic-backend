@@ -7,10 +7,11 @@ const deliveryCtrl = require("../delivery_executive/delivery_executive.controlle
 const pickerBoyCtrl = require("../picker_boy/picker_boy.controller");
 const _ = require("lodash");
 const { error, info } = require("../../../utils").logging;
-
 const {
   getAgencyNameFromIdForDeliveryAndPickerBoy, // geting the agency name from ID
-} = require('../../../inter_service_api/dms_dashboard_v1/v1');
+} = require("../../../inter_service_api/dms_dashboard_v1/v1");
+const gpnModel = require("../../delivery_app/deliveryExecutiveTrip/model/gpn_model");
+const invoiceMasterModel = require("../../picker_app/invoice_master/models/invoice_master.model")
 
 //getting the model
 class securityController extends BaseController {
@@ -23,24 +24,24 @@ class securityController extends BaseController {
   // getting the security guard details using other fields
   getDetailsUsingField = async (fieldValue) => {
     try {
-      info('Get security guard details !');
+      info("Get security guard details !");
 
       // find the  security guard
       return await Model.aggregate([
         {
           $match: {
-            '$or': [
+            $or: [
               {
-                'email': fieldValue,
+                email: fieldValue,
               },
               {
-                'contactMobile': fieldValue,
+                contactMobile: fieldValue,
               },
             ],
-            'status': 1,
-            'isDeleted': 0,
-          }
-        }
+            status: 1,
+            isDeleted: 0,
+          },
+        },
       ])
         .allowDiskUse(true)
         .then((res) => {
@@ -50,7 +51,7 @@ class securityController extends BaseController {
               data: res[res.length - 1],
             };
           } else {
-            error('Error Searching Data in  security guard DB!');
+            error("Error Searching Data in  security guard DB!");
             return {
               success: false,
             };
@@ -139,6 +140,37 @@ class securityController extends BaseController {
         });
 
       // catch any runtime error
+    } catch (err) {
+      error(err);
+    }
+  };
+
+  getGpnNumber = async (gpn) => {
+    try {
+      info("Getting GPN Number!");
+
+      return await gpnModel
+        .find({ gpn: gpn })
+        .then((res) => {
+          if (res && res.length) {
+            return {
+              success: true,
+              data: res,
+            };
+          } else {
+            error("Error Searching this GPN in DB!");
+            return {
+              success: false,
+            };
+          }
+        })
+        .catch((err) => {
+          error(err);
+          return {
+            success: false,
+            error: err,
+          };
+        });
     } catch (err) {
       error(err);
     }
@@ -469,53 +501,77 @@ class securityController extends BaseController {
     try {
       // get the employee data id
       let employeeType = req.params.employeeType, // employee designation
-        employeeData = req.body.employeeData,     // employee data
-        cityId = req.user.region || '';           // getting the cityId
+        employeeData = req.body.employeeData, // employee data
+        cityId = req.user.region || ""; // getting the cityId
 
       info(`Single Employee DETAILS for - ${employeeType}`);
 
       if (employeeData && !_.isEmpty(employeeData)) {
+        let agencyId = employeeData.agencyId; //getting the agency Id
 
-        let agencyId = employeeData.agencyId;     //getting the agency Id
-
-        if (employeeType == 'deliveryExecutive') {
-          let agencyData = await getAgencyNameFromIdForDeliveryAndPickerBoy(cityId, agencyId);
-
-          if (agencyData.success) {
-            employeeData = {
-              ...employeeData,
-              'agencyName': agencyData.data.nameToDisplay,
-              'designation': 'Delivery Executive'
-            }
-            return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
-
-          }
-          employeeData = {
-            ...employeeData,
-            'designation': 'Delivery Executive'
-          }
-          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
-        }
-        else if (employeeType == 'pickerBoy') {
-          let agencyData = await getAgencyNameFromIdForDeliveryAndPickerBoy(cityId, agencyId);
+        if (employeeType == "deliveryExecutive") {
+          let agencyData = await getAgencyNameFromIdForDeliveryAndPickerBoy(
+            cityId,
+            agencyId
+          );
 
           if (agencyData.success) {
             employeeData = {
               ...employeeData,
-              'agencyName': agencyData.data.nameToDisplay,
-              'designation': 'Picker Boy'
-            }
-            return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
-
+              agencyName: agencyData.data.nameToDisplay,
+              designation: "Delivery Executive",
+            };
+            return this.success(
+              req,
+              res,
+              this.status.HTTP_OK,
+              employeeData,
+              this.messageTypes.securityGuardFetchedSuccessfully
+            );
           }
           employeeData = {
             ...employeeData,
-            'designation': 'Picker Boy'
-          }
-          return this.success(req, res, this.status.HTTP_OK, employeeData, this.messageTypes.securityGuardFetchedSuccessfully);
+            designation: "Delivery Executive",
+          };
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            employeeData,
+            this.messageTypes.securityGuardFetchedSuccessfully
+          );
+        } else if (employeeType == "pickerBoy") {
+          let agencyData = await getAgencyNameFromIdForDeliveryAndPickerBoy(
+            cityId,
+            agencyId
+          );
 
-        }
-        else if (employeeType == 'securityGuard') {
+          if (agencyData.success) {
+            employeeData = {
+              ...employeeData,
+              agencyName: agencyData.data.nameToDisplay,
+              designation: "Picker Boy",
+            };
+            return this.success(
+              req,
+              res,
+              this.status.HTTP_OK,
+              employeeData,
+              this.messageTypes.securityGuardFetchedSuccessfully
+            );
+          }
+          employeeData = {
+            ...employeeData,
+            designation: "Picker Boy",
+          };
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            employeeData,
+            this.messageTypes.securityGuardFetchedSuccessfully
+          );
+        } else if (employeeType == "securityGuard") {
           employeeData = {
             ...employeeData,
             designation: "Security Guard",
@@ -530,9 +586,13 @@ class securityController extends BaseController {
 
           // catch any runtime error
         }
-      }
-      else {
-        return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.employeeDetailsNotFound);
+      } else {
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          this.messageTypes.employeeDetailsNotFound
+        );
       }
     } catch (err) {
       error(err);
@@ -630,10 +690,11 @@ class securityController extends BaseController {
       let employeeType = req.params.employeeType;
 
       if (employeeType == "deliveryExecutive") {
-        let deliveryResponse = await deliveryCtrl.updateDeliveryExecutiveDetails(
-          employeeId,
-          req.body.toChangeObject
-        );
+        let deliveryResponse =
+          await deliveryCtrl.updateDeliveryExecutiveDetails(
+            employeeId,
+            req.body.toChangeObject
+          );
         if (deliveryResponse.success) {
           return this.success(
             req,
@@ -734,23 +795,51 @@ class securityController extends BaseController {
         empType = req.params.employeeType;
 
       if (empType == "deliveryExecutive") {
-        let deliveryResponse = await deliveryCtrl.patchDeliveryExecutiveStatus(type, employeeId);
+        let deliveryResponse = await deliveryCtrl.patchDeliveryExecutiveStatus(
+          type,
+          employeeId
+        );
 
         if (deliveryResponse.success)
-          return this.success(req, res, this.status.HTTP_OK, deliveryResponse.data, type == "activate" ? this.messageTypes.deliveryExecutiveActivatedSuccessfully : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully);
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            deliveryResponse.data,
+            type == "activate"
+              ? this.messageTypes.deliveryExecutiveActivatedSuccessfully
+              : this.messageTypes.deliveryExecutiveDeactivatedSuccessfully
+          );
         else
-          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.deliveryExecutiveNotUpdated);
-
-      }
-      else if (empType == "pickerBoy") {
-        let pickerboyResponse = await pickerBoyCtrl.patchPickerBoyStatus(type, employeeId);
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.deliveryExecutiveNotUpdated
+          );
+      } else if (empType == "pickerBoy") {
+        let pickerboyResponse = await pickerBoyCtrl.patchPickerBoyStatus(
+          type,
+          employeeId
+        );
         if (pickerboyResponse.success)
-          return this.success(req, res, this.status.HTTP_OK, pickerboyResponse.data, type == "activate" ? this.messageTypes.pickerboyActivatedSuccessfully : this.messageTypes.pickerboyDeactivatedSuccessfully);
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            pickerboyResponse.data,
+            type == "activate"
+              ? this.messageTypes.pickerboyActivatedSuccessfully
+              : this.messageTypes.pickerboyDeactivatedSuccessfully
+          );
         else
-          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.pickerboyNotUpdated);
-
-      }
-      else if (empType == "securityGuard") {
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.pickerboyNotUpdated
+          );
+      } else if (empType == "securityGuard") {
         // creating data to insert
         let dataToUpdate = {
           $set: {
@@ -773,47 +862,66 @@ class securityController extends BaseController {
 
         // check if inserted
         if (isUpdated && !_.isEmpty(isUpdated))
-          return this.success(req, res, this.status.HTTP_OK, isUpdated, type == "activate" ? this.messageTypes.securityguardActivatedSuccessfully : this.messageTypes.securityguardDeactivatedSuccessfully);
+          return this.success(
+            req,
+            res,
+            this.status.HTTP_OK,
+            isUpdated,
+            type == "activate"
+              ? this.messageTypes.securityguardActivatedSuccessfully
+              : this.messageTypes.securityguardDeactivatedSuccessfully
+          );
         else
-          return this.errors(req, res, this.status.HTTP_CONFLICT, this.messageTypes.securityGuardNotUpdatedSuccessfully);
+          return this.errors(
+            req,
+            res,
+            this.status.HTTP_CONFLICT,
+            this.messageTypes.securityGuardNotUpdatedSuccessfully
+          );
         // catch any runtime error
       }
     } catch (err) {
       error(err);
-      this.errors(req, res, this.status.HTTP_INTERNAL_SERVER_ERROR, this.exceptions.internalServerErr(req, err));
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
     }
   };
 
-
-  // Internal Function get full details 
+  // Internal Function get full details
   getsecurityFullDetails = async (securityGuardId) => {
     try {
-      info('Security GET DETAILS !');
+      info("Security GET DETAILS !");
 
       // get picker boy details
-      let securityData = await Model.aggregate([{
-        $match: {
-          _id: mongoose.Types.ObjectId(securityGuardId)
-        }
-      }
+      let securityData = await Model.aggregate([
+        {
+          $match: {
+            _id: mongoose.Types.ObjectId(securityGuardId),
+          },
+        },
       ]).allowDiskUse(true);
 
-      // check if inserted 
-      if (securityData && securityData.length) return {
-        success: true,
-        data: securityData[securityData.length - 1]
-      };
+      // check if inserted
+      if (securityData && securityData.length)
+        return {
+          success: true,
+          data: securityData[securityData.length - 1],
+        };
       else return { success: false };
 
-      // catch any runtime error 
+      // catch any runtime error
     } catch (err) {
       error(err);
       return {
         success: false,
-        error: err
-      }
+        error: err,
+      };
     }
-  }
+  };
 
   // Internal function to update the details
   updateDetails = async (dataObject, id) => {
@@ -871,6 +979,67 @@ class securityController extends BaseController {
     }
   };
 
+  getInvoiceDetails = async (invoiceId) => {
+    try {
+      info("Getting invoice details!");
+      
+      return await invoiceMasterModel
+        .find({ "_id": mongoose.Types.ObjectId(invoiceId) })
+        .then((res) => {
+          if (res && res.length) {
+            return {
+              success: true,
+              data: res,
+            };
+          } else {
+            error("Error Searching invoices in DB");
+            return {
+              success: false,
+            };
+          }
+        })
+        .catch((err) => {
+          error(err);
+          return {
+            success: false,
+            error: err,
+          };
+        });
+    } catch (err) {
+      error(err);
+    }
+  };
+
+  getInvoiceAlreadyVerifiedDetails = async (invoiceId) => {
+    try {
+      info("Getting invoice details!");
+      
+      return await invoiceMasterModel
+        .find({ "_id": mongoose.Types.ObjectId(invoiceId),isDelivered:0 })
+        .then((res) => {
+          if (res && res.length) {
+            return {
+              success: true,
+              data: res,
+            };
+          } else {
+            error("Error Searching invoices in DB");
+            return {
+              success: false,
+            };
+          }
+        })
+        .catch((err) => {
+          error(err);
+          return {
+            success: false,
+            error: err,
+          };
+        });
+    } catch (err) {
+      error(err);
+    }
+  };
 }
 // exporting the modules
 module.exports = new securityController();

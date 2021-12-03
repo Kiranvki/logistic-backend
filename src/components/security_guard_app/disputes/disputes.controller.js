@@ -1,0 +1,964 @@
+const BaseController = require("../../baseController");
+const BasicCtrl = require("../../basic_config/basic_config.controller");
+const tripModel = require("../../MyTrip/assign_trip/model/trip.model");
+const disputeModel = require("../../MyTrip/assign_trip/model/disputes.model");
+const gpnModel = require("../../delivery_app/deliveryExecutiveTrip/model/gpn_model");
+
+const mongoose = require("mongoose");
+const { error, info } = require("../../../utils").logging;
+const _ = require("lodash");
+const moment = require("moment");
+const { parseInt } = require("lodash");
+
+class disputesController extends BaseController {
+  // constructor
+  constructor() {
+    super();
+    this.messageTypes = this.messageTypes.securityGuardApp;
+  }
+
+  getDisputes = async (req, res, next) => {
+    let pageSize = 100;
+    let pageNumber = req.query.page;
+
+    let dateToday = moment(Date.now())
+      .set({
+        h: 24,
+        m: 59,
+        s: 0,
+        millisecond: 0,
+      })
+      .toDate();
+
+    let trip = await disputeModel.aggregate([
+      {
+        $match: {
+          createdAt: { $lt: dateToday },
+        },
+      },
+      {
+        $lookup: {
+          from: "invoicemasters",
+          localField: "invoiceId",
+          foreignField: "_id",
+          as: "invoices",
+        },
+      },
+      {
+        $project: {
+          disputeId: 1,
+          status: 1,
+          isPODReturned: 1,
+          disputeDate: {
+            $dateToString: { format: "%d-%m-%Y", date: "$createdAt" },
+          },
+          invoicesNo: { $first: "$invoices.invoiceDetails.invoiceNo" },
+          tripId: "$tripId",
+          deliveryExecutiveName: "",
+        },
+      },
+
+      {
+        $skip: pageSize * (pageNumber - 1),
+      },
+      {
+        $limit: 100,
+      },
+      {
+        $group: {
+          _id: "$disputeId",
+          total: { $sum: 1 },
+          tripData: {
+            $push: "$$ROOT",
+          },
+        },
+      },
+      // {
+      //   $sort: {
+      //     _id: -1
+      //   }
+      // },
+    ]);
+
+    let totalCount = await disputeModel.count({
+      createdAt: { $lt: dateToday },
+    });
+    let data = {
+      results: trip,
+      pageMeta: {
+        skip: pageSize * (pageNumber - 1),
+        pageSize: pageSize,
+        total: totalCount,
+      },
+    };
+
+    try {
+      info("getting desputes data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        data || [],
+        this.messageTypes.disputeDetailsFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+
+    // success(req, res, status, data = null, message = 'success')
+  };
+
+  getDisputeDetails = async (req, res, next) => {
+    let disputeId = req.params.disputeId || req.query.disputeId,
+      PODtype = parseInt(req.params.PODtype) || parseInt(req.query.PODtype);
+    console.log("PODtype", PODtype);
+
+    let pipeline = [
+      {
+        $match: { disputeId: parseInt(disputeId) },
+      },
+      { $project: { _id: 0, createdAt: 0 } },
+      {
+        $lookup: {
+          from: "trips",
+          let: { id: "$tripId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$tripId", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                vehicleRegNumber: 1,
+                deliveryExecutiveName: 1,
+                deliveryExecutiveEmpCode: 1,
+              },
+            },
+          ],
+          as: "trips",
+        },
+      },
+      { $unwind: { path: "$trips" } },
+
+      {
+        $lookup: {
+          from: "invoicemasters",
+          let: { id: "$invoiceId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                so_db_id: 1,
+                invoiceNo: "$invoiceDetails.invoiceNo",
+              },
+            },
+            {
+              $lookup: {
+                from: "salesorders",
+                localField: "so_db_id",
+                foreignField: "_id",
+                as: "salesorders",
+              },
+            },
+            { $unwind: { path: "$salesorders" } },
+          ],
+          as: "invoices",
+        },
+      },
+      { $unwind: { path: "$invoices" } },
+      {
+        $project: {
+          tripId: 1,
+          disputeId: 1,
+          dispute_amount: 1,
+          status: 1,
+          acceptedQty: 1,
+          checkedQty: { $first: "$returnDetails.checkedQty" },
+          reason: { $first: "$returnDetails.reason" },
+          vehicleRegNumber: "$trips.vehicleRegNumber",
+          deliveryExecutiveName: "$trips.deliveryExecutiveName",
+          deliveryExecutiveEmpCode: "$trips.deliveryExecutiveEmpCode",
+          invoiceNo: "$invoices.invoiceNo",
+          invoiceId: "$invoices._id",
+          orderItems: {
+            $filter: {
+              input: "$invoices.salesorders.orderItems",
+              as: "items",
+              cond: { $eq: ["$$items.orderDetails.itemDeliveryStatus", 2] },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          "orderItems.checkedQty": "$checkedQty",
+          "orderItems.reason": "$reason",
+        },
+      },
+      {
+        $addFields: {
+          noOfItems: {
+            $cond: {
+              if: { $isArray: "$orderItems" },
+              then: { $size: "$orderItems" },
+              else: "0",
+            },
+          },
+        },
+      },
+    ];
+
+    let trip = await disputeModel.aggregate(pipeline);
+
+    try {
+      info("getting desputes data!");
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        trip || [],
+        this.messageTypes.disputeDetailsFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+
+    // success(req, res, status, data = null, message = 'success')
+  };
+
+  getPODDisputeDetails = async (req, res, next) => {
+    let disputeId = req.params.disputeId || req.query.disputeId,
+      PODtype = parseInt(req.params.PODtype) || parseInt(req.query.PODtype);
+    console.log("PODtype", PODtype);
+
+    let pipeline = [
+      {
+        $match: { disputeId: parseInt(disputeId) },
+      },
+      { $project: { _id: 0, createdAt: 0 } },
+      {
+        $lookup: {
+          from: "trips",
+          let: { id: "$tripId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$tripId", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                vehicleRegNumber: 1,
+                deliveryExecutiveName: 1,
+                deliveryExecutiveEmpCode: 1,
+              },
+            },
+          ],
+          as: "trips",
+        },
+      },
+      { $unwind: { path: "$trips" } },
+
+      {
+        $lookup: {
+          from: "invoicemasters",
+          let: { id: "$invoiceId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                so_db_id: 1,
+                invoiceNo: "$invoiceDetails.invoiceNo",
+              },
+            },
+            {
+              $lookup: {
+                from: "salesorders",
+                localField: "so_db_id",
+                foreignField: "_id",
+                as: "salesorders",
+              },
+            },
+            { $unwind: { path: "$salesorders" } },
+          ],
+          as: "invoices",
+        },
+      },
+      { $unwind: { path: "$invoices" } },
+      {
+        $project: {
+          tripId: 1,
+          disputeId: 1,
+          dispute_amount: 1,
+          status: 1,
+          acceptedQty: 1,
+          checkedQty: { $first: "$returnDetails.checkedQty" },
+          reason: { $first: "$returnDetails.reason" },
+          vehicleRegNumber: "$trips.vehicleRegNumber",
+          deliveryExecutiveName: "$trips.deliveryExecutiveName",
+          deliveryExecutiveEmpCode: "$trips.deliveryExecutiveEmpCode",
+          invoiceNo: "$invoices.invoiceNo",
+          invoiceId: "$invoices._id",
+
+          // orderItems: {
+          //   $filter: {
+          //     input: "$invoices.salesorders.orderItems",
+          //     as: "items",
+          //     cond: { $eq: ["$$items.orderDetails.itemDeliveryStatus", 2] },
+          //   },
+          // },
+        },
+      },
+      // {
+      //   $addFields: {
+      //     "orderItems.checkedQty": "$checkedQty",
+      //     "orderItems.reason": "$reason",
+      //   },
+      // },
+      // {
+      //   $addFields: {
+      //     noOfItems: {
+      //       $cond: {
+      //         if: { $isArray: "$orderItems" },
+      //         then: { $size: "$orderItems" },
+      //         else: "0",
+      //       },
+      //     },
+      //   },
+      // },
+    ];
+    let trip = await disputeModel.aggregate(pipeline);
+
+    try {
+      info("getting desputes data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        trip || [],
+        this.messageTypes.disputeDetailsFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+
+    // success(req, res, status, data = null, message = 'success')
+  };
+
+  getUpdatedDisputeDetails = async (req, res, next) => {
+    let pageSize = 100;
+    let invoiceId = req.params.invoiceId || req.query.invoiceId;
+    let pageNumber = req.query.page;
+
+    let dateToday = moment(Date.now())
+      .set({
+        h: 24,
+        m: 59,
+        s: 0,
+        millisecond: 0,
+      })
+      .toDate();
+
+    let trip = await disputeModel.aggregate([
+      {
+        $match: { invoiceId: mongoose.Types.ObjectId(invoiceId) },
+      },
+      { $project: { _id: 0, createdAt: 0 } },
+      {
+        $lookup: {
+          from: "trips",
+          let: { id: "$tripId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$tripId", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                vehicleRegNumber: 1,
+                deliveryExecutiveName: 1,
+                deliveryExecutiveEmpCode: 1,
+              },
+            },
+          ],
+          as: "trips",
+        },
+      },
+      { $unwind: { path: "$trips" } },
+
+      {
+        $lookup: {
+          from: "invoicemasters",
+          let: { id: "$invoiceId" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$id"] },
+              },
+            },
+            {
+              $project: {
+                _id: 0,
+                so_db_id: 1,
+                invoiceNo: "$invoiceDetails.invoiceNo",
+              },
+            },
+            {
+              $lookup: {
+                from: "salesorders",
+                localField: "so_db_id",
+                foreignField: "_id",
+                as: "salesorders",
+              },
+            },
+            { $unwind: { path: "$salesorders" } },
+          ],
+          as: "invoices",
+        },
+      },
+      { $unwind: { path: "$invoices" } },
+      {
+        $project: {
+          tripId: 1,
+          disputeId: 1,
+          dispute_amount: 1,
+          status: 1,
+          acceptedQty: 1,
+          returnDetails: 1,
+          vehicleRegNumber: "$trips.vehicleRegNumber",
+          deliveryExecutiveName: "$trips.deliveryExecutiveName",
+          deliveryExecutiveEmpCode: "$trips.deliveryExecutiveEmpCode",
+          invoiceNo: "$invoices.invoiceNo",
+          salesReturnItems: {
+            $filter: {
+              input: "$invoices.salesorders.orderItems",
+              as: "items",
+              cond: { $eq: ["$$items.orderDetails.itemDeliveryStatus", 2] },
+            },
+          },
+        },
+      },
+      {
+        $addFields: {
+          noOfItems: {
+            $cond: {
+              if: { $isArray: "$salesReturnItems" },
+              then: { $size: "$salesReturnItems" },
+              else: "0",
+            },
+          },
+        },
+      },
+    ]);
+
+    let totalCount = await disputeModel.count({
+      createdAt: { $lt: dateToday },
+    });
+    let data = {
+      results: trip,
+      // pageMeta: {
+      //   skip: pageSize * (pageNumber - 1),
+      //   pageSize: pageSize,
+      //   total: totalCount,
+      // },
+    };
+
+    try {
+      info("getting desputes data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        data || [],
+        this.messageTypes.disputeDetailsFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+
+    // success(req, res, status, data = null, message = 'success')
+  };
+
+  getsaleReturnDetails = async (req, res, next) => {
+    let invoiceId = req.params.invoiceId || req.query.invoiceId,
+      itemID = req.params.itemId || req.query.itemId;
+
+    let trip = await disputeModel.aggregate([
+      {
+        $match: { invoiceId: mongoose.Types.ObjectId(invoiceId) },
+      },
+      {
+        $lookup: {
+          from: "salesorders",
+          localField: "so_db_id",
+          foreignField: "_id",
+          as: "salesReturn",
+        },
+      },
+      { $unwind: { path: "$salesReturn" } },
+      { $unwind: { path: "$salesReturn.orderItems" } },
+      { $project: { returnDetails: 1, salesReturn: 1 } },
+      {
+        $match: { "salesReturn.orderItems.material_no": itemID },
+      },
+      { $unwind: { path: "$returnDetails" } },
+      {
+        $addFields: {
+          "returnDetails.ordered_qty": "$salesReturn.orderItems.ordered_qty",
+          "returnDetails.packed_qty": "$salesReturn.orderItems.packed_qty",
+          "returnDetails.accepted_qty": "$salesReturn.orderItems.accepted_qty",
+          "returnDetails.itemName":
+            "$salesReturn.orderItems.material_description",
+        },
+      },
+      { $match: { "returnDetails.itemId": itemID } },
+      { $project: { _id: 0, returnDetails: 1 } },
+    ]);
+
+    try {
+      info("getting desputes data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        trip || [],
+        this.messageTypes.disputeDetailsFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+
+    // success(req, res, status, data = null, message = 'success')
+  };
+
+  notifyDispute = async (req, res, next) => {
+    let id = req.params.invoiceId || req.query.invoiceId || req.body.invoiceId,
+      { _id, itemId, reason, checkedQty } = req.body,
+      notId = await disputeModel.find().sort({ createdAt: -1 }),
+      newId = parseInt(notId[0].notifiedId),
+      notifiedId = newId + 1;
+
+    try {
+      info("notfying dispute!");
+
+      let updateObj = {
+          notifiedId: notifiedId || "",
+          status: 2,
+        },
+        // Obj = {
+        //   _id: mongoose.Types.ObjectId(_id),
+        //   itemId: itemId,
+        //   reason: reason,
+        //   checkedQty:checkedQty
+        // };
+        Arr = req.body;
+
+      let data = await disputeModel.findOneAndUpdate(
+        {
+          invoiceId: mongoose.Types.ObjectId(id),
+        },
+        { $set: { ...updateObj } }
+      );
+
+      let data2 = await disputeModel.findOneAndUpdate(
+        {
+          invoiceId: mongoose.Types.ObjectId(id),
+        },
+
+        { $addToSet: { returnDetails: { $each: Arr } } }
+      );
+
+      let updatedData = await disputeModel.find(
+        {
+          invoiceId: mongoose.Types.ObjectId(id),
+        },
+        {
+          _id: 0,
+          status: 1,
+          notifiedId: 1,
+        }
+      );
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        updatedData || [],
+        this.messageTypes.disputeNotified
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.disputeNotNotified
+      );
+    }
+  };
+
+  scanReturnGpn = async (req, res, next) => {
+    let gpnId = req.params.gpn;
+
+    info("getting gpn details!");
+
+    let gpnDetails = await gpnModel
+      .aggregate([
+        { $match: { gpn: gpnId } },
+        {
+          $lookup: {
+            from: "salesorders",
+            localField: "salesOrderId",
+            foreignField: "_id",
+            as: "salesorder",
+          },
+        },
+        {
+          $lookup: {
+            from: "invoicemasters",
+            localField: "invoiceId",
+            foreignField: "_id",
+            as: "invoices",
+          },
+        },
+        {
+          $lookup: {
+            from: "disputes",
+            localField: "invoiceId",
+            foreignField: "invoiceId",
+            as: "disputes",
+          },
+        },
+
+        //   {$unwind:{path:"$result", preserveNullAndEmptyArrays:false}},
+        { $unwind: { path: "$salesorder", preserveNullAndEmptyArrays: false } },
+        { $unwind: { path: "$invoices", preserveNullAndEmptyArrays: false } },
+        { $unwind: { path: "$disputes", preserveNullAndEmptyArrays: false } },
+
+        {
+          $project: {
+            orderType: "$orderType",
+            invoiceNo: { $first: "$invoiceNumber" },
+            invoiceId: "$invoices._id",
+            customer: "$salesorder.sold_to_party_description",
+            orderStatus: "$invoices.isDelivered",
+            // orderStatus: {
+            //   $cond: {
+            //     if: { "$invoices.isDelivered": 0 },
+            //     then: "Sales Retuen",
+            //     else: "Delivered!",
+            //   },
+            // },
+            invoices: "$salesorder.invoiceUploads",
+            deliveryDate: {
+              $dateToString: {
+                format: "%d-%m-%Y",
+                date: "$invoices.so_deliveryDate",
+              },
+            },
+            deliveryTime: {
+              $dateToString: {
+                format: "%H:%M",
+                date: "$invoices.so_deliveryDate",
+              },
+            },
+            itemSupplied: {
+              $cond: {
+                if: { $isArray: "$invoices.itemSupplied" },
+                then: { $size: "$invoices.itemSupplied" },
+                else: "0",
+              },
+            },
+            salesReturnItems: {
+              $filter: {
+                input: "$salesorder.orderItems",
+                as: "items",
+                cond: { $eq: ["$$items.orderDetails.itemDeliveryStatus", 2] },
+              },
+            },
+          },
+        },
+        // {
+        //   $match: {
+        //     "orderItems.0.material_no": itemId,
+        //   },
+        // },
+      ])
+      .allowDiskUse(true);
+
+    let data = {
+      results: gpnDetails,
+    };
+
+    try {
+      info("getting gpn data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        data || [],
+        this.messageTypes.gpnDetailsFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.gpnDetailsNotFetched
+      );
+    }
+  };
+
+  getDisputeItemsMinifiedList = async (req, res, next) => {
+    let invoiceNo =
+      req.params.invoiceId || req.query.invoiceId || req.body.invoiceId;
+    let itemsList = await gpnModel.aggregate([
+      { $match: { invoiceNumber: { $in: [invoiceNo] } } },
+      {
+        $lookup: {
+          from: "trips",
+          localField: "tripId",
+          foreignField: "_id",
+          as: "trips",
+        },
+      },
+      {
+        $project: { tripId: { $first: "$trips.tripId" }, _id: 0, invoiceId: 1 },
+      },
+      {
+        $lookup: {
+          from: "invoicemasters",
+          localField: "invoiceId",
+          foreignField: "_id",
+          as: "invoices",
+        },
+      },
+      {
+        $project: {
+          itemId: { $first: "$invoices.itemSupplied.material_no" },
+          tripId: 1,
+          invoiceNumber: { $first: "$invoices.invoiceDetails.invoiceNo" },
+        },
+      },
+    ]);
+
+    try {
+      info("getting item Ids list!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        itemsList || [],
+        this.messageTypes.itemsIdsFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.itemsIdsNotFetched
+      );
+    }
+  };
+
+  updateDisputeDetails = async (req, res, next) => {
+    let id = req.params.disputeId || req.query.disputeId || req.body.disputeId;
+    let checkedQuantity =
+      req.params.quantity || req.query.quantity || req.body.quantity;
+    let reasons = req.params.reason || req.query.reason || req.body.reason;
+
+    let updatedDisputeDetail;
+
+    // update checked quantity and reason
+
+    try {
+      let updateObj = {
+        checkedQty: parseInt(checkedQuantity) || "",
+        reason: reasons,
+      };
+
+      updatedDisputeDetail = await disputeModel.findOneAndUpdate(
+        {
+          disputeId: parseInt(id),
+        },
+        { $set: { ...updateObj } }
+      );
+
+      info("Dispute Details Updating!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        updatedDisputeDetail || [],
+        this.messageTypes.disputeDetailsUpdated
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.disputeDetailsNotUpdated
+      );
+    }
+  };
+
+  getReturnedItemDetails = async (req, res, next) => {
+    let invoiceId = req.params.invoiceId || req.query.itemId || req.body.itemId,
+      itemId = req.params.itemId || req.query.itemId;
+    console.log(itemId);
+
+    info("getting item details!");
+
+    let data = await gpnModel
+      .aggregate([
+        { $match: { invoiceId: mongoose.Types.ObjectId(invoiceId) } },
+        {
+          $lookup: {
+            from: "salesorders",
+            localField: "salesOrderId",
+            foreignField: "_id",
+            as: "salesorder",
+          },
+        },
+        {
+          $lookup: {
+            from: "invoicemasters",
+            localField: "invoiceId",
+            foreignField: "_id",
+            as: "invoices",
+          },
+        },
+
+        //   {$unwind:{path:"$result", preserveNullAndEmptyArrays:false}},
+        { $unwind: { path: "$salesorder", preserveNullAndEmptyArrays: false } },
+        { $unwind: { path: "$invoices", preserveNullAndEmptyArrays: false } },
+        {
+          $project: {
+            _id: 0,
+            itemDetails: {
+              $filter: {
+                input: "$salesorder.orderItems",
+                as: "items",
+                cond: { $eq: ["$$items.orderDetails.itemDeliveryStatus", 2] },
+              },
+            },
+          },
+        },
+        {
+          $match: {
+            "itemDetails.0.material_no": itemId,
+          },
+        },
+      ])
+      .allowDiskUse(true);
+
+    try {
+      info("getting item data!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        data || [],
+        this.messageTypes.disputeItemDetailsFetched
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err),
+        this.messageTypes.disputeItemDetailsNotFetched
+      );
+    }
+  };
+}
+
+module.exports = new disputesController();
