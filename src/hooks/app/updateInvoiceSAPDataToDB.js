@@ -212,11 +212,11 @@ module.exports = async (req, res, next) => {
                 
                 'irn_no':invoiceDetail['irn'] ,
                 'signed_qrcode': invoiceDetail['qr'],
-                'acknowledgement_number':req.body.einvoicing_detail['data']['Acknowledgement_Number'],
-                'acknowledgement_date':req.body.einvoicing_detail['data']['Acknowledgement_Date'],
+                'acknowledgement_number':req.body.einvoicing_detail&&req.body.einvoicing_detail['data']&&req.body.einvoicing_detail['data']['Acknowledgement_Number'],
+                'acknowledgement_date':req.body.einvoicing_detail&&req.body.einvoicing_detail['data']&&req.body.einvoicing_detail['data']['Acknowledgement_Date'],
                 'irn_status': invoiceDetail['irn_status'],
                 'error_details': invoiceDetail['error_details'],
-                'signed_invoice_no':req.body.einvoicing_detail['data']['signed_invoice_no'],
+                'signed_invoice_no':req.body.einvoicing_detail&&req.body.einvoicing_detail['data']&&req.body.einvoicing_detail['data']['signed_invoice_no'],
 
 
              
