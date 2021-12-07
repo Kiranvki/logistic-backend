@@ -121,7 +121,7 @@ module.exports = async (req, res, next) => {
 //     }
 // }
  
- 
+ console.log('e-invoicing response',req.body.einvoicing_detail)
   if (req.body.einvoicing_detail['success'] && !(req.body.einvoicing_detail['data']&&req.body.einvoicing_detail['data']['error_details']&&req.body.einvoicing_detail['data']['error_details'].length)) {
     info('E-invoicing generating sucessfully !')
     console.log(req.body.einvoicing_detail['data'])
@@ -148,7 +148,7 @@ module.exports = async (req, res, next) => {
   } else {
     
     console.log(req.body.einvoicing_detail['data'])
-    if (req.body.einvoicing_detail['success'] && req.body.einvoicing_detail['data']['irn_no'] && req.body.einvoicing_detail['data']['error_details'][0]['error_message'] === "IRN already exist") {
+    if (req.body.einvoicing_detail['success'] && req.body.einvoicing_detail['data']['irn_no'] && req.body.einvoicing_detail['data']['error_details']&&req.body.einvoicing_detail['data']['error_details'][0]&&req.body.einvoicing_detail['data']['error_details'][0]['error_message'] === "IRN already exist") {
       info('E-invoice Already Exist!')
       let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
         '_id': req.params.pickerBoyOrderMappingId

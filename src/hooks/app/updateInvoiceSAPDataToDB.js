@@ -204,14 +204,19 @@ module.exports = async (req, res, next) => {
                 'distribution_channel':invoiceDetail['distribution_channel'], //sap field
             
                 'division':invoiceDetail['division'],  //sap field
+
+              
+            
+            // "signed_qr_code":req.body.einvoicing_detail['data']['signed_qr_code'] ,
+        
                 
-                'irn_no':invoiceDetail['irn_no'] ,
-                'signed_qrcode': invoiceDetail['signed_qrcode'],
-                'acknowledgement_number':invoiceDetail['acknowledgement_number'],
-                // 'Acknowledgement_Date':invoiceDetail['Acknowledgement_Number'],
+                'irn_no':invoiceDetail['irn'] ,
+                'signed_qrcode': invoiceDetail['qr'],
+                'acknowledgement_number':req.body.einvoicing_detail['data']['Acknowledgement_Number'],
+                'acknowledgement_date':req.body.einvoicing_detail['data']['Acknowledgement_Date'],
                 'irn_status': invoiceDetail['irn_status'],
                 'error_details': invoiceDetail['error_details'],
-                'signed_invoice_no':invoiceDetail['signed_invoice_no'],
+                'signed_invoice_no':req.body.einvoicing_detail['data']['signed_invoice_no'],
 
 
              
