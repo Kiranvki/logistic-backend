@@ -3987,7 +3987,14 @@ class pickerboySalesOrderMappingController extends BaseController {
             'totalTax': { $first: '$invoice.totalTax' },
             'totalDiscount': { $first: '$invoice.totalDiscount' },
             'totalNetValue': { $first: '$invoice.totalNetValue' },
-            'itemSupplied': { $first: '$invoice.itemSupplied' }
+            'itemSupplied': { $first: '$invoice.itemSupplied' },
+            'Einvoice_response':1,
+            'Einvoice_request':1,
+            'Acknowledgement_Date':1,
+            'Acknowledgement_Number':1,
+            'error_details':1,
+            'irn_no':1,
+            'signed_qr_code':1
           }
       },
       {
