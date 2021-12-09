@@ -19,8 +19,21 @@ const schemas = {
       .allow(""),
   }),
 
-  joiInvoiceNo: Joi.object().keys({
-    invoiceNo: Joi.number().integer().required(),
+  joiInvoiceId: Joi.object().keys({
+    invoiceId: Joi.string()
+      .trim()
+      .regex(/^[a-fA-F0-9]{24}$/)
+      .label("Invoice Id")
+      .required()
+      .options({
+        language: {
+          string: {
+            regex: {
+              base: "should be a valid mongoose Id.",
+            },
+          },
+        },
+      }),
   }),
 
   joiVehicleId: Joi.object().keys({
@@ -107,9 +120,9 @@ module.exports = {
       });
   },
 
-  joiInvoiceNo: (req, res, next) => {
+  joiInvoiceId: (req, res, next) => {
     // getting the schemas
-    let schema = schemas.joiInvoiceNo;
+    let schema = schemas.joiInvoiceId;
     let option = options.basic;
 
     // validating the schema

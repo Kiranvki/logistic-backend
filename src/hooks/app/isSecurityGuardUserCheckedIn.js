@@ -63,7 +63,7 @@ module.exports = async (req, res, next) => {
 
         } else {
           error('User Already Checked Out !');
-          return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.appUserAttendance.userAlreadyCheckedOut);
+          return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.appUserAttendance.securityGuardUserCheckedOut);
         }
 
         // if user session not exist 
@@ -75,7 +75,7 @@ module.exports = async (req, res, next) => {
       // if picker id is invalid
     } else {
       error('The Security Guard ID is Invalid !');
-      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.appUserAttendance.invalidPickerBoyId);
+      return Response.errors(req, res, StatusCodes.HTTP_CONFLICT, MessageTypes.appUserAttendance.invalidSecurityGuardId);
     }
 
     // catch any runtime error 

@@ -2548,6 +2548,12 @@ class pickerboySalesOrderMappingController extends BaseController {
           'remarks': 1,
           'shipping_point': 1,
           'delivery_no': 1,
+          "irn_no":1,
+          "signed_invoice_no":1,
+          "signed_qr_code":1,
+          "error_details":1,
+          "Acknowledgement_Number":1,
+          "Acknowledgement_Date":1,
           // 'delivery_date': 1,
           
       
@@ -2845,6 +2851,12 @@ class pickerboySalesOrderMappingController extends BaseController {
           'salesOrderId': 1,
           'pickerBoyId': 1,
           'createdBy': 1,
+          "irn_no":1,
+          "signed_invoice_no":1,
+          "signed_qr_code":1,
+          "error_details":1,
+          "Acknowledgement_Number":1,
+          "Acknowledgement_Date":1,
           
           'createdAt': 1,
           'updatedAt': 1,
@@ -2929,6 +2941,12 @@ class pickerboySalesOrderMappingController extends BaseController {
             'pickingDate': 1,
             'createdAt': 1,
             'updatedAt': 1,
+            "irn_no":1,
+          "signed_invoice_no":1,
+          "signed_qr_code":1,
+          "error_details":1,
+          "Acknowledgement_Number":1,
+          "Acknowledgement_Date":1,
 
             'invoice_request': 1,
             'invoice_response': 1,
@@ -3969,7 +3987,14 @@ class pickerboySalesOrderMappingController extends BaseController {
             'totalTax': { $first: '$invoice.totalTax' },
             'totalDiscount': { $first: '$invoice.totalDiscount' },
             'totalNetValue': { $first: '$invoice.totalNetValue' },
-            'itemSupplied': { $first: '$invoice.itemSupplied' }
+            'itemSupplied': { $first: '$invoice.itemSupplied' },
+            'Einvoice_response':1,
+            'Einvoice_request':1,
+            'Acknowledgement_Date':1,
+            'Acknowledgement_Number':1,
+            'error_details':1,
+            'irn_no':1,
+            'signed_qr_code':1
           }
       },
       {

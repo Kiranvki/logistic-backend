@@ -22,8 +22,8 @@ class vehicleEntryController extends BaseController {
   // get entry vehicle list after delivery
   entryVehicleList = async (req, res, next) => {
     let pageNumber = req.query.page || 1,
-      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((res) => {
-        if (res.success) return res.data;
+      pageSize = await BasicCtrl.GET_PAGINATION_LIMIT().then((resp) => {
+        if (resp.success) return resp.data;
         else return 60;
       }),
       searchKey = req.query.search || "",
@@ -32,15 +32,6 @@ class vehicleEntryController extends BaseController {
       sgDetails = await sgCtrl.getsecurityFullDetails(req.user._id);
 
     sortingArray[sortBy] = -1;
-
-    let dateToday = moment(Date.now())
-      .set({
-        h: 0,
-        m: 0,
-        s: 0,
-        millisecond: 0,
-      })
-      .toDate();
 
     let searchObject = {
       "transporterDetails.vehicle": {
@@ -125,21 +116,6 @@ class vehicleEntryController extends BaseController {
     ];
 
     let trip = await tripModel.aggregate(pipeline);
-    let crates = await tripModel.aggregate([
-      {
-        $lookup: {
-          from: "salesorders",
-          localField: "salesOrderId",
-          foreignField: "_id",
-          as: "salesOrder",
-        },
-      },
-      {
-        $project: {
-          totalCrate: { $sum: ["$salesOrder.crateIn"] },
-        },
-      },
-    ]);
 
     let totalCount = await tripModel.count({
       ...searchObject,
@@ -281,6 +257,27 @@ class vehicleEntryController extends BaseController {
               $push: {
                 invoiceNo: "$salesorder.invoices.invoiceDetails.invoiceNo",
                 invoiceId: "$salesorder.invoices._id",
+                invoiceDate: {
+                  $dateToString: {
+                    format: "%d-%m-%Y",
+                    date: "$salesorder.invoices.invoiceDetails.invoiceDate",
+                  },
+                },
+                invoiceTime: {
+                  $dateToString: {
+                    format: "%H:%M",
+                    date: "$salesorder.invoices.invoiceDetails.invoiceDate",
+                    timezone: "+05:30",
+                  },
+                },
+                noOfItems: {
+                  $cond: {
+                    if: { $isArray: "$salesorder.invoices.itemSupplied" },
+                    then: { $size: "$salesorder.invoices.itemSupplied" },
+                    else: "NA",
+                  },
+                },
+                invoiceUploads: "$salesorder.invoiceUploads",
                 gpnNo: { $first: "$salesorder.invoices.gpnNumber.gpn" },
                 deliveryFlag: "$salesorder.invoices.isDelivered",
                 isSalesReturn: "$isSalesReturn",
@@ -392,7 +389,7 @@ class vehicleEntryController extends BaseController {
     try {
       info("Update Invoice Status !");
 
-      let invoice = req.params.invoiceNo;
+      let invoice = req.params.invoiceId;
 
       // creating data to insert
       let dataToUpdate = {
@@ -404,7 +401,7 @@ class vehicleEntryController extends BaseController {
       // inserting data into the db
       let isUpdated = await invoiceModel.findOneAndUpdate(
         {
-          "invoiceDetails.invoiceNo": invoice,
+          "_id": mongoose.Types.ObjectId(invoice),
         },
         dataToUpdate,
         {

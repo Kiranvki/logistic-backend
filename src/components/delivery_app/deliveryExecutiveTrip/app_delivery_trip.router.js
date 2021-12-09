@@ -40,23 +40,23 @@ function tripsRoutes() {
   //open, closed
   return (open, closed) => {
 
+    //get-trip
+
     closed.route('/get-trip').get(
       verifyDeliveryAppToken,
       isValidDeliveryId,
       isActiveDelivery,
-      // verifyAppToken, // verify app token
       ctrl.getTripByDeliveryExecutiveId
     );
 
+    //trip details by Trip Id & type salesoders 
     closed.route('/get-trip/:type/detail/:tripid').get(
       getTripByIdVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
-      // verifyAppToken, // verify app token
       ctrl.getTripByTripId
     );
 
-    // post 
     // type orderid
     closed.route('/orderdetail/:type/:orderid').get(
       getOrderDetailVal,
@@ -65,20 +65,39 @@ function tripsRoutes() {
       // verifyAppToken, // verify app token
       ctrl.getOrderDetails
     );
+
     // get sales order by customer mobile
     closed.route('/trip/order/:type/:orderId/:phoneNumber').get(
       getHistoryVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
-
-
       ctrl.getOrderByCustomer
     );
 
-    // closed.route('/orderdetail/:type/:orderid').post(
-    //   // verifyAppToken, // verify app token
-    //   ctrl.getOrderDetails 
-    // );
+    //get sale order by trip id
+    closed.route('/:tripId/salesorders').get(
+      [joiTripId],
+      verifyDeliveryAppToken,
+      ctrl.getSalesOrdersbyTripID
+    );
+
+    //get ivoice numbers by sales oders
+
+    closed.route('/:salesorderId/invoiceList').get(
+      [joiSoId],
+      verifyDeliveryAppToken,
+      ctrl.getInvoiceNumberbySo
+    )
+
+    //view invoice by invoice number
+    closed.route('/trip/viewinvoice').get(
+      getInvoiceVal,
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      // verifyAppToken, // verify app token
+      ctrl.getInvoiceByNumber
+    );
+
 
     closed.route('/orderdetail/update/:type/:itemId').post(
       updateOrderStatusVal,
@@ -86,6 +105,15 @@ function tripsRoutes() {
       isValidDeliveryId,
       // verifyAppToken, // verify app token
       ctrl.updateOrderStatus
+    );
+
+
+    closed.route('/orderdetail/updateDetails/:type/:itemId').patch(
+      updateOrderStatusVal,
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      // verifyAppToken, // verify app token
+      ctrl.updateCommets
     );
 
     closed.route('/trip/generategpn/:type').post(
@@ -96,20 +124,20 @@ function tripsRoutes() {
       ctrl.generateGpnNumber
     );
 
-    closed.route('/trip/viewinvoice').get(
-      getInvoiceVal,
-      verifyDeliveryAppToken,
-      isValidDeliveryId,
-      // verifyAppToken, // verify app token
-      ctrl.getInvoiceByNumber
-    );
-
     closed.route('/trip/starttrip/:tripid').patch(
       updateOdometerReadingVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
       // verifyAppToken, // verify app token
-      ctrl.updateOdometerReading
+      ctrl.updateOdometerReadingStarting
+    );
+
+    closed.route('/trip/endtrip/:tripid').patch(
+      updateOdometerReadingVal,
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      // verifyAppToken, // verify app token
+      ctrl.updateOdometerReadingEnding
     );
 
     closed.route('/trip/intrip/:type').get(
@@ -117,8 +145,8 @@ function tripsRoutes() {
       verifyDeliveryAppToken,
       isValidDeliveryId,
 
-     // verifyAppToken, // verify app token
-     ctrl.getInTrip
+      // verifyAppToken, // verify app token
+      ctrl.getInTrip
     );
 
     closed.route('/trip/intrip/:type/invoiceList').get(
@@ -151,9 +179,20 @@ function tripsRoutes() {
       getHistoryVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
-
-
       ctrl.getHistoryByOrderType
+    );
+
+    closed.route('/trip/history/:salesorderId/invoiceList').get(
+      [joiSoId],
+      verifyDeliveryAppToken,
+      ctrl.getHistoryInvoiceListbySo
+    );
+
+    closed.route('/trip/history/salesorders/viewInvoiceHistory').get(
+      getInvoiceVal,
+      verifyDeliveryAppToken,
+      isValidDeliveryId,
+      ctrl.getHistoryInvoiceDetails
     );
 
     // salesorderID
@@ -171,36 +210,17 @@ function tripsRoutes() {
       ctrl.getPendingTrip
     );
 
-    //get sale order by trip id
-
-    closed.route('/:tripId/salesorders').get(
-      [joiTripId],
-      verifyDeliveryAppToken,
-      ctrl.getSalesOrdersbyTripID
-    )
 
     closed.route('/trip/intrip/caputreDocument/:salesOrdersId').post(
       // getInvoiceVal,
       verifyDeliveryAppToken,
-      multipartMiddleware.array('files',5), // multer middleware
+      multipartMiddleware.array('files', 5), // multer middleware
       isValidMultiImageIsUploading,
       ctrl.uploadDocuments
       // ctrl.justChecking
     )
 
-    //get ivoice numbers by sales oders
 
-    closed.route('/:salesorderId/invoiceList').get(
-      [joiSoId],
-      verifyDeliveryAppToken,
-      ctrl.getInvoiceNumberbySo
-    )
-
-    closed.route('/trip/history/:salesorderId/invoiceList').get(
-      [joiSoId],
-      verifyDeliveryAppToken,
-      ctrl.getHistoryInvoiceListbySo
-    )
     closed.route('/get-dispute').get(
       verifyDeliveryAppToken,
       isValidDeliveryId,
@@ -242,23 +262,31 @@ function tripsRoutes() {
     closed.route('/trip/intrip/:salesOrdersId/customerNotAvailable').post(
       //getInvoiceVal,
       verifyDeliveryAppToken,
-      multipartMiddleware.array('files',5), // multer middleware
+      multipartMiddleware.array('files', 5), // multer middleware
       isValidCustomerNotAvailUpload, // is valid balance confirmation file upload 
       ctrl.uploadImageCustomerNotAvailable // controller function
     )
 
-    closed.route('/trip/intrip/salesorders/invoiceList/viewInvoiceAfterpPayment').get(
+    closed.route('/trip/intrip/salesorders/viewInvoiceSummary').get(
       getInvoiceVal,
       verifyDeliveryAppToken,
       isValidDeliveryId,
       // verifyAppToken, // verify app token
-      ctrl.getInvoiceVewAfterPayment
+      ctrl.getInvoiceSummary
     );
 
     closed.route('/get-dispute/:disputeId/:condition/updateDisputeDetails').patch(
       verifyDeliveryAppToken,
       ctrl.disputeAcceptOrReject
     );
+
+    closed.route('/trip/intrip/:soId/:type/customer_NotAvailable').patch(
+      // [joiTripId],
+      [joiSoId],
+      verifyDeliveryAppToken,
+      ctrl.customerUnAvailability
+
+    )
 
 
 

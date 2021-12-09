@@ -64,6 +64,7 @@ module.exports = async (req, res, next) => {
         // checking whether the user is authentic
         if (res.status === 200) {
           info('Document Generated Successfully !');
+          console.log('e-invoice response',res.body.response)
           return {
             success: true,
             data: res.body.response,
@@ -120,8 +121,8 @@ module.exports = async (req, res, next) => {
 //     }
 // }
  
- 
-  if (req.body.einvoicing_detail['success'] && !req.body.einvoicing_detail['data']['error_details'].length) {
+ console.log('e-invoicing response',req.body.einvoicing_detail)
+  if (req.body.einvoicing_detail['success'] && !(req.body.einvoicing_detail['data']&&req.body.einvoicing_detail['data']['error_details']&&req.body.einvoicing_detail['data']['error_details'].length)) {
     info('E-invoicing generating sucessfully !')
     console.log(req.body.einvoicing_detail['data'])
     let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
@@ -147,7 +148,7 @@ module.exports = async (req, res, next) => {
   } else {
     
     console.log(req.body.einvoicing_detail['data'])
-    if (req.body.einvoicing_detail['success'] && req.body.einvoicing_detail['data']['irn_no'] && req.body.einvoicing_detail['data']['error_details'][0]['error_message'] === "IRN already exist") {
+    if (req.body.einvoicing_detail['success'] && req.body.einvoicing_detail['data']['irn_no'] && req.body.einvoicing_detail['data']['error_details']&&req.body.einvoicing_detail['data']['error_details'][0]&&req.body.einvoicing_detail['data']['error_details'][0]['error_message'] === "IRN already exist") {
       info('E-invoice Already Exist!')
       let isResponseAdded = await pickerBoyOrderMappingModel.findOneAndUpdate({
         '_id': req.params.pickerBoyOrderMappingId

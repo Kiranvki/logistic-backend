@@ -93,6 +93,8 @@ class DeliveryExecutivetrip extends BaseController {
       {
         $project: {
           tripId: 1,
+          statusVerify: 1,
+          statusPendingVerify: 1,
           vehicleRegNumber: 1,
           salesorders: {
             $cond: {
@@ -236,6 +238,7 @@ class DeliveryExecutivetrip extends BaseController {
 
     // success(req, res, status, data = null, message = 'success')
   };
+
   // Trip detail by tripID
   getTripByTripId = async (req, res, next) => {
     let user = req.user, // user
@@ -245,6 +248,8 @@ class DeliveryExecutivetrip extends BaseController {
     let type = req.params.type;
     let pageSize = 100;
     let pageNumber = req.query.page;
+    let VerifyUpdate = await tripModel.updateOne({ tripId: ID }, { $set: { statusVerify: 0 } })
+    let pendingVerify = await tripModel.updateOne({ tripId: ID }, { $set: { statusPendingVerify: 0 } })
     info("getting trip data!");
     if (type === "salesorders" || type === "salesOrder") {
       pipeline = [
@@ -282,6 +287,9 @@ class DeliveryExecutivetrip extends BaseController {
             _id: "$salesOrder.details.customerPhone",
             totalCrate: { $sum: "salesOrder.crateIn" },
             totalSalesOrder: { $sum: 1 },
+            statusVerify: { $first: "$statusVerify" },
+            statusPendingVerify: { $first: "$statusPendingVerify" },
+
 
             orderData: {
               $push: "$$ROOT",
@@ -299,6 +307,7 @@ class DeliveryExecutivetrip extends BaseController {
         {
           $project: {
             spotSalesId: 0,
+
           },
         },
         // {
@@ -561,7 +570,7 @@ class DeliveryExecutivetrip extends BaseController {
         Model = null;
         break;
     }
-    console.log(Model);
+    // console.log(Model);
     // let suppliedQty = req.body.data[0].supplied_qty;
     // let itemRemarks = req.body.data[0].item_remarks;
     // let caret_count = req.body.data[0].caret_count;
@@ -576,7 +585,7 @@ class DeliveryExecutivetrip extends BaseController {
         itemId: dataObj.itemId,
       };
 
-      console.log("updateObj", updateObject);
+      // console.log("updateObj", updateObject);
 
       let quantity = await invoiceMasterModel.aggregate([
         {
@@ -604,6 +613,124 @@ class DeliveryExecutivetrip extends BaseController {
         },
         { $push: { "orderItems.$.itemRemarks": dataObj.itemRemarks[0] } }
       );
+      // }
+      // console.log(updatedOrderDetail)
+      try {
+        info("updating order!");
+
+        // success response
+        this.success(
+          req,
+          res,
+          this.status.HTTP_OK,
+          updatedOrderDetail,
+          this.messageTypes.deliveryExecutiveOrderUpdatedSuccessfully
+        );
+
+        // catch any runtime error
+      } catch (err) {
+        error(err);
+        this.errors(
+          req,
+          res,
+          this.status.HTTP_INTERNAL_SERVER_ERROR,
+          this.exceptions.internalServerErr(req, err)
+        );
+      }
+    }
+  };
+
+  updateCommets = async (req, res, next) => {
+    let Model;
+    let saleoderId = req.body.salesOrderId || req.query.salesOrderId;
+    let dataObj = req.body;
+    let user = req.user, // user
+      deliveryId = user._id;
+
+    switch (req.params.type) {
+      case "salesorders":
+        Model = salesOrderModel;
+        break;
+      case "spotsales":
+        Model = spotSalesModel;
+
+        break;
+      case "assettransfer":
+        mMdel = require("../../MyTrip/assign_trip/model/spotsales.model");
+        break;
+      default:
+        Model = null;
+        break;
+    }
+
+    if (!_.isEmpty(dataObj)) {
+      // creating the push object
+      let updateObject = {
+        //'orderItems.$.suppliedQty': dataObj.supplied_qty,
+        itemRemarks: dataObj.itemRemarks[0],
+        caretCount: dataObj.caretCount,
+        itemId: dataObj.itemId,
+      };
+
+      // console.log("updateObj", updateObject);
+
+      let quantity = await invoiceMasterModel.aggregate([
+        {
+          $match: {
+
+            "itemSupplied._id": mongoose.Types.ObjectId(req.params.itemid),
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            totalQuantity: "$itemSupplied.quantity",
+            orderedQuantity: "$itemSupplied.requiredQuantity",
+          },
+        },
+      ]);
+
+
+      let updatedOrderDetail = await Model.updateOne(
+        {
+          "orderItems._id": mongoose.Types.ObjectId(req.params.itemId),
+          orderItems: { $elemMatch: { material_no: dataObj.itemId } },
+
+        },
+
+        { $push: { "orderItems.$.itemRemarks": dataObj.itemRemarks[0] } }
+      );
+
+      let itemDetails = await Model.aggregate([{
+
+        $match: {
+          _id: mongoose.Types.ObjectId(saleoderId),
+          //"orderItems._id": mongoose.Types.ObjectId(req.params.itemid),
+
+        },
+
+      },
+      {
+        $project: {
+          orderItems: 1
+        }
+      },
+      { $unwind: { path: "$orderItems" } },
+      {
+        $match: {
+          "orderItems._id": mongoose.Types.ObjectId(req.params.itemId)
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          itemRemarks: "$orderItems.itemRemarks"
+        }
+      }
+      ])
+
+      console.log("itemdetails====>", itemDetails)
+
       // }
       // console.log(updatedOrderDetail)
       try {
@@ -735,7 +862,7 @@ class DeliveryExecutivetrip extends BaseController {
       let responseObj = {
         invoiceNumber: invoiceNumber,
         //'invoiceId': invoiceId,
-        //'qr': qr,
+        'qr': qr,
         gpn: gpnData.gpn,
       };
 
@@ -862,7 +989,7 @@ class DeliveryExecutivetrip extends BaseController {
   };
 
   // CHeck the reponse and add proper key and vehicle details
-  updateOdometerReading = async (req, res, next) => {
+  updateOdometerReadingStarting = async (req, res, next) => {
     let ID = parseInt(req.params.tripid);
     let user = req.user; // user
     let pageSize = 100;
@@ -874,6 +1001,138 @@ class DeliveryExecutivetrip extends BaseController {
     let updateObject = {
       initialOdometerReading: parseInt(req.body.odometerreading),
       isTripStarted: 1,
+      isActive: 1,
+    };
+
+    let odometerReading = await tripModel.findOneAndUpdate(
+      {
+        tripId: ID,
+      },
+      {
+        $set: updateObject,
+      },
+      {
+        new: true,
+      }
+    );
+
+    const now = new Date();
+    let dateToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    let pipeline = [
+      {
+        $match: {
+          $and: [
+            {
+              deliveryExecutiveId: deliveryExecutiveId,
+            },
+            {
+              createdAt: { $gte: dateToday },
+            },
+          ],
+        },
+      },
+      //   {
+      //     $unwind: "$salesOrderId"
+      // }
+
+      {
+        $project: {
+          _id: 0,
+          deliveryDetails: 0,
+          vehicleId: 0,
+          checkedInId: 0,
+          rateCategoryId: 0,
+
+          deliveryExecutiveId: 0,
+          invoice_db_id: 0,
+          invoiceNo: 0,
+          approvedBySecurityGuard: 0,
+          isTripStarted: 0,
+          isActive: 0,
+          tripFinished: 0,
+          isCompleteDeleiveryDone: 0,
+          isPartialDeliveryDone: 0,
+          returnedStockDetails: 0,
+
+          __v: 0,
+        },
+      },
+      {
+        $skip: pageSize * (pageNumber - 1),
+      },
+      {
+        $limit: 100,
+      },
+      // {
+      //   $group: {
+      //     _id: '$_id',
+      //     totalSales:{$sum:1},
+      //     orders:{
+      //       $push: '$$ROOT'
+      //     }
+      //     // 'attendanceLog': { $push: '$attendanceLog' },
+      //     // 'userId': { $push: '$userId' }
+      //   }
+      // },
+
+      {
+        $group: {
+          _id: "$deliveryExecutiveId",
+          total: { $sum: 1 },
+          tripData: {
+            $push: "$$ROOT",
+          },
+          // 'attendanceLog': { $push: '$attendanceLog' },
+          // 'userId': { $push: '$userId' }
+        },
+      },
+      {
+        $sort: {
+          _id: -1,
+        },
+      },
+    ];
+    let trip = await tripModel.aggregate(pipeline);
+
+    try {
+      info("Getting trip Detail!");
+
+      // odometerReading
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        trip || [],
+        this.messageTypes.deliveryExecutiveOdometerReadingUpdatedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+  updateOdometerReadingEnding = async (req, res, next) => {
+    let ID = parseInt(req.params.tripid);
+    let user = req.user; // user
+    let pageSize = 100;
+
+    let deliveryExecutiveId = user._id;
+
+    let pageNumber = req.query.page || 1;
+
+    let updateObject = {
+      endOdometerReading: parseInt(req.body.odometerreading),
+      isTripStarted: 1,
+
       isActive: 1,
     };
 
@@ -1056,10 +1315,12 @@ class DeliveryExecutivetrip extends BaseController {
           {
             $project: {
               tripId: 1,
+              tripInProcess: "$salesorders.tripInProcess",
               salesOrder: 1,
               vehicleRegNumber: 1,
               getDirection: "$salesorders.location",
               NoOfCrates: "$salesorders.crateIn",
+              salesorderStatus : "$salesorders.salesorderStatus",
               sold_to_party_description:
                 "$salesorders.sold_to_party_description",
               sold_to_party: "$salesorders.sold_to_party",
@@ -1076,31 +1337,7 @@ class DeliveryExecutivetrip extends BaseController {
               },
             },
           },
-          //   {
-          //     $lookup:{
-          //       from:'trips',
-          //       localField:'salesOrder',
-          //       foreignField:'_id',
-          //       as:'order'
 
-          //     }
-          //   },  {
-          //     $lookup:{
-          //       from:'salesorders',
-          //       localField:'order.salesOrderId',
-          //       foreignField:'_id',
-          //       as:'order.details'
-
-          //     }
-          //   }
-          //   ,{
-          //   $lookup:{
-          //     from:'vehiclemasters',
-          //     localField:'vehicleId',
-          //     foreignField:'_id',
-          //     as:'vehicleDetail'
-          //   }
-          // },
           {
             $group: {
               _id: "$order.details.customerName",
@@ -1112,21 +1349,6 @@ class DeliveryExecutivetrip extends BaseController {
           },
         ]
       );
-
-      // {
-      //   $lookup:{
-      //     from:'salesorders',
-      //     localField:'salesOrderId',
-      //     foreignField:'_id',
-      //     as:'salesOrder'
-
-      //   }
-      // },{
-      //   $project:{
-      //     spotSalesId:0
-      //   }
-
-      // }
     }
     if (type === "spotsales" || type === "spotSales") {
       pipeline.push(
@@ -1170,7 +1392,7 @@ class DeliveryExecutivetrip extends BaseController {
 
     let activeTripData = await tripModel.aggregate(pipeline);
 
-    // console.log('totalCrateCount',data)
+    // console.log('tripInProcess',activeTripData[0].orderData)
 
     try {
       info("Getting trip Detail!");
@@ -1208,6 +1430,7 @@ class DeliveryExecutivetrip extends BaseController {
           $project: {
             customerName: 1,
             invoice: "$invoiceDetails.invoiceNo",
+            itemID: "$itemSupplied._id",
             salesOrderNo: "$soId",
             "shippingDetails.address1": 1,
             "shippingDetails.cityId": 1,
@@ -1357,7 +1580,7 @@ class DeliveryExecutivetrip extends BaseController {
       pipeline.push(
         ...[
           {
-            $project: { vehicleRegNumber: 1, tripId: 1, salesOrder: 1, _id: 0 },
+            $project: { vehicleRegNumber: 1, tripId: 1, salesOrder: 1, _id: 0, salesorderStatus:1 },
           },
           {
             $lookup: {
@@ -1400,6 +1623,7 @@ class DeliveryExecutivetrip extends BaseController {
               vehicleRegNumber: { $first: "$vehicleRegNumber" },
               isDelivered: { $first: "$salesorder.invoices.isDelivered" },
               so_db_id: { $first: "$salesOrder" },
+              salesorderStatus : { $first: "$salesorder.salesorderStatus"},
               customerName: { $first: "$salesorder.sold_to_party_description" },
               address: {
                 $first: "$salesorder.invoices.shippingDetails.address1",
@@ -1820,7 +2044,7 @@ class DeliveryExecutivetrip extends BaseController {
       info("getting the salesOrder by trip Id");
 
       let tripId = req.params.tripId;
-      console.log("tripId", tripId);
+      // console.log("tripId", tripId);
       let salesOrderlist = await tripModel.aggregate([
         { $match: { tripId: parseInt(req.params.tripId) } },
         { $project: { salesOrder: 1, vehicleRegNumber: 1 } },
@@ -1863,6 +2087,7 @@ class DeliveryExecutivetrip extends BaseController {
             vehicleRegNumber: 1,
             sold_to_party_description: "$salesorders.sold_to_party_description",
             sold_to_party: "$salesorders.sold_to_party",
+            invoiceNo: "$invoice.invoiceDetails.invoiceNo",
             //shippingDetails:"$invoice.shippingDetails",
             address1: "$invoice.shippingDetails.address1",
             mobileNo: "$invoice.shippingDetails.mobileNo",
@@ -1877,14 +2102,52 @@ class DeliveryExecutivetrip extends BaseController {
           },
         },
       ]);
-      console.log("salesOrderlist", salesOrderlist);
+      let isVerify, response = [];
+      for (let i = 0; i < salesOrderlist.length; i++) {
+        let invoiceNo = salesOrderlist[i].invoiceNo
+        //console.log(invoiceNo)
+        isVerify = await invoiceMasterModel.aggregate([{
+          $match: {
+            "invoiceDetails.invoiceNo": invoiceNo
+          }
+        },
+        {
+          $lookup: {
+            from: "gatepassnumbers",
+            let: { id: "$invoiceDetails.invoiceNo" },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $in: ['$$id', '$invoiceNumber'] }
+                }
+              }],
+            as: "result"
+          }
+        },
+        { $match: { "result.isVerify": 1 } }, {
+          $project: {
+            "isVerified": { $first: "$result.isVerify" },
+            invoiceNo: "$invoiceDetails.invoiceNo"
+          }
+        }])
+        if (isVerify.length > 0) {
+          response.push(isVerify);
+        }
+      }
+      let statusVerifyUpdate = (response.length == salesOrderlist.length) ? 1 : 0;
+      let updateStatus = await tripModel.updateOne({ tripId: parseInt(req.params.tripId) },
+        { $set: { statusVerify: statusVerifyUpdate } })
+
+
+      // console.log("verify" ,response);
+
       //on success
       if (salesOrderlist && !_.isEmpty(salesOrderlist)) {
         this.success(
           req,
           res,
           this.status.HTTP_OK,
-          salesOrderlist,
+          { statusVerifyUpdate, salesOrderlist },
           this.messageTypes.SalesOrderListByTripIdFetchedSuccessfully
         );
       } else {
@@ -1914,6 +2177,16 @@ class DeliveryExecutivetrip extends BaseController {
 
       let invoiceNumber = await invoiceMasterModel.aggregate([
         { $match: { so_db_id: mongoose.Types.ObjectId(so_id) } },
+        { $unwind: { path: "$itemSupplied" } },
+        {
+          $lookup: {
+            from: "salesorders",
+            localField: "so_db_id",
+            foreignField: "_id",
+            as: "salesorder",
+          }
+        },
+        { $unwind: "$salesorder" },
         {
           $project: {
             customerName: 1,
@@ -1922,9 +2195,23 @@ class DeliveryExecutivetrip extends BaseController {
             "shippingDetails.address1": 1,
             "shippingDetails.cityId": 1,
             orderPlacedAt: "$createdAt",
-          },
+            crates: "$salesorder.crateIn",
+          }
+        },
+        {
+          $group: {
+            _id: "$invoice",
+            customerName: { $first: "$customerName" },
+            invoice: { $first: "$invoice" },
+            salesOrderNo: { $first: "$salesOrderNo" },
+            "address1": { $first: "$shippingDetails.address1" },
+            "cityId": { $first: "$shippingDetails.cityId" },
+            orderPlacedAt: { $first: "$orderPlacedAt" },
+            noOfCrates: { $first: "$crates" }
+          }
         },
       ]);
+      console.log("data updated", invoiceNumber);
 
       let invoiceData = [];
       for (let v of invoiceNumber) {
@@ -1935,12 +2222,18 @@ class DeliveryExecutivetrip extends BaseController {
           { $set: { status: 1 } },
           { $project: { status: 1 } },
         ]);
+        //  console.log("id",v.itemId)
         invoiceData.push({
           _id: v._id,
           customerName: v.customerName,
+          //itemObjectId:v.itemObjectId,
+          items: v.items,
+
           invoice: v.invoice,
           salesOrderNo: v.salesOrderNo,
-          shippingDetails: v.shippingDetails,
+          address1: v.address1,
+          cityId: v.cityId,
+          noOfcrates: v.noOfCrates,
           orderPlacedAt: v.orderPlacedAt,
           status: gpnStatus.length ? gpnStatus[0].status : 0,
         });
@@ -1976,6 +2269,7 @@ class DeliveryExecutivetrip extends BaseController {
       );
     }
   };
+
 
   getPendingTrip = async (req, res, next) => {
     info("getting delivery executive pending trip data!");
@@ -2189,6 +2483,7 @@ class DeliveryExecutivetrip extends BaseController {
                 address1: "$shippingDetails.address1",
                 city: "$shippingDetails.cityId",
                 isDelivered: "$isDelivered",
+                soId: "$soId"
               },
             },
             noOfSalesOrder: { $sum: 1 },
@@ -2353,6 +2648,7 @@ class DeliveryExecutivetrip extends BaseController {
           disputeId: 1,
           acceptedQty: 1,
           status: 1,
+          isAccepted:1,
           disputeDate: "$createdAt",
           invoicesNo: { $first: "$invoices.invoiceDetails.invoiceNo" },
         },
@@ -2447,7 +2743,7 @@ class DeliveryExecutivetrip extends BaseController {
       {
         $lookup: {
           from: "salesorders",
-          localField: "salesOrderId",
+          localField: "so_db_id",
           foreignField: "_id",
           as: "salesorder",
         },
@@ -2467,7 +2763,7 @@ class DeliveryExecutivetrip extends BaseController {
           tripId: 1,
           status: 1,
           disputeId: 1,
-          dispute_amount: 1,
+          disputeAmount:"disputeDetails.dispute_amount",
           itemName: "$salesorder.orderItems.material_description",
           itemId: "$salesorder.orderItems.material_no",
           "ordered qty": "$salesorder.orderItems.quantity",
@@ -2828,7 +3124,7 @@ class DeliveryExecutivetrip extends BaseController {
           }
         )
       }
-      console.log('isUpdated', isUpdated)
+      // console.log('isUpdated', isUpdated)
       // success
       return this.success(
         req,
@@ -2853,51 +3149,52 @@ class DeliveryExecutivetrip extends BaseController {
     }
   };
 
-  getInvoiceVewAfterPayment = async (req, res, next) => {
+  getInvoiceSummary = async (req, res, next) => {
     let user = req.user, // user
       deliveryExecutiveId = user._id;
-    let invoiceId = req.query.invoiceid;
+    //let invoiceId = req.query.invoiceid;
     let soId = req.query.soId || 0;
 
     let pipeline = [
-       { $match: { soId: soId } },
-  {
-    $lookup: {
-      from: "salesorders",
-      localField: "so_db_id",
-      foreignField: "_id",
-      as: "saleorder",
-    },
-  },
-  {
-    $lookup: {
-      from: "decollections",
-      localField: "soId",
-      foreignField: "soId",
-      as: "decollection",
-    }
-  },
-  {
-      "$project":{
-         "so_db_id":1,
-         "isDelivered":1,
-         "orderPlacedAt":"$createdAt",
-         "pendingCrates": { $first:"$saleorder.crateOutWithItem"},
-         "noOfCratesOut" : { $first:"$saleorder.crateOut"},
-         "invoiceNo":"$invoiceDetails.invoiceNo",
-         "itemSupplied.itemId":1,
-         "itemSupplied._id":1,
-         "itemSupplied.suppliedQty":1,
-         "itemSupplied.quantity":1,
-         "credit":{ $first:"$decollection.collectionAmount"},
-         "photos":{ $first:"$saleorder.invoiceUploads"},
-         "itemSupplied.itemName":1,
-         "soId":1,
-      }
-  }
-];
-    let invoiceDetail = await invoiceMasterModel.aggregate(pipeline);
+      { $match: { soId: parseInt(soId) } },
 
+      {
+        $lookup: {
+          from: "salesorders",
+          localField: "so_db_id",
+          foreignField: "_id",
+          as: "saleorder",
+        },
+      },
+      {
+        $lookup: {
+          from: "decollections",
+          localField: "soId",
+          foreignField: "soId",
+          as: "decollection",
+        }
+      },
+      {
+        "$project": {
+          "so_db_id": 1,
+          "isDelivered": 1,
+          "orderPlacedAt": "$createdAt",
+          "pendingCrates": { $first: "$saleorder.crateOutWithItem" },
+          "noOfCratesOut": { $first: "$saleorder.crateOut" },
+          "invoiceNo": "$invoiceDetails.invoiceNo",
+          "itemSupplied.itemId": 1,
+          "itemSupplied._id": 1,
+          "itemSupplied.suppliedQty": 1,
+          "itemSupplied.quantity": 1,
+          "credit": { $first: "$decollection.collectionAmount" },
+          "photos": { $first: "$saleorder.invoiceUploads" },
+          "itemSupplied.itemName": 1,
+          "soId": 1,
+        }
+      }
+    ];
+    let invoiceDetail = await invoiceMasterModel.aggregate(pipeline);
+    //console.log("invoice details ==== >", invoiceDetail)
     try {
       info("Getting invoice Detail!");
 
@@ -2925,7 +3222,7 @@ class DeliveryExecutivetrip extends BaseController {
 
   disputeAcceptOrReject = async (req, res, next) => {
     let id = req.params.disputeId || req.query.disputeId || req.body.disputeId;
-    let condition = req.params.condition == "accept" ? 1 : 0;
+    let condition = req.params.condition == "accept" ? 1 : 2;
 
     let updatedDisputeDetail;
 
@@ -2965,6 +3262,131 @@ class DeliveryExecutivetrip extends BaseController {
       );
     }
   };
+
+  customerUnAvailability = async (req, res, next) => {
+    try {
+      // let id = req.params.tripId
+      let soId = req.query.soId || req.params.soId
+      let type = req.query.type || req.params.type
+
+      let updatedOrder = await salesOrderModel.updateOne(
+        {
+          //tripId:id,
+          _id: mongoose.Types.ObjectId(soId)
+        },
+        {
+          $set: { salesorderStatus: type }
+
+        },
+        {
+          upsert: true
+        }
+
+      )
+      if (updatedOrder && !_.isEmpty(updatedOrder)) {
+
+        return this.success(
+          req,
+          res,
+          this.status.HTTP_OK,
+          updatedOrder || [],
+          "updated"
+        )
+      }
+
+      else {
+        return this.errors(
+          req,
+          res,
+          this.status.HTTP_CONFLICT,
+          "notupdated"
+        );
+
+      }
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+  getHistoryInvoiceDetails = async (req, res, next) => {
+    let user = req.user, // user
+      deliveryExecutiveId = user._id;
+   // let invoiceId = req.query.invoiceid;
+    let soId = req.query.soId || 0;
+
+    let pipeline = [
+      { $match: { soId: parseInt(soId) } },
+
+      {
+        $lookup: {
+          from: "salesorders",
+          localField: "so_db_id",
+          foreignField: "_id",
+          as: "saleorder",
+        },
+      },
+      {
+        $lookup: {
+          from: "decollections",
+          localField: "soId",
+          foreignField: "soId",
+          as: "decollection",
+        }
+      },
+      {
+        "$project": {
+          "so_db_id": 1,
+          "isDelivered": 1,
+          "orderPlacedAt": "$createdAt",
+          "pendingCrates": { $first: "$saleorder.crateOutWithItem" },
+          "noOfCratesOut": { $first: "$saleorder.crateOut" },
+          "invoiceNo": "$invoiceDetails.invoiceNo",
+          "itemSupplied.itemId": 1,
+          "itemSupplied._id": 1,
+          "itemSupplied.suppliedQty": 1,
+          "itemSupplied.quantity": 1,
+          "credit": { $first: "$decollection.collectionAmount" },
+          "photos": { $first: "$saleorder.invoiceUploads" },
+          "itemSupplied.itemName": 1,
+          "soId": 1,
+        }
+      }
+    ];
+    let invoiceDetail = await invoiceMasterModel.aggregate(pipeline);
+    console.log("invoice details ==== >", invoiceDetail)
+    try {
+      info("Getting invoice Detail!");
+
+      // success response
+      this.success(
+        req,
+        res,
+        this.status.HTTP_OK,
+        invoiceDetail || [],
+        this.messageTypes.deliveryExecutiveInvoiceFetchedSuccessfully
+      );
+
+      // catch any runtime error
+    } catch (err) {
+      error(err);
+      this.errors(
+        req,
+        res,
+        this.status.HTTP_INTERNAL_SERVER_ERROR,
+        this.exceptions.internalServerErr(req, err)
+      );
+    }
+  };
+
+
+
 
 
 }

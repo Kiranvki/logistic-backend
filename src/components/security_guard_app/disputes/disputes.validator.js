@@ -27,8 +27,8 @@ const schemas = {
     disputeId: Joi.number().integer().min(2).label("dispute Id").required(),
   }),
 
-  joiInvoiceNo: Joi.object().keys({
-    invoiceId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Salesman Id').required().options({
+  joiInvoiceId: Joi.object().keys({
+    invoiceId: Joi.string().trim().regex(/^[a-fA-F0-9]{24}$/).label('Invoice Id').required().options({
       language: {
         string: {
           regex: {
@@ -75,9 +75,9 @@ module.exports = {
         // if error occured
       })
       .catch((err) => {
-        let error = [];
+        let errors = [];
         err.details.forEach((element) => {
-          error.push(element.message);
+          errors.push(element.message);
         });
 
         // returning the response
@@ -108,9 +108,9 @@ module.exports = {
       });
   },
 
-  joiInvoiceNo: (req, res, next) => {
+  joiInvoiceId: (req, res, next) => {
     // getting the schemas
-    let schema = schemas.joiInvoiceNo;
+    let schema = schemas.joiInvoiceId;
     let option = options.basic;
 
     // validating the schema
@@ -123,7 +123,7 @@ module.exports = {
       .catch((err) => {
         let error = [];
         err.details.forEach((element) => {
-          error.push(element.message);
+         return error.push(element.message);
         });
 
         // returning the response
@@ -144,9 +144,9 @@ module.exports = {
         // if error occured
       })
       .catch((err) => {
-        let error = [];
+        let errorz = [];
         err.details.forEach((element) => {
-          error.push(element.message);
+          errorz.push(element.message);
         });
 
         // returning the response

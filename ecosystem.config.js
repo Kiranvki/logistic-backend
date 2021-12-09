@@ -193,7 +193,7 @@ module.exports = {
       'sapPickingAllocation' : 'http://13.71.71.184:50100/RESTAdapter/waycool_prod/Picking_Allocation_Creation',
       'sapInvoiceGenerate':'http://13.71.71.184:50100/RESTAdapter/waycool_prod/invoice_sto_create',
       'sapInvoiceFetch' : 'http://13.71.71.184:50100/RESTAdapter/waycool_prod/invoice_sto_get',
-      'sapEInvoiceGenerate':'http://52.172.31.130:50100/RESTAdapter/waycool/e_invoice',
+      'sapEInvoiceGenerate':'http://13.71.71.184:50100/RESTAdapter/waycool_prod/e_invoice',
       'systemStockGet':'waycool_prod/system_stock_get'
     }
   }]

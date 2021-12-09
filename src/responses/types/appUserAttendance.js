@@ -3,6 +3,7 @@ module.exports = {
   attendanceNotMarkedSuccessfully:
     "Attendance Not Marked Successfully, Please try again after sometime !",
   invalidPickerBoyId: "Invalid PickerBoy Id !",
+  invalidSecurityGuardId: "Invalid Security Guard Id !",
   pickerBoyNotCheckedIn: "User Still Not Checked In !",
 
   salesmanNotCheckedIn: "User Still Not Checked In !",
@@ -10,6 +11,7 @@ module.exports = {
   userCheckedOut: "User Checked Out Successfully !",
   userCheckedNotOut: "Server Error! Please try after sometime !",
   userAlreadyCheckedOut: "User Already Checked Out for today!",
+  securityGuardUserCheckedOut: "User Checked Out Please Check In!",
   userAlreadyCheckedIn: "User Already Checked In for today!",
   userAttendanceFetchedSuccessfully: "User Attendance Fetched Successfully !",
   userAttendanceFetchError:
